@@ -1,0 +1,6 @@
+{
+  "name": "Hari Kripa Fruit ERP",
+  "description": "Wholesale Fruit Commission Agent ERP, mandi accounting, billing, customer and vendor ledgers, crate inventory tracking, and financial statements.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

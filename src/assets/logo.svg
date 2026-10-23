@@ -1,0 +1,309 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="110 5 320 320" width="100%" height="100%">
+  <defs>
+    <!-- Gold Metallic Gradients for Circular Ring -->
+    <linearGradient id="goldOuterRim" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FCE588" />
+      <stop offset="25%" stop-color="#D99E26" />
+      <stop offset="50%" stop-color="#FFF0A5" />
+      <stop offset="75%" stop-color="#C28715" />
+      <stop offset="100%" stop-color="#E5AF36" />
+    </linearGradient>
+
+    <linearGradient id="goldInnerRim" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#E2A62B" />
+      <stop offset="40%" stop-color="#FFF4B8" />
+      <stop offset="80%" stop-color="#B87C0E" />
+      <stop offset="100%" stop-color="#FCE17E" />
+    </linearGradient>
+
+    <!-- Inner Soft Circular Glow -->
+    <radialGradient id="emblemGlow" cx="50%" cy="45%" r="55%">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="65%" stop-color="#FFFDF5" />
+      <stop offset="90%" stop-color="#FAF1D8" />
+      <stop offset="100%" stop-color="#EFE0B6" />
+    </radialGradient>
+
+    <!-- Letter H Crimson Red Gradient -->
+    <linearGradient id="redHGrad" x1="20%" y1="0%" x2="80%" y2="100%">
+      <stop offset="0%" stop-color="#FF3823" />
+      <stop offset="35%" stop-color="#E01018" />
+      <stop offset="70%" stop-color="#B3050C" />
+      <stop offset="100%" stop-color="#730005" />
+    </linearGradient>
+
+    <!-- Letter F Radiant Orange Gradient -->
+    <linearGradient id="orangeFGrad" x1="20%" y1="0%" x2="80%" y2="100%">
+      <stop offset="0%" stop-color="#FFB300" />
+      <stop offset="30%" stop-color="#FF7D00" />
+      <stop offset="70%" stop-color="#E65100" />
+      <stop offset="100%" stop-color="#BF360C" />
+    </linearGradient>
+
+    <!-- Letter C Forest Green Gradient -->
+    <linearGradient id="greenCGrad" x1="20%" y1="0%" x2="80%" y2="100%">
+      <stop offset="0%" stop-color="#4CAF50" />
+      <stop offset="35%" stop-color="#2E7D32" />
+      <stop offset="75%" stop-color="#1B5E20" />
+      <stop offset="100%" stop-color="#093810" />
+    </linearGradient>
+
+    <!-- Glossy Red Apple Gradient -->
+    <radialGradient id="appleRed" cx="38%" cy="32%" r="65%">
+      <stop offset="0%" stop-color="#FF8A80" />
+      <stop offset="25%" stop-color="#FF1744" />
+      <stop offset="65%" stop-color="#D50000" />
+      <stop offset="100%" stop-color="#5B0000" />
+    </radialGradient>
+
+    <!-- Fresh Green Apple Gradient -->
+    <radialGradient id="appleGreen" cx="38%" cy="32%" r="65%">
+      <stop offset="0%" stop-color="#CCFF90" />
+      <stop offset="25%" stop-color="#76FF03" />
+      <stop offset="60%" stop-color="#64DD17" />
+      <stop offset="85%" stop-color="#33691E" />
+      <stop offset="100%" stop-color="#1B5E20" />
+    </radialGradient>
+
+    <!-- Citrus Orange Gradient -->
+    <radialGradient id="orangeFruit" cx="40%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#FFE082" />
+      <stop offset="20%" stop-color="#FFB74D" />
+      <stop offset="55%" stop-color="#FB8C00" />
+      <stop offset="85%" stop-color="#E65100" />
+      <stop offset="100%" stop-color="#BF360C" />
+    </radialGradient>
+
+    <!-- Ripe Lemon Gradient -->
+    <radialGradient id="lemonFruit" cx="42%" cy="32%" r="65%">
+      <stop offset="0%" stop-color="#FFFF8D" />
+      <stop offset="30%" stop-color="#FFEA00" />
+      <stop offset="70%" stop-color="#FDD835" />
+      <stop offset="90%" stop-color="#F57F17" />
+      <stop offset="100%" stop-color="#E65100" />
+    </radialGradient>
+
+    <!-- Green Grape Spherical Gradient -->
+    <radialGradient id="grapeGreen" cx="35%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#E8F5E9" />
+      <stop offset="25%" stop-color="#C8E6C9" />
+      <stop offset="55%" stop-color="#81C784" />
+      <stop offset="85%" stop-color="#4CAF50" />
+      <stop offset="100%" stop-color="#2E7D32" />
+    </radialGradient>
+
+    <!-- Purple Grape Spherical Gradient -->
+    <radialGradient id="grapePurple" cx="35%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#E1BEE7" />
+      <stop offset="25%" stop-color="#BA68C8" />
+      <stop offset="60%" stop-color="#7B1FA2" />
+      <stop offset="85%" stop-color="#4A148C" />
+      <stop offset="100%" stop-color="#1A0033" />
+    </radialGradient>
+
+    <!-- Green Cradle Leaf Gradient -->
+    <linearGradient id="cradleLeaf" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#66BB6A" />
+      <stop offset="20%" stop-color="#43A047" />
+      <stop offset="50%" stop-color="#2E7D32" />
+      <stop offset="80%" stop-color="#1B5E20" />
+      <stop offset="100%" stop-color="#4CAF50" />
+    </linearGradient>
+
+    <linearGradient id="leafSheen" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#1B5E20" />
+      <stop offset="70%" stop-color="#4CAF50" />
+      <stop offset="100%" stop-color="#C8E6C9" />
+    </linearGradient>
+
+    <!-- Realistic Drop Shadows -->
+    <filter id="softGlow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#000000" flood-opacity="0.14" />
+    </filter>
+
+    <filter id="textBevel" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="1" dy="2" stdDeviation="1.5" flood-color="#000000" flood-opacity="0.25" />
+    </filter>
+
+    <filter id="fruitShadow" x="-15%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="4" stdDeviation="3.5" flood-color="#1B5E20" flood-opacity="0.28" />
+    </filter>
+  </defs>
+
+  <!-- =========================================================================
+       1. THE CIRCULAR GOLD EMBLEM BADGE
+       ========================================================================= -->
+  <g id="circularEmblem" filter="url(#softGlow)">
+    <!-- Outer Gold Ring Rim -->
+    <circle cx="270" cy="162" r="148" fill="url(#goldOuterRim)" stroke="#C28715" stroke-width="1.5" />
+    
+    <!-- Secondary Gold Inset Ring -->
+    <circle cx="270" cy="162" r="142" fill="url(#goldInnerRim)" />
+    
+    <!-- Thin Golden Line Accent -->
+    <circle cx="270" cy="162" r="137.5" fill="none" stroke="#FFFFFF" stroke-width="1.2" opacity="0.8" />
+    
+    <!-- Inner Glowing Center Field -->
+    <circle cx="270" cy="162" r="136" fill="url(#emblemGlow)" />
+  </g>
+
+  <!-- =========================================================================
+       2. BOLD SERIF "HFC" MONOGRAM LETTERS
+       ========================================================================= -->
+  <g id="monogramHFC" filter="url(#textBevel)">
+    <!-- Letter 'H' in Crimson Red Gradient -->
+    <path d="M 148 116 L 186 116 L 186 122 L 176 123 L 176 148 L 210 148 L 210 123 L 200 122 L 200 116 L 238 116 L 238 122 L 228 123 L 228 178 L 238 179 L 238 185 L 200 185 L 200 179 L 210 178 L 210 154 L 176 154 L 176 178 L 186 179 L 186 185 L 148 185 L 148 179 L 158 178 L 158 123 L 148 122 Z"
+          fill="url(#redHGrad)" stroke="#B71C1C" stroke-width="0.75" />
+    <!-- Letter 'H' 3D Left Highlight -->
+    <path d="M 158 123 L 163 123 L 163 178 L 158 178 Z" fill="#FFA498" opacity="0.45" />
+
+    <!-- Letter 'F' in Radiant Amber/Orange Gradient -->
+    <path d="M 248 116 L 308 116 L 308 136 L 301 136 L 298 125 C 296 123 293 122 284 122 L 276 122 L 276 146 L 292 146 L 294 139 L 300 139 L 300 158 L 294 158 L 292 151 L 276 151 L 276 178 L 286 179 L 286 185 L 248 185 L 248 179 L 258 178 L 258 123 L 248 122 Z"
+          fill="url(#orangeFGrad)" stroke="#D84315" stroke-width="0.75" />
+    <!-- Letter 'F' 3D Left Highlight -->
+    <path d="M 258 123 L 263 123 L 263 178 L 258 178 Z" fill="#FFE082" opacity="0.45" />
+
+    <!-- Letter 'C' in Forest Green Gradient -->
+    <path d="M 374 136 C 369 126 357 116 339 116 C 316 116 298 133 298 152 C 298 171 316 186 341 186 C 362 186 374 174 378 162 L 371 160 C 366 171 356 178 341 178 C 322 178 310 166 310 152 C 310 137 323 124 340 124 C 354 124 364 131 369 139 L 372 133 Z"
+          fill="url(#greenCGrad)" stroke="#1B5E20" stroke-width="0.75" />
+    <!-- Letter 'C' Top Highlight -->
+    <path d="M 340 124 C 326 124 314 134 311 146 C 314 137 325 127 340 127 C 352 127 361 133 366 139 L 369 136 C 364 128 353 124 340 124 Z" fill="#A5D6A7" opacity="0.5" />
+  </g>
+
+  <!-- =========================================================================
+       3. LUSH FRESH FRUITS ARRANGEMENT
+       ========================================================================= -->
+  <g id="freshFruits" filter="url(#fruitShadow)">
+    <!-- Behind Fruit Leaves -->
+    <g id="backLeaves">
+      <!-- Leaf Behind Red Apple -->
+      <path d="M 218 195 C 205 178 200 165 212 158 C 226 150 236 166 230 188 Z" fill="#4CAF50" />
+      <path d="M 214 190 Q 216 170 216 160" stroke="#C8E6C9" stroke-width="1.2" fill="none" opacity="0.6" />
+      <!-- Leaf Behind Orange -->
+      <path d="M 358 190 C 352 172 360 162 374 162 C 388 162 388 178 376 195 Z" fill="#388E3C" />
+      <path d="M 364 185 Q 374 172 382 165" stroke="#C8E6C9" stroke-width="1.2" fill="none" opacity="0.6" />
+    </g>
+
+    <!-- FRUIT 1: Green Grapes Cluster (Left) -->
+    <g id="greenGrapes">
+      <!-- Stems -->
+      <path d="M 166 185 Q 170 178 176 175" stroke="#795548" stroke-width="2" fill="none" stroke-linecap="round" />
+      <circle cx="152" cy="202" r="10.5" fill="url(#grapeGreen)" />
+      <circle cx="166" cy="195" r="11" fill="url(#grapeGreen)" />
+      <circle cx="180" cy="192" r="10.5" fill="url(#grapeGreen)" />
+      <circle cx="144" cy="216" r="11" fill="url(#grapeGreen)" />
+      <circle cx="158" cy="212" r="11.5" fill="url(#grapeGreen)" />
+      <circle cx="174" cy="208" r="11.5" fill="url(#grapeGreen)" />
+      <circle cx="154" cy="228" r="10.5" fill="url(#grapeGreen)" />
+      <circle cx="168" cy="225" r="11" fill="url(#grapeGreen)" />
+      <circle cx="182" cy="222" r="10.5" fill="url(#grapeGreen)" />
+      <circle cx="164" cy="238" r="9.5" fill="url(#grapeGreen)" />
+      <circle cx="176" cy="235" r="9" fill="url(#grapeGreen)" />
+      <!-- Tiny shine dots on grapes -->
+      <ellipse cx="148" cy="200" rx="2.5" ry="1.5" fill="#FFFFFF" opacity="0.75" />
+      <ellipse cx="162" cy="193" rx="2.5" ry="1.5" fill="#FFFFFF" opacity="0.75" />
+      <ellipse cx="141" cy="213" rx="2.5" ry="1.5" fill="#FFFFFF" opacity="0.75" />
+      <ellipse cx="155" cy="209" rx="3" ry="1.8" fill="#FFFFFF" opacity="0.8" />
+    </g>
+
+    <!-- FRUIT 2: Glossy Red Apple (Center-Left) -->
+    <g id="redApple">
+      <!-- Apple Stem -->
+      <path d="M 234 192 C 235 178 240 172 245 168" stroke="#4E342E" stroke-width="3" fill="none" stroke-linecap="round" />
+      <!-- Apple Body -->
+      <path d="M 234 194 C 218 178 194 185 190 206 C 186 228 206 250 228 252 C 235 252 238 248 243 251 C 255 249 268 238 268 214 C 268 190 248 182 234 194 Z"
+            fill="url(#appleRed)" />
+      <!-- Apple Glossy Crescent Highlight -->
+      <path d="M 200 202 C 196 214 200 230 212 238 C 206 228 205 214 214 204 C 216 202 210 198 200 202 Z" fill="#FFFFFF" opacity="0.65" />
+      <ellipse cx="218" cy="202" rx="4" ry="7" transform="rotate(-25 218 202)" fill="#FFFFFF" opacity="0.7" />
+    </g>
+
+    <!-- FRUIT 3: Crisp Green Apple (Center) -->
+    <g id="greenApple">
+      <!-- Stem -->
+      <path d="M 284 196 C 285 186 287 182 290 179" stroke="#4E342E" stroke-width="2.8" fill="none" stroke-linecap="round" />
+      <!-- Body -->
+      <path d="M 283 197 C 271 184 252 192 248 208 C 244 227 259 248 276 249 C 282 249 285 246 290 248 C 300 246 312 235 312 215 C 312 194 295 186 283 197 Z"
+            fill="url(#appleGreen)" />
+      <!-- Green Gloss Highlight -->
+      <ellipse cx="265" cy="207" rx="3.5" ry="6.5" transform="rotate(-20 265 207)" fill="#FFFFFF" opacity="0.65" />
+    </g>
+
+    <!-- FRUIT 4: Plump Purple Grapes Cluster -->
+    <g id="purpleGrapes">
+      <circle cx="316" cy="198" r="10" fill="url(#grapePurple)" />
+      <circle cx="328" cy="192" r="10.5" fill="url(#grapePurple)" />
+      <circle cx="340" cy="194" r="10" fill="url(#grapePurple)" />
+      <circle cx="310" cy="210" r="10.5" fill="url(#grapePurple)" />
+      <circle cx="324" cy="206" r="11" fill="url(#grapePurple)" />
+      <circle cx="338" cy="204" r="11" fill="url(#grapePurple)" />
+      <circle cx="314" cy="222" r="10" fill="url(#grapePurple)" />
+      <circle cx="326" cy="218" r="11" fill="url(#grapePurple)" />
+      <circle cx="338" cy="216" r="10.5" fill="url(#grapePurple)" />
+      <circle cx="322" cy="230" r="9.5" fill="url(#grapePurple)" />
+      <circle cx="334" cy="228" r="9.5" fill="url(#grapePurple)" />
+      <circle cx="328" cy="239" r="8.5" fill="url(#grapePurple)" />
+      <!-- Purple shine highlights -->
+      <ellipse cx="324" cy="189" rx="2.5" ry="1.5" fill="#E1BEE7" opacity="0.8" />
+      <ellipse cx="320" cy="203" rx="2.8" ry="1.8" fill="#E1BEE7" opacity="0.8" />
+      <ellipse cx="334" cy="201" rx="2.8" ry="1.8" fill="#E1BEE7" opacity="0.8" />
+    </g>
+
+    <!-- FRUIT 5: Textured Citrus Orange -->
+    <g id="citrusOrangeFruit">
+      <!-- Orange Stem & Little Leaf -->
+      <path d="M 366 186 L 368 178" stroke="#3E2723" stroke-width="2.5" stroke-linecap="round" />
+      <circle cx="368" cy="186" r="3" fill="#2E7D32" />
+      <!-- Orange Globe -->
+      <circle cx="376" cy="216" r="32" fill="url(#orangeFruit)" />
+      <!-- Orange Surface Texture Dots & Highlight -->
+      <ellipse cx="364" cy="202" rx="9" ry="14" transform="rotate(-30 364 202)" fill="#FFFFFF" opacity="0.35" />
+      <circle cx="362" cy="212" r="1" fill="#FFFFFF" opacity="0.5" />
+      <circle cx="372" cy="206" r="1" fill="#FFFFFF" opacity="0.5" />
+      <circle cx="382" cy="212" r="1" fill="#FFFFFF" opacity="0.4" />
+      <circle cx="370" cy="222" r="1" fill="#FFFFFF" opacity="0.4" />
+      <circle cx="380" cy="226" r="1" fill="#FFFFFF" opacity="0.4" />
+    </g>
+
+    <!-- FRUIT 6: Bright Yellow Lemon (Right) -->
+    <g id="yellowLemon">
+      <path d="M 408 214 C 404 196 414 186 432 188 C 444 190 448 196 450 197 C 452 198 448 206 448 215 C 448 226 442 235 430 236 C 416 237 408 228 408 214 Z"
+            fill="url(#lemonFruit)" />
+      <!-- Lemon Tip Accent -->
+      <circle cx="450" cy="198" r="2.5" fill="#C67D0A" />
+      <ellipse cx="424" cy="202" rx="6" ry="10" transform="rotate(-20 424 202)" fill="#FFFFFF" opacity="0.45" />
+    </g>
+  </g>
+
+  <!-- =========================================================================
+       4. CRADLE LEAF CURVE (SUPPORTING THE FRUITS ALONG BOTTOM OF RING)
+       ========================================================================= -->
+  <g id="greenCradleLeaf" filter="url(#fruitShadow)">
+    <!-- Primary Green Leaf Swoosh Base -->
+    <path d="M 148 215 
+             C 178 245 220 262 270 262 
+             C 320 262 362 245 392 215 
+             C 370 240 324 256 270 256 
+             C 216 256 170 240 148 215 Z"
+          fill="#1B5E20" />
+
+    <!-- Lush Curved Vibrant Leaf Cradle -->
+    <path d="M 144 218 
+             C 176 248 220 266 270 266 
+             C 320 266 364 248 396 218 
+             C 372 245 325 260 270 260 
+             C 215 260 168 245 144 218 Z"
+          fill="url(#cradleLeaf)" />
+
+    <!-- Top Glossy Leaf Spine Highlight -->
+    <path d="M 152 222 
+             C 182 250 224 263 270 263 
+             C 316 263 358 250 388 222 
+             C 362 246 320 258 270 258 
+             C 220 258 178 246 152 222 Z"
+          fill="url(#leafSheen)" opacity="0.75" />
+
+    <!-- Leaf Center Rib Ribbon -->
+    <path d="M 146 220 Q 270 274 394 220" stroke="#81C784" stroke-width="1.8" fill="none" opacity="0.8" />
+  </g>
+</svg>

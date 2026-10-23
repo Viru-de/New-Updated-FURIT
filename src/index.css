@@ -1,0 +1,587 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+@layer base {
+  :root {
+    --erp-bg: #f8fafc;
+    --erp-surface: #ffffff;
+    --erp-border: #e2e8f0;
+    --erp-text-main: #0f172a;
+    --erp-text-muted: #64748b;
+  }
+  .dark {
+    --erp-bg: #0b1120;
+    --erp-surface: #131d31;
+    --erp-border: #24344d;
+    --erp-text-main: #f8fafc;
+    --erp-text-muted: #94a3b8;
+  }
+  body {
+    font-family: 'Plus Jakarta Sans', 'Noto Sans Devanagari', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: #f8fafc;
+    color: #0f172a;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+  }
+  .dark body {
+    background-color: #0b1120;
+    color: #f8fafc;
+  }
+}
+
+.font-devanagari {
+  font-family: 'Noto Sans Devanagari', 'Plus Jakarta Sans', sans-serif;
+}
+
+/* =========================================================================
+   NUMERIC TYPOGRAPHY — NORMAL, CLEAR, UNSLASHED ZERO ACROSS ENTIRE ERP
+   Eliminates slashed/dotted zeros from monospace fonts (JetBrains Mono, Consolas, SF Mono)
+   Uses Plus Jakarta Sans with tabular figures so:
+   - Digit '0' is an open, unslashed, clearly distinguishable zero (not confused with 8)
+   - Numbers align perfectly in accounting columns ('tabular-nums', 'tnum')
+   - OpenType slashed zero is strictly disabled ('zero' 0)
+   - Seamless Devanagari font fallback for Hindi text and numerals
+   ========================================================================= */
+*::before, *::after {
+  font-feature-settings: "zero" 0;
+}
+
+body, table, input, select, textarea, button, .font-mono, .font-mono-numbers, code, kbd, samp, pre, input[type="number"], input[type="tel"] {
+  font-feature-settings: "tnum" 1, "zero" 0 !important;
+  font-variant-numeric: tabular-nums !important;
+}
+
+.font-mono, .font-mono-numbers, code, kbd, samp, pre, input[type="number"], input[type="tel"] {
+  font-family: 'Plus Jakarta Sans', 'Noto Sans Devanagari', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
+}
+
+/* =========================================================================
+   QUANTITY & NUMERIC INPUTS — ZERO NATIVE SPINNER CONTROLS ERP-WIDE
+   Removes browser up/down spinner arrows across the entire ERP while preserving
+   direct keyboard editing, decimal precision, numeric validation, and responsive sizing.
+   ========================================================================= */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button,
+input.no-spinners::-webkit-outer-spin-button,
+input.no-spinners::-webkit-inner-spin-button {
+  -webkit-appearance: none !important;
+  margin: 0 !important;
+}
+
+input[type="number"],
+input.no-spinners {
+  -moz-appearance: textfield !important;
+  appearance: textfield !important;
+}
+
+/* =========================================================================
+   CLEAN MODERN ERP DESIGN SYSTEM STYLES
+   Crisp white surfaces, subtle 1px slate borders, minimal shadows
+   ========================================================================= */
+/* Clean White Card (Subtle border, minimal elevation) */
+.neu-card {
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
+}
+.neu-card-sm {
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
+  border: 1px solid #e2e8f0;
+}
+.neu-card-lg {
+  background-color: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
+}
+
+/* Inset / Clean Form Inputs & Search */
+.neu-inset {
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+  border: 1px solid #cbd5e1;
+}
+.neu-inset:focus-within {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+}
+.neu-inset-sm {
+  background-color: #ffffff;
+  border-radius: 6px;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.02);
+  border: 1px solid #cbd5e1;
+}
+
+/* Clean Professional Buttons */
+.neu-btn {
+  background-color: #ffffff;
+  color: #334155;
+  border-radius: 8px;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
+  border: 1px solid #cbd5e1;
+  transition: all 0.15s ease-in-out;
+}
+.neu-btn:hover {
+  background-color: #f8fafc;
+  border-color: #94a3b8;
+  color: #0f172a;
+}
+.neu-btn:active, .neu-btn-active {
+  background-color: #f1f5f9;
+  border-color: #94a3b8;
+  box-shadow: inset 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+/* Blue Button for Primary Actions */
+.neu-btn-primary {
+  background-color: #2563eb;
+  color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px 0 rgba(37, 99, 235, 0.25);
+  border: 1px solid #1d4ed8;
+  transition: all 0.15s ease-in-out;
+}
+.neu-btn-primary:hover {
+  background-color: #1d4ed8;
+}
+.neu-btn-primary:active {
+  background-color: #1e40af;
+}
+
+/* Green Button for Success */
+.neu-btn-success {
+  background-color: #059669;
+  color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px 0 rgba(5, 150, 105, 0.25);
+  border: 1px solid #047857;
+  transition: all 0.15s ease-in-out;
+}
+.neu-btn-success:hover {
+  background-color: #047857;
+}
+
+/* Red Button for Danger */
+.neu-btn-danger {
+  background-color: #dc2626;
+  color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px 0 rgba(220, 38, 38, 0.25);
+  border: 1px solid #b91c1c;
+  transition: all 0.15s ease-in-out;
+}
+.neu-btn-danger:hover {
+  background-color: #b91c1c;
+}
+
+/* Dropdown Panels */
+.neu-dropdown {
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
+}
+
+/* Modal Dialogs */
+.neu-modal {
+  background-color: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.06);
+  border: 1px solid #e2e8f0;
+}
+
+/* Active Nav Pill / Button Indicator */
+.neu-nav-active {
+  background-color: #eff6ff !important;
+  color: #1d4ed8 !important;
+  font-weight: 700 !important;
+  border: 1px solid #bfdbfe !important;
+}
+
+/* Header bar container */
+.neu-header {
+  background-color: #ffffff;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04);
+  border-bottom: 1px solid #e2e8f0;
+}
+
+/* =========================================================================
+   DARK MODE SYSTEM RULES
+   Clean slate tones, comfortable eye contrast, no pure-black harshness
+   ========================================================================= */
+.dark .neu-card, .dark .neu-card-sm, .dark .neu-card-lg {
+  background-color: #131d31;
+  border-color: #24344d;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.35);
+  color: #f1f5f9;
+}
+.dark .neu-inset, .dark .neu-inset-sm {
+  background-color: #0b1324;
+  border-color: #263554;
+  color: #f8fafc;
+}
+.dark .neu-inset:focus-within {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
+}
+.dark .neu-btn {
+  background-color: #162035;
+  color: #e2e8f0;
+  border-color: #2a3b5c;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.25);
+}
+.dark .neu-btn:hover {
+  background-color: #202d48;
+  border-color: #3b4e75;
+  color: #ffffff;
+}
+.dark .neu-btn:active, .dark .neu-btn-active {
+  background-color: #101827;
+  border-color: #3b4e75;
+  box-shadow: inset 0 1px 2px 0 rgba(0, 0, 0, 0.4);
+}
+.dark .neu-nav-active {
+  background-color: #1e3a8a !important;
+  color: #bfdbfe !important;
+  border-color: #3b82f6 !important;
+}
+.dark .neu-dropdown {
+  background-color: #131d31;
+  border-color: #293a58;
+  box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -4px rgba(0, 0, 0, 0.3);
+  color: #f1f5f9;
+}
+.dark .neu-modal {
+  background-color: #131d31;
+  border-color: #293a58;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.6), 0 8px 10px -6px rgba(0, 0, 0, 0.4);
+  color: #f1f5f9;
+}
+.dark .neu-header {
+  background-color: #0f172a;
+  border-color: #1e293b;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3);
+}
+
+/* Comprehensive dark mode adaptors for tables, inputs, text, and containers */
+.dark body {
+  background-color: #0b1120;
+}
+.dark div.bg-white, .dark section.bg-white, .dark article.bg-white, .dark main.bg-white, .dark aside.bg-white, .dark header.bg-white, .dark footer.bg-white {
+  background-color: #131d31;
+}
+.dark div.bg-slate-50, .dark section.bg-slate-50, .dark header.bg-slate-50, .dark footer.bg-slate-50 {
+  background-color: #0d1527;
+}
+.dark div.bg-slate-100 {
+  background-color: #10192a;
+}
+.dark .border-slate-100 {
+  border-color: #1a253a !important;
+}
+.dark .border-slate-200 {
+  border-color: #24344d !important;
+}
+.dark .border-slate-300 {
+  border-color: #334668 !important;
+}
+.dark .text-slate-900 {
+  color: #f8fafc !important;
+}
+.dark .text-slate-800 {
+  color: #f1f5f9 !important;
+}
+.dark .text-slate-700 {
+  color: #cbd5e1 !important;
+}
+.dark .text-slate-600 {
+  color: #94a3b8 !important;
+}
+.dark .text-slate-500 {
+  color: #64748b !important;
+}
+.dark input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]), .dark select, .dark textarea {
+  background-color: #0b1324;
+  color: #f8fafc;
+  border-color: #263554;
+}
+.dark input::placeholder, .dark textarea::placeholder {
+  color: #64748b;
+}
+.dark .neu-dropdown input {
+  background-color: #0b1324 !important;
+  color: #f8fafc !important;
+}
+.dark .neu-dropdown .hover\:bg-slate-100\/70:hover, .dark .neu-dropdown .hover\:bg-slate-100:hover {
+  background-color: #1c2942 !important;
+}
+.dark table thead th {
+  background-color: #0d1629;
+  color: #cbd5e1;
+  border-color: #24344d;
+}
+.dark table tbody td {
+  border-color: #24344d;
+}
+.dark table tbody tr:hover {
+  background-color: #17243b;
+}
+.dark .bg-emerald-50, .dark .bg-emerald-100, .dark .bg-emerald-100\/70 {
+  background-color: rgba(6, 78, 59, 0.35) !important;
+  color: #6ee7b7 !important;
+}
+.dark .bg-rose-50, .dark .bg-rose-100, .dark .bg-rose-100\/70 {
+  background-color: rgba(136, 19, 55, 0.35) !important;
+  color: #fda4af !important;
+}
+.dark .bg-blue-50, .dark .bg-blue-100, .dark .bg-blue-100\/70 {
+  background-color: rgba(30, 58, 138, 0.35) !important;
+  color: #93c5fd !important;
+}
+.dark .bg-amber-50, .dark .bg-amber-100 {
+  background-color: rgba(120, 53, 15, 0.35) !important;
+  color: #fcd34d !important;
+}
+
+/* =========================================================================
+   PURE LIGHT MODE ISOLATION FOR ALL PRINT BILLS, STATEMENTS & CANVASES
+   Ensures bills, receipts, ledgers, and group sale summaries ALWAYS render
+   with pure white background (#ffffff) and black text (#000000) on-screen,
+   in print mode, and during PDF canvas generation, REGARDLESS OF DARK MODE.
+   ========================================================================= */
+#mandi-print-area, #receipt-print-area, #ledger-print-area, #group-sale-print-summary, #sale-proceeds-print-area, #crate-statement-print-area, #report-print-area, .print-bill-canvas {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  color-scheme: light !important;
+}
+.dark #mandi-print-area, .dark #receipt-print-area, .dark #ledger-print-area, .dark #group-sale-print-summary, .dark #sale-proceeds-print-area, .dark #crate-statement-print-area, .dark #report-print-area, .dark .print-bill-canvas {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  color-scheme: light !important;
+}
+.dark #mandi-print-area table thead th, .dark #receipt-print-area table thead th, .dark #ledger-print-area table thead th, .dark #group-sale-print-summary table thead th, .dark #sale-proceeds-print-area table thead th, .dark #crate-statement-print-area table thead th, .dark #report-print-area table thead th, .dark .print-bill-canvas table thead th {
+  background-color: #f8fafc !important;
+  color: #0f172a !important;
+  border-color: #000000 !important;
+}
+.dark #mandi-print-area table tbody td, .dark #receipt-print-area table tbody td, .dark #ledger-print-area table tbody td, .dark #group-sale-print-summary table tbody td, .dark #sale-proceeds-print-area table tbody td, .dark #crate-statement-print-area table tbody td, .dark #report-print-area table tbody td, .dark .print-bill-canvas table tbody td, .dark #mandi-print-area table tfoot td, .dark #receipt-print-area table tfoot td, .dark #ledger-print-area table tfoot td, .dark #group-sale-print-summary table tfoot td, .dark #sale-proceeds-print-area table tfoot td, .dark #crate-statement-print-area table tfoot td, .dark #report-print-area table tfoot td, .dark .print-bill-canvas table tfoot td {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border-color: #000000 !important;
+}
+.dark #mandi-print-area table tbody tr:hover, .dark #receipt-print-area table tbody tr:hover, .dark #ledger-print-area table tbody tr:hover, .dark #group-sale-print-summary table tbody tr:hover, .dark #sale-proceeds-print-area table tbody tr:hover, .dark #crate-statement-print-area table tbody tr:hover, .dark #report-print-area table tbody tr:hover, .dark .print-bill-canvas table tbody tr:hover {
+  background-color: #ffffff !important;
+}
+.dark #mandi-print-area .text-slate-400, .dark #mandi-print-area .text-slate-500, .dark #mandi-print-area .text-slate-600, .dark #mandi-print-area .text-slate-700, .dark #mandi-print-area .text-slate-800, .dark #mandi-print-area .text-slate-900, .dark #receipt-print-area .text-slate-400, .dark #receipt-print-area .text-slate-500, .dark #receipt-print-area .text-slate-600, .dark #receipt-print-area .text-slate-700, .dark #receipt-print-area .text-slate-800, .dark #receipt-print-area .text-slate-900, .dark #ledger-print-area .text-slate-400, .dark #ledger-print-area .text-slate-500, .dark #ledger-print-area .text-slate-600, .dark #ledger-print-area .text-slate-700, .dark #ledger-print-area .text-slate-800, .dark #ledger-print-area .text-slate-900, .dark #group-sale-print-summary .text-slate-400, .dark #group-sale-print-summary .text-slate-500, .dark #group-sale-print-summary .text-slate-600, .dark #group-sale-print-summary .text-slate-700, .dark #group-sale-print-summary .text-slate-800, .dark #group-sale-print-summary .text-slate-900, .dark #sale-proceeds-print-area .text-slate-400, .dark #sale-proceeds-print-area .text-slate-500, .dark #sale-proceeds-print-area .text-slate-600, .dark #sale-proceeds-print-area .text-slate-700, .dark #sale-proceeds-print-area .text-slate-800, .dark #sale-proceeds-print-area .text-slate-900, .dark #crate-statement-print-area .text-slate-400, .dark #crate-statement-print-area .text-slate-500, .dark #crate-statement-print-area .text-slate-600, .dark #crate-statement-print-area .text-slate-700, .dark #crate-statement-print-area .text-slate-800, .dark #crate-statement-print-area .text-slate-900, .dark #report-print-area .text-slate-400, .dark #report-print-area .text-slate-500, .dark #report-print-area .text-slate-600, .dark #report-print-area .text-slate-700, .dark #report-print-area .text-slate-800, .dark #report-print-area .text-slate-900, .dark .print-bill-canvas .text-slate-400, .dark .print-bill-canvas .text-slate-500, .dark .print-bill-canvas .text-slate-600, .dark .print-bill-canvas .text-slate-700, .dark .print-bill-canvas .text-slate-800, .dark .print-bill-canvas .text-slate-900 {
+  color: #0f172a !important;
+}
+.dark #mandi-print-area .dark\:text-white, .dark #receipt-print-area .dark\:text-white, .dark #ledger-print-area .dark\:text-white, .dark #group-sale-print-summary .dark\:text-white, .dark #sale-proceeds-print-area .dark\:text-white, .dark #crate-statement-print-area .dark\:text-white, .dark #report-print-area .dark\:text-white, .dark .print-bill-canvas .dark\:text-white {
+  color: #0f172a !important;
+}
+.dark #mandi-print-area .dark\:text-slate-200, .dark #mandi-print-area .dark\:text-slate-300, .dark #mandi-print-area .dark\:text-slate-400, .dark #ledger-print-area .dark\:text-slate-200, .dark #ledger-print-area .dark\:text-slate-300, .dark #ledger-print-area .dark\:text-slate-400, .dark #sale-proceeds-print-area .dark\:text-slate-200, .dark #sale-proceeds-print-area .dark\:text-slate-300, .dark #sale-proceeds-print-area .dark\:text-slate-400, .dark #crate-statement-print-area .dark\:text-slate-200, .dark #crate-statement-print-area .dark\:text-slate-300, .dark #crate-statement-print-area .dark\:text-slate-400, .dark #report-print-area .dark\:text-slate-200, .dark #report-print-area .dark\:text-slate-300, .dark #report-print-area .dark\:text-slate-400, .dark .print-bill-canvas .dark\:text-slate-200, .dark .print-bill-canvas .dark\:text-slate-300, .dark .print-bill-canvas .dark\:text-slate-400 {
+  color: #0f172a !important;
+}
+.dark #mandi-print-area .dark\:bg-slate-900, .dark #mandi-print-area .dark\:bg-slate-800, .dark #ledger-print-area .dark\:bg-slate-900, .dark #ledger-print-area .dark\:bg-slate-800, .dark #sale-proceeds-print-area .dark\:bg-slate-900, .dark #sale-proceeds-print-area .dark\:bg-slate-800, .dark #crate-statement-print-area .dark\:bg-slate-900, .dark #crate-statement-print-area .dark\:bg-slate-800, .dark #report-print-area .dark\:bg-slate-900, .dark #report-print-area .dark\:bg-slate-800, .dark .print-bill-canvas .dark\:bg-slate-900, .dark .print-bill-canvas .dark\:bg-slate-800 {
+  background-color: #ffffff !important;
+}
+.dark #mandi-print-area .dark\:border-slate-800, .dark #mandi-print-area .dark\:border-slate-700, .dark #ledger-print-area .dark\:border-slate-800, .dark #ledger-print-area .dark\:border-slate-700, .dark #sale-proceeds-print-area .dark\:border-slate-800, .dark #sale-proceeds-print-area .dark\:border-slate-700, .dark #crate-statement-print-area .dark\:border-slate-800, .dark #crate-statement-print-area .dark\:border-slate-700, .dark #report-print-area .dark\:border-slate-800, .dark #report-print-area .dark\:border-slate-700, .dark .print-bill-canvas .dark\:border-slate-800, .dark .print-bill-canvas .dark\:border-slate-700 {
+  border-color: #000000 !important;
+}
+
+/* =========================================================================
+   PRINT STYLES — MULTI-PAGE PAGINATION & TRADITIONAL MANDI INVOICE FORMAT
+   CRITICAL: Do not apply neumorphic shadows or dark theme to printed documents.
+   Supports multi-page statements, table header repeating, and clean margins.
+   ========================================================================= */
+@media print {
+  @page {
+    margin: 8mm;
+    size: auto;
+  }
+  html, body, html.dark, body.dark, .dark {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  /* Prevent 100vh viewport height or body flex layout from pushing content to page 2 (especially in B6/B7) */
+  html, body, #root, .min-h-screen {
+    min-height: 0 !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  /* When printing from a modal, remove background siblings from document flow so zero height precedes bill */
+  main > div > *:not(:has(#mandi-print-area)):not(:has(#receipt-print-area)):not(:has(.print-bill-canvas)) {
+    display: none !important;
+  }
+  /* Unconstrain modals so they flow from top without backdrop or scrolling clipping */
+  .fixed.inset-0 {
+    position: static !important;
+    background: transparent !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: visible !important;
+    display: block !important;
+  }
+  main {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+  body * {
+    visibility: hidden;
+  }
+  #mandi-print-area, #mandi-print-area *,
+  #receipt-print-area, #receipt-print-area *,
+  #ledger-print-area, #ledger-print-area *,
+  #group-sale-print-summary, #group-sale-print-summary *,
+  #sale-proceeds-print-area, #sale-proceeds-print-area *,
+  #crate-statement-print-area, #crate-statement-print-area *,
+  #report-print-area, #report-print-area *,
+  .print-bill-canvas, .print-bill-canvas * {
+    visibility: visible;
+  }
+  /* Multi-page statements, ledgers, summaries, and reports */
+  #ledger-print-area,
+  #group-sale-print-summary,
+  #sale-proceeds-print-area,
+  #crate-statement-print-area,
+  #report-print-area {
+    position: relative !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    box-shadow: none !important;
+    border: none !important;
+    outline: none !important;
+    overflow: visible !important;
+    page-break-after: auto;
+    page-break-before: avoid !important;
+    break-before: avoid !important;
+  }
+  /* Bill and receipt canvas - Remove heavy black outer box border around whole page */
+  #mandi-print-area,
+  #receipt-print-area,
+  .print-bill-canvas {
+    position: relative !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    box-shadow: none !important;
+    border: none !important;
+    outline: none !important;
+    overflow: visible !important;
+    page-break-before: avoid !important;
+    break-before: avoid !important;
+  }
+  /* Multi-page table support: repeat headers and keep rows together */
+  #ledger-print-area table,
+  #group-sale-print-summary table,
+  #sale-proceeds-print-area table,
+  #crate-statement-print-area table,
+  #report-print-area table,
+  .print-bill-canvas table {
+    page-break-inside: auto;
+    border-collapse: collapse !important;
+    width: 100% !important;
+  }
+  #ledger-print-area thead,
+  #group-sale-print-summary thead,
+  #sale-proceeds-print-area thead,
+  #crate-statement-print-area thead,
+  #report-print-area thead,
+  .print-bill-canvas thead {
+    display: table-header-group !important;
+  }
+  #ledger-print-area tfoot,
+  #group-sale-print-summary tfoot,
+  #sale-proceeds-print-area tfoot,
+  #crate-statement-print-area tfoot,
+  #report-print-area tfoot,
+  .print-bill-canvas tfoot {
+    display: table-footer-group !important;
+  }
+  #ledger-print-area tr,
+  #group-sale-print-summary tr,
+  #sale-proceeds-print-area tr,
+  #crate-statement-print-area tr,
+  #report-print-area tr,
+  .print-bill-canvas tr {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+  #ledger-print-area td,
+  #ledger-print-area th,
+  #group-sale-print-summary td,
+  #group-sale-print-summary th,
+  #sale-proceeds-print-area td,
+  #sale-proceeds-print-area th,
+  #crate-statement-print-area td,
+  #crate-statement-print-area th,
+  #report-print-area td,
+  #report-print-area th,
+  .print-bill-canvas td,
+  .print-bill-canvas th {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+  /* Force pure black text, internal table borders, and clear backgrounds during print */
+  #mandi-print-area *,
+  #receipt-print-area *,
+  #ledger-print-area *,
+  #group-sale-print-summary *,
+  #sale-proceeds-print-area *,
+  #crate-statement-print-area *,
+  #report-print-area *,
+  .print-bill-canvas * {
+    color: #000000 !important;
+    border-color: #000000 !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+  /* Preserve intentional light gray backgrounds for headers */
+  #mandi-print-area table thead tr,
+  #receipt-print-area table thead tr,
+  #ledger-print-area table thead tr,
+  #group-sale-print-summary table thead tr,
+  #sale-proceeds-print-area table thead tr,
+  #crate-statement-print-area table thead tr,
+  #report-print-area table thead tr,
+  .print-bill-canvas table thead tr {
+    background-color: #f1f5f9 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  /* Ensure unslashed normal zeros and crisp Devanagari font rendering in print output */
+  *,
+  .font-mono,
+  .font-mono-numbers {
+    font-variant-numeric: tabular-nums !important;
+    font-feature-settings: "tnum" 1, "zero" 0 !important;
+  }
+  .font-mono,
+  .font-mono-numbers {
+    font-family: 'Plus Jakarta Sans', 'Noto Sans Devanagari', Arial, sans-serif !important;
+  }
+  .font-devanagari {
+    font-family: 'Noto Sans Devanagari', 'Plus Jakarta Sans', Arial, sans-serif !important;
+  }
+}
