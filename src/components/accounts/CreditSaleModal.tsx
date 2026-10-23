@@ -54,12 +54,14 @@ export const CreditSaleModal: React.FC<CreditSaleModalProps> = ({
   // Financial summary
   const [oldBalance, setOldBalance] = useState<number>(0);
   const [cashReceipt, setCashReceipt] = useState<number | ''>('');
+  const [customerError, setCustomerError] = useState(false);
 
   const [isAddCustomerOpen, setIsAddCustomerOpen] = useState(false);
 
   // Initialize or reset form
   useEffect(() => {
     if (!isOpen) return;
+    setCustomerError(false);
 
     if (editItem) {
       setCustomerId(editItem.customerId);
@@ -121,7 +123,7 @@ export const CreditSaleModal: React.FC<CreditSaleModalProps> = ({
 
       setCashReceipt(editItem.cashReceipt !== undefined && editItem.cashReceipt > 0 ? editItem.cashReceipt : '');
     } else {
-      const initialCustId = preselectedCustomerId || customers[0]?.id || '';
+      const initialCustId = preselectedCustomerId || '';
       setCustomerId(initialCustId);
       setDate(getTodayIso());
       setNotes('');
@@ -166,6 +168,9 @@ export const CreditSaleModal: React.FC<CreditSaleModalProps> = ({
   // Update customer balance when customer selection changes (for new bills)
   const handleCustomerChange = (newCustId: string) => {
     setCustomerId(newCustId);
+    if (newCustId) {
+      setCustomerError(false);
+    }
     if (!newCustId) {
       setOldBalance(0);
       return;
@@ -384,7 +389,10 @@ export const CreditSaleModal: React.FC<CreditSaleModalProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!customerId) return;
+    if (!customerId) {
+      setCustomerError(true);
+      return;
+    }
     if (items.length === 0) return;
 
     const cust = customers.find((c) => c.id === customerId);
@@ -531,8 +539,14 @@ export const CreditSaleModal: React.FC<CreditSaleModalProps> = ({
                   <CustomerAutocomplete
                     valueCustomerId={customerId}
                     onChange={(cust) => handleCustomerChange(cust ? cust.id : '')}
+                    hasError={customerError}
                     placeholder="Search customer name, mobile or city..."
                   />
+                  {customerError && (
+                    <p className="mt-1 text-xs font-semibold text-rose-600 dark:text-rose-400">
+                      Please search and select a customer before entering the sale.
+                    </p>
+                  )}
                   {selectedCustomer && (
                     <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
                       {selectedCustomer.mobile && (

@@ -50,7 +50,6 @@ export const CustomerDirectoryView: React.FC<CustomerDirectoryViewProps> = ({
   const [editMobile, setEditMobile] = useState('');
   const [editCity, setEditCity] = useState('');
   const [editAddress, setEditAddress] = useState('');
-  const [editGstin, setEditGstin] = useState('');
   const [editAadhaarNo, setEditAadhaarNo] = useState('');
   const [editPhoto, setEditPhoto] = useState<string | undefined>(undefined);
 
@@ -66,8 +65,8 @@ export const CustomerDirectoryView: React.FC<CustomerDirectoryViewProps> = ({
       o.customer.name.toLowerCase().includes(q) ||
       (o.customer.mobile && o.customer.mobile.includes(q)) ||
       (o.customer.city && o.customer.city.toLowerCase().includes(q)) ||
-      (o.customer.gstin && o.customer.gstin.toLowerCase().includes(q)) ||
-      (o.customer.aadhaarNo && o.customer.aadhaarNo.includes(q))
+      (o.customer.aadhaarNo && o.customer.aadhaarNo.includes(q)) ||
+      (o.customer.gstin && o.customer.gstin.toLowerCase().includes(q))
     );
   });
 
@@ -77,7 +76,6 @@ export const CustomerDirectoryView: React.FC<CustomerDirectoryViewProps> = ({
     setEditMobile(c.mobile || '');
     setEditCity(c.city || '');
     setEditAddress(c.address || '');
-    setEditGstin(c.gstin || '');
     setEditAadhaarNo(c.aadhaarNo || '');
     setEditPhoto(c.photo);
   };
@@ -92,7 +90,6 @@ export const CustomerDirectoryView: React.FC<CustomerDirectoryViewProps> = ({
       mobile: editMobile.trim(),
       city: editCity.trim() || undefined,
       address: editAddress.trim() || undefined,
-      gstin: editGstin.trim() || undefined,
       aadhaarNo: editAadhaarNo.trim() || undefined,
       photo: editPhoto,
     };
@@ -169,7 +166,7 @@ export const CustomerDirectoryView: React.FC<CustomerDirectoryViewProps> = ({
         <Search className="h-4 w-4 text-slate-400 mr-2 shrink-0" />
         <input
           type="text"
-          placeholder="Search by customer name, mobile, city, GSTIN..."
+          placeholder="Search by customer name, mobile, city, Aadhaar..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="w-full text-xs text-slate-900 outline-none placeholder:text-slate-400 dark:bg-slate-900 dark:text-white"
@@ -214,6 +211,11 @@ export const CustomerDirectoryView: React.FC<CustomerDirectoryViewProps> = ({
                         {customer.city && (
                           <span className="flex items-center gap-1">
                             <MapPin className="h-3 w-3" /> {customer.city}
+                          </span>
+                        )}
+                        {customer.aadhaarNo && (
+                          <span className="flex items-center gap-1 text-[11px] text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-950/40 px-1.5 py-0.5 rounded font-mono">
+                            Aadhaar: {customer.aadhaarNo}
                           </span>
                         )}
                       </div>
@@ -404,11 +406,11 @@ export const CustomerDirectoryView: React.FC<CustomerDirectoryViewProps> = ({
 
               <div>
                 <label className="mb-1 block text-xs font-semibold text-slate-700 dark:text-slate-300">
-                  Aadhaar Card No.
+                  Aadhaar Number
                 </label>
                 <input
                   type="text"
-                  placeholder="12-digit Aadhaar"
+                  placeholder="12-digit Aadhaar Number (e.g. 2345 6789 0123)"
                   maxLength={14}
                   value={editAadhaarNo}
                   onChange={(e) => setEditAadhaarNo(e.target.value)}

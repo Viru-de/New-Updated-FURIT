@@ -154,6 +154,32 @@ export const CashSaleModal: React.FC<CashSaleModalProps> = ({
 
   const selectedCustomer = customers.find((c) => c.id === customerId);
 
+  // Directly handle fruit selection from Fruit/Item Master
+  const handleSelectFruit = (index: number, f: Fruit) => {
+    const updated = [...items];
+    const current = { ...updated[index] };
+    current.fruitId = f.id;
+    current.fruitName = f.name;
+    // 1. Auto-fill Unit
+    current.unit = f.unit || f.defaultUnit || 'Crate';
+    // 2. Auto-fill Rate
+    const r = getFruitEffectivePrice(f);
+    current.rate = typeof r === 'number' && !isNaN(r) ? r : (f.defaultRate || 1);
+    // 3. Auto-fill Crate Type (save exactly what was entered, e.g. 20kg or 10kg, or blank)
+    const ctName = f.crateType !== undefined ? f.crateType : (f.crateName || '');
+    current.crateName = ctName;
+    current.crateTypeId = ctName
+      ? (crateTypes.find((c) => c.name.toLowerCase().includes(ctName.toLowerCase()))?.id || f.crateTypeId || 'ct_20')
+      : '';
+    // 4. Qty defaults to 1 but remains editable
+    current.quantity = 1;
+    // 5. Weight defaults to 0
+    current.kg = 0;
+    current.amount = calculateWholesaleItemAmount(1, current.unit, 0, current.rate);
+    updated[index] = current;
+    setItems(updated);
+  };
+
   // Item manipulations
   const handleItemChange = (index: number, field: keyof CashSaleItem, val: any) => {
     const updated = [...items];
@@ -582,7 +608,7 @@ export const CashSaleModal: React.FC<CashSaleModalProps> = ({
                                 valueFruitName={it.fruitName}
                                 onChange={(f, customName) => {
                                   if (f) {
-                                    handleItemChange(idx, 'fruitId', f.id);
+                                    handleSelectFruit(idx, f);
                                   } else {
                                     handleItemChange(idx, 'fruitId', '');
                                     handleItemChange(idx, 'fruitName', customName || '');

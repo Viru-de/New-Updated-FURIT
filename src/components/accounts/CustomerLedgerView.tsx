@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { db } from '../../services/db';
 import { getCustomerLedger } from '../../services/accounting';
 import { formatCurrency, formatDate, toIsoDate, getTodayIso } from '../../utils/formatters';
@@ -7,8 +7,8 @@ import { CreditSaleModal } from './CreditSaleModal';
 import { ReceiptModal } from './ReceiptModal';
 import { SaleProceedsModal } from './SaleProceedsModal';
 import { CreditSale, Customer, LedgerEntry, Receipt, SaleProceeds } from '../../types';
-import { Download, Printer, Plus, Phone, MapPin, CreditCard, ShoppingBag, Edit2, Building2 } from 'lucide-react';
-import { CustomerAvatar } from '../common/CustomerAvatar';
+import { Download, Printer, Plus, Phone, MapPin, CreditCard, ShoppingBag, Edit2, Building2, Box, User } from 'lucide-react';
+import { CustomerAvatar, getCustomerInitials } from '../common/CustomerAvatar';
 import { CustomerAutocomplete } from '../common/CustomerAutocomplete';
 import { exportCustomerLedger } from '../../utils/excelEngine';
 import { BillShareButtons } from '../common/BillShareButtons';
@@ -27,8 +27,21 @@ export const CustomerLedgerView: React.FC<CustomerLedgerViewProps> = ({
   const [refreshKey, setRefreshKey] = useState(0);
   const customers = db.getCustomers();
   const [selectedCustomerId, setSelectedCustomerId] = useState(
-    initialCustomerId || customers[0]?.id || ''
+    initialCustomerId || ''
   );
+
+  useEffect(() => {
+    const unsub = db.subscribe(() => {
+      setRefreshKey((k) => k + 1);
+    });
+    return unsub;
+  }, []);
+
+  useEffect(() => {
+    if (initialCustomerId) {
+      setSelectedCustomerId(initialCustomerId);
+    }
+  }, [initialCustomerId]);
 
   const [filterStartDate, setFilterStartDate] = useState('');
   const [filterEndDate, setFilterEndDate] = useState('');
@@ -48,7 +61,9 @@ export const CustomerLedgerView: React.FC<CustomerLedgerViewProps> = ({
   const [custObAmount, setCustObAmount] = useState<number | ''>('');
   const [custObType, setCustObType] = useState<'debit' | 'credit'>('debit');
 
-  const activeCustomer = customers.find((c) => c.id === selectedCustomerId) || customers[0];
+  const activeCustomer = selectedCustomerId
+    ? customers.find((c) => c.id === selectedCustomerId) || null
+    : null;
   const profiles = db.getCompanyProfiles();
   const defaultProfile = db.getDefaultProfile() || profiles[0];
   const [selectedProfileId, setSelectedProfileId] = useState<string>(
@@ -56,8 +71,8 @@ export const CustomerLedgerView: React.FC<CustomerLedgerViewProps> = ({
   );
   const currentProfile = profiles.find((p) => p.id === selectedProfileId) || defaultProfile || profiles[0];
 
-  const ledger = selectedCustomerId
-    ? getCustomerLedger(selectedCustomerId, {
+  const ledger = activeCustomer
+    ? getCustomerLedger(activeCustomer.id, {
         startDate: filterStartDate ? toIsoDate(filterStartDate) : undefined,
         endDate: filterEndDate ? toIsoDate(filterEndDate) : undefined,
       })
@@ -171,15 +186,25 @@ export const CustomerLedgerView: React.FC<CustomerLedgerViewProps> = ({
           </button>
           <button
             type="button"
-            onClick={() => exportCustomerLedger(activeCustomer?.id)}
-            className="flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 cursor-pointer shadow-2xs"
+            disabled={!activeCustomer}
+            onClick={() => activeCustomer && exportCustomerLedger(activeCustomer.id)}
+            className={`flex items-center gap-1.5 rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold ${
+              !activeCustomer
+                ? 'opacity-40 cursor-not-allowed bg-slate-100 text-slate-400 dark:bg-slate-800/40 dark:border-slate-800'
+                : 'bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 cursor-pointer shadow-2xs'
+            }`}
           >
             <Download className="h-3.5 w-3.5 text-emerald-600" /> Export Excel
           </button>
           <button
             type="button"
+            disabled={!activeCustomer}
             onClick={handleExportCsv}
-            className="flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+            className={`flex items-center gap-1.5 rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold ${
+              !activeCustomer
+                ? 'opacity-40 cursor-not-allowed bg-slate-100 text-slate-400 dark:bg-slate-800/40 dark:border-slate-800'
+                : 'bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 cursor-pointer'
+            }`}
           >
             <Download className="h-3.5 w-3.5" /> CSV
           </button>
@@ -198,127 +223,318 @@ export const CustomerLedgerView: React.FC<CustomerLedgerViewProps> = ({
               ))}
             </select>
           </div>
-          <BillShareButtons
-            elementId="ledger-print-area"
-            filename={`Customer_Ledger_${(activeCustomer?.name || 'Customer').replace(/\s+/g, '_')}`}
-            customerMobile={activeCustomer?.mobile}
-            title={`Customer Ledger - ${activeCustomer?.name || 'Customer'}`}
-            summaryText={`Customer: ${activeCustomer?.name || 'Customer'}\nDate: ${formatDate(getTodayIso())}\nTotal Debit: ₹${ledger.totalDebit.toLocaleString('en-IN')}\nTotal Credit: ₹${ledger.totalCredit.toLocaleString('en-IN')}\nClosing Balance: ₹${ledger.closingBalance.toLocaleString('en-IN')} ${ledger.closingBalance > 0 ? '(Dr - Due)' : ledger.closingBalance < 0 ? '(Cr - Advance)' : '(Settled)'}`}
-          />
+          {activeCustomer && (
+            <BillShareButtons
+              elementId="ledger-print-area"
+              filename={`Customer_Ledger_${activeCustomer.name.replace(/\s+/g, '_')}`}
+              customerMobile={activeCustomer.mobile}
+              title={`Customer Ledger - ${activeCustomer.name}`}
+              summaryText={`Customer: ${activeCustomer.name}\nDate: ${formatDate(getTodayIso())}\nTotal Debit: ₹${ledger.totalDebit.toLocaleString('en-IN')}\nTotal Credit: ₹${ledger.totalCredit.toLocaleString('en-IN')}\nClosing Balance: ₹${ledger.closingBalance.toLocaleString('en-IN')} ${ledger.closingBalance > 0 ? '(Dr - Due)' : ledger.closingBalance < 0 ? '(Cr - Advance)' : '(Settled)'}`}
+            />
+          )}
           <button
             type="button"
+            disabled={!activeCustomer}
             onClick={handlePrint}
-            className="flex items-center gap-1.5 rounded-lg bg-slate-900 px-3.5 py-1.5 text-xs font-semibold text-white hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 shadow-xs cursor-pointer"
+            className={`flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-semibold shadow-xs ${
+              !activeCustomer
+                ? 'opacity-40 cursor-not-allowed bg-slate-300 text-slate-500 dark:bg-slate-800 dark:text-slate-600'
+                : 'bg-slate-900 text-white hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 cursor-pointer'
+            }`}
           >
             <Printer className="h-3.5 w-3.5" /> Print
           </button>
         </div>
       </div>
 
-      {/* Customer Selection & Profile Strip */}
+      {/* 1. Customer Selection Bar & Date Filters */}
       <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-2xs dark:border-slate-800 dark:bg-slate-900 no-print">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
-          <div className="md:col-span-5">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 items-end">
+          <div className="lg:col-span-5">
             <label className="mb-1 block text-xs font-semibold text-slate-700 dark:text-slate-300">
               Select Customer
             </label>
             <CustomerAutocomplete
               valueCustomerId={selectedCustomerId}
               onChange={(c) => {
-                if (c) setSelectedCustomerId(c.id);
+                setSelectedCustomerId(c ? c.id : '');
               }}
-              placeholder="Search customer name, mobile or city..."
+              placeholder="Search customer name, mobile, city or Aadhaar..."
             />
           </div>
 
-          <div className="md:col-span-7 flex flex-wrap items-center justify-between gap-3 bg-slate-50 p-3 rounded-lg dark:bg-slate-800/50">
-            {activeCustomer && (
-              <>
-                <div className="flex items-center gap-3">
-                  <CustomerAvatar
-                    photo={activeCustomer.photo}
-                    name={activeCustomer.name}
-                    size="md"
-                  />
-                  <div className="text-xs space-y-0.5">
-                    <div className="font-bold text-slate-800 dark:text-white">{activeCustomer.name}</div>
-                    <div className="text-slate-500 flex items-center gap-3">
-                      {activeCustomer.mobile && (
-                        <span className="flex items-center gap-1">
-                          <Phone className="h-3 w-3" /> {activeCustomer.mobile}
-                        </span>
-                      )}
-                      {activeCustomer.city && (
-                        <span className="flex items-center gap-1">
-                          <MapPin className="h-3 w-3" /> {activeCustomer.city}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </div>
+          <div className="lg:col-span-7 flex flex-wrap items-end gap-3">
+            <div className="w-36 sm:w-40 flex-1 sm:flex-none">
+              <DatePickerInput
+                label="From Date"
+                value={filterStartDate}
+                onChange={setFilterStartDate}
+              />
+            </div>
+            <div className="w-36 sm:w-40 flex-1 sm:flex-none">
+              <DatePickerInput
+                label="To Date"
+                value={filterEndDate}
+                onChange={setFilterEndDate}
+              />
+            </div>
+            {(filterStartDate || filterEndDate) && (
+              <button
+                type="button"
+                onClick={() => {
+                  setFilterStartDate('');
+                  setFilterEndDate('');
+                }}
+                className="rounded-lg border border-slate-200 px-3 py-2 text-xs text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 cursor-pointer"
+              >
+                Clear
+              </button>
+            )}
 
-                <div className="text-right">
-                  <span className="block text-[11px] font-medium text-slate-500">Current Balance</span>
-                  <span
-                    className={`font-mono-numbers text-base font-bold ${
-                      ledger.closingBalance > 0
-                        ? 'text-rose-600 dark:text-rose-400'
-                        : ledger.closingBalance < 0
-                        ? 'text-emerald-600 dark:text-emerald-400'
-                        : 'text-slate-700 dark:text-slate-300'
-                    }`}
-                  >
-                    {formatCurrency(ledger.closingBalance)}{' '}
-                    <span className="text-xs font-normal">
-                      {ledger.closingBalance > 0 ? '(Dr - Due)' : ledger.closingBalance < 0 ? '(Cr - Advance)' : ''}
-                    </span>
-                  </span>
-                </div>
-              </>
+            {onNavigateToCrate && activeCustomer && (
+              <button
+                type="button"
+                onClick={() => onNavigateToCrate(activeCustomer.id)}
+                className="ml-auto flex items-center gap-1.5 rounded-lg border border-sky-200 bg-sky-50 px-3 py-2 text-xs font-bold text-sky-700 hover:bg-sky-100 dark:border-sky-800 dark:bg-sky-950/40 dark:text-sky-300 cursor-pointer"
+              >
+                <Box className="h-3.5 w-3.5" />
+                <span>Crate Statement →</span>
+              </button>
             )}
           </div>
         </div>
+      </div>
 
-        {/* Date Filter */}
-        <div className="mt-3 flex flex-wrap items-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
-          <div className="w-40">
-            <DatePickerInput
-              label="From Date"
-              value={filterStartDate}
-              onChange={setFilterStartDate}
-            />
-          </div>
-          <div className="w-40">
-            <DatePickerInput
-              label="To Date"
-              value={filterEndDate}
-              onChange={setFilterEndDate}
-            />
-          </div>
-          {(filterStartDate || filterEndDate) && (
-            <button
-              type="button"
-              onClick={() => {
-                setFilterStartDate('');
-                setFilterEndDate('');
-              }}
-              className="mb-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300"
-            >
-              Clear
-            </button>
-          )}
+      {/* 2. Customer Ledger Statement — Customer Profile or Selection Prompt */}
+      {activeCustomer ? (
+        <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 sm:p-6 shadow-xs relative overflow-hidden transition-all no-print">
+          {/* Top border accent line */}
+          <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-emerald-500 via-teal-500 to-blue-600" />
 
-          {onNavigateToCrate && (
-            <button
-              type="button"
-              onClick={() => onNavigateToCrate(selectedCustomerId)}
-              className="ml-auto text-xs font-semibold text-sky-600 hover:text-sky-700 dark:text-sky-400 pb-1"
-            >
-              → View Customer Crate Statement
-            </button>
+          <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-5 sm:gap-6 pt-1">
+            {/* Left Section: Large Photo + Comprehensive Non-Empty Details */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5 sm:gap-6 min-w-0 flex-1">
+              {/* Prominent Large Customer Photo */}
+              <div className="relative shrink-0">
+                <div className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-2xl border-2 border-emerald-500/40 dark:border-emerald-500/30 shadow-md overflow-hidden bg-slate-100 dark:bg-slate-800 flex items-center justify-center select-none ring-4 ring-emerald-50 dark:ring-emerald-950/40">
+                  {activeCustomer.photo ? (
+                    <img
+                      src={activeCustomer.photo}
+                      alt={activeCustomer.name}
+                      className="w-full h-full object-cover"
+                      loading="eager"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-emerald-50 to-teal-100/70 dark:from-slate-800 dark:to-emerald-950/50 text-emerald-800 dark:text-emerald-200">
+                      <span className="font-mono-numbers text-3xl sm:text-4xl font-extrabold tracking-tight">
+                        {getCustomerInitials(activeCustomer.name)}
+                      </span>
+                      <span className="text-[10px] font-semibold text-emerald-700/80 dark:text-emerald-300/80 uppercase tracking-wider mt-1">
+                        No Photo
+                      </span>
+                    </div>
+                  )}
+                </div>
+                {activeCustomer.active && (
+                  <span
+                    className="absolute -bottom-1 -right-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-600 text-white shadow-xs border-2 border-white dark:border-slate-900"
+                    title="Active Wholesale Customer"
+                  >
+                    Active
+                  </span>
+                )}
+              </div>
+
+              {/* Customer Details Content */}
+              <div className="min-w-0 space-y-2.5 flex-1">
+                <div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h3 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight leading-tight">
+                      {activeCustomer.name}
+                    </h3>
+                    <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                      Wholesale Customer
+                    </span>
+                  </div>
+
+                  {/* Description / Notes (only if non-empty) */}
+                  {(activeCustomer.notes?.trim() || activeCustomer.description?.trim()) && (
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 italic">
+                      "{activeCustomer.notes?.trim() || activeCustomer.description?.trim()}"
+                    </p>
+                  )}
+
+                  {/* Contact Person (only if non-empty) */}
+                  {activeCustomer.contactPerson && activeCustomer.contactPerson.trim() && (
+                    <p className="text-xs text-slate-600 dark:text-slate-300 mt-0.5 font-medium">
+                      <span className="text-slate-400">Contact:</span> {activeCustomer.contactPerson.trim()}
+                    </p>
+                  )}
+                </div>
+
+                {/* Details Badges / Info Grid (Only non-empty fields displayed) */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-2 text-xs text-slate-600 dark:text-slate-300">
+                  {/* Phone / Mobile (only if non-empty) */}
+                  {activeCustomer.mobile && activeCustomer.mobile.trim() ? (
+                    <div className="flex items-center gap-2.5">
+                      <span className="flex items-center justify-center w-7 h-7 rounded-lg bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 shrink-0">
+                        <Phone className="h-4 w-4" />
+                      </span>
+                      <div>
+                        <span className="text-[10px] uppercase font-bold text-slate-400 block leading-3">Phone / Mobile</span>
+                        <span className="font-semibold text-slate-900 dark:text-white font-mono-numbers text-xs sm:text-sm">
+                          <a href={`tel:${activeCustomer.mobile.trim()}`} className="hover:underline">
+                            {activeCustomer.mobile.trim()}
+                          </a>
+                        </span>
+                        {activeCustomer.altMobile && activeCustomer.altMobile.trim() && (
+                          <span className="text-slate-400 text-xs font-mono-numbers ml-1">
+                            / {activeCustomer.altMobile.trim()}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  ) : activeCustomer.altMobile && activeCustomer.altMobile.trim() ? (
+                    <div className="flex items-center gap-2.5">
+                      <span className="flex items-center justify-center w-7 h-7 rounded-lg bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 shrink-0">
+                        <Phone className="h-4 w-4" />
+                      </span>
+                      <div>
+                        <span className="text-[10px] uppercase font-bold text-slate-400 block leading-3">Alternate Mobile</span>
+                        <span className="font-semibold text-slate-900 dark:text-white font-mono-numbers text-xs sm:text-sm">
+                          <a href={`tel:${activeCustomer.altMobile.trim()}`} className="hover:underline">
+                            {activeCustomer.altMobile.trim()}
+                          </a>
+                        </span>
+                      </div>
+                    </div>
+                  ) : null}
+
+                  {/* Address & City (only if non-empty) */}
+                  {Boolean(activeCustomer.address?.trim() || activeCustomer.city?.trim() || activeCustomer.state?.trim()) && (
+                    <div className="flex items-center gap-2.5">
+                      <span className="flex items-center justify-center w-7 h-7 rounded-lg bg-blue-50 dark:bg-blue-950/50 text-blue-600 shrink-0">
+                        <MapPin className="h-4 w-4" />
+                      </span>
+                      <div className="min-w-0">
+                        <span className="text-[10px] uppercase font-bold text-slate-400 block leading-3">Address & City</span>
+                        <span className="font-semibold text-slate-900 dark:text-white truncate block text-xs sm:text-sm">
+                          {[activeCustomer.address?.trim(), activeCustomer.city?.trim(), activeCustomer.state?.trim()].filter(Boolean).join(', ')}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Aadhaar Number (only if non-empty, NO GSTIN) */}
+                  {activeCustomer.aadhaarNo && activeCustomer.aadhaarNo.trim() && (
+                    <div className="flex items-center gap-2.5">
+                      <span className="flex items-center justify-center w-7 h-7 rounded-lg bg-purple-50 dark:bg-purple-950/50 text-purple-600 shrink-0">
+                        <CreditCard className="h-4 w-4" />
+                      </span>
+                      <div>
+                        <span className="text-[10px] uppercase font-bold text-slate-400 block leading-3">
+                          Aadhaar Number
+                        </span>
+                        <span className="font-semibold text-slate-800 dark:text-slate-200 font-mono-numbers text-xs">
+                          {activeCustomer.aadhaarNo.trim()}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Opening Crates (only if non-empty and non-zero) */}
+                  {Boolean(activeCustomer.openingCrateBalance) && (
+                    <div className="flex items-center gap-2.5">
+                      <span className="flex items-center justify-center w-7 h-7 rounded-lg bg-sky-50 dark:bg-sky-950/50 text-sky-600 shrink-0">
+                        <Box className="h-4 w-4" />
+                      </span>
+                      <div>
+                        <span className="text-[10px] uppercase font-bold text-slate-400 block leading-3">Opening Crate Balance</span>
+                        <span className="font-semibold text-slate-800 dark:text-slate-200 font-mono-numbers text-xs">
+                          {activeCustomer.openingCrateBalance} Crates
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Prominent Current Balance in Top-Right Corner */}
+            <div className="w-full lg:w-72 shrink-0 flex flex-col justify-between bg-slate-50 dark:bg-slate-800/60 p-4 sm:p-5 rounded-xl border border-slate-200 dark:border-slate-700/60 shadow-2xs">
+              <div>
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                    Current Balance
+                  </span>
+                  <span
+                    className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                      ledger.closingBalance > 0
+                        ? 'bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300'
+                        : ledger.closingBalance < 0
+                        ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300'
+                        : 'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-300'
+                    }`}
+                  >
+                    {ledger.closingBalance > 0 ? 'Dr · Due' : ledger.closingBalance < 0 ? 'Cr · Advance' : 'Settled'}
+                  </span>
+                </div>
+
+                <div
+                  className={`mt-1 font-mono-numbers text-2xl sm:text-3xl font-black tracking-tight ${
+                    ledger.closingBalance > 0
+                      ? 'text-rose-600 dark:text-rose-400'
+                      : ledger.closingBalance < 0
+                      ? 'text-emerald-600 dark:text-emerald-400'
+                      : 'text-slate-800 dark:text-slate-200'
+                  }`}
+                >
+                  {formatCurrency(ledger.closingBalance)}
+                </div>
+              </div>
+
+              {/* Summary totals inside balance box */}
+              <div className="mt-3 pt-3 border-t border-slate-200 dark:border-slate-700 text-[11px] flex items-center justify-between gap-4 text-slate-500 font-mono-numbers">
+                <div>
+                  <span className="block text-[9px] uppercase tracking-wider text-slate-400">Total Debit</span>
+                  <span className="font-bold text-rose-600 dark:text-rose-400">{formatCurrency(ledger.totalDebit)}</span>
+                </div>
+                <div className="text-right">
+                  <span className="block text-[9px] uppercase tracking-wider text-slate-400">Total Credit</span>
+                  <span className="font-bold text-emerald-600 dark:text-emerald-400">{formatCurrency(ledger.totalCredit)}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-800 p-8 sm:p-12 text-center bg-white dark:bg-slate-900 shadow-2xs no-print">
+          <div className="w-14 h-14 rounded-2xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 mx-auto flex items-center justify-center mb-3">
+            <User className="h-7 w-7" />
+          </div>
+          <h3 className="text-base font-bold text-slate-900 dark:text-white">
+            Please Select a Customer
+          </h3>
+          <p className="text-xs text-slate-500 max-w-md mx-auto mt-1 mb-4">
+            Type or search customer name, mobile, city, or Aadhaar number above to view their customer profile, balance, and complete transaction ledger.
+          </p>
+          {customers.length > 0 && (
+            <div className="flex flex-wrap justify-center gap-2">
+              {customers.slice(0, 6).map((c) => (
+                <button
+                  key={c.id}
+                  type="button"
+                  onClick={() => setSelectedCustomerId(c.id)}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors cursor-pointer"
+                >
+                  <CustomerAvatar photo={c.photo} name={c.name} size="xs" />
+                  <span>{c.name}</span>
+                </button>
+              ))}
+            </div>
           )}
         </div>
-      </div>
+      )}
 
       {/* Ledger Table Container (Used for on-screen viewing, PDF generation, and printing) */}
       <div
@@ -385,7 +601,9 @@ export const CustomerLedgerView: React.FC<CustomerLedgerViewProps> = ({
               {ledger.entries.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="px-5 py-8 text-center text-xs text-slate-500">
-                    No transactions found for this customer.
+                    {activeCustomer
+                      ? 'No transactions found for this customer.'
+                      : 'Please search and select a customer above to view their transaction ledger.'}
                   </td>
                 </tr>
               ) : (

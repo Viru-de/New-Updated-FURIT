@@ -73,11 +73,12 @@ export interface Fruit {
 export interface Customer {
   id: string;
   name: string;
+  contactPerson?: string;
   mobile: string;
   altMobile?: string;
   address?: string;
   aadhaarNo?: string;
-  gstin?: string;
+  gstin?: string; // Preserved legacy database field (hidden from forms & profiles)
   city?: string;
   state?: string;
   openingBalance: number;
@@ -85,6 +86,7 @@ export interface Customer {
   openingCrateBalance: number;
   crateTypeId?: string;
   notes?: string;
+  description?: string;
   photo?: string; // Optional uploaded customer photo (data URI or asset path)
   active: boolean;
   createdAt: string;

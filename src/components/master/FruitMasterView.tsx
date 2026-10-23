@@ -31,7 +31,7 @@ export const FruitMasterView: React.FC = () => {
   // Edit modal state
   const [editName, setEditName] = useState('');
   const [editUnit, setEditUnit] = useState('Crate');
-  const [editCrateType, setEditCrateType] = useState('20kg');
+  const [editCrateType, setEditCrateType] = useState('');
   const [editPrice, setEditPrice] = useState<number | ''>(1);
   const [editFruitIcon, setEditFruitIcon] = useState<string | undefined>(undefined);
 
@@ -52,30 +52,14 @@ export const FruitMasterView: React.FC = () => {
     setEditFruitIcon(f.fruitIcon);
   };
 
-  const handleAddNewCrateType = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newCrateSizeName.trim()) return;
-    const weight = Number(newCrateSizeWeight) || 10;
-    const newCt: CrateType = {
-      id: `ct-${Date.now()}`,
-      name: newCrateSizeName.trim(),
-      defaultWeightKg: weight,
-      description: `${weight} Kg crate size`,
-    };
-    db.saveCrateType(newCt);
-    const updatedCrates = db.getCrateTypes();
-    setCrateTypes(updatedCrates);
-    setEditCrateTypeId(newCt.id);
-    setIsAddingNewCrateSize(false);
-    setNewCrateSizeName('');
-  };
+
 
   const handleSaveEdit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingFruit || !editName.trim()) return;
 
     const savedUnit = editUnit.trim() || 'Crate';
-    const savedCrateType = editCrateType.trim();
+    const savedCrateType = editCrateType !== undefined ? editCrateType.trim() : '';
 
     const updated: Fruit = {
       ...editingFruit,
@@ -85,7 +69,7 @@ export const FruitMasterView: React.FC = () => {
       crateType: savedCrateType,
       crateName: savedCrateType,
       crateTypeId: savedCrateType ? (editingFruit.crateTypeId || 'ct_20') : undefined,
-      crateWeightKg: savedCrateType ? 20 : 0,
+      crateWeightKg: 0,
       defaultRate: editPrice !== '' ? Number(editPrice) : 1,
       fruitIcon: editFruitIcon,
     };

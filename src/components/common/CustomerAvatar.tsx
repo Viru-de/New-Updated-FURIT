@@ -4,7 +4,7 @@ import { User } from 'lucide-react';
 interface CustomerAvatarProps {
   photo?: string;
   name: string;
-  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl';
   className?: string;
 }
 
@@ -40,6 +40,8 @@ export const CustomerAvatar: React.FC<CustomerAvatarProps> = ({
     md: 'w-10 h-10 text-sm font-bold',
     lg: 'w-12 h-12 text-base font-bold',
     xl: 'w-16 h-16 text-lg font-bold',
+    '2xl': 'w-24 h-24 sm:w-28 sm:h-28 text-2xl sm:text-3xl font-black',
+    '3xl': 'w-28 h-28 sm:w-32 sm:h-32 text-3xl sm:text-4xl font-black',
   }[size];
 
   const iconSizes = {
@@ -48,6 +50,8 @@ export const CustomerAvatar: React.FC<CustomerAvatarProps> = ({
     md: 'h-5 w-5',
     lg: 'h-6 w-6',
     xl: 'h-8 w-8',
+    '2xl': 'h-12 w-12',
+    '3xl': 'h-16 w-16',
   }[size];
 
   const hasPhoto = Boolean(

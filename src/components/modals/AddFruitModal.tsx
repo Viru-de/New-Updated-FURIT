@@ -17,7 +17,7 @@ export const AddFruitModal: React.FC<AddFruitModalProps> = ({
 }) => {
   const [name, setName] = useState('');
   const [unit, setUnit] = useState('Crate');
-  const [crateType, setCrateType] = useState('20kg');
+  const [crateType, setCrateType] = useState('');
   // Default Price/Rate is 1 for new items
   const [price, setPrice] = useState<number | ''>(1);
   const [fruitIcon, setFruitIcon] = useState<string | undefined>(undefined);
@@ -53,7 +53,7 @@ export const AddFruitModal: React.FC<AddFruitModalProps> = ({
     // Reset form for next use
     setName('');
     setUnit('Crate');
-    setCrateType('20kg');
+    setCrateType('');
     setPrice(1);
     setFruitIcon(undefined);
   };

@@ -157,7 +157,7 @@ export const AddCustomerModal: React.FC<AddCustomerModalProps> = ({
 
           <div>
             <label className="mb-1 block text-xs font-semibold text-slate-700 dark:text-slate-300">
-              Aadhaar Card No.
+              Aadhaar Number
             </label>
             <input
               type="text"

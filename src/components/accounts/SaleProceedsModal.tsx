@@ -106,10 +106,10 @@ export const SaleProceedsModal: React.FC<SaleProceedsModalProps> = ({
 
   const currentFruit = fruits.find((f) => f.id === selectedFruitId);
 
-  const handleFruitSelect = (id: string) => {
-    setSelectedFruitId(id);
-    const fruit = fruits.find((f) => f.id === id);
+  const handleFruitSelect = (target: Fruit | string) => {
+    const fruit = typeof target === 'string' ? fruits.find((f) => f.id === target) : target;
     if (fruit) {
+      setSelectedFruitId(fruit.id);
       setCustomFruitName(fruit.name);
       // 1. Auto-fill Unit
       setUnit(fruit.unit || fruit.defaultUnit || 'Crate');
@@ -164,9 +164,7 @@ export const SaleProceedsModal: React.FC<SaleProceedsModalProps> = ({
   const difference = netAmount - numericAmount; // = -totalExpense
 
   const handleFruitCreated = (newFruit: Fruit) => {
-    setSelectedFruitId(newFruit.id);
-    setUnit(newFruit.defaultUnit || 'Crate');
-    setRate(getFruitEffectivePrice(newFruit));
+    handleFruitSelect(newFruit);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -266,12 +264,17 @@ export const SaleProceedsModal: React.FC<SaleProceedsModalProps> = ({
               />
             </div>
 
-            {/* Product Section */}
+            {/* Product Section: Table Format */}
             <div className="rounded-lg border border-slate-200 bg-slate-50/60 p-4 dark:border-slate-800 dark:bg-slate-800/30">
               <div className="mb-3 flex items-center justify-between">
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-                  Fruit / Consignment Product
-                </span>
+                <div>
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                    Sale Product / Consignment
+                  </span>
+                  <p className="text-[11px] text-slate-500">
+                    Exact column layout: No., Item Name, Qty, Unit, Weight, Crate Type, Rate, Amount
+                  </p>
+                </div>
                 <button
                   type="button"
                   onClick={() => setIsAddFruitOpen(true)}
@@ -281,143 +284,161 @@ export const SaleProceedsModal: React.FC<SaleProceedsModalProps> = ({
                 </button>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-12 gap-3">
-                <div className="sm:col-span-4">
-                  <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-400">
-                    Product *
-                  </label>
-                  <FruitAutocomplete
-                    valueFruitId={selectedFruitId}
-                    valueFruitName={currentFruit ? currentFruit.name : customFruitName}
-                    onChange={(f, name) => {
-                      if (f) {
-                        handleFruitSelect(f.id);
-                        setCustomFruitName(f.name);
-                      } else {
-                        setSelectedFruitId('');
-                        setCustomFruitName(name || '');
-                      }
-                    }}
-                    placeholder="Search fruit / item name..."
-                  />
-                </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse text-xs">
+                  <thead>
+                    <tr className="border-b border-slate-200 bg-slate-100/60 text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:border-slate-800 dark:bg-slate-800/60 dark:text-slate-400">
+                      <th className="py-2.5 px-2 text-center w-10">No.</th>
+                      <th className="py-2.5 px-2 min-w-[180px]">Item Name *</th>
+                      <th className="py-2.5 px-2 w-20 text-right">Qty *</th>
+                      <th className="py-2.5 px-2 w-24 text-center">Unit</th>
+                      <th className="py-2.5 px-2 w-24 text-right">Weight</th>
+                      <th className="py-2.5 px-2 w-28 text-center">Crate Type</th>
+                      <th className="py-2.5 px-2 w-24 text-right">Rate (₹) *</th>
+                      <th className="py-2.5 px-2 w-28 text-right">Amount (₹)</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800 bg-white dark:bg-slate-900">
+                    <tr>
+                      {/* 1. No. */}
+                      <td className="py-2 px-2 text-center font-mono text-slate-500 font-bold">1</td>
 
-                <div className="sm:col-span-2">
-                  <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-400">
-                    Quantity *
-                  </label>
-                  <QuantityInput
-                    required
-                    min={0}
-                    step="any"
-                    value={quantity}
-                    onChange={(val) => setQuantity(val)}
-                    className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-mono-numbers text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-                  />
-                </div>
+                      {/* 2. Item Name */}
+                      <td className="py-2 px-2 min-w-[180px]">
+                        <FruitAutocomplete
+                          valueFruitId={selectedFruitId}
+                          valueFruitName={currentFruit ? currentFruit.name : customFruitName}
+                          onChange={(f, name) => {
+                            if (f) {
+                              handleFruitSelect(f);
+                            } else {
+                              setSelectedFruitId('');
+                              setCustomFruitName(name || '');
+                            }
+                          }}
+                          placeholder="Search fruit / item name..."
+                        />
+                      </td>
 
-                <div className="sm:col-span-2">
-                  <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-400">
-                    Unit
-                  </label>
-                  <select
-                    value={unit}
-                    onChange={(e) => setUnit(e.target.value)}
-                    className="w-full rounded-lg border border-slate-300 bg-white px-2 py-2 text-sm text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-                  >
-                    {units.map((u) => (
-                      <option key={u.id} value={u.symbol}>
-                        {u.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                      {/* 3. Qty */}
+                      <td className="py-2 px-2 text-right">
+                        <QuantityInput
+                          required
+                          min={0}
+                          step="any"
+                          value={quantity === 0 ? '' : quantity}
+                          onChange={(val) => {
+                            setQuantity(val);
+                            const q = val === '' ? 0 : Number(val);
+                            const r = Number(rate) || 0;
+                            setAmount(q * r);
+                          }}
+                          className="w-full rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-xs text-right font-mono font-bold outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800"
+                        />
+                      </td>
 
-                {unit === 'Crate' ? (
-                  <>
-                    <div className="sm:col-span-2">
-                      <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-400">
-                        Crate Type
-                      </label>
-                      <select
-                        value={crateTypeId}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          setCrateTypeId(val);
-                          const ct = crateTypes.find((c) => c.id === val);
-                          setCrateName(ct ? ct.name.replace(/\s*crate$/i, '').trim() : '20kg');
-                        }}
-                        className="w-full rounded-lg border border-sky-300 bg-sky-50/60 px-2 py-2 text-xs font-bold text-sky-800 outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-sky-300"
-                        title="Crate Name is only a label for identification & balance tracking"
-                      >
-                        {crateTypes.map((ct) => (
-                          <option key={ct.id} value={ct.id}>
-                            {ct.name.replace(/\s*crate$/i, '').trim() || ct.name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+                      {/* 4. Unit (free-text input, not a dropdown) */}
+                      <td className="py-2 px-2 text-center">
+                        <input
+                          type="text"
+                          list="sp-unit-options"
+                          placeholder="Unit"
+                          value={unit}
+                          onChange={(e) => setUnit(e.target.value)}
+                          className="w-full rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-xs font-semibold text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white text-center"
+                        />
+                        <datalist id="sp-unit-options">
+                          <option value="Crate" />
+                          <option value="Peti" />
+                          <option value="Box" />
+                          <option value="KG" />
+                          <option value="Bag" />
+                          <option value="Piece" />
+                          <option value="Nag" />
+                        </datalist>
+                      </td>
 
-                    <div className="sm:col-span-2">
-                      <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-400">
-                        Rate (₹) *
-                      </label>
-                      <QuantityInput
-                        min={0}
-                        step="any"
-                        placeholder="0.00"
-                        value={rate}
-                        onChange={(val) => setRate(val)}
-                        className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-mono-numbers text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-                      />
-                    </div>
-                  </>
-                ) : (
-                  <div className="sm:col-span-4">
-                    <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-400">
-                      Rate (₹) *
-                    </label>
-                    <QuantityInput
-                      min={0}
-                      step="any"
-                      placeholder="0.00"
-                      value={rate}
-                      onChange={(val) => setRate(val)}
-                      className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-mono-numbers text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-                    />
-                  </div>
-                )}
+                      {/* 5. Weight (default 0) */}
+                      <td className="py-2 px-2 text-right">
+                        <QuantityInput
+                          min={0}
+                          step="any"
+                          placeholder="0"
+                          value={weight === 0 ? '0' : (weight || '0')}
+                          onChange={(val) => setWeight(val)}
+                          className="w-full rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-xs text-right font-mono outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800"
+                        />
+                      </td>
+
+                      {/* 6. Crate Type (free-text input; e.g. 20kg or 10kg, or blank) */}
+                      <td className="py-2 px-2 text-center">
+                        <input
+                          type="text"
+                          list="sp-crate-types"
+                          placeholder="e.g. 20kg"
+                          value={crateName}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setCrateName(val);
+                            const ct = crateTypes.find((c) => c.name.toLowerCase().includes(val.toLowerCase()));
+                            if (ct) setCrateTypeId(ct.id);
+                          }}
+                          className="w-full rounded-lg border border-sky-300 bg-sky-50/60 dark:bg-slate-800 px-2 py-1.5 text-xs font-bold text-sky-800 dark:text-sky-300 outline-none focus:border-sky-500 dark:border-slate-700 text-center"
+                          title="Crate Name is only a label for identification & balance tracking"
+                        />
+                        <datalist id="sp-crate-types">
+                          <option value="20kg" />
+                          <option value="10kg" />
+                          <option value="15kg" />
+                          <option value="24kg" />
+                        </datalist>
+                      </td>
+
+                      {/* 7. Rate */}
+                      <td className="py-2 px-2 text-right">
+                        <QuantityInput
+                          min={0}
+                          step="any"
+                          placeholder="0.00"
+                          value={rate === 0 ? '' : rate}
+                          onChange={(val) => {
+                            setRate(val);
+                            const q = Number(quantity) || 0;
+                            const r = val === '' ? 0 : Number(val);
+                            setAmount(q * r);
+                          }}
+                          className="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-xs font-mono font-bold text-slate-900 text-right outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                        />
+                      </td>
+
+                      {/* 8. Amount (Manually editable) */}
+                      <td className="py-2 px-2 text-right">
+                        <QuantityInput
+                          step="any"
+                          placeholder="0.00"
+                          value={amount}
+                          onChange={(val) => setAmount(val)}
+                          className="w-full rounded-lg border-2 border-emerald-500 bg-white px-2 py-1.5 text-right font-mono font-bold text-xs text-slate-900 outline-none dark:bg-slate-900 dark:text-white"
+                        />
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
 
-              {/* Amount - Manual editable requirement! */}
-              <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50/50 p-3 dark:border-amber-900/40 dark:bg-amber-950/20">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                  <div>
-                    <label className="block text-xs font-bold text-slate-800 dark:text-slate-200">
-                      Amount (₹) — Manually Editable
-                    </label>
-                    <span className="text-[11px] text-slate-500">
-                      Quantity {quantity || 0} × Rate ₹{rate || 0} = {formatCurrency((Number(quantity) || 0) * (Number(rate) || 0))} (Crate type {crateName} is label only; never multiplied)
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={calculateAutoAmount}
-                      title="Set to Qty × Rate"
-                      className="flex items-center gap-1 rounded border border-slate-300 bg-white px-2 py-1 text-xs text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
-                    >
-                      <Calculator className="h-3 w-3" /> Auto (Qty × Rate)
-                    </button>
-                    <QuantityInput
-                      step="any"
-                      placeholder="0.00"
-                      value={amount}
-                      onChange={(val) => setAmount(val)}
-                      className="w-36 rounded-lg border-2 border-emerald-500 bg-white px-3 py-1.5 text-right font-mono-numbers text-base font-bold text-slate-900 outline-none dark:bg-slate-900 dark:text-white"
-                    />
-                  </div>
-                </div>
+              {/* Amount note & auto button */}
+              <div className="mt-2 flex items-center justify-between text-[11px] text-slate-500">
+                <span>
+                  Quantity {quantity || 0} × Rate ₹{rate || 0} = {formatCurrency((Number(quantity) || 0) * (Number(rate) || 0))} (Crate type {crateName ? `"${crateName}"` : 'blank'} is label only; never multiplied)
+                </span>
+                <button
+                  type="button"
+                  onClick={calculateAutoAmount}
+                  title="Recalculate Qty × Rate"
+                  className="flex items-center gap-1 rounded border border-slate-300 bg-white px-2 py-0.5 text-[11px] text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 cursor-pointer"
+                >
+                  <Calculator className="h-3 w-3" /> Auto (Qty × Rate)
+                </button>
               </div>
             </div>
 
