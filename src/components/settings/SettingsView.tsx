@@ -5,6 +5,7 @@ import { CompanyBillProfilesView } from '../billing/CompanyBillProfilesView';
 import { ImageUploader } from '../common/ImageUploader';
 import { ExcelActionBar } from '../common/ExcelActionBar';
 import { exportAllErpDataZip, exportUnitsAndCrates } from '../../utils/excelEngine';
+import { QuantityInput } from '../common/QuantityInput';
 import {
   Settings,
   Building2,
@@ -320,10 +321,11 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ initialTab = 'genera
             <label className="mb-1 block text-xs font-semibold text-slate-700 dark:text-slate-300">
               Default Crate Weight (KG)
             </label>
-            <input
-              type="number"
+            <QuantityInput
+              step="any"
+              min={0}
               value={settings.defaultCrateWeightKg}
-              onChange={(e) => setSettings({ ...settings, defaultCrateWeightKg: Number(e.target.value) })}
+              onChange={(val) => setSettings({ ...settings, defaultCrateWeightKg: val === '' ? 0 : Number(val) })}
               className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
             />
           </div>
@@ -433,14 +435,13 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ initialTab = 'genera
             </div>
             <div>
               <label className="mb-1 block text-xs font-semibold text-slate-700 dark:text-slate-300">Default Weight (KG)</label>
-              <input
-                type="number"
+              <QuantityInput
                 required
-                min="0.1"
-                step="0.5"
+                min={0.1}
+                step={0.5}
                 placeholder="20"
                 value={newCrateWeight}
-                onChange={(e) => setNewCrateWeight(e.target.value ? Number(e.target.value) : '')}
+                onChange={(val) => setNewCrateWeight(val)}
                 className="w-full rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-mono-numbers text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
               />
             </div>

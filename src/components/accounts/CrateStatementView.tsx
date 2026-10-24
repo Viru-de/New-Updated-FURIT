@@ -75,7 +75,7 @@ export const CrateStatementView: React.FC<CrateStatementViewProps> = ({
   };
 
   const handlePrint = () => {
-    triggerPrint();
+    triggerPrint('a4', 'crate-statement-print-area');
   };
 
   const handleExportCsv = () => {
@@ -224,7 +224,7 @@ export const CrateStatementView: React.FC<CrateStatementViewProps> = ({
             <CustomerAutocomplete
               valueCustomerId={selectedCustomerId}
               onChange={(c) => {
-                if (c) setSelectedCustomerId(c.id);
+                setSelectedCustomerId(c ? c.id : '');
               }}
               placeholder="Search customer name, mobile or city..."
             />
@@ -342,7 +342,7 @@ export const CrateStatementView: React.FC<CrateStatementViewProps> = ({
       {/* Crate Statement Table */}
       <div
         id="crate-statement-print-area"
-        className="rounded-xl border border-slate-200 bg-white shadow-2xs dark:border-slate-800 dark:bg-slate-900 overflow-hidden print-bill-canvas"
+        className="rounded-xl border border-slate-200 bg-white shadow-2xs dark:border-slate-800 dark:bg-slate-900 overflow-hidden erp-print-area print-bill-canvas"
       >
         {/* Printable Traditional Mandi Statement Header */}
         <div className="hidden print:block p-4 border-b border-black text-center mb-1">

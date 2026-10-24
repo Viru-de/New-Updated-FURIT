@@ -30,22 +30,80 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
   const q = query.trim().toLowerCase();
 
   const matchedCustomers = q
-    ? customers.filter((c) => c.name.toLowerCase().includes(q) || c.mobile?.includes(q) || c.city?.toLowerCase().includes(q)).slice(0, 4)
+    ? customers
+        .filter((c) => c.name.toLowerCase().includes(q) || c.mobile?.includes(q) || c.city?.toLowerCase().includes(q))
+        .sort((a, b) => {
+          const aStarts = a.name.toLowerCase().startsWith(q);
+          const bStarts = b.name.toLowerCase().startsWith(q);
+          if (aStarts && !bStarts) return -1;
+          if (!aStarts && bStarts) return 1;
+          const aWord = a.name.toLowerCase().includes(' ' + q);
+          const bWord = b.name.toLowerCase().includes(' ' + q);
+          if (aWord && !bWord) return -1;
+          if (!aWord && bWord) return 1;
+          return a.name.localeCompare(b.name);
+        })
+        .slice(0, 5)
     : [];
   const matchedFruits = q
-    ? fruits.filter((f) => f.name.toLowerCase().includes(q) || (f.category ? f.category.toLowerCase().includes(q) : false)).slice(0, 4)
+    ? fruits
+        .filter((f) => f.name.toLowerCase().includes(q) || (f.category ? f.category.toLowerCase().includes(q) : false))
+        .sort((a, b) => {
+          const aStarts = a.name.toLowerCase().startsWith(q);
+          const bStarts = b.name.toLowerCase().startsWith(q);
+          if (aStarts && !bStarts) return -1;
+          if (!aStarts && bStarts) return 1;
+          return a.name.localeCompare(b.name);
+        })
+        .slice(0, 5)
     : [];
   const matchedProceeds = q
-    ? saleProceeds.filter((s) => s.proceedsNo.toLowerCase().includes(q) || s.billNumber?.toLowerCase().includes(q)).slice(0, 4)
+    ? saleProceeds
+        .filter((s) => s.proceedsNo.toLowerCase().includes(q) || s.billNumber?.toLowerCase().includes(q) || s.vendorName?.toLowerCase().includes(q))
+        .sort((a, b) => {
+          const aStarts = a.proceedsNo.toLowerCase().startsWith(q) || (a.vendorName && a.vendorName.toLowerCase().startsWith(q));
+          const bStarts = b.proceedsNo.toLowerCase().startsWith(q) || (b.vendorName && b.vendorName.toLowerCase().startsWith(q));
+          if (aStarts && !bStarts) return -1;
+          if (!aStarts && bStarts) return 1;
+          return b.date.localeCompare(a.date);
+        })
+        .slice(0, 5)
     : [];
   const matchedCreditSales = q
-    ? creditSales.filter((cs) => cs.creditSaleNo.toLowerCase().includes(q) || cs.customerName.toLowerCase().includes(q)).slice(0, 4)
+    ? creditSales
+        .filter((cs) => cs.creditSaleNo.toLowerCase().includes(q) || cs.customerName.toLowerCase().includes(q))
+        .sort((a, b) => {
+          const aStarts = a.customerName.toLowerCase().startsWith(q) || a.creditSaleNo.toLowerCase().startsWith(q);
+          const bStarts = b.customerName.toLowerCase().startsWith(q) || b.creditSaleNo.toLowerCase().startsWith(q);
+          if (aStarts && !bStarts) return -1;
+          if (!aStarts && bStarts) return 1;
+          return b.date.localeCompare(a.date);
+        })
+        .slice(0, 5)
     : [];
   const matchedReceipts = q
-    ? receipts.filter((r) => r.receiptNo.toLowerCase().includes(q) || r.customerName.toLowerCase().includes(q)).slice(0, 4)
+    ? receipts
+        .filter((r) => r.receiptNo.toLowerCase().includes(q) || r.customerName.toLowerCase().includes(q))
+        .sort((a, b) => {
+          const aStarts = a.customerName.toLowerCase().startsWith(q) || a.receiptNo.toLowerCase().startsWith(q);
+          const bStarts = b.customerName.toLowerCase().startsWith(q) || b.receiptNo.toLowerCase().startsWith(q);
+          if (aStarts && !bStarts) return -1;
+          if (!aStarts && bStarts) return 1;
+          return b.date.localeCompare(a.date);
+        })
+        .slice(0, 5)
     : [];
   const matchedBills = q
-    ? bills.filter((b) => b.billNo.toLowerCase().includes(q) || b.customerName.toLowerCase().includes(q)).slice(0, 4)
+    ? bills
+        .filter((b) => b.billNo.toLowerCase().includes(q) || b.customerName.toLowerCase().includes(q))
+        .sort((a, b) => {
+          const aStarts = a.customerName.toLowerCase().startsWith(q) || a.billNo.toLowerCase().startsWith(q);
+          const bStarts = b.customerName.toLowerCase().startsWith(q) || b.billNo.toLowerCase().startsWith(q);
+          if (aStarts && !bStarts) return -1;
+          if (!aStarts && bStarts) return 1;
+          return b.date.localeCompare(a.date);
+        })
+        .slice(0, 5)
     : [];
 
   const totalMatches =

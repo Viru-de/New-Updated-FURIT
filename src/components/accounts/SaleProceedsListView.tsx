@@ -9,6 +9,7 @@ import { exportSaleProceeds } from '../../utils/excelEngine';
 import {
   Plus,
   Search,
+  X,
   ChevronDown,
   ChevronUp,
   Edit2,
@@ -67,14 +68,45 @@ export const SaleProceedsListView: React.FC = () => {
     }
   };
 
-  const filteredSales = sales.filter((s) => {
-    const q = searchTerm.toLowerCase();
-    const noMatch = s.proceedsNo.toLowerCase().includes(q);
-    const fruitMatch = s.items?.some((it) => it.fruitName.toLowerCase().includes(q));
-    const billMatch = s.billNumber?.toLowerCase().includes(q);
-    const vendorMatch = s.vendorName?.toLowerCase().includes(q);
-    return noMatch || fruitMatch || billMatch || vendorMatch;
-  });
+  const filteredSales = React.useMemo(() => {
+    if (!searchTerm.trim()) return sales;
+    const q = searchTerm.trim().toLowerCase();
+
+    const matches = sales.filter((s) => {
+      const noMatch = s.proceedsNo.toLowerCase().includes(q);
+      const fruitMatch = s.items?.some((it) => it.fruitName.toLowerCase().includes(q));
+      const billMatch = s.billNumber?.toLowerCase().includes(q);
+      const vendorMatch = s.vendorName?.toLowerCase().includes(q);
+      return noMatch || fruitMatch || billMatch || vendorMatch;
+    });
+
+    return matches.sort((a, b) => {
+      const aVendor = (a.vendorName || '').toLowerCase();
+      const bVendor = (b.vendorName || '').toLowerCase();
+      const aNo = a.proceedsNo.toLowerCase();
+      const bNo = b.proceedsNo.toLowerCase();
+
+      // Check vendor name prefix
+      const aVendorStarts = aVendor.startsWith(q);
+      const bVendorStarts = bVendor.startsWith(q);
+      if (aVendorStarts && !bVendorStarts) return -1;
+      if (!aVendorStarts && bVendorStarts) return 1;
+
+      // Check proceeds no prefix
+      const aNoStarts = aNo.startsWith(q);
+      const bNoStarts = bNo.startsWith(q);
+      if (aNoStarts && !bNoStarts) return -1;
+      if (!aNoStarts && bNoStarts) return 1;
+
+      // Check fruit name prefix
+      const aFruitStarts = a.items?.some((it) => it.fruitName.toLowerCase().startsWith(q));
+      const bFruitStarts = b.items?.some((it) => it.fruitName.toLowerCase().startsWith(q));
+      if (aFruitStarts && !bFruitStarts) return -1;
+      if (!aFruitStarts && bFruitStarts) return 1;
+
+      return b.date.localeCompare(a.date);
+    });
+  }, [sales, searchTerm]);
 
   return (
     <div className="space-y-6">
@@ -124,10 +156,13 @@ export const SaleProceedsListView: React.FC = () => {
         />
         {searchTerm && (
           <button
+            type="button"
             onClick={() => setSearchTerm('')}
-            className="neu-btn px-2 py-0.5 text-xs text-slate-600 hover:text-slate-900"
+            className="neu-btn flex items-center gap-1 px-2 py-0.5 text-xs text-slate-600 hover:text-slate-900"
+            title="Clear search"
           >
-            Clear
+            <X className="h-3 w-3" />
+            <span>Clear</span>
           </button>
         )}
       </div>

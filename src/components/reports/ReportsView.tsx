@@ -391,7 +391,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
       </div>
 
       {/* Report Printable Area */}
-      <div id="report-print-area" className="print-bill-canvas space-y-4">
+      <div id="report-print-area" className="erp-print-area print-bill-canvas space-y-4">
         {/* Printable Traditional Mandi Report Header */}
         <div className="hidden print:block p-4 border-b border-black text-center mb-1">
           {currentProfile.shortCode && (

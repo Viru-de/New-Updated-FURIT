@@ -125,14 +125,40 @@ export async function triggerPrint(
   applyPrintPageSize(chosenSize, targetElementId);
   saveLastSelectedPaperSize(chosenSize);
 
-  if (targetElementId && typeof document !== 'undefined') {
-    document.body.setAttribute('data-print-target', targetElementId);
-    const cleanup = () => {
-      document.body.removeAttribute('data-print-target');
-      window.removeEventListener('afterprint', cleanup);
-    };
-    window.addEventListener('afterprint', cleanup);
+  const root = typeof document !== 'undefined' ? document.documentElement : null;
+  const body = typeof document !== 'undefined' ? document.body : null;
+  const isDark = Boolean(root?.classList.contains('dark') || body?.classList.contains('dark'));
+
+  if (targetElementId && body) {
+    body.setAttribute('data-print-target', targetElementId);
   }
+
+  // Temporarily switch DOM to light mode during browser print/preview
+  // so all computed styles, borders, text, and canvas elements render with pure white background and black text
+  if (isDark && root && body) {
+    root.classList.remove('dark');
+    body.classList.remove('dark');
+    root.setAttribute('data-theme', 'light');
+    root.style.colorScheme = 'light';
+  }
+
+  let cleanedUp = false;
+  const cleanup = () => {
+    if (cleanedUp) return;
+    cleanedUp = true;
+    if (body) {
+      body.removeAttribute('data-print-target');
+    }
+    if (isDark && root && body) {
+      root.classList.add('dark');
+      body.classList.add('dark');
+      root.setAttribute('data-theme', 'dark');
+      root.style.colorScheme = 'dark';
+    }
+    window.removeEventListener('afterprint', cleanup);
+  };
+
+  window.addEventListener('afterprint', cleanup);
 
   if (typeof document !== 'undefined' && document.fonts) {
     try {
@@ -141,7 +167,11 @@ export async function triggerPrint(
       // Proceed even if fonts.ready fails
     }
   }
+
   window.print();
+
+  // Safety fallback: ensure cleanup runs even if afterprint is cancelled or missed in embedded iframes
+  setTimeout(cleanup, 1500);
 }
 
 export interface ShareOptions {

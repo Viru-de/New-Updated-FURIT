@@ -44,6 +44,7 @@ import {
   FileSpreadsheet,
   AlertTriangle,
   Building2,
+  X,
 } from 'lucide-react';
 
 export interface GroupSaleRow {
@@ -764,17 +765,40 @@ export const GroupSaleView: React.FC<GroupSaleViewProps> = ({
     }
   };
 
-  // Filtered rows for search within loaded sales
+  // Filtered rows for search within loaded sales with prefix ranking
   const filteredRows = useMemo(() => {
     if (!searchFilter.trim()) return rows;
     const q = searchFilter.trim().toLowerCase();
-    return rows.filter(
+    const matches = rows.filter(
       (r) =>
         r.customerName.toLowerCase().includes(q) ||
         r.creditSaleNo.toLowerCase().includes(q) ||
         r.fruitName.toLowerCase().includes(q) ||
         r.customerId.toLowerCase().includes(q)
     );
+
+    return matches.sort((a, b) => {
+      const aCust = a.customerName.toLowerCase();
+      const bCust = b.customerName.toLowerCase();
+      const aCustStarts = aCust.startsWith(q);
+      const bCustStarts = bCust.startsWith(q);
+      if (aCustStarts && !bCustStarts) return -1;
+      if (!aCustStarts && bCustStarts) return 1;
+
+      const aFruit = a.fruitName.toLowerCase();
+      const bFruit = b.fruitName.toLowerCase();
+      const aFruitStarts = aFruit.startsWith(q);
+      const bFruitStarts = bFruit.startsWith(q);
+      if (aFruitStarts && !bFruitStarts) return -1;
+      if (!aFruitStarts && bFruitStarts) return 1;
+
+      const aCustWord = aCust.includes(' ' + q);
+      const bCustWord = bCust.includes(' ' + q);
+      if (aCustWord && !bCustWord) return -1;
+      if (!aCustWord && bCustWord) return 1;
+
+      return (a.sequenceNumber || 0) - (b.sequenceNumber || 0);
+    });
   }, [rows, searchFilter]);
 
   // Date-Wise Summary Calculations
@@ -1032,10 +1056,13 @@ export const GroupSaleView: React.FC<GroupSaleViewProps> = ({
           />
           {searchFilter && (
             <button
+              type="button"
               onClick={() => setSearchFilter('')}
-              className="rounded px-2 py-0.5 text-[10px] text-slate-600 dark:text-slate-300 hover:text-slate-900 cursor-pointer"
+              className="flex items-center gap-1 rounded bg-slate-100 dark:bg-slate-800 px-2 py-0.5 text-[10px] text-slate-600 dark:text-slate-300 hover:text-slate-900 cursor-pointer"
+              title="Clear search"
             >
-              Clear
+              <X className="h-3 w-3" />
+              <span>Clear</span>
             </button>
           )}
         </div>

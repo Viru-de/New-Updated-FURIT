@@ -59,16 +59,45 @@ export const CustomerDirectoryView: React.FC<CustomerDirectoryViewProps> = ({
 
   const outstandings = getAllCustomerOutstandings();
 
-  const filtered = outstandings.filter((o) => {
-    const q = searchTerm.toLowerCase();
-    return (
-      o.customer.name.toLowerCase().includes(q) ||
-      (o.customer.mobile && o.customer.mobile.includes(q)) ||
-      (o.customer.city && o.customer.city.toLowerCase().includes(q)) ||
-      (o.customer.aadhaarNo && o.customer.aadhaarNo.includes(q)) ||
-      (o.customer.gstin && o.customer.gstin.toLowerCase().includes(q))
-    );
-  });
+  const q = searchTerm.trim().toLowerCase();
+  const cleanQ = q.replace(/\s+/g, '');
+
+  const filtered = React.useMemo(() => {
+    if (!q) return outstandings;
+
+    const scored = outstandings
+      .map((item) => {
+        const c = item.customer;
+        const nameLower = c.name.toLowerCase();
+        const cityLower = c.city ? c.city.toLowerCase() : '';
+        const mobile = c.mobile || '';
+        const altMobile = c.altMobile || '';
+        const aadhaar = c.aadhaarNo ? c.aadhaarNo.replace(/\s+/g, '') : '';
+        const gstin = c.gstin ? c.gstin.toLowerCase() : '';
+
+        if (nameLower === q) return { item, score: 0 };
+        if (nameLower.startsWith(q)) return { item, score: 1 };
+        const words = nameLower.split(/\s+/);
+        if (words.some((w) => w.startsWith(q))) return { item, score: 2 };
+        if (nameLower.includes(q)) return { item, score: 3 };
+        if (mobile.startsWith(q) || altMobile.startsWith(q)) return { item, score: 4 };
+        if (cityLower.startsWith(q)) return { item, score: 5 };
+        if (mobile.includes(q) || altMobile.includes(q)) return { item, score: 6 };
+        if (cityLower.includes(q)) return { item, score: 7 };
+        if (aadhaar.includes(cleanQ)) return { item, score: 8 };
+        if (gstin.includes(q)) return { item, score: 9 };
+
+        return null;
+      })
+      .filter((entry): entry is { item: typeof outstandings[0]; score: number } => entry !== null);
+
+    scored.sort((a, b) => {
+      if (a.score !== b.score) return a.score - b.score;
+      return a.item.customer.name.localeCompare(b.item.customer.name);
+    });
+
+    return scored.map((s) => s.item);
+  }, [outstandings, q, cleanQ]);
 
   const handleEditClick = (c: Customer) => {
     setEditingCustomer(c);
@@ -173,10 +202,12 @@ export const CustomerDirectoryView: React.FC<CustomerDirectoryViewProps> = ({
         />
         {searchTerm && (
           <button
+            type="button"
             onClick={() => setSearchTerm('')}
-            className="text-xs text-slate-400 hover:text-slate-600"
+            className="flex items-center gap-1 text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer p-1"
+            title="Clear search"
           >
-            Clear
+            <X className="h-3.5 w-3.5" />
           </button>
         )}
       </div>

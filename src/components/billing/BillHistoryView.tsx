@@ -75,14 +75,34 @@ export const BillHistoryView: React.FC<BillHistoryViewProps> = ({
     }
   };
 
-  const filteredBills = bills.filter((b) => {
-    const q = searchTerm.toLowerCase();
-    return (
-      b.billNo.toLowerCase().includes(q) ||
-      b.customerName.toLowerCase().includes(q) ||
-      b.companyProfileSnapshot?.name.toLowerCase().includes(q)
-    );
-  });
+  const q = searchTerm.trim().toLowerCase();
+
+  const filteredBills = React.useMemo(() => {
+    if (!q) return bills;
+
+    const scored = bills
+      .map((b) => {
+        const billNoLower = b.billNo.toLowerCase();
+        const custLower = (b.customerName || '').toLowerCase();
+        const profileLower = (b.companyProfileSnapshot?.name || '').toLowerCase();
+        const itemMatch = b.items?.some((it) => it.fruitName.toLowerCase().includes(q));
+
+        if (billNoLower === q || custLower === q) return { bill: b, score: 0 };
+        if (billNoLower.startsWith(q) || custLower.startsWith(q)) return { bill: b, score: 1 };
+        const words = custLower.split(/\s+/);
+        if (words.some((w) => w.startsWith(q))) return { bill: b, score: 2 };
+        if (billNoLower.includes(q) || custLower.includes(q)) return { bill: b, score: 3 };
+        if (profileLower.startsWith(q)) return { bill: b, score: 4 };
+        if (profileLower.includes(q)) return { bill: b, score: 5 };
+        if (itemMatch) return { bill: b, score: 6 };
+
+        return null;
+      })
+      .filter((entry): entry is { bill: typeof bills[0]; score: number } => entry !== null);
+
+    scored.sort((a, b) => a.score - b.score);
+    return scored.map((s) => s.bill);
+  }, [bills, q]);
 
   return (
     <div className="space-y-6">
@@ -122,11 +142,21 @@ export const BillHistoryView: React.FC<BillHistoryViewProps> = ({
         <Search className="h-4 w-4 text-slate-400 mr-2 shrink-0" />
         <input
           type="text"
-          placeholder="Search by Bill No, customer name, company profile..."
+          placeholder="Search by Bill No, customer name, fruit, company profile..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="w-full text-xs text-slate-900 outline-none placeholder:text-slate-400 dark:bg-slate-900 dark:text-white"
         />
+        {searchTerm && (
+          <button
+            type="button"
+            onClick={() => setSearchTerm('')}
+            className="flex items-center gap-1 text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer p-1"
+            title="Clear search"
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
+        )}
       </div>
 
       {/* Bills Table */}

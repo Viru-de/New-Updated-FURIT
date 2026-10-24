@@ -757,12 +757,12 @@ export const CashSaleModal: React.FC<CashSaleModalProps> = ({
                       />
                       <div className="relative w-32">
                         <span className="absolute left-2.5 top-1.5 text-xs text-slate-400">₹</span>
-                        <input
-                          type="number"
-                          min="0"
+                        <QuantityInput
+                          min={0}
                           step="any"
+                          placeholder="0.00"
                           value={exp.amount === 0 ? '' : exp.amount}
-                          onChange={(e) => handleExpenseChange(idx, 'amount', e.target.value)}
+                          onChange={(val) => handleExpenseChange(idx, 'amount', val)}
                           className="w-full rounded-lg border border-slate-300 pl-6 pr-2 py-1.5 text-xs font-mono-numbers text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                         />
                       </div>
@@ -821,13 +821,12 @@ export const CashSaleModal: React.FC<CashSaleModalProps> = ({
                   {isManualAmountOverridden && (
                     <div className="flex items-center gap-2">
                       <span className="font-medium text-slate-600 dark:text-slate-400">Fixed Total: ₹</span>
-                      <input
-                        type="number"
-                        min="0"
+                      <QuantityInput
+                        min={0}
                         step="any"
                         placeholder="Manual Amount"
                         value={manualAmount}
-                        onChange={(e) => setManualAmount(e.target.value ? Number(e.target.value) : '')}
+                        onChange={(val) => setManualAmount(val)}
                         className="w-32 rounded-lg border-2 border-emerald-500 px-2.5 py-1 text-xs font-mono-numbers font-bold text-slate-900 outline-none dark:bg-slate-800 dark:text-white"
                       />
                     </div>

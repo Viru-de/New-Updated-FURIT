@@ -315,7 +315,7 @@ export const CreateBillView: React.FC<CreateBillViewProps> = ({
               <CustomerAutocomplete
                 valueCustomerId={selectedCustomerId}
                 onChange={(c) => {
-                  if (c) setSelectedCustomerId(c.id);
+                  setSelectedCustomerId(c ? c.id : '');
                 }}
                 placeholder="Search customer name, mobile or city..."
               />
@@ -430,13 +430,12 @@ export const CreateBillView: React.FC<CreateBillViewProps> = ({
                   <div className="col-span-4 sm:col-span-4">
                     <div className="relative">
                       <span className="absolute left-2 top-1.5 text-xs text-slate-400">₹</span>
-                      <input
-                        type="number"
-                        min="0"
+                      <QuantityInput
+                        min={0}
                         step="any"
                         placeholder="Rate"
                         value={it.rate === 0 ? '' : it.rate}
-                        onChange={(e) => handleItemChange(idx, 'rate', e.target.value)}
+                        onChange={(val) => handleItemChange(idx, 'rate', val)}
                         className="w-full rounded-lg border border-slate-300 pl-5 pr-2 py-1.5 text-right text-xs font-mono-numbers text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                       />
                     </div>
@@ -494,13 +493,12 @@ export const CreateBillView: React.FC<CreateBillViewProps> = ({
                 />
                 <div className="relative w-36">
                   <span className="absolute left-2.5 top-1.5 text-xs text-slate-400">₹</span>
-                  <input
-                    type="number"
-                    min="0"
+                  <QuantityInput
+                    min={0}
                     step="any"
                     value={exp.amount === 0 ? '' : exp.amount}
                     placeholder="0.00"
-                    onChange={(e) => handleExpenseChange(idx, 'amount', e.target.value)}
+                    onChange={(val) => handleExpenseChange(idx, 'amount', val)}
                     className="w-full rounded-lg border border-slate-300 pl-5 pr-2 py-1.5 text-right font-mono-numbers text-xs text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                   />
                 </div>

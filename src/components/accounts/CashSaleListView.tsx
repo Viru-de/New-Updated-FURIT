@@ -9,6 +9,7 @@ import { exportCashSales } from '../../utils/excelEngine';
 import {
   Plus,
   Search,
+  X,
   Edit2,
   Trash2,
   Banknote,
@@ -71,13 +72,31 @@ export const CashSaleListView: React.FC<CashSaleListViewProps> = ({
     }
   };
 
-  const filteredSales = sales.filter((s) => {
-    const q = searchTerm.toLowerCase();
-    const noMatch = s.cashSaleNo.toLowerCase().includes(q);
-    const custMatch = (s.customerName || '').toLowerCase().includes(q);
-    const fruitMatch = s.items?.some((it) => it.fruitName.toLowerCase().includes(q));
-    return noMatch || custMatch || fruitMatch;
-  });
+  const q = searchTerm.trim().toLowerCase();
+
+  const filteredSales = React.useMemo(() => {
+    if (!q) return sales;
+
+    const scored = sales
+      .map((s) => {
+        const noLower = s.cashSaleNo.toLowerCase();
+        const custLower = (s.customerName || '').toLowerCase();
+        const fruitMatch = s.items?.some((it) => it.fruitName.toLowerCase().includes(q));
+
+        if (noLower === q || custLower === q) return { sale: s, score: 0 };
+        if (noLower.startsWith(q) || custLower.startsWith(q)) return { sale: s, score: 1 };
+        const words = custLower.split(/\s+/);
+        if (words.some((w) => w.startsWith(q))) return { sale: s, score: 2 };
+        if (noLower.includes(q) || custLower.includes(q)) return { sale: s, score: 3 };
+        if (fruitMatch) return { sale: s, score: 4 };
+
+        return null;
+      })
+      .filter((entry): entry is { sale: typeof sales[0]; score: number } => entry !== null);
+
+    scored.sort((a, b) => a.score - b.score);
+    return scored.map((s) => s.sale);
+  }, [sales, q]);
 
   const totalCashRevenue = sales.reduce((sum, s) => sum + (s.finalAmount || 0), 0);
   const totalCratesOut = sales.reduce((sum, s) => sum + (s.crateOut || 0), 0);
@@ -152,10 +171,12 @@ export const CashSaleListView: React.FC<CashSaleListViewProps> = ({
         />
         {searchTerm && (
           <button
+            type="button"
             onClick={() => setSearchTerm('')}
-            className="text-xs text-slate-400 hover:text-slate-600 cursor-pointer"
+            className="flex items-center gap-1 text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer p-1"
+            title="Clear search"
           >
-            Clear
+            <X className="h-3.5 w-3.5" />
           </button>
         )}
       </div>

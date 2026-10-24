@@ -7,6 +7,7 @@ import { DatePickerInput } from '../common/DatePickerInput';
 import { AddFruitModal } from '../modals/AddFruitModal';
 import { FruitAutocomplete } from '../common/FruitAutocomplete';
 import { CustomerAutocomplete } from '../common/CustomerAutocomplete';
+import { VendorAutocomplete } from '../common/VendorAutocomplete';
 import { QuantityInput } from '../common/QuantityInput';
 import { X, Plus, Trash2, Calculator, Info } from 'lucide-react';
 
@@ -533,18 +534,11 @@ export const SaleProceedsModal: React.FC<SaleProceedsModalProps> = ({
                 <label className="mb-1 block text-xs font-semibold text-slate-700 dark:text-slate-300">
                   Wholesale Vendor / Consignor
                 </label>
-                <select
-                  value={vendorId}
-                  onChange={(e) => setVendorId(e.target.value)}
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-                >
-                  <option value="">-- No Vendor Selected --</option>
-                  {vendors.map((v) => (
-                    <option key={v.id} value={v.id}>
-                      {v.name}
-                    </option>
-                  ))}
-                </select>
+                <VendorAutocomplete
+                  valueVendorId={vendorId}
+                  onChange={(v) => setVendorId(v ? v.id : '')}
+                  placeholder="Search vendor / consignor name..."
+                />
               </div>
 
               <div>

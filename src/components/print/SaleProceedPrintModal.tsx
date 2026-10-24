@@ -74,11 +74,11 @@ export const SaleProceedPrintModal: React.FC<SaleProceedPrintModalProps> = ({
   const words = numberToWordsIndian(netTotal);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/70 p-4 backdrop-blur-xs overflow-y-auto">
-      <div className="w-full max-w-3xl rounded-xl border border-slate-200 bg-white shadow-2xl dark:border-slate-800 dark:bg-slate-900 my-6">
-        {/* Modal Controls Bar (Hidden during print) */}
-        <div className="flex flex-wrap items-center justify-between border-b border-slate-200 px-6 py-3 no-print bg-slate-50 dark:border-slate-800 dark:bg-slate-800/60 gap-3">
-          <div className="flex items-center gap-3">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/70 p-2 sm:p-4 md:p-6 backdrop-blur-xs overflow-hidden">
+      <div className="flex flex-col w-full max-w-4xl max-h-[90vh] max-h-[90dvh] rounded-xl sm:rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-800 dark:bg-slate-900 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+        {/* Modal Controls Bar (Always visible at top, hidden during print) */}
+        <div className="shrink-0 flex flex-wrap items-center justify-between border-b border-slate-200 px-4 sm:px-6 py-2.5 sm:py-3 no-print bg-slate-50 dark:border-slate-800 dark:bg-slate-800/80 gap-2 sm:gap-3 z-10">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
             <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
               Sale Proceed Bill Preview
             </span>
@@ -149,8 +149,8 @@ export const SaleProceedPrintModal: React.FC<SaleProceedPrintModalProps> = ({
           </div>
         </div>
 
-        {/* Printable Traditional Bill Canvas */}
-        <div className="p-4 sm:p-6 overflow-x-auto flex justify-center bg-slate-100 dark:bg-slate-950">
+        {/* Printable Traditional Bill Canvas (Scrollable inside popup) */}
+        <div className="flex-1 min-h-0 overflow-y-auto overflow-x-auto p-3 sm:p-6 flex justify-center items-start bg-slate-100 dark:bg-slate-950">
           <div
             id="mandi-print-area"
             className={`bg-white text-slate-900 font-sans leading-tight border border-slate-300 print:border-none shadow-md print-bill-canvas ${

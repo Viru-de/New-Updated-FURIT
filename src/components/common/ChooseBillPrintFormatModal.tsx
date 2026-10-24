@@ -70,7 +70,7 @@ export const ChooseBillPrintFormatModal: React.FC<ChooseBillPrintFormatModalProp
       setIsPrinting(true);
       setErrorMessage(null);
       saveLastSelectedPaperSize(selectedSize);
-      await triggerPrint(selectedSize);
+      await triggerPrint(selectedSize, elementId);
       onClose();
     } catch (err: any) {
       console.error('Print trigger failed:', err);
@@ -110,14 +110,14 @@ export const ChooseBillPrintFormatModal: React.FC<ChooseBillPrintFormatModalProp
   const sizeKeys: BillPaperSize[] = ['compact', 'a4', 'a5', 'b6', 'b7'];
 
   return (
-    <div className="fixed inset-0 z-60 flex items-center justify-center bg-slate-900/70 p-3 sm:p-4 backdrop-blur-xs overflow-y-auto no-print">
+    <div className="fixed inset-0 z-60 flex items-center justify-center bg-slate-900/70 p-2 sm:p-4 backdrop-blur-xs overflow-hidden no-print">
       <div
-        className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-800 dark:bg-slate-900 overflow-hidden animate-in fade-in zoom-in-95 duration-150"
+        className="flex flex-col w-full max-w-lg max-h-[90vh] max-h-[90dvh] rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-800 dark:bg-slate-900 overflow-hidden animate-in fade-in zoom-in-95 duration-150"
         role="dialog"
         aria-labelledby="choose-bill-print-format-title"
       >
         {/* Modal Header */}
-        <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 px-5 py-4 bg-slate-50 dark:bg-slate-850">
+        <div className="shrink-0 flex items-center justify-between border-b border-slate-200 dark:border-slate-800 px-5 py-3.5 sm:py-4 bg-slate-50 dark:bg-slate-850">
           <div className="flex items-center gap-2.5">
             <div className="rounded-lg bg-blue-100 p-2 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300">
               <FileText className="h-5 w-5" />
@@ -146,7 +146,7 @@ export const ChooseBillPrintFormatModal: React.FC<ChooseBillPrintFormatModalProp
         </div>
 
         {/* Modal Body */}
-        <div className="p-5 space-y-4 max-h-[75vh] overflow-y-auto">
+        <div className="flex-1 min-h-0 p-5 space-y-4 overflow-y-auto">
           {/* Format selection options */}
           <div className="space-y-2.5">
             <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
@@ -248,7 +248,7 @@ export const ChooseBillPrintFormatModal: React.FC<ChooseBillPrintFormatModalProp
         </div>
 
         {/* Modal Actions Footer */}
-        <div className="border-t border-slate-200 dark:border-slate-800 px-5 py-4 bg-slate-50 dark:bg-slate-850 flex flex-wrap items-center justify-between gap-3">
+        <div className="shrink-0 border-t border-slate-200 dark:border-slate-800 px-5 py-3.5 sm:py-4 bg-slate-50 dark:bg-slate-850 flex flex-wrap items-center justify-between gap-3">
           <button
             type="button"
             onClick={onClose}

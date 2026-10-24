@@ -14,6 +14,7 @@ import { exportCustomerLedger } from '../../utils/excelEngine';
 import { BillShareButtons } from '../common/BillShareButtons';
 import { triggerPrint } from '../../utils/pdfAndShareEngine';
 import { CompanyContactsHeader } from '../common/CompanyContactsHeader';
+import { QuantityInput } from '../common/QuantityInput';
 
 interface CustomerLedgerViewProps {
   initialCustomerId?: string;
@@ -173,37 +174,37 @@ export const CustomerLedgerView: React.FC<CustomerLedgerViewProps> = ({
           <button
             type="button"
             onClick={() => setIsCreditSaleOpen(true)}
-            className="flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+            className="flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
           >
-            <ShoppingBag className="h-3.5 w-3.5 text-blue-600" /> + Credit Sale
+            <ShoppingBag className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" /> + Credit Sale
           </button>
           <button
             type="button"
             onClick={() => setIsReceiptOpen(true)}
-            className="flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+            className="flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
           >
-            <CreditCard className="h-3.5 w-3.5 text-emerald-600" /> + Receipt
+            <CreditCard className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" /> + Receipt
           </button>
           <button
             type="button"
             disabled={!activeCustomer}
             onClick={() => activeCustomer && exportCustomerLedger(activeCustomer.id)}
-            className={`flex items-center gap-1.5 rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold ${
+            className={`flex items-center gap-1.5 rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold transition-colors ${
               !activeCustomer
-                ? 'opacity-40 cursor-not-allowed bg-slate-100 text-slate-400 dark:bg-slate-800/40 dark:border-slate-800'
-                : 'bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 cursor-pointer shadow-2xs'
+                ? 'opacity-40 cursor-not-allowed bg-slate-100 text-slate-400 dark:bg-slate-800/40 dark:border-slate-800 dark:text-slate-500'
+                : 'bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 cursor-pointer shadow-2xs'
             }`}
           >
-            <Download className="h-3.5 w-3.5 text-emerald-600" /> Export Excel
+            <Download className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" /> Export Excel
           </button>
           <button
             type="button"
             disabled={!activeCustomer}
             onClick={handleExportCsv}
-            className={`flex items-center gap-1.5 rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold ${
+            className={`flex items-center gap-1.5 rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold transition-colors ${
               !activeCustomer
-                ? 'opacity-40 cursor-not-allowed bg-slate-100 text-slate-400 dark:bg-slate-800/40 dark:border-slate-800'
-                : 'bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 cursor-pointer'
+                ? 'opacity-40 cursor-not-allowed bg-slate-100 text-slate-400 dark:bg-slate-800/40 dark:border-slate-800 dark:text-slate-500'
+                : 'bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 cursor-pointer'
             }`}
           >
             <Download className="h-3.5 w-3.5" /> CSV
@@ -236,10 +237,10 @@ export const CustomerLedgerView: React.FC<CustomerLedgerViewProps> = ({
             type="button"
             disabled={!activeCustomer}
             onClick={handlePrint}
-            className={`flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-semibold shadow-xs ${
+            className={`flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-semibold shadow-xs transition-colors ${
               !activeCustomer
                 ? 'opacity-40 cursor-not-allowed bg-slate-300 text-slate-500 dark:bg-slate-800 dark:text-slate-600'
-                : 'bg-slate-900 text-white hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 cursor-pointer'
+                : 'bg-slate-900 text-white hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-slate-200 cursor-pointer'
             }`}
           >
             <Printer className="h-3.5 w-3.5" /> Print
@@ -539,7 +540,7 @@ export const CustomerLedgerView: React.FC<CustomerLedgerViewProps> = ({
       {/* Ledger Table Container (Used for on-screen viewing, PDF generation, and printing) */}
       <div
         id="ledger-print-area"
-        className="rounded-xl border border-slate-200 bg-white shadow-2xs dark:border-slate-800 dark:bg-slate-900 overflow-hidden print-bill-canvas"
+        className="rounded-xl border border-slate-200 bg-white shadow-2xs dark:border-slate-800 dark:bg-slate-900 overflow-hidden erp-print-area"
       >
         {/* Printable Traditional Mandi Statement Header (matches on-screen layout & company profile) */}
         <div className="hidden print:block p-4 border-b border-black text-center mb-1">
@@ -588,7 +589,7 @@ export const CustomerLedgerView: React.FC<CustomerLedgerViewProps> = ({
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm border-collapse">
             <thead>
-              <tr className="border-b border-slate-200 bg-slate-50 text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:border-slate-800 dark:bg-slate-800/60 dark:text-slate-300">
+              <tr className="border-b border-slate-200 bg-slate-50 text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:border-slate-800 dark:bg-slate-800/80 dark:text-slate-300">
                 <th className="px-5 py-3.5 w-32">Date</th>
                 <th className="px-5 py-3.5">Particulars / Transaction</th>
                 <th className="px-5 py-3.5 text-right w-36">Debit (Dr)</th>
@@ -600,7 +601,7 @@ export const CustomerLedgerView: React.FC<CustomerLedgerViewProps> = ({
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
               {ledger.entries.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-5 py-8 text-center text-xs text-slate-500">
+                  <td colSpan={6} className="px-5 py-8 text-center text-xs text-slate-500 dark:text-slate-400">
                     {activeCustomer
                       ? 'No transactions found for this customer.'
                       : 'Please search and select a customer above to view their transaction ledger.'}
@@ -612,8 +613,8 @@ export const CustomerLedgerView: React.FC<CustomerLedgerViewProps> = ({
                   return (
                     <tr
                       key={entry.id}
-                      className={`hover:bg-slate-50/60 transition-colors dark:hover:bg-slate-800/40 ${
-                        isOb ? 'bg-amber-50/30 font-medium dark:bg-amber-950/10' : ''
+                      className={`hover:bg-slate-50/60 transition-colors dark:hover:bg-slate-800/50 ${
+                        isOb ? 'bg-amber-50/30 font-medium dark:bg-amber-950/20' : ''
                       }`}
                     >
                       <td className="px-5 py-3 font-mono-numbers text-xs text-slate-700 dark:text-slate-300 whitespace-nowrap">
@@ -667,10 +668,10 @@ export const CustomerLedgerView: React.FC<CustomerLedgerViewProps> = ({
                         <button
                           type="button"
                           onClick={() => handleEditEntry(entry)}
-                          className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 hover:border-emerald-500 hover:text-emerald-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                          className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 hover:border-emerald-500 hover:text-emerald-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-emerald-500 dark:hover:text-emerald-400 dark:hover:bg-slate-700 transition-colors cursor-pointer"
                           title="Edit Transaction"
                         >
-                          <Edit2 className="h-3.5 w-3.5 text-emerald-600" />
+                          <Edit2 className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
                           <span>Edit</span>
                         </button>
                       </td>
@@ -680,7 +681,7 @@ export const CustomerLedgerView: React.FC<CustomerLedgerViewProps> = ({
               )}
             </tbody>
             <tfoot>
-              <tr className="border-t-2 border-slate-300 bg-slate-50/90 font-bold dark:border-slate-700 dark:bg-slate-800/80">
+              <tr className="border-t-2 border-slate-300 bg-slate-50/90 font-bold dark:border-slate-700 dark:bg-slate-800/90">
                 <td colSpan={2} className="px-5 py-3.5 text-xs uppercase tracking-wider text-slate-700 dark:text-slate-300">
                   Total Debits & Credits
                 </td>
@@ -701,7 +702,7 @@ export const CustomerLedgerView: React.FC<CustomerLedgerViewProps> = ({
 
         {/* Bottom Banner */}
         <div className="flex flex-col sm:flex-row items-center justify-between border-t border-slate-200 bg-slate-50 px-6 py-4 dark:border-slate-800 dark:bg-slate-800/60">
-          <div className="text-xs text-slate-500">
+          <div className="text-xs text-slate-500 dark:text-slate-400">
             Net balance is calculated dynamically from all historical transactions.
           </div>
           <div className="flex items-center gap-3 mt-2 sm:mt-0">
@@ -724,7 +725,7 @@ export const CustomerLedgerView: React.FC<CustomerLedgerViewProps> = ({
 
         {/* Software attribution & Signatory (matches requirement: left side, smaller font size) */}
         <div className="p-3 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 print:border-black flex justify-between items-center text-xs">
-          <div className="text-[8px] sm:text-[8.5px] text-left text-slate-500 print:text-black font-mono">
+          <div className="text-[8px] sm:text-[8.5px] text-left text-slate-500 dark:text-slate-400 print:text-black font-mono">
             Software Developed by: {defaultProfile.softwareDevelopedBy || 'Klyia Technology'}
           </div>
           <div className="hidden print:block text-right font-bold uppercase text-[11px]">
@@ -806,12 +807,11 @@ export const CustomerLedgerView: React.FC<CustomerLedgerViewProps> = ({
                   <label className="mb-1 block text-xs font-semibold text-slate-700 dark:text-slate-300">
                     Amount (₹)
                   </label>
-                  <input
-                    type="number"
+                  <QuantityInput
                     step="any"
                     required
                     value={custObAmount}
-                    onChange={(e) => setCustObAmount(e.target.value ? Number(e.target.value) : '')}
+                    onChange={(val) => setCustObAmount(val)}
                     className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm font-mono-numbers text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                   />
                 </div>

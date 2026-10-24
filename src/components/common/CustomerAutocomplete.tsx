@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { Customer } from '../../types';
 import { db } from '../../services/db';
 import { CustomerAvatar } from './CustomerAvatar';
-import { Users, Search, Phone, MapPin, Check, X } from 'lucide-react';
+import { Users, Search, Phone, Check, X } from 'lucide-react';
 
 interface CustomerAutocompleteProps {
   valueCustomerId: string;
@@ -28,7 +28,10 @@ export const CustomerAutocomplete: React.FC<CustomerAutocompleteProps> = ({
   className = '',
 }) => {
   const customers = db.getCustomers();
-  const selectedCustomer = customers.find((c) => c.id === valueCustomerId) || null;
+  const selectedCustomer = useMemo(
+    () => customers.find((c) => c.id === valueCustomerId) || null,
+    [customers, valueCustomerId]
+  );
 
   const [searchTerm, setSearchTerm] = useState(selectedCustomer ? selectedCustomer.name : '');
   const [isOpen, setIsOpen] = useState(false);
@@ -37,6 +40,8 @@ export const CustomerAutocomplete: React.FC<CustomerAutocompleteProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const isUserInputActiveRef = useRef(false);
+  const lastPropCustomerIdRef = useRef(valueCustomerId);
 
   // Position state for portal dropdown
   const [coords, setCoords] = useState<{
@@ -46,12 +51,15 @@ export const CustomerAutocomplete: React.FC<CustomerAutocompleteProps> = ({
     openAbove: boolean;
   }>({ top: 0, left: 0, width: 280, openAbove: false });
 
-  // Sync internal search input if valueCustomerId / selectedCustomer changes from outside
+  // Sync internal search input ONLY when valueCustomerId changes externally (not while user is actively typing)
   useEffect(() => {
-    if (selectedCustomer) {
+    if (valueCustomerId !== lastPropCustomerIdRef.current) {
+      lastPropCustomerIdRef.current = valueCustomerId;
+      if (!isUserInputActiveRef.current) {
+        setSearchTerm(selectedCustomer ? selectedCustomer.name : '');
+      }
+    } else if (!isUserInputActiveRef.current && selectedCustomer && searchTerm !== selectedCustomer.name) {
       setSearchTerm(selectedCustomer.name);
-    } else if (!valueCustomerId) {
-      setSearchTerm('');
     }
   }, [valueCustomerId, selectedCustomer]);
 
@@ -59,7 +67,7 @@ export const CustomerAutocomplete: React.FC<CustomerAutocompleteProps> = ({
   const updateCoords = () => {
     if (!inputRef.current) return;
     const rect = inputRef.current.getBoundingClientRect();
-    const dropdownHeight = 260;
+    const dropdownHeight = 270;
     const spaceBelow = window.innerHeight - rect.bottom;
     const spaceAbove = rect.top;
     const openAbove = spaceBelow < 220 && spaceAbove > spaceBelow;
@@ -97,19 +105,59 @@ export const CustomerAutocomplete: React.FC<CustomerAutocompleteProps> = ({
     }
   }, [isOpen]);
 
-  // Filter matching customers: match name, id, mobile, city, altMobile, aadhaarNo
+  // Intelligent filter & ranking:
+  // 1. Name starts with query (e.g. typing "S" shows "Shree Ganesh" first)
+  // 2. Word in name starts with query
+  // 3. Name contains query
+  // 4. Mobile, altMobile, city, or Aadhaar matches query
   const query = searchTerm.trim().toLowerCase();
-  const matchingCustomers = query
-    ? customers.filter((c) => {
-        const nameMatch = c.name.toLowerCase().includes(query);
-        const mobileMatch = c.mobile && c.mobile.includes(query);
-        const altMobileMatch = c.altMobile && c.altMobile.includes(query);
-        const idMatch = c.id.toLowerCase().includes(query);
-        const cityMatch = c.city && c.city.toLowerCase().includes(query);
-        const aadhaarMatch = c.aadhaarNo && c.aadhaarNo.replace(/\s+/g, '').includes(query.replace(/\s+/g, ''));
-        return nameMatch || mobileMatch || altMobileMatch || idMatch || cityMatch || aadhaarMatch;
+  const matchingCustomers = useMemo(() => {
+    if (!query) return customers;
+
+    const cleanQuery = query.replace(/\s+/g, '');
+
+    const scored = customers
+      .map((c) => {
+        const nameLower = c.name.toLowerCase();
+        const cityLower = c.city ? c.city.toLowerCase() : '';
+        const mobile = c.mobile || '';
+        const altMobile = c.altMobile || '';
+        const aadhaar = c.aadhaarNo ? c.aadhaarNo.replace(/\s+/g, '') : '';
+        const idLower = c.id.toLowerCase();
+
+        // Exact match
+        if (nameLower === query) return { customer: c, score: 0 };
+        // Name starts with query (e.g. 's' -> 'Shree')
+        if (nameLower.startsWith(query)) return { customer: c, score: 1 };
+        // Word in name starts with query (e.g. 'ganesh' -> 'Shree Ganesh')
+        const words = nameLower.split(/\s+/);
+        if (words.some((w) => w.startsWith(query))) return { customer: c, score: 2 };
+        // Name contains query
+        if (nameLower.includes(query)) return { customer: c, score: 3 };
+        // Mobile or alt mobile starts with query
+        if (mobile.startsWith(query) || altMobile.startsWith(query)) return { customer: c, score: 4 };
+        // City starts with query
+        if (cityLower.startsWith(query)) return { customer: c, score: 5 };
+        // Mobile / Alt mobile contains query
+        if (mobile.includes(query) || altMobile.includes(query)) return { customer: c, score: 6 };
+        // City contains query
+        if (cityLower.includes(query)) return { customer: c, score: 7 };
+        // Aadhaar contains query
+        if (aadhaar.includes(cleanQuery)) return { customer: c, score: 8 };
+        // ID matches
+        if (idLower.includes(query)) return { customer: c, score: 9 };
+
+        return null;
       })
-    : customers;
+      .filter((item): item is { customer: Customer; score: number } => item !== null);
+
+    scored.sort((a, b) => {
+      if (a.score !== b.score) return a.score - b.score;
+      return a.customer.name.localeCompare(b.customer.name);
+    });
+
+    return scored.map((s) => s.customer);
+  }, [customers, query]);
 
   useEffect(() => {
     setHighlightedIndex(0);
@@ -126,20 +174,29 @@ export const CustomerAutocomplete: React.FC<CustomerAutocompleteProps> = ({
         !dropdownRef.current.contains(target)
       ) {
         setIsOpen(false);
+        isUserInputActiveRef.current = false;
+
         const trimmed = searchTerm.trim();
         if (!trimmed) {
           setSearchTerm('');
+          lastPropCustomerIdRef.current = '';
           onChange(null);
         } else if (selectedCustomer && trimmed.toLowerCase() === selectedCustomer.name.toLowerCase()) {
           setSearchTerm(selectedCustomer.name);
         } else {
-          // Check if typed text matches an exact customer
+          // Check if typed text exactly matches a customer
           const exact = customers.find((c) => c.name.toLowerCase() === trimmed.toLowerCase());
           if (exact) {
             setSearchTerm(exact.name);
+            lastPropCustomerIdRef.current = exact.id;
             onChange(exact);
           } else if (selectedCustomer) {
             setSearchTerm(selectedCustomer.name);
+          } else {
+            // Keep what user typed or clear if no selection
+            setSearchTerm('');
+            lastPropCustomerIdRef.current = '';
+            onChange(null);
           }
         }
       }
@@ -149,6 +206,8 @@ export const CustomerAutocomplete: React.FC<CustomerAutocompleteProps> = ({
   }, [selectedCustomer, searchTerm, customers, onChange]);
 
   const handleSelect = (customer: Customer) => {
+    isUserInputActiveRef.current = false;
+    lastPropCustomerIdRef.current = customer.id;
     setSearchTerm(customer.name);
     onChange(customer);
     setIsOpen(false);
@@ -157,7 +216,10 @@ export const CustomerAutocomplete: React.FC<CustomerAutocompleteProps> = ({
     }
   };
 
-  const handleClear = () => {
+  const handleClear = (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    isUserInputActiveRef.current = false;
+    lastPropCustomerIdRef.current = '';
     setSearchTerm('');
     onChange(null);
     setIsOpen(true);
@@ -192,19 +254,11 @@ export const CustomerAutocomplete: React.FC<CustomerAutocompleteProps> = ({
       }
     } else if (e.key === 'Escape') {
       setIsOpen(false);
+      isUserInputActiveRef.current = false;
       if (selectedCustomer) {
         setSearchTerm(selectedCustomer.name);
       } else {
         setSearchTerm('');
-      }
-    } else if (e.key === 'Backspace' || e.key === 'Delete') {
-      // If entire input is selected or becomes empty, clear
-      const input = e.currentTarget;
-      if (
-        (input.selectionStart === 0 && input.selectionEnd === input.value.length) ||
-        input.value.length <= 1
-      ) {
-        onChange(null);
       }
     }
   };
@@ -238,10 +292,10 @@ export const CustomerAutocomplete: React.FC<CustomerAutocompleteProps> = ({
           }}
           onChange={(e) => {
             const val = e.target.value;
+            isUserInputActiveRef.current = true;
             setSearchTerm(val);
             if (!val.trim()) {
-              onChange(null);
-            } else if (selectedCustomer && val.trim().toLowerCase() !== selectedCustomer.name.toLowerCase()) {
+              lastPropCustomerIdRef.current = '';
               onChange(null);
             }
             updateCoords();
@@ -255,14 +309,14 @@ export const CustomerAutocomplete: React.FC<CustomerAutocompleteProps> = ({
           }`}
         />
 
-        {/* Right side controls: Clear (X) button & selection checkmark */}
+        {/* Right side controls: Clear (X) button & selection checkmark / search toggle */}
         <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1 z-10">
           {(searchTerm || selectedCustomer) && (
             <button
               type="button"
               onClick={handleClear}
               className="p-1 rounded-md text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer"
-              title="Clear selection (Backspace / Delete)"
+              title="Clear selection (or edit text with Backspace / Delete)"
             >
               <X className="h-3.5 w-3.5" />
             </button>
@@ -283,7 +337,7 @@ export const CustomerAutocomplete: React.FC<CustomerAutocompleteProps> = ({
                 setIsOpen(true);
                 inputRef.current?.focus();
               }}
-              className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-0.5"
+              className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-0.5 cursor-pointer"
               title="Search customer directory"
             >
               <Search className="h-3.5 w-3.5" />
@@ -298,93 +352,93 @@ export const CustomerAutocomplete: React.FC<CustomerAutocompleteProps> = ({
           <div
             ref={dropdownRef}
             style={{
-            position: 'fixed',
-            top: `${coords.top}px`,
-            left: `${coords.left}px`,
-            width: `${coords.width}px`,
-            zIndex: 99999,
-          }}
-          className="max-h-64 overflow-y-auto p-1.5 text-xs shadow-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl"
-        >
-          {matchingCustomers.length === 0 ? (
-            <div className="p-3 text-center text-slate-400">
-              <Users className="mx-auto h-5 w-5 mb-1 opacity-50" />
-              <span>No matching customer in Directory</span>
-            </div>
-          ) : (
-            matchingCustomers.map((cust, idx) => {
-              const isSelected = cust.id === valueCustomerId;
-              const isHighlighted = idx === highlightedIndex;
-              return (
-                <div
-                  key={cust.id}
-                  onMouseDown={(e) => {
-                    e.preventDefault();
-                    handleSelect(cust);
-                  }}
-                  onMouseEnter={() => setHighlightedIndex(idx)}
-                  className={`flex cursor-pointer items-center justify-between px-3 py-2 rounded-lg transition-colors ${
-                    isHighlighted
-                      ? 'bg-blue-600 text-white'
-                      : isSelected
-                      ? 'bg-blue-50 dark:bg-blue-900/50 text-blue-900 dark:text-blue-200 font-bold'
-                      : 'text-slate-700 dark:text-slate-200 hover:bg-slate-100/70 dark:hover:bg-slate-800'
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <CustomerAvatar
-                      photo={cust.photo}
-                      name={cust.name}
-                      size="sm"
-                    />
-                    <div className="flex flex-col min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-sm truncate">{cust.name}</span>
-                        {cust.city && (
-                          <span
-                            className={`text-[10px] px-1 rounded shrink-0 ${
-                              isHighlighted
-                                ? 'bg-blue-500 text-white'
-                                : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
-                            }`}
-                          >
-                            {cust.city}
-                          </span>
-                        )}
-                      </div>
-                      <div
-                        className={`flex items-center gap-2 text-[11px] mt-0.5 ${
-                          isHighlighted ? 'text-blue-100' : 'text-slate-400'
-                        }`}
-                      >
-                        {cust.mobile && (
-                          <span className="flex items-center gap-0.5">
-                            <Phone className="h-3 w-3" /> {cust.mobile}
-                          </span>
-                        )}
-                        {cust.aadhaarNo && (
-                          <span className="flex items-center gap-0.5">
-                            Aadhaar: {cust.aadhaarNo}
-                          </span>
-                        )}
+              position: 'fixed',
+              top: `${coords.top}px`,
+              left: `${coords.left}px`,
+              width: `${coords.width}px`,
+              zIndex: 99999,
+            }}
+            className="max-h-64 overflow-y-auto p-1.5 text-xs shadow-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl"
+          >
+            {matchingCustomers.length === 0 ? (
+              <div className="p-3 text-center text-slate-400">
+                <Users className="mx-auto h-5 w-5 mb-1 opacity-50" />
+                <span>No matching customer in Directory</span>
+              </div>
+            ) : (
+              matchingCustomers.map((cust, idx) => {
+                const isSelected = cust.id === valueCustomerId;
+                const isHighlighted = idx === highlightedIndex;
+                return (
+                  <div
+                    key={cust.id}
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      handleSelect(cust);
+                    }}
+                    onMouseEnter={() => setHighlightedIndex(idx)}
+                    className={`flex cursor-pointer items-center justify-between px-3 py-2 rounded-lg transition-colors ${
+                      isHighlighted
+                        ? 'bg-blue-600 text-white'
+                        : isSelected
+                        ? 'bg-blue-50 dark:bg-blue-900/50 text-blue-900 dark:text-blue-200 font-bold'
+                        : 'text-slate-700 dark:text-slate-200 hover:bg-slate-100/70 dark:hover:bg-slate-800'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <CustomerAvatar
+                        photo={cust.photo}
+                        name={cust.name}
+                        size="sm"
+                      />
+                      <div className="flex flex-col min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-sm truncate">{cust.name}</span>
+                          {cust.city && (
+                            <span
+                              className={`text-[10px] px-1 rounded shrink-0 ${
+                                isHighlighted
+                                  ? 'bg-blue-500 text-white'
+                                  : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
+                              }`}
+                            >
+                              {cust.city}
+                            </span>
+                          )}
+                        </div>
+                        <div
+                          className={`flex items-center gap-2 text-[11px] mt-0.5 ${
+                            isHighlighted ? 'text-blue-100' : 'text-slate-400'
+                          }`}
+                        >
+                          {cust.mobile && (
+                            <span className="flex items-center gap-0.5">
+                              <Phone className="h-3 w-3" /> {cust.mobile}
+                            </span>
+                          )}
+                          {cust.aadhaarNo && (
+                            <span className="flex items-center gap-0.5">
+                              Aadhaar: {cust.aadhaarNo}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  {isSelected && (
-                    <Check
-                      className={`h-4 w-4 shrink-0 ${
-                        isHighlighted ? 'text-white' : 'text-blue-600'
-                      }`}
-                    />
-                  )}
-                </div>
-              );
-            })
-          )}
-        </div>,
-        document.body
-      )}
+                    {isSelected && (
+                      <Check
+                        className={`h-4 w-4 shrink-0 ${
+                          isHighlighted ? 'text-white' : 'text-blue-600'
+                        }`}
+                      />
+                    )}
+                  </div>
+                );
+              })
+            )}
+          </div>,
+          document.body
+        )}
     </div>
   );
 };

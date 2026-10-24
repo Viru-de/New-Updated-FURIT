@@ -10,6 +10,7 @@ import { exportSaleProceedsLedger } from '../../utils/excelEngine';
 import { BillShareButtons } from '../common/BillShareButtons';
 import { triggerPrint } from '../../utils/pdfAndShareEngine';
 import { CompanyContactsHeader } from '../common/CompanyContactsHeader';
+import { QuantityInput } from '../common/QuantityInput';
 
 export const SaleProceedsLedgerView: React.FC = () => {
   const [refreshKey, setRefreshKey] = useState(0);
@@ -203,7 +204,7 @@ export const SaleProceedsLedgerView: React.FC = () => {
       {/* Ledger Table Container */}
       <div
         id="sale-proceeds-print-area"
-        className="rounded-xl border border-slate-200 bg-white shadow-2xs dark:border-slate-800 dark:bg-slate-900 overflow-hidden print-bill-canvas"
+        className="rounded-xl border border-slate-200 bg-white shadow-2xs dark:border-slate-800 dark:bg-slate-900 overflow-hidden erp-print-area print-bill-canvas"
       >
         {/* Printable Traditional Mandi Statement Header */}
         <div className="hidden print:block p-4 border-b border-black text-center mb-1">
@@ -408,12 +409,11 @@ export const SaleProceedsLedgerView: React.FC = () => {
                   <label className="mb-1 block text-xs font-semibold text-slate-700 dark:text-slate-300">
                     Opening Amount (₹)
                   </label>
-                  <input
-                    type="number"
+                  <QuantityInput
                     step="any"
                     required
                     value={obAmount}
-                    onChange={(e) => setObAmount(e.target.value ? Number(e.target.value) : '')}
+                    onChange={(val) => setObAmount(val)}
                     className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm font-mono-numbers text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                   />
                 </div>

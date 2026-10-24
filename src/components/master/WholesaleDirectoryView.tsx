@@ -16,6 +16,7 @@ import {
   AlertCircle,
 } from 'lucide-react';
 import { AdminPasswordModal } from '../common/AdminPasswordModal';
+import { QuantityInput } from '../common/QuantityInput';
 
 export const WholesaleDirectoryView: React.FC = () => {
   const [vendors, setVendors] = useState<Vendor[]>(db.getVendors());
@@ -109,14 +110,41 @@ export const WholesaleDirectoryView: React.FC = () => {
     }
   };
 
-  const filtered = vendors.filter((v) => {
-    const q = searchTerm.toLowerCase();
-    return (
-      v.name.toLowerCase().includes(q) ||
-      v.contact.includes(q) ||
-      (v.city && v.city.toLowerCase().includes(q))
-    );
-  });
+  const q = searchTerm.trim().toLowerCase();
+
+  const filtered = React.useMemo(() => {
+    if (!q) return vendors;
+
+    const scored = vendors
+      .map((v) => {
+        const nameLower = v.name.toLowerCase();
+        const cityLower = v.city ? v.city.toLowerCase() : '';
+        const stateLower = v.state ? v.state.toLowerCase() : '';
+        const contact = v.contact || '';
+        const idLower = v.id.toLowerCase();
+
+        if (nameLower === q) return { vendor: v, score: 0 };
+        if (nameLower.startsWith(q)) return { vendor: v, score: 1 };
+        const words = nameLower.split(/\s+/);
+        if (words.some((w) => w.startsWith(q))) return { vendor: v, score: 2 };
+        if (nameLower.includes(q)) return { vendor: v, score: 3 };
+        if (contact.startsWith(q)) return { vendor: v, score: 4 };
+        if (cityLower.startsWith(q)) return { vendor: v, score: 5 };
+        if (contact.includes(q)) return { vendor: v, score: 6 };
+        if (cityLower.includes(q) || stateLower.includes(q)) return { vendor: v, score: 7 };
+        if (idLower.includes(q)) return { vendor: v, score: 8 };
+
+        return null;
+      })
+      .filter((entry): entry is { vendor: Vendor; score: number } => entry !== null);
+
+    scored.sort((a, b) => {
+      if (a.score !== b.score) return a.score - b.score;
+      return a.vendor.name.localeCompare(b.vendor.name);
+    });
+
+    return scored.map((s) => s.vendor);
+  }, [vendors, q]);
 
   return (
     <div className="space-y-6">
@@ -161,6 +189,16 @@ export const WholesaleDirectoryView: React.FC = () => {
           onChange={(e) => setSearchTerm(e.target.value)}
           className="w-full text-xs text-slate-900 outline-none placeholder:text-slate-400 dark:bg-slate-900 dark:text-white"
         />
+        {searchTerm && (
+          <button
+            type="button"
+            onClick={() => setSearchTerm('')}
+            className="flex items-center gap-1 text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer p-1"
+            title="Clear search"
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
+        )}
       </div>
 
       {/* Vendors Table */}
@@ -315,11 +353,10 @@ export const WholesaleDirectoryView: React.FC = () => {
                   <label className="mb-1 block text-xs font-semibold text-slate-700 dark:text-slate-300">
                     Opening Balance (₹)
                   </label>
-                  <input
-                    type="number"
+                  <QuantityInput
                     step="any"
                     value={openingBalance}
-                    onChange={(e) => setOpeningBalance(e.target.value ? Number(e.target.value) : '')}
+                    onChange={(val) => setOpeningBalance(val)}
                     className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm font-mono-numbers text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                   />
                 </div>

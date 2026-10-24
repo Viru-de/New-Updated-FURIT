@@ -17,6 +17,7 @@ import {
   Package,
 } from 'lucide-react';
 import { AdminPasswordModal } from '../common/AdminPasswordModal';
+import { QuantityInput } from '../common/QuantityInput';
 
 export const FruitMasterView: React.FC = () => {
   const [fruits, setFruits] = useState<Fruit[]>(db.getFruits());
@@ -100,10 +101,39 @@ export const FruitMasterView: React.FC = () => {
 
   const isEditUnitCrate = editUnit.trim().toLowerCase() === 'crate';
 
-  const filtered = fruits.filter((f) => {
-    const q = searchTerm.toLowerCase().trim();
-    return f.name.toLowerCase().includes(q);
-  });
+  const q = searchTerm.trim().toLowerCase();
+
+  const filtered = React.useMemo(() => {
+    if (!q) return fruits;
+
+    const scored = fruits
+      .map((f) => {
+        const nameLower = f.name.toLowerCase();
+        const catLower = f.category ? f.category.toLowerCase() : '';
+        const unitLower = (f.unit || f.defaultUnit || '').toLowerCase();
+        const idLower = f.id.toLowerCase();
+
+        if (nameLower === q) return { fruit: f, score: 0 };
+        if (nameLower.startsWith(q)) return { fruit: f, score: 1 };
+        const words = nameLower.split(/\s+/);
+        if (words.some((w) => w.startsWith(q))) return { fruit: f, score: 2 };
+        if (nameLower.includes(q)) return { fruit: f, score: 3 };
+        if (catLower.startsWith(q)) return { fruit: f, score: 4 };
+        if (catLower.includes(q)) return { fruit: f, score: 5 };
+        if (unitLower.includes(q)) return { fruit: f, score: 6 };
+        if (idLower.includes(q)) return { fruit: f, score: 7 };
+
+        return null;
+      })
+      .filter((entry): entry is { fruit: Fruit; score: number } => entry !== null);
+
+    scored.sort((a, b) => {
+      if (a.score !== b.score) return a.score - b.score;
+      return a.fruit.name.localeCompare(b.fruit.name);
+    });
+
+    return scored.map((s) => s.fruit);
+  }, [fruits, q]);
 
   return (
     <div className="space-y-6">
@@ -143,11 +173,21 @@ export const FruitMasterView: React.FC = () => {
         <Search className="h-4 w-4 text-slate-400 mr-2 shrink-0" />
         <input
           type="text"
-          placeholder="Search by item name (e.g. Apple, Strawberry, Mango)..."
+          placeholder="Search by item name, category or unit (e.g. Apple, Strawberry, Mango)..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="w-full text-xs text-slate-900 outline-none placeholder:text-slate-400 dark:bg-slate-900 dark:text-white"
         />
+        {searchTerm && (
+          <button
+            type="button"
+            onClick={() => setSearchTerm('')}
+            className="flex items-center gap-1 text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer p-1"
+            title="Clear search"
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
+        )}
       </div>
 
       {/* Items Grid */}
@@ -305,13 +345,12 @@ export const FruitMasterView: React.FC = () => {
                   <label className="mb-1 block text-xs font-semibold text-slate-700 dark:text-slate-300">
                     Price/Rate (₹) *
                   </label>
-                  <input
-                    type="number"
+                  <QuantityInput
                     step="any"
-                    min="0"
+                    min={0}
                     required
                     value={editPrice}
-                    onChange={(e) => setEditPrice(e.target.value !== '' ? Number(e.target.value) : '')}
+                    onChange={(val) => setEditPrice(val)}
                     className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm font-mono-numbers text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                   />
                 </div>

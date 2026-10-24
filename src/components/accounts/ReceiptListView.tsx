@@ -9,6 +9,7 @@ import { exportReceipts } from '../../utils/excelEngine';
 import {
   Plus,
   Search,
+  X,
   Edit2,
   Trash2,
   CreditCard,
@@ -65,15 +66,46 @@ export const ReceiptListView: React.FC<ReceiptListViewProps> = ({
     }
   };
 
-  const filteredReceipts = receipts.filter((r) => {
-    const q = searchTerm.toLowerCase();
-    return (
-      r.receiptNo.toLowerCase().includes(q) ||
-      r.customerName.toLowerCase().includes(q) ||
-      r.paymentMode.toLowerCase().includes(q) ||
-      (r.notes && r.notes.toLowerCase().includes(q))
-    );
-  });
+  const filteredReceipts = React.useMemo(() => {
+    if (!searchTerm.trim()) return receipts;
+    const q = searchTerm.trim().toLowerCase();
+
+    const matches = receipts.filter((r) => {
+      return (
+        r.receiptNo.toLowerCase().includes(q) ||
+        r.customerName.toLowerCase().includes(q) ||
+        r.paymentMode.toLowerCase().includes(q) ||
+        (r.notes && r.notes.toLowerCase().includes(q))
+      );
+    });
+
+    return matches.sort((a, b) => {
+      const aCust = a.customerName.toLowerCase();
+      const bCust = b.customerName.toLowerCase();
+      const aNo = a.receiptNo.toLowerCase();
+      const bNo = b.receiptNo.toLowerCase();
+
+      // Check customer prefix
+      const aCustStarts = aCust.startsWith(q);
+      const bCustStarts = bCust.startsWith(q);
+      if (aCustStarts && !bCustStarts) return -1;
+      if (!aCustStarts && bCustStarts) return 1;
+
+      // Check receipt no prefix
+      const aNoStarts = aNo.startsWith(q);
+      const bNoStarts = bNo.startsWith(q);
+      if (aNoStarts && !bNoStarts) return -1;
+      if (!aNoStarts && bNoStarts) return 1;
+
+      // Check customer word start
+      const aCustWord = aCust.includes(' ' + q);
+      const bCustWord = bCust.includes(' ' + q);
+      if (aCustWord && !bCustWord) return -1;
+      if (!aCustWord && bCustWord) return 1;
+
+      return b.date.localeCompare(a.date);
+    });
+  }, [receipts, searchTerm]);
 
   return (
     <div className="space-y-6">
@@ -123,10 +155,13 @@ export const ReceiptListView: React.FC<ReceiptListViewProps> = ({
         />
         {searchTerm && (
           <button
+            type="button"
             onClick={() => setSearchTerm('')}
-            className="text-xs text-slate-400 hover:text-slate-600"
+            className="flex items-center gap-1 rounded bg-slate-100 dark:bg-slate-800 px-2 py-0.5 text-xs text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+            title="Clear search"
           >
-            Clear
+            <X className="h-3 w-3" />
+            <span>Clear</span>
           </button>
         )}
       </div>

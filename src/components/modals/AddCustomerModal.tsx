@@ -3,6 +3,7 @@ import { Customer } from '../../types';
 import { db } from '../../services/db';
 import { X, Plus, UserPlus } from 'lucide-react';
 import { ImageUploader } from '../common/ImageUploader';
+import { QuantityInput } from '../common/QuantityInput';
 
 interface AddCustomerModalProps {
   isOpen: boolean;
@@ -191,11 +192,10 @@ export const AddCustomerModal: React.FC<AddCustomerModalProps> = ({
                 <label className="mb-1 block text-[11px] font-medium text-slate-600 dark:text-slate-400">
                   Opening Balance (₹)
                 </label>
-                <input
-                  type="number"
+                <QuantityInput
                   step="any"
                   value={openingBalance}
-                  onChange={(e) => setOpeningBalance(e.target.value ? Number(e.target.value) : '')}
+                  onChange={(val) => setOpeningBalance(val)}
                   className="w-full rounded-lg border border-slate-300 px-2.5 py-1.5 text-xs text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                 />
               </div>
@@ -219,10 +219,10 @@ export const AddCustomerModal: React.FC<AddCustomerModalProps> = ({
                 <label className="mb-1 block text-[11px] font-medium text-slate-600 dark:text-slate-400">
                   Opening Crate Balance (Qty)
                 </label>
-                <input
-                  type="number"
+                <QuantityInput
+                  step="any"
                   value={openingCrateBalance}
-                  onChange={(e) => setOpeningCrateBalance(e.target.value ? Number(e.target.value) : '')}
+                  onChange={(val) => setOpeningCrateBalance(val)}
                   className="w-full rounded-lg border border-slate-300 px-2.5 py-1.5 text-xs text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                 />
               </div>

@@ -22,6 +22,7 @@ import { BillHistoryView } from './components/billing/BillHistoryView';
 import { CompanyBillProfilesView } from './components/billing/CompanyBillProfilesView';
 import { ReportsView } from './components/reports/ReportsView';
 import { SettingsView } from './components/settings/SettingsView';
+import { initDisableNumberInputScroll } from './utils/disableNumberInputScroll';
 
 function AppContent() {
   const [currentUser, setCurrentUser] = useState<User | null>(() => db.getActiveUser());
@@ -36,10 +37,14 @@ function AppContent() {
   const [editingBill, setEditingBill] = useState<Bill | null>(null);
 
   useEffect(() => {
+    const cleanupScroll = initDisableNumberInputScroll();
     const unsubscribe = db.subscribe(() => {
       setCurrentUser(db.getActiveUser());
     });
-    return unsubscribe;
+    return () => {
+      cleanupScroll();
+      unsubscribe();
+    };
   }, []);
 
   const handleLogout = () => {
