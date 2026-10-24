@@ -53,6 +53,7 @@ export const SaleProceedPrintModal: React.FC<SaleProceedPrintModalProps> = ({
           fruitName: 'STRAWBERRY',
           quantity: proceeds.quantity,
           unit: proceeds.unit,
+          kg: proceeds.kg,
           rate: proceeds.rate,
           amount: proceeds.amount,
         },
@@ -238,8 +239,7 @@ export const SaleProceedPrintModal: React.FC<SaleProceedPrintModalProps> = ({
                     <td className="border-r border-black p-1 font-semibold uppercase">{it.fruitName}</td>
                     <td className="border-r border-black p-1 text-right font-mono">{it.quantity}</td>
                     <td className="border-r border-black p-1 text-right font-mono">
-                      {/* Blank if not specified */}
-                      {''}
+                      {it.kg && it.kg > 0 ? it.kg : (proceeds.kg && proceeds.kg > 0 ? proceeds.kg : '')}
                     </td>
                     <td className="border-r border-black p-1 text-right font-mono">
                       {formatBillAmount(it.rate)}

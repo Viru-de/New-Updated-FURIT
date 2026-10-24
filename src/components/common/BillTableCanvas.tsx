@@ -212,7 +212,7 @@ export const BillTableCanvas: React.FC<BillTableCanvasProps> = ({
         </thead>
         <tbody>
           {items.map((it, idx) => {
-            const lineKg = it.kg !== undefined ? it.kg : calculateLineKg(it, fruitsCatalog);
+            const lineKg = it.kg !== undefined ? (Number(it.kg) || 0) : 0;
             const lineAmount =
               it.amount !== undefined
                 ? it.amount

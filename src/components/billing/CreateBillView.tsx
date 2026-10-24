@@ -3,6 +3,7 @@ import { Bill, BillItem, CompanyProfile, Customer, ExpenseItem, Fruit } from '..
 import { db } from '../../services/db';
 import { formatCurrency, formatSequence, getTodayIso, formatDate, formatBillAmount, numberToWordsIndian } from '../../utils/formatters';
 import { getFruitEffectivePrice } from '../../utils/fruitUtils';
+import { calculateWholesaleItemAmount } from '../../utils/billingCalculations';
 import { maskAadhaar } from '../../utils/aadhaarUtils';
 import { DatePickerInput } from '../common/DatePickerInput';
 import { AddFruitModal } from '../modals/AddFruitModal';
@@ -114,12 +115,13 @@ export const CreateBillView: React.FC<CreateBillViewProps> = ({
         current.fruitName = f.name;
         current.unit = f.defaultUnit || 'Crate';
         current.rate = getFruitEffectivePrice(f);
-        current.amount = (current.quantity || 0) * (current.rate || 0);
+        current.amount = calculateWholesaleItemAmount(current.quantity || 1, current.unit, current.kg, current.rate);
       }
-    } else if (field === 'quantity' || field === 'rate') {
-      const q = field === 'quantity' ? Number(val) || 0 : current.quantity;
-      const r = field === 'rate' ? Number(val) || 0 : current.rate;
-      current.amount = q * r;
+    } else if (field === 'quantity' || field === 'rate' || field === 'unit' || field === 'kg') {
+      const q = field === 'quantity' ? (val === '' ? 0 : Number(val)) : current.quantity;
+      const r = field === 'rate' ? (val === '' ? 0 : Number(val)) : current.rate;
+      const k = field === 'kg' ? (val === '' ? 0 : Number(val)) : current.kg;
+      current.amount = calculateWholesaleItemAmount(q, current.unit, k, r);
     }
     updated[index] = current;
     setItems(updated);

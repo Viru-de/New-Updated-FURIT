@@ -141,6 +141,7 @@ const FIELD_ALIASES: Record<ImportModule, Record<string, string[]>> = {
     itemName: ['itemname', 'fruitname', 'item'],
     quantity: ['quantity', 'qty'],
     unit: ['unit', 'uom'],
+    kg: ['kg', 'weight', 'weightkg', 'vajan'],
     rate: ['rate', 'price'],
     expenses: ['freighthamali', 'expenses', 'hamali'],
     advancePaid: ['advancepaid', 'advance'],
@@ -471,6 +472,12 @@ export function validateImportRows(
         const vendor = existingVendors.find((v) => v.name.toLowerCase() === vendorName.toLowerCase());
         const fruit = existingFruits.find((f) => f.name.toLowerCase() === itemName.toLowerCase());
 
+        const spWeight = normalizedRow.kg !== undefined && normalizedRow.kg !== ''
+          ? Number(normalizedRow.kg)
+          : (normalizedRow.weight !== undefined && normalizedRow.weight !== '' ? Number(normalizedRow.weight) : 0);
+        const spUnit = normalizedRow.unit || fruit?.unit || 'Crate';
+        const spAmount = calculateWholesaleItemAmount(qty, spUnit, spWeight, rate);
+
         parsedData = {
           proceedsNo,
           date,
@@ -479,9 +486,10 @@ export function validateImportRows(
           itemName,
           fruitId: fruit?.id || '',
           quantity: qty,
-          unit: normalizedRow.unit || fruit?.unit || 'Crate',
+          unit: spUnit,
+          kg: spWeight > 0 ? spWeight : 0,
           rate,
-          amount: qty * rate,
+          amount: spAmount,
           expenses: Number(normalizedRow.expenses) || 0,
           advancePaid: Number(normalizedRow.advancePaid) || 0,
         };

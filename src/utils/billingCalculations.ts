@@ -44,40 +44,37 @@ export function formatQtyWithUnit(quantity: number | string, unit?: string | nul
 
 /**
  * Calculates wholesale item amount according to Hari Kripa Fruit ERP rules:
- * A. For crate items: Amount = Qty × Rate.
- *    The crate name (20kg or 10kg) is only for identifying the crate type and tracking crate balance.
- *    It is NOT the actual weight and must never be multiplied or used in amount calculations.
- *    Do not convert crate quantity into kilograms or calculate Qty × crate size × Rate.
- * B. For non-crate items (Box, Peti, DABBA, Packet, Bag, etc.):
- *    Preserve existing calculation rules exactly:
- *    - If Kg is greater than 0: Amount = Kg × Rate.
- *    - If Kg is 0 or empty: Amount = Qty × Rate.
+ * In Sale Proceed, Cash Sale, Wholesale Credit Sale, Group Sale, and all Bill Items modules:
+ *
+ * Calculation rule:
+ * - If Weight > 0: Amount = Weight × Rate
+ * - If Weight = 0 or blank: Amount = Quantity × Rate
+ *
+ * Examples:
+ * - Qty 10, Weight 200, Rate ₹50 → Amount ₹10,000.
+ * - Qty 10, Weight 0, Rate ₹100 → Amount ₹1,000.
+ * - Apply the same rule to Crate, Box, Peti, Kg, and every other unit.
+ *
+ * Important: Do not multiply by crate type (e.g., 10kg or 20kg). Crate Type is only a label.
  */
 export function calculateWholesaleItemAmount(
   quantity: number | string | undefined | null,
-  unit: string | undefined | null,
-  kg: number | string | undefined | null,
-  rate: number | string | undefined | null
+  unit?: string | null,
+  kg?: number | string | undefined | null,
+  rate?: number | string | undefined | null
 ): number {
   const numQty = typeof quantity === 'number' ? quantity : (Number(quantity) || 0);
   const numRate = typeof rate === 'number' ? rate : (Number(rate) || 0);
-  const numKg = typeof kg === 'number' ? kg : (Number(kg) || 0);
+  const numWeight = typeof kg === 'number' ? kg : (Number(kg) || 0);
 
   if (numRate <= 0) return 0;
 
-  // A. For crate items: Amount = Qty × Rate.
-  // The 10kg or 20kg crate name must NOT affect the amount.
-  if (isCrateUnit(unit)) {
-    return Math.round(numQty * numRate * 100) / 100;
+  // If Weight > 0: Amount = Weight × Rate
+  if (numWeight > 0) {
+    return Math.round(numWeight * numRate * 100) / 100;
   }
 
-  // B. For non-crate items (Box, Peti, DABBA, Packet, Bag, etc.):
-  // If Kg is greater than 0: Amount = Kg × Rate
-  if (numKg > 0) {
-    return Math.round(numKg * numRate * 100) / 100;
-  }
-
-  // If Kg is 0 or empty: Amount = Qty × Rate
+  // If Weight = 0 or blank: Amount = Quantity × Rate
   return Math.round(numQty * numRate * 100) / 100;
 }
 
@@ -156,11 +153,21 @@ export function calculateLineKg(
 }
 
 /**
- * Calculates line amount using unit and rate without multiplying blindly by kg.
+ * Calculates line amount using quantity, rate, and optional weight.
+ * Rule: Weight > 0 ? Weight × Rate : Quantity × Rate.
  */
-export function calculateLineAmount(quantity: number | string, rate: number | string): number {
+export function calculateLineAmount(
+  quantity: number | string,
+  rate: number | string,
+  weight?: number | string | null
+): number {
   const q = typeof quantity === 'number' ? quantity : (Number(quantity) || 0);
   const r = typeof rate === 'number' ? rate : (Number(rate) || 0);
+  const w = typeof weight === 'number' ? weight : (Number(weight) || 0);
+  if (r <= 0) return 0;
+  if (w > 0) {
+    return Math.round(w * r * 100) / 100;
+  }
   return Math.round(q * r * 100) / 100;
 }
 

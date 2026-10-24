@@ -343,9 +343,6 @@ export const GroupSaleView: React.FC<GroupSaleViewProps> = ({
           } else {
             updated.crateSize = undefined;
             updated.crateCount = 0;
-            if (prevWasCrate && !isCrateUnit(nextUnit)) {
-              updated.kg = 0;
-            }
           }
         }
 
@@ -376,11 +373,7 @@ export const GroupSaleView: React.FC<GroupSaleViewProps> = ({
             updated.crateCount = q;
           }
 
-          // Exact Wholesale Credit Sale Calculation:
-          // A. When unit is Crate: Amount = Kg × Rate when Kg > 0; if Kg is 0 or empty, Amount = 0
-          // B. When unit is anything other than Crate (Box, Peti, DABBA, etc.):
-          //    - If Kg is 0 or empty: Amount = Qty × Rate
-          //    - If Kg > 0: Amount = Kg × Rate
+          // Exact Calculation: Weight > 0 ? Weight × Rate : Quantity × Rate (regardless of unit)
           updated.totalAmount = calculateWholesaleItemAmount(q, updated.unit, k, p);
 
           const f = typeof updated.freight === 'number' ? updated.freight : Number(updated.freight) || 0;

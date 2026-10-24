@@ -299,6 +299,7 @@ export interface BillItem {
   fruitName: string;
   quantity: number;
   unit: string;
+  kg?: number;
   rate: number;
   amount: number;
   crateSize?: number | string;

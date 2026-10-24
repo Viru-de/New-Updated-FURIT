@@ -9,6 +9,7 @@ import { FruitAutocomplete } from '../common/FruitAutocomplete';
 import { CustomerAutocomplete } from '../common/CustomerAutocomplete';
 import { VendorAutocomplete } from '../common/VendorAutocomplete';
 import { QuantityInput } from '../common/QuantityInput';
+import { calculateWholesaleItemAmount } from '../../utils/billingCalculations';
 import { X, Plus, Trash2, Calculator, Info } from 'lucide-react';
 
 interface SaleProceedsModalProps {
@@ -126,15 +127,16 @@ export const SaleProceedsModal: React.FC<SaleProceedsModalProps> = ({
       setQuantity(1);
       // 5. Weight defaults to 0
       setWeight(0);
-      // Amount = Qty * Rate
-      setAmount(1 * newRate);
+      // Amount = Weight > 0 ? Weight * Rate : Qty * Rate
+      setAmount(calculateWholesaleItemAmount(1, fruit.unit || fruit.defaultUnit || 'Crate', 0, newRate));
     }
   };
 
   const calculateAutoAmount = () => {
     const q = Number(quantity) || 0;
+    const w = Number(weight) || 0;
     const r = Number(rate) || 0;
-    setAmount(q * r);
+    setAmount(calculateWholesaleItemAmount(q, unit, w, r));
   };
 
   const handleExpenseChange = (index: number, field: 'name' | 'amount', val: any) => {
@@ -331,8 +333,9 @@ export const SaleProceedsModal: React.FC<SaleProceedsModalProps> = ({
                           onChange={(val) => {
                             setQuantity(val);
                             const q = val === '' ? 0 : Number(val);
+                            const w = Number(weight) || 0;
                             const r = Number(rate) || 0;
-                            setAmount(q * r);
+                            setAmount(calculateWholesaleItemAmount(q, unit, w, r));
                           }}
                           className="w-full rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-xs text-right font-mono font-bold outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800"
                         />
@@ -345,7 +348,14 @@ export const SaleProceedsModal: React.FC<SaleProceedsModalProps> = ({
                           list="sp-unit-options"
                           placeholder="Unit"
                           value={unit}
-                          onChange={(e) => setUnit(e.target.value)}
+                          onChange={(e) => {
+                            const nextUnit = e.target.value;
+                            setUnit(nextUnit);
+                            const q = Number(quantity) || 0;
+                            const w = Number(weight) || 0;
+                            const r = Number(rate) || 0;
+                            setAmount(calculateWholesaleItemAmount(q, nextUnit, w, r));
+                          }}
                           className="w-full rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-xs font-semibold text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white text-center"
                         />
                         <datalist id="sp-unit-options">
@@ -366,7 +376,13 @@ export const SaleProceedsModal: React.FC<SaleProceedsModalProps> = ({
                           step="any"
                           placeholder="0"
                           value={weight === 0 ? '0' : (weight || '0')}
-                          onChange={(val) => setWeight(val)}
+                          onChange={(val) => {
+                            setWeight(val);
+                            const w = val === '' ? 0 : Number(val);
+                            const q = Number(quantity) || 0;
+                            const r = Number(rate) || 0;
+                            setAmount(calculateWholesaleItemAmount(q, unit, w, r));
+                          }}
                           className="w-full rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-xs text-right font-mono outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800"
                         />
                       </td>
@@ -405,8 +421,9 @@ export const SaleProceedsModal: React.FC<SaleProceedsModalProps> = ({
                           onChange={(val) => {
                             setRate(val);
                             const q = Number(quantity) || 0;
+                            const w = Number(weight) || 0;
                             const r = val === '' ? 0 : Number(val);
-                            setAmount(q * r);
+                            setAmount(calculateWholesaleItemAmount(q, unit, w, r));
                           }}
                           className="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-xs font-mono font-bold text-slate-900 text-right outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                         />
@@ -428,17 +445,22 @@ export const SaleProceedsModal: React.FC<SaleProceedsModalProps> = ({
               </div>
 
               {/* Amount note & auto button */}
-              <div className="mt-2 flex items-center justify-between text-[11px] text-slate-500">
+              <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-500">
                 <span>
-                  Quantity {quantity || 0} × Rate ₹{rate || 0} = {formatCurrency((Number(quantity) || 0) * (Number(rate) || 0))} (Crate type {crateName ? `"${crateName}"` : 'blank'} is label only; never multiplied)
+                  {(Number(weight) || 0) > 0 ? (
+                    <>Weight {weight} kg × Rate ₹{rate || 0} = <strong>{formatCurrency((Number(weight) || 0) * (Number(rate) || 0))}</strong></>
+                  ) : (
+                    <>Quantity {quantity || 0} × Rate ₹{rate || 0} = <strong>{formatCurrency((Number(quantity) || 0) * (Number(rate) || 0))}</strong></>
+                  )}{' '}
+                  (Rule: Weight &gt; 0 ? Weight × Rate : Qty × Rate; Crate type {crateName ? `"${crateName}"` : 'blank'} is label only)
                 </span>
                 <button
                   type="button"
                   onClick={calculateAutoAmount}
-                  title="Recalculate Qty × Rate"
-                  className="flex items-center gap-1 rounded border border-slate-300 bg-white px-2 py-0.5 text-[11px] text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 cursor-pointer"
+                  title="Recalculate Amount (Weight > 0 ? Weight × Rate : Qty × Rate)"
+                  className="flex items-center gap-1 rounded border border-slate-300 bg-white px-2 py-0.5 text-[11px] text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 cursor-pointer font-medium"
                 >
-                  <Calculator className="h-3 w-3" /> Auto (Qty × Rate)
+                  <Calculator className="h-3 w-3" /> Auto Recalculate
                 </button>
               </div>
             </div>
