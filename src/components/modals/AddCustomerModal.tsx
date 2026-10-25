@@ -20,7 +20,8 @@ export const AddCustomerModal: React.FC<AddCustomerModalProps> = ({
 
   const [name, setName] = useState('');
   const [mobile, setMobile] = useState('');
-  const [altMobile, setAltMobile] = useState('');
+  const [altMobile, setAltMobile] = useState(''); // Alternate Number 1
+  const [alternate2Mobile, setAlternate2Mobile] = useState(''); // Alternate Number 2
   const [address, setAddress] = useState('');
   const [city, setCity] = useState('');
   const [state, setState] = useState('Maharashtra');
@@ -38,11 +39,18 @@ export const AddCustomerModal: React.FC<AddCustomerModalProps> = ({
     e.preventDefault();
     if (!name.trim()) return;
 
+    const trimmedAlt1 = altMobile.trim();
+    const trimmedAlt2 = alternate2Mobile.trim();
+
     const newCustomer: Customer = {
       id: `c-${Date.now()}`,
       name: name.trim(),
       mobile: mobile.trim(),
-      altMobile: altMobile.trim() || undefined,
+      altMobile: trimmedAlt1 || undefined,
+      alternate1Mobile: trimmedAlt1 || undefined,
+      alternateNumber1: trimmedAlt1 || undefined,
+      alternate2Mobile: trimmedAlt2 || undefined,
+      alternateNumber2: trimmedAlt2 || undefined,
       address: address.trim() || undefined,
       city: city.trim() || undefined,
       state: state.trim() || undefined,
@@ -65,6 +73,7 @@ export const AddCustomerModal: React.FC<AddCustomerModalProps> = ({
     setName('');
     setMobile('');
     setAltMobile('');
+    setAlternate2Mobile('');
     setAddress('');
     setAadhaarNo('');
     setPhoto(undefined);
@@ -131,7 +140,7 @@ export const AddCustomerModal: React.FC<AddCustomerModalProps> = ({
             </div>
             <div>
               <label className="mb-1 block text-xs font-semibold text-slate-700 dark:text-slate-300">
-                Alternate Mobile
+                Alternate Number 1
               </label>
               <input
                 type="tel"
@@ -141,6 +150,19 @@ export const AddCustomerModal: React.FC<AddCustomerModalProps> = ({
                 className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
               />
             </div>
+          </div>
+
+          <div>
+            <label className="mb-1 block text-xs font-semibold text-slate-700 dark:text-slate-300">
+              Alternate Number 2
+            </label>
+            <input
+              type="tel"
+              placeholder="Optional"
+              value={alternate2Mobile}
+              onChange={(e) => setAlternate2Mobile(e.target.value)}
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+            />
           </div>
 
           <div>

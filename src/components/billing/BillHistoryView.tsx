@@ -22,6 +22,7 @@ import { AdminPasswordModal } from '../common/AdminPasswordModal';
 import { triggerPrint, BillPaperSize, getLastSelectedPaperSize } from '../../utils/pdfAndShareEngine';
 import { CompanyContactsHeader } from '../common/CompanyContactsHeader';
 import { ChooseBillPrintFormatModal } from '../common/ChooseBillPrintFormatModal';
+import { getCustomerPrintContactLines } from '../../utils/customerContactUtils';
 
 interface BillHistoryViewProps {
   onCreateNewBill: () => void;
@@ -391,6 +392,20 @@ export const BillHistoryView: React.FC<BillHistoryViewProps> = ({
                     {selectedBillForPreview.customerAddress && (
                       <div className="text-[11px]">{selectedBillForPreview.customerAddress}</div>
                     )}
+                    {(() => {
+                      const cust = selectedBillForPreview.customerId
+                        ? db.getCustomerById(selectedBillForPreview.customerId)
+                        : undefined;
+                      if (!cust) return null;
+                      return (
+                        <>
+                          {cust.mobile && <div className="text-[11px]">Mob: {cust.mobile}</div>}
+                          {getCustomerPrintContactLines(cust).map((c) => (
+                            <div key={c.id} className="text-[11px]">{c.text}</div>
+                          ))}
+                        </>
+                      );
+                    })()}
                     {selectedBillForPreview.challanNumber && (
                       <div className="mt-1 text-[11px]">
                         Challan DT: <strong>{formatDate(selectedBillForPreview.challanDate || selectedBillForPreview.date)}</strong>

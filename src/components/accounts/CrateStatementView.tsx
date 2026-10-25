@@ -12,6 +12,7 @@ import { CompanyContactsHeader } from '../common/CompanyContactsHeader';
 import { CustomerAvatar } from '../common/CustomerAvatar';
 import { CustomerAutocomplete } from '../common/CustomerAutocomplete';
 import { QuantityInput } from '../common/QuantityInput';
+import { getCustomerPrintContactLines } from '../../utils/customerContactUtils';
 
 interface CrateStatementViewProps {
   initialCustomerId?: string;
@@ -372,6 +373,9 @@ export const CrateStatementView: React.FC<CrateStatementViewProps> = ({
               {activeCustomer?.address && <div className="text-[11px]">{activeCustomer.address}</div>}
               {activeCustomer?.city && <div className="text-[11px]">{activeCustomer.city}</div>}
               {activeCustomer?.mobile && <div className="text-[11px]">Mob: {activeCustomer.mobile}</div>}
+              {activeCustomer && getCustomerPrintContactLines(activeCustomer).map((c) => (
+                <div key={c.id} className="text-[11px]">{c.text}</div>
+              ))}
               {activeCustomer?.aadhaarNo && <div className="text-[10px]">Aadhaar: {activeCustomer.aadhaarNo}</div>}
             </div>
             <div className="text-right">

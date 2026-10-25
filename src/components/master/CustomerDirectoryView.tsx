@@ -48,6 +48,8 @@ export const CustomerDirectoryView: React.FC<CustomerDirectoryViewProps> = ({
   // Edit Customer Modal State
   const [editName, setEditName] = useState('');
   const [editMobile, setEditMobile] = useState('');
+  const [editAltMobile, setEditAltMobile] = useState(''); // Alternate Number 1
+  const [editAlternate2Mobile, setEditAlternate2Mobile] = useState(''); // Alternate Number 2
   const [editCity, setEditCity] = useState('');
   const [editAddress, setEditAddress] = useState('');
   const [editAadhaarNo, setEditAadhaarNo] = useState('');
@@ -71,7 +73,8 @@ export const CustomerDirectoryView: React.FC<CustomerDirectoryViewProps> = ({
         const nameLower = c.name.toLowerCase();
         const cityLower = c.city ? c.city.toLowerCase() : '';
         const mobile = c.mobile || '';
-        const altMobile = c.altMobile || '';
+        const altMobile = c.altMobile || c.alternate1Mobile || c.alternateNumber1 || '';
+        const alt2Mobile = c.alternate2Mobile || c.alternateNumber2 || '';
         const aadhaar = c.aadhaarNo ? c.aadhaarNo.replace(/\s+/g, '') : '';
         const gstin = c.gstin ? c.gstin.toLowerCase() : '';
 
@@ -80,9 +83,9 @@ export const CustomerDirectoryView: React.FC<CustomerDirectoryViewProps> = ({
         const words = nameLower.split(/\s+/);
         if (words.some((w) => w.startsWith(q))) return { item, score: 2 };
         if (nameLower.includes(q)) return { item, score: 3 };
-        if (mobile.startsWith(q) || altMobile.startsWith(q)) return { item, score: 4 };
+        if (mobile.startsWith(q) || altMobile.startsWith(q) || alt2Mobile.startsWith(q)) return { item, score: 4 };
         if (cityLower.startsWith(q)) return { item, score: 5 };
-        if (mobile.includes(q) || altMobile.includes(q)) return { item, score: 6 };
+        if (mobile.includes(q) || altMobile.includes(q) || alt2Mobile.includes(q)) return { item, score: 6 };
         if (cityLower.includes(q)) return { item, score: 7 };
         if (aadhaar.includes(cleanQ)) return { item, score: 8 };
         if (gstin.includes(q)) return { item, score: 9 };
@@ -103,6 +106,8 @@ export const CustomerDirectoryView: React.FC<CustomerDirectoryViewProps> = ({
     setEditingCustomer(c);
     setEditName(c.name);
     setEditMobile(c.mobile || '');
+    setEditAltMobile(c.altMobile || c.alternate1Mobile || c.alternateNumber1 || '');
+    setEditAlternate2Mobile(c.alternate2Mobile || c.alternateNumber2 || '');
     setEditCity(c.city || '');
     setEditAddress(c.address || '');
     setEditAadhaarNo(c.aadhaarNo || '');
@@ -113,10 +118,18 @@ export const CustomerDirectoryView: React.FC<CustomerDirectoryViewProps> = ({
     e.preventDefault();
     if (!editingCustomer || !editName.trim()) return;
 
+    const trimmedAlt1 = editAltMobile.trim();
+    const trimmedAlt2 = editAlternate2Mobile.trim();
+
     const updated: Customer = {
       ...editingCustomer,
       name: editName.trim(),
       mobile: editMobile.trim(),
+      altMobile: trimmedAlt1 || undefined,
+      alternate1Mobile: trimmedAlt1 || undefined,
+      alternateNumber1: trimmedAlt1 || undefined,
+      alternate2Mobile: trimmedAlt2 || undefined,
+      alternateNumber2: trimmedAlt2 || undefined,
       city: editCity.trim() || undefined,
       address: editAddress.trim() || undefined,
       aadhaarNo: editAadhaarNo.trim() || undefined,
@@ -424,15 +437,41 @@ export const CustomerDirectoryView: React.FC<CustomerDirectoryViewProps> = ({
                 </div>
                 <div>
                   <label className="mb-1 block text-xs font-semibold text-slate-700 dark:text-slate-300">
-                    City / Mandi Yard
+                    Alternate Number 1
                   </label>
                   <input
-                    type="text"
-                    value={editCity}
-                    onChange={(e) => setEditCity(e.target.value)}
+                    type="tel"
+                    placeholder="Optional"
+                    value={editAltMobile}
+                    onChange={(e) => setEditAltMobile(e.target.value)}
                     className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                   />
                 </div>
+              </div>
+
+              <div>
+                <label className="mb-1 block text-xs font-semibold text-slate-700 dark:text-slate-300">
+                  Alternate Number 2
+                </label>
+                <input
+                  type="tel"
+                  placeholder="Optional"
+                  value={editAlternate2Mobile}
+                  onChange={(e) => setEditAlternate2Mobile(e.target.value)}
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                />
+              </div>
+
+              <div>
+                <label className="mb-1 block text-xs font-semibold text-slate-700 dark:text-slate-300">
+                  City / Mandi Yard
+                </label>
+                <input
+                  type="text"
+                  value={editCity}
+                  onChange={(e) => setEditCity(e.target.value)}
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                />
               </div>
 
               <div>

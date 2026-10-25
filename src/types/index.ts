@@ -75,7 +75,13 @@ export interface Customer {
   name: string;
   contactPerson?: string;
   mobile: string;
-  altMobile?: string;
+  altMobile?: string; // Preserved legacy database field (Alternate Number 1)
+  alternate1ContactName?: string; // Optional Alternate 1 Contact Name
+  alternate1Mobile?: string; // Optional Alternate 1 Mobile Number
+  alternate2ContactName?: string; // Optional Alternate 2 Contact Name
+  alternate2Mobile?: string; // Optional Alternate 2 Mobile Number
+  alternateNumber1?: string; // Optional Alternate Number 1 alias
+  alternateNumber2?: string; // Optional Alternate Number 2 alias
   address?: string;
   aadhaarNo?: string;
   gstin?: string; // Preserved legacy database field (hidden from forms & profiles)

@@ -31,25 +31,25 @@ export function getCompanyContactEntries(profile?: Partial<CompanyProfile> | nul
     }
   }
 
-  // 2. Alternate 1 Contact
+  // 2. Alternate 1 Contact (Word "Alternate" removed for print documents)
   const alt1Mobile = (profile.alternate1Mobile || profile.alternateMobile || '').trim();
   const alt1Name = (profile.alternate1ContactName || '').trim();
   if (alt1Mobile) {
     if (alt1Name) {
-      entries.push({ id: 'alt1', text: `Alternate 1: ${alt1Name} — Mobile: ${alt1Mobile}` });
+      entries.push({ id: 'alt1', text: `${alt1Name} — Mobile: ${alt1Mobile}` });
     } else {
-      entries.push({ id: 'alt1', text: `Alternate 1 Mobile: ${alt1Mobile}` });
+      entries.push({ id: 'alt1', text: `Mobile: ${alt1Mobile}` });
     }
   }
 
-  // 3. Alternate 2 Contact
+  // 3. Alternate 2 Contact (Word "Alternate" removed for print documents)
   const alt2Mobile = (profile.alternate2Mobile || '').trim();
   const alt2Name = (profile.alternate2ContactName || '').trim();
   if (alt2Mobile) {
     if (alt2Name) {
-      entries.push({ id: 'alt2', text: `Alternate 2: ${alt2Name} — Mobile: ${alt2Mobile}` });
+      entries.push({ id: 'alt2', text: `${alt2Name} — Mobile: ${alt2Mobile}` });
     } else {
-      entries.push({ id: 'alt2', text: `Alternate 2 Mobile: ${alt2Mobile}` });
+      entries.push({ id: 'alt2', text: `Mobile: ${alt2Mobile}` });
     }
   }
 

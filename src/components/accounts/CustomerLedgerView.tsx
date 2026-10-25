@@ -15,6 +15,7 @@ import { BillShareButtons } from '../common/BillShareButtons';
 import { triggerPrint } from '../../utils/pdfAndShareEngine';
 import { CompanyContactsHeader } from '../common/CompanyContactsHeader';
 import { QuantityInput } from '../common/QuantityInput';
+import { getCustomerPrintContactLines } from '../../utils/customerContactUtils';
 
 interface CustomerLedgerViewProps {
   initialCustomerId?: string;
@@ -570,6 +571,9 @@ export const CustomerLedgerView: React.FC<CustomerLedgerViewProps> = ({
               {activeCustomer?.address && <div className="text-[11px]">{activeCustomer.address}</div>}
               {activeCustomer?.city && <div className="text-[11px]">{activeCustomer.city}</div>}
               {activeCustomer?.mobile && <div className="text-[11px]">Mob: {activeCustomer.mobile}</div>}
+              {activeCustomer && getCustomerPrintContactLines(activeCustomer).map((c) => (
+                <div key={c.id} className="text-[11px]">{c.text}</div>
+              ))}
               {activeCustomer?.aadhaarNo && <div className="text-[10px]">Aadhaar: {activeCustomer.aadhaarNo}</div>}
             </div>
             <div className="text-right">

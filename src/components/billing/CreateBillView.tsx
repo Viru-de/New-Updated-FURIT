@@ -13,6 +13,7 @@ import { triggerPrint, BillPaperSize, getLastSelectedPaperSize } from '../../uti
 import { CompanyContactsHeader } from '../common/CompanyContactsHeader';
 import { ChooseBillPrintFormatModal } from '../common/ChooseBillPrintFormatModal';
 import { CustomerAvatar } from '../common/CustomerAvatar';
+import { getCustomerPrintContactLines } from '../../utils/customerContactUtils';
 import { CustomerAutocomplete } from '../common/CustomerAutocomplete';
 import { FruitAutocomplete } from '../common/FruitAutocomplete';
 import { QuantityInput } from '../common/QuantityInput';
@@ -666,6 +667,12 @@ export const CreateBillView: React.FC<CreateBillViewProps> = ({
                     {activeCustomer?.address && (
                       <div className="text-[11px]">{activeCustomer.address}, {activeCustomer.city}</div>
                     )}
+                    {activeCustomer?.mobile && (
+                      <div className="text-[11px]">Mob: {activeCustomer.mobile}</div>
+                    )}
+                    {activeCustomer && getCustomerPrintContactLines(activeCustomer).map((c) => (
+                      <div key={c.id} className="text-[11px]">{c.text}</div>
+                    ))}
                     {challanNo && (
                       <div className="mt-1 text-[11px]">
                         Challan DT: <strong>{formatDate(challanDate)}</strong>

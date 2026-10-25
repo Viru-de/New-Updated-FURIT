@@ -20,6 +20,7 @@ export interface BillTableCanvasProps {
   customerName: string;
   customerAddress?: string;
   customerMobile?: string;
+  customerAlternateContacts?: string[];
   customerAadhaarNo?: string;
   items: BillingLineItem[];
   expenses?: Array<{ id?: string; name: string; amount: number }>;
@@ -47,6 +48,7 @@ export const BillTableCanvas: React.FC<BillTableCanvasProps> = ({
   customerName,
   customerAddress,
   customerMobile,
+  customerAlternateContacts,
   customerAadhaarNo,
   items,
   expenses = [],
@@ -178,6 +180,9 @@ export const BillTableCanvas: React.FC<BillTableCanvasProps> = ({
               </div>
               {customerAddress && <div className="text-[11px] text-slate-600 print:text-black">{customerAddress}</div>}
               {customerMobile && <div className="text-[11px] text-slate-600 print:text-black">Mob: {customerMobile}</div>}
+              {customerAlternateContacts && customerAlternateContacts.map((c, i) => (
+                <div key={i} className="text-[11px] text-slate-600 print:text-black">{c}</div>
+              ))}
               {customerAadhaarNo && (
                 <div className="text-[10px] text-slate-600 print:text-black font-mono">
                   Aadhaar Card No.: {maskAadhaar(customerAadhaarNo)}

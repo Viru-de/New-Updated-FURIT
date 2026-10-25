@@ -9,6 +9,7 @@ import { BillShareButtons } from '../common/BillShareButtons';
 import { ChooseBillPrintFormatModal } from '../common/ChooseBillPrintFormatModal';
 import { CompanyContactsHeader } from '../common/CompanyContactsHeader';
 import { BillPaperSize, getLastSelectedPaperSize } from '../../utils/pdfAndShareEngine';
+import { getCustomerPrintContactLines } from '../../utils/customerContactUtils';
 
 interface ReceiptPrintModalProps {
   isOpen: boolean;
@@ -200,6 +201,9 @@ export const ReceiptPrintModal: React.FC<ReceiptPrintModalProps> = ({
                   </div>
                   {customerAddress && <div className="text-[11px] text-slate-600 print:text-black">{customerAddress}</div>}
                   {customerMobile && <div className="text-[11px] text-slate-600 print:text-black">Mob: {customerMobile}</div>}
+                  {customer && getCustomerPrintContactLines(customer).map((c) => (
+                    <div key={c.id} className="text-[11px] text-slate-600 print:text-black">{c.text}</div>
+                  ))}
                   {customerAadhaarNo && (
                     <div className="text-[10px] text-slate-600 print:text-black font-mono">
                       Aadhaar Card No.: {maskAadhaar(customerAadhaarNo)}

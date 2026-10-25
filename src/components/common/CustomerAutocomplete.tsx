@@ -121,7 +121,8 @@ export const CustomerAutocomplete: React.FC<CustomerAutocompleteProps> = ({
         const nameLower = c.name.toLowerCase();
         const cityLower = c.city ? c.city.toLowerCase() : '';
         const mobile = c.mobile || '';
-        const altMobile = c.altMobile || '';
+        const altMobile = c.altMobile || c.alternate1Mobile || c.alternateNumber1 || '';
+        const alt2Mobile = c.alternate2Mobile || c.alternateNumber2 || '';
         const aadhaar = c.aadhaarNo ? c.aadhaarNo.replace(/\s+/g, '') : '';
         const idLower = c.id.toLowerCase();
 
@@ -135,11 +136,11 @@ export const CustomerAutocomplete: React.FC<CustomerAutocompleteProps> = ({
         // Name contains query
         if (nameLower.includes(query)) return { customer: c, score: 3 };
         // Mobile or alt mobile starts with query
-        if (mobile.startsWith(query) || altMobile.startsWith(query)) return { customer: c, score: 4 };
+        if (mobile.startsWith(query) || altMobile.startsWith(query) || alt2Mobile.startsWith(query)) return { customer: c, score: 4 };
         // City starts with query
         if (cityLower.startsWith(query)) return { customer: c, score: 5 };
         // Mobile / Alt mobile contains query
-        if (mobile.includes(query) || altMobile.includes(query)) return { customer: c, score: 6 };
+        if (mobile.includes(query) || altMobile.includes(query) || alt2Mobile.includes(query)) return { customer: c, score: 6 };
         // City contains query
         if (cityLower.includes(query)) return { customer: c, score: 7 };
         // Aadhaar contains query

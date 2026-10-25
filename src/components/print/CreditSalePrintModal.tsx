@@ -6,6 +6,7 @@ import { BillTableCanvas } from '../common/BillTableCanvas';
 import { BillShareButtons } from '../common/BillShareButtons';
 import { ChooseBillPrintFormatModal } from '../common/ChooseBillPrintFormatModal';
 import { BillPaperSize, getLastSelectedPaperSize } from '../../utils/pdfAndShareEngine';
+import { getCustomerPrintContactLines } from '../../utils/customerContactUtils';
 
 interface CreditSalePrintModalProps {
   isOpen: boolean;
@@ -133,6 +134,7 @@ export const CreditSalePrintModal: React.FC<CreditSalePrintModalProps> = ({
             customerName={customerName}
             customerAddress={customerAddress}
             customerMobile={customerMobile}
+            customerAlternateContacts={getCustomerPrintContactLines(customer).map((c) => c.text)}
             customerAadhaarNo={customerAadhaarNo}
             items={creditSale.items || []}
             expenses={creditSale.expenses || []}
