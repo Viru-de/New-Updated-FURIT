@@ -620,6 +620,45 @@ export function exportSaleProceedsLedger(vendorId?: string, fileNameSuffix = '')
   }
 }
 
+// 9b. Sale Proceeds Customer Ledger Export
+export function exportSaleProceedsCustomerLedger(customerId: string) {
+  const cust = db.getCustomerById(customerId);
+  const dateStr = getTodayIso();
+  const ledger = getSaleProceedsLedger({ customerId });
+  const fileName = `Hari_Kripa_Sale_Proceeds_${cust ? cust.name.replace(/\s+/g, '_') : customerId}_${dateStr}.xlsx`;
+
+  const headers = [
+    'Date',
+    'Particulars',
+    'Debit (₹)',
+    'Credit (₹)',
+    'Running Balance (₹)',
+  ];
+
+  const rows = ledger.entries.map((e) => [
+    formatDate(e.date),
+    sanitizeCellValue(e.particulars),
+    e.debit || '',
+    e.credit || '',
+    e.balance,
+  ]);
+
+  const wsData = [
+    [`HARI KRIPA FRUIT ERP — SALE PROCEEDS LEDGER: ${cust ? cust.name.toUpperCase() : 'CUSTOMER'}`],
+    [`Mobile: ${cust?.mobile || 'N/A'} | City: ${cust?.city || 'N/A'} | Export Date: ${formatDate(dateStr)}`],
+    [`Total Credit: ₹${ledger.totalCredit} | Total Debit: ₹${ledger.totalDebit} | Closing Balance: ₹${ledger.closingBalance}`],
+    [],
+    headers,
+    ...rows,
+  ];
+
+  const ws = XLSX.utils.aoa_to_sheet(wsData);
+  setAutoColumnWidths(ws, [headers, ...rows]);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Customer Sale Proceeds');
+  downloadWorkbook(wb, fileName);
+}
+
 // 10. Crate Statement
 export function exportCrateStatement(customerId?: string, fileNameSuffix = '') {
   const customers = db.getCustomers();

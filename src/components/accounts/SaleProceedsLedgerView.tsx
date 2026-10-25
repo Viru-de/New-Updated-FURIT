@@ -3,10 +3,12 @@ import { db } from '../../services/db';
 import { getSaleProceedsLedger } from '../../services/accounting';
 import { formatCurrency, formatDate, toIsoDate, getTodayIso } from '../../utils/formatters';
 import { DatePickerInput } from '../common/DatePickerInput';
-import { LedgerEntry, SaleProceeds, SaleProceedsOpeningBalance } from '../../types';
+import { Customer, LedgerEntry, SaleProceeds, SaleProceedsOpeningBalance } from '../../types';
 import { SaleProceedsModal } from './SaleProceedsModal';
-import { Edit2, Download, Printer, Filter, Calendar, Building2 } from 'lucide-react';
-import { exportSaleProceedsLedger } from '../../utils/excelEngine';
+import { SearchCustomerModal } from '../modals/SearchCustomerModal';
+import { CustomerAvatar } from '../common/CustomerAvatar';
+import { Edit2, Download, Printer, Filter, Calendar, Building2, Search, X, Users } from 'lucide-react';
+import { exportSaleProceedsLedger, exportSaleProceedsCustomerLedger } from '../../utils/excelEngine';
 import { BillShareButtons } from '../common/BillShareButtons';
 import { triggerPrint } from '../../utils/pdfAndShareEngine';
 import { CompanyContactsHeader } from '../common/CompanyContactsHeader';
@@ -17,6 +19,11 @@ export const SaleProceedsLedgerView: React.FC = () => {
   const [isEditObOpen, setIsEditObOpen] = useState(false);
   const [editingSaleProceeds, setEditingSaleProceeds] = useState<SaleProceeds | null>(null);
   const [isSaleProceedsModalOpen, setIsSaleProceedsModalOpen] = useState(false);
+
+  // Customer search & filter state
+  const [selectedCustomerId, setSelectedCustomerId] = useState<string>('');
+  const [isSearchCustomerOpen, setIsSearchCustomerOpen] = useState(false);
+  const selectedCustomer = selectedCustomerId ? db.getCustomerById(selectedCustomerId) : null;
 
   const currentOb = db.getSaleProceedsOpeningBalance();
 
@@ -39,6 +46,7 @@ export const SaleProceedsLedgerView: React.FC = () => {
   const ledger = getSaleProceedsLedger({
     startDate: filterStartDate ? toIsoDate(filterStartDate) : undefined,
     endDate: filterEndDate ? toIsoDate(filterEndDate) : undefined,
+    customerId: selectedCustomerId || undefined,
   });
 
   const handleEditEntry = (entry: LedgerEntry) => {
@@ -116,6 +124,15 @@ export const SaleProceedsLedgerView: React.FC = () => {
         <div className="flex flex-wrap items-center gap-2 no-print">
           <button
             type="button"
+            onClick={() => setIsSearchCustomerOpen(true)}
+            className="flex items-center gap-1.5 rounded-lg border border-emerald-500 bg-emerald-50/70 px-3 py-1.5 text-xs font-bold text-emerald-800 hover:bg-emerald-100 dark:border-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-300 cursor-pointer shadow-2xs"
+            title="Search and filter by customer"
+          >
+            <Search className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+            <span>Search Customer</span>
+          </button>
+          <button
+            type="button"
             onClick={() => setIsEditObOpen(true)}
             className="flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 cursor-pointer"
           >
@@ -123,7 +140,13 @@ export const SaleProceedsLedgerView: React.FC = () => {
           </button>
           <button
             type="button"
-            onClick={() => exportSaleProceedsLedger()}
+            onClick={() => {
+              if (selectedCustomerId) {
+                exportSaleProceedsCustomerLedger(selectedCustomerId);
+              } else {
+                exportSaleProceedsLedger();
+              }
+            }}
             className="flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 cursor-pointer shadow-2xs"
           >
             <Download className="h-3.5 w-3.5 text-emerald-600" /> Export Excel
@@ -152,9 +175,9 @@ export const SaleProceedsLedgerView: React.FC = () => {
           </div>
           <BillShareButtons
             elementId="sale-proceeds-print-area"
-            filename={`Sale_Proceeds_Ledger_${formatDate(getTodayIso()).replace(/\//g, '_')}`}
-            title="Sale Proceeds Ledger Statement"
-            summaryText={`Account: Sale Proceeds Ledger\nDate: ${formatDate(getTodayIso())}\nTotal Debit: ₹${ledger.totalDebit.toLocaleString('en-IN')}\nTotal Credit: ₹${ledger.totalCredit.toLocaleString('en-IN')}\nClosing Balance: ₹${ledger.closingBalance.toLocaleString('en-IN')}`}
+            filename={`Sale_Proceeds_Ledger_${selectedCustomer ? `${selectedCustomer.name.replace(/\s+/g, '_')}_` : ''}${formatDate(getTodayIso()).replace(/\//g, '_')}`}
+            title={selectedCustomer ? `Sale Proceeds Ledger — ${selectedCustomer.name}` : "Sale Proceeds Ledger Statement"}
+            summaryText={`Account: Sale Proceeds Ledger${selectedCustomer ? `\nCustomer: ${selectedCustomer.name}` : ''}\nDate: ${formatDate(getTodayIso())}\nTotal Debit: ₹${ledger.totalDebit.toLocaleString('en-IN')}\nTotal Credit: ₹${ledger.totalCredit.toLocaleString('en-IN')}\nClosing Balance: ₹${ledger.closingBalance.toLocaleString('en-IN')}`}
           />
           <button
             type="button"
@@ -166,17 +189,80 @@ export const SaleProceedsLedgerView: React.FC = () => {
         </div>
       </div>
 
-      {/* Date Filter Bar */}
+      {/* Date & Customer Filter Bar */}
       <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-2xs dark:border-slate-800 dark:bg-slate-900 no-print">
         <div className="flex flex-wrap items-end gap-3">
-          <div className="w-44">
+          {/* Prominent Search Customer Button */}
+          <div>
+            <label className="mb-1 block text-xs font-semibold text-slate-700 dark:text-slate-300">
+              Customer Filter
+            </label>
+            <button
+              type="button"
+              onClick={() => setIsSearchCustomerOpen(true)}
+              className="flex items-center gap-2 rounded-lg bg-emerald-600 px-3.5 py-2 text-xs font-bold text-white shadow-xs hover:bg-emerald-700 cursor-pointer transition-all"
+            >
+              <Search className="h-4 w-4" />
+              <span>Search Customer</span>
+            </button>
+          </div>
+
+          {/* Active Customer Indicator with Clear Search / All Customers option */}
+          {selectedCustomer ? (
+            <div className="flex items-center gap-2.5 rounded-lg border border-emerald-300 bg-emerald-50/90 px-3 py-1.5 text-xs dark:border-emerald-800 dark:bg-emerald-950/50">
+              <CustomerAvatar photo={selectedCustomer.photo} name={selectedCustomer.name} size="xs" />
+              <div className="min-w-0">
+                <div className="flex items-center gap-1.5">
+                  <span className="font-bold text-emerald-950 dark:text-emerald-100 truncate">
+                    {selectedCustomer.name}
+                  </span>
+                  {selectedCustomer.city && (
+                    <span className="text-[10px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-100/90 dark:bg-emerald-900/60 px-1.5 py-0.2 rounded">
+                      {selectedCustomer.city}
+                    </span>
+                  )}
+                </div>
+                {selectedCustomer.mobile && (
+                  <div className="text-[11px] text-emerald-800 dark:text-emerald-300 font-mono">
+                    Mob: {selectedCustomer.mobile}
+                  </div>
+                )}
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedCustomerId('')}
+                className="ml-1 rounded p-1 text-emerald-700 hover:bg-emerald-200 hover:text-rose-600 dark:text-emerald-300 dark:hover:bg-emerald-900 dark:hover:text-rose-300 cursor-pointer transition-colors"
+                title="Clear Search / Show All Customers"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          ) : (
+            <div className="hidden sm:flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-500 dark:border-slate-800 dark:bg-slate-800/40 dark:text-slate-400">
+              <Users className="h-4 w-4 opacity-50" />
+              <span>All Customers (Complete Ledger)</span>
+            </div>
+          )}
+
+          {/* All Customers / Clear Search button when filtered */}
+          {selectedCustomerId && (
+            <button
+              type="button"
+              onClick={() => setSelectedCustomerId('')}
+              className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 cursor-pointer shadow-2xs"
+            >
+              All Customers (Clear Search)
+            </button>
+          )}
+
+          <div className="w-36 sm:w-44">
             <DatePickerInput
               label="From Date"
               value={filterStartDate}
               onChange={setFilterStartDate}
             />
           </div>
-          <div className="w-44">
+          <div className="w-36 sm:w-44">
             <DatePickerInput
               label="To Date"
               value={filterEndDate}
@@ -190,11 +276,12 @@ export const SaleProceedsLedgerView: React.FC = () => {
                 setFilterStartDate('');
                 setFilterEndDate('');
               }}
-              className="mb-1 rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300"
+              className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 cursor-pointer"
             >
-              Clear Filter
+              Clear Dates
             </button>
           )}
+
           <div className="ml-auto text-xs text-slate-500 pb-2">
             Credit increases balance · Debit decreases balance
           </div>
@@ -231,6 +318,11 @@ export const SaleProceedsLedgerView: React.FC = () => {
           <div className="flex justify-between items-start text-xs mt-2 text-left border-t border-slate-300 pt-1.5">
             <div>
               <div className="font-bold text-sm">Account: Mandi Sale Consignment Proceeds</div>
+              {selectedCustomer && (
+                <div className="font-bold text-xs mt-0.5 text-slate-900 print:text-black">
+                  Customer: {selectedCustomer.name} {selectedCustomer.mobile ? `· Mob: ${selectedCustomer.mobile}` : ''}
+                </div>
+              )}
               <div className="text-[11px]">Entity: {currentProfile.name}</div>
             </div>
             <div className="text-right">
@@ -238,7 +330,7 @@ export const SaleProceedsLedgerView: React.FC = () => {
               {(filterStartDate || filterEndDate) ? (
                 <div className="text-[11px]">Period: {filterStartDate ? formatDate(filterStartDate) : 'Opening'} to {filterEndDate ? formatDate(filterEndDate) : 'Today'}</div>
               ) : (
-                <div className="text-[11px]">Period: Complete Statement (All Transactions)</div>
+                <div className="text-[11px]">Period: Complete Statement{selectedCustomer ? ` (${selectedCustomer.name})` : ' (All Transactions)'}</div>
               )}
               <div className="mt-1 font-bold">
                 Closing Balance: <strong>{formatCurrency(ledger.closingBalance)}</strong>
@@ -263,7 +355,9 @@ export const SaleProceedsLedgerView: React.FC = () => {
               {ledger.entries.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="px-5 py-8 text-center text-xs text-slate-500">
-                    No ledger transactions recorded in this period.
+                    {selectedCustomer
+                      ? `No sale proceeds records found for ${selectedCustomer.name}${filterStartDate || filterEndDate ? ' in this date range.' : '.'}`
+                      : 'No ledger transactions recorded in this period.'}
                   </td>
                 </tr>
               ) : (
@@ -343,7 +437,11 @@ export const SaleProceedsLedgerView: React.FC = () => {
         {/* Bottom Closing Balance Banner */}
         <div className="flex flex-col sm:flex-row items-center justify-between border-t border-slate-200 bg-emerald-50/50 px-6 py-4 dark:border-slate-800 dark:bg-emerald-950/20">
           <div className="text-xs text-slate-600 dark:text-slate-400">
-            Current Account Balance for <strong>Hari Kripa</strong>
+            {selectedCustomer ? (
+              <span>Sale Proceeds Ledger Balance for <strong>{selectedCustomer.name}</strong></span>
+            ) : (
+              <span>Current Account Balance for <strong>Hari Kripa</strong></span>
+            )}
           </div>
           <div className="flex items-center gap-3 mt-2 sm:mt-0">
             <span className="text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400">
@@ -466,6 +564,16 @@ export const SaleProceedsLedgerView: React.FC = () => {
           setEditingSaleProceeds(null);
           setRefreshKey((k) => k + 1);
         }}
+      />
+
+      {/* Search Customer Modal */}
+      <SearchCustomerModal
+        isOpen={isSearchCustomerOpen}
+        onClose={() => setIsSearchCustomerOpen(false)}
+        onSelectCustomer={(c) => {
+          setSelectedCustomerId(c ? c.id : '');
+        }}
+        selectedCustomerId={selectedCustomerId}
       />
     </div>
   );

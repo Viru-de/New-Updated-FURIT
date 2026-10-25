@@ -82,10 +82,19 @@ export const SaleProceedsModal: React.FC<SaleProceedsModalProps> = ({
           );
           const q = it.quantity !== undefined ? it.quantity : 1;
           const u = it.unit || 'Crate';
-          const w = it.kg !== undefined ? it.kg : 0;
+          const itemWeight = it.weight !== undefined && it.weight !== null
+            ? it.weight
+            : (it.kg !== undefined && it.kg !== null
+              ? it.kg
+              : (editItem.items?.length === 1 && editItem.weight !== undefined && editItem.weight !== null
+                ? editItem.weight
+                : (editItem.items?.length === 1 && editItem.kg !== undefined && editItem.kg !== null
+                  ? editItem.kg
+                  : 0)));
+          const w = typeof itemWeight === 'number' ? itemWeight : (Number(itemWeight) || 0);
           const r = it.rate !== undefined ? it.rate : 0;
           const a =
-            it.amount !== undefined
+            it.amount !== undefined && it.amount !== null
               ? it.amount
               : calculateWholesaleItemAmount(
                   Number(q) || 0,
@@ -116,9 +125,20 @@ export const SaleProceedsModal: React.FC<SaleProceedsModalProps> = ({
         );
         const q = editItem.quantity !== undefined ? editItem.quantity : 1;
         const u = editItem.unit || 'Crate';
-        const w = editItem.kg !== undefined ? editItem.kg : 0;
+        const itemWeight = editItem.weight !== undefined && editItem.weight !== null
+          ? editItem.weight
+          : (editItem.kg !== undefined && editItem.kg !== null ? editItem.kg : 0);
+        const w = typeof itemWeight === 'number' ? itemWeight : (Number(itemWeight) || 0);
         const r = editItem.rate !== undefined ? editItem.rate : 0;
-        const a = editItem.amount !== undefined ? editItem.amount : 0;
+        const a =
+          editItem.amount !== undefined && editItem.amount !== null
+            ? editItem.amount
+            : calculateWholesaleItemAmount(
+                Number(q) || 0,
+                u,
+                Number(w) || 0,
+                Number(r) || 0
+              );
         setItems([
           {
             id: `spi-${Date.now()}-1`,
@@ -358,18 +378,27 @@ export const SaleProceedsModal: React.FC<SaleProceedsModalProps> = ({
     const selectedVendor = vendors.find((v) => v.id === vendorId);
     const selectedCustomer = customers.find((c) => c.id === customerId);
 
-    const saleItems: SaleProceedsItem[] = items.map((it, idx) => ({
-      id: it.id || `spi-${Date.now()}-${idx}`,
-      fruitId: it.fruitId,
-      fruitName: it.fruitName || 'Fruit',
-      quantity: Number(it.quantity) || 0,
-      unit: it.unit || 'Crate',
-      kg: Number(it.weight) || 0,
-      crateTypeId: it.crateName ? (it.crateTypeId || 'ct_20') : undefined,
-      crateName: it.crateName || undefined,
-      rate: Number(it.rate) || 0,
-      amount: Number(it.amount) || 0,
-    }));
+    const saleItems: SaleProceedsItem[] = items.map((it, idx) => {
+      const itemWeight = it.weight === '' ? 0 : Number(it.weight) || 0;
+      const itemQty = it.quantity === '' ? 0 : Number(it.quantity) || 0;
+      const itemRate = it.rate === '' ? 0 : Number(it.rate) || 0;
+      const calculatedAmount = calculateWholesaleItemAmount(itemQty, it.unit, itemWeight, itemRate);
+      const itemAmount = it.amount !== '' && it.amount !== undefined ? Number(it.amount) : calculatedAmount;
+
+      return {
+        id: it.id || `spi-${Date.now()}-${idx}`,
+        fruitId: it.fruitId,
+        fruitName: it.fruitName || 'Fruit',
+        quantity: itemQty,
+        unit: it.unit || 'Crate',
+        kg: itemWeight,
+        weight: itemWeight,
+        crateTypeId: it.crateName ? (it.crateTypeId || 'ct_20') : undefined,
+        crateName: it.crateName || undefined,
+        rate: itemRate,
+        amount: itemAmount,
+      };
+    });
 
     const primaryItem = saleItems[0] || {
       id: `spi-${Date.now()}`,
@@ -378,6 +407,7 @@ export const SaleProceedsModal: React.FC<SaleProceedsModalProps> = ({
       quantity: 0,
       unit: 'Crate',
       kg: 0,
+      weight: 0,
       rate: 0,
       amount: 0,
     };
@@ -395,6 +425,7 @@ export const SaleProceedsModal: React.FC<SaleProceedsModalProps> = ({
       quantity: totalQuantity,
       unit: primaryItem.unit || 'Crate',
       kg: totalWeight,
+      weight: totalWeight,
       rate: saleItems.length === 1 ? primaryItem.rate : 0,
       amount: totalProductAmount,
       expenses,
@@ -564,7 +595,7 @@ export const SaleProceedsModal: React.FC<SaleProceedsModalProps> = ({
                             min={0}
                             step="any"
                             placeholder="0"
-                            value={it.weight === 0 ? '0' : it.weight || '0'}
+                            value={it.weight}
                             onChange={(val) => handleItemChange(idx, 'weight', val)}
                             className="w-full rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-xs text-right font-mono outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800"
                           />

@@ -15,12 +15,14 @@ import { compareDates, formatDate, toIsoDate } from '../utils/formatters';
 export interface DateFilterRange {
   startDate?: string; // YYYY-MM-DD
   endDate?: string; // YYYY-MM-DD
+  customerId?: string;
 }
 
 /**
  * Computes the complete Sale Proceeds Ledger dynamically.
  * Starts with Opening Balance, then adds all Sale Proceeds in chronological order.
  * Credit increases balance, Debit decreases balance.
+ * When customerId filter is provided, displays only that customer's records.
  */
 export function getSaleProceedsLedger(filter?: DateFilterRange): {
   entries: LedgerEntry[];
@@ -30,6 +32,9 @@ export function getSaleProceedsLedger(filter?: DateFilterRange): {
 } {
   const ob = db.getSaleProceedsOpeningBalance();
   const sales = db.getSaleProceeds();
+  const targetCustomerId = filter?.customerId;
+  const targetCustomer = targetCustomerId ? db.getCustomerById(targetCustomerId) : null;
+  const targetCustomerName = targetCustomer ? targetCustomer.name.trim().toLowerCase() : '';
 
   // Sort sales chronologically by date, then by sequence number
   const sortedSales = [...sales].sort((a, b) => {
@@ -41,8 +46,8 @@ export function getSaleProceedsLedger(filter?: DateFilterRange): {
   const entries: LedgerEntry[] = [];
   let currentBalance = 0;
 
-  // 1. Opening Balance
-  if (ob && ob.amount > 0) {
+  // 1. Opening Balance - only included when viewing complete/consolidated ledger (not filtered by a single customer)
+  if (!targetCustomerId && ob && ob.amount > 0) {
     const isCredit = ob.type === 'credit';
     const credit = isCredit ? ob.amount : null;
     const debit = isCredit ? null : ob.amount;
@@ -61,6 +66,15 @@ export function getSaleProceedsLedger(filter?: DateFilterRange): {
 
   // 2. Sale Proceeds
   for (const sp of sortedSales) {
+    // If filtered by customer, only include sales matching this customer
+    if (targetCustomerId) {
+      const matchId = sp.customerId === targetCustomerId;
+      const matchName = targetCustomerName && sp.customerName?.trim().toLowerCase() === targetCustomerName;
+      if (!matchId && !matchName) {
+        continue;
+      }
+    }
+
     const isCredit = sp.netAmount >= 0;
     const credit = isCredit ? sp.netAmount : null;
     const debit = isCredit ? null : Math.abs(sp.netAmount);
@@ -73,6 +87,8 @@ export function getSaleProceedsLedger(filter?: DateFilterRange): {
       referenceType: 'Sale Proceeds',
       referenceId: sp.id,
       referenceNo: sp.proceedsNo,
+      customerId: sp.customerId,
+      customerName: sp.customerName,
       debit,
       credit,
       balance: currentBalance,
@@ -108,7 +124,7 @@ export function getSaleProceedsLedger(filter?: DateFilterRange): {
   const totalDebit = filteredEntries.reduce((sum, e) => sum + (e.debit || 0), 0);
   const closingBalance = filteredEntries.length > 0
     ? filteredEntries[filteredEntries.length - 1].balance
-    : (entries.length > 0 ? entries[entries.length - 1].balance : currentBalance);
+    : (entries.length > 0 ? entries[entries.length - 1].balance : 0);
 
   return {
     entries: filteredEntries,

@@ -127,6 +127,7 @@ export interface SaleProceedsItem {
   quantity: number;
   unit: string;
   kg?: number;
+  weight?: number;
   crateTypeId?: string;
   crateName?: string;
   rate: number;
@@ -144,6 +145,7 @@ export interface SaleProceeds {
   quantity: number;
   unit: string;
   kg?: number;
+  weight?: number;
   rate: number;
   amount: number; // Manually editable amount!
   expenses: ExpenseItem[];
@@ -343,6 +345,8 @@ export interface LedgerEntry {
   referenceType?: string;
   referenceId?: string;
   referenceNo?: string;
+  customerId?: string;
+  customerName?: string;
   debit: number | null;
   credit: number | null;
   balance: number;
