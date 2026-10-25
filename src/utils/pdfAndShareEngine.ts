@@ -106,8 +106,8 @@ export function applyPrintPageSize(size: BillPaperSize = 'compact', targetElemen
   styleEl.textContent = `
     @media print {
       @page {
-        size: ${spec.widthMm}mm ${spec.heightMm}mm;
-        margin: ${margin};
+        size: ${spec.widthMm}mm ${spec.heightMm}mm !important;
+        margin: ${margin} !important;
       }
     }
   `;
@@ -308,8 +308,10 @@ export async function generatePdfDoc(
 
     let pageCount = 1;
 
-    // Case 1: Fits cleanly on a single page (allowing slight 4% sub-pixel rounding tolerance)
-    if (totalContentHeightMm <= pageHeightMm * 1.04) {
+    // Case 1: Fits cleanly on a single page
+    // For small-format bills (B7: 88x125mm, B6: 125x176mm), allow 6% sub-pixel rounding tolerance
+    const singlePageTolerance = paperSize === 'b7' || paperSize === 'b6' ? 1.06 : 1.04;
+    if (totalContentHeightMm <= pageHeightMm * singlePageTolerance) {
       const fitHeightMm = Math.min(totalContentHeightMm, pageHeightMm);
       const imgData = canvas.toDataURL('image/jpeg', 0.95);
       doc.addImage(imgData, 'JPEG', 0, 0, pageWidthMm, fitHeightMm, undefined, 'FAST');
@@ -323,8 +325,8 @@ export async function generatePdfDoc(
         const startY = i * pxPerPage;
         const slicePxHeight = Math.min(pxPerPage, canvas.height - startY);
 
-        // Avoid adding a trailing blank page for a tiny sliver (< 20px) of white padding
-        if (i > 0 && slicePxHeight < 20) {
+        // Avoid adding a trailing blank page for a tiny sliver (< 30px) of white padding
+        if (i > 0 && slicePxHeight < 30) {
           break;
         }
 

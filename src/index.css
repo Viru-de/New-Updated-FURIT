@@ -348,48 +348,430 @@ input.no-spinners {
 }
 
 /* =========================================================================
-   PURE LIGHT MODE ISOLATION FOR INVOICE BILL & RECEIPT POPUP CANVASES ONLY
-   Ensures bill and receipt paper canvases render with pure white background (#ffffff)
-   and black text (#000000) during print previews, while full on-screen accounting ledgers
-   properly honor the user's Dark Mode setting.
+   DEDICATED THEME-INDEPENDENT BILL & PRINT SYSTEM
+   Guarantees 100% IDENTICAL bill appearance across Dark Mode and Light Mode.
+   Applies to Cash Sale, Credit Sale, Group Sale, Sale Proceeds, Payment Receipts,
+   Customer Ledgers, Crate Statements, Reports, B6/B7 single page, and all paper sizes.
+   The bill retains identical white background, text, borders, row heights,
+   typography, and colors regardless of ERP theme switch.
    ========================================================================= */
-#mandi-print-area, #receipt-print-area {
+#mandi-print-area,
+#receipt-print-area,
+#group-sale-print-summary,
+#ledger-print-area,
+#sale-proceeds-print-area,
+#crate-statement-print-area,
+#report-print-area,
+.print-bill-canvas,
+.erp-print-area,
+[data-theme-isolated="true"],
+.dark #mandi-print-area,
+.dark #receipt-print-area,
+.dark #group-sale-print-summary,
+.dark #ledger-print-area,
+.dark #sale-proceeds-print-area,
+.dark #crate-statement-print-area,
+.dark #report-print-area,
+.dark .print-bill-canvas,
+.dark .erp-print-area,
+.dark [data-theme-isolated="true"] {
   background-color: #ffffff !important;
+  background: #ffffff !important;
   color: #0f172a !important;
   color-scheme: light !important;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
 }
-.dark #mandi-print-area, .dark #receipt-print-area {
+
+/* Background containers inside all bill and print canvases */
+#mandi-print-area div,
+#receipt-print-area div,
+#group-sale-print-summary div,
+#ledger-print-area div,
+#sale-proceeds-print-area div,
+#crate-statement-print-area div,
+#report-print-area div,
+.print-bill-canvas div,
+.erp-print-area div,
+[data-theme-isolated="true"] div,
+.dark #mandi-print-area div,
+.dark #receipt-print-area div,
+.dark #group-sale-print-summary div,
+.dark #ledger-print-area div,
+.dark #sale-proceeds-print-area div,
+.dark #crate-statement-print-area div,
+.dark #report-print-area div,
+.dark .print-bill-canvas div,
+.dark .erp-print-area div,
+.dark [data-theme-isolated="true"] div {
+  color: #0f172a;
+}
+
+/* Force pure white background on white divs in both themes */
+#mandi-print-area div.bg-white,
+#receipt-print-area div.bg-white,
+.print-bill-canvas div.bg-white,
+.erp-print-area div.bg-white,
+[data-theme-isolated="true"] div.bg-white,
+.dark #mandi-print-area div.bg-white,
+.dark #receipt-print-area div.bg-white,
+.dark .print-bill-canvas div.bg-white,
+.dark .erp-print-area div.bg-white,
+.dark [data-theme-isolated="true"] div.bg-white {
+  background-color: #ffffff !important;
+}
+
+/* Subtle slate-50 / slate-100 backgrounds for headers & sections */
+#mandi-print-area .bg-slate-50,
+#receipt-print-area .bg-slate-50,
+.print-bill-canvas .bg-slate-50,
+.erp-print-area .bg-slate-50,
+[data-theme-isolated="true"] .bg-slate-50,
+.dark #mandi-print-area .bg-slate-50,
+.dark #receipt-print-area .bg-slate-50,
+.dark .print-bill-canvas .bg-slate-50,
+.dark .erp-print-area .bg-slate-50,
+.dark [data-theme-isolated="true"] .bg-slate-50,
+#mandi-print-area .bg-slate-50\/50,
+#receipt-print-area .bg-slate-50\/50,
+.dark #mandi-print-area .bg-slate-50\/50,
+.dark #receipt-print-area .bg-slate-50\/50 {
+  background-color: #f8fafc !important;
+}
+
+#mandi-print-area .bg-slate-100,
+#receipt-print-area .bg-slate-100,
+.print-bill-canvas .bg-slate-100,
+.erp-print-area .bg-slate-100,
+[data-theme-isolated="true"] .bg-slate-100,
+.dark #mandi-print-area .bg-slate-100,
+.dark #receipt-print-area .bg-slate-100,
+.dark .print-bill-canvas .bg-slate-100,
+.dark .erp-print-area .bg-slate-100,
+.dark [data-theme-isolated="true"] .bg-slate-100 {
+  background-color: #f1f5f9 !important;
+}
+
+/* Tables inside bill canvases */
+#mandi-print-area table,
+#receipt-print-area table,
+#group-sale-print-summary table,
+#ledger-print-area table,
+#sale-proceeds-print-area table,
+#crate-statement-print-area table,
+#report-print-area table,
+.print-bill-canvas table,
+.erp-print-area table,
+[data-theme-isolated="true"] table,
+.dark #mandi-print-area table,
+.dark #receipt-print-area table,
+.dark #group-sale-print-summary table,
+.dark #ledger-print-area table,
+.dark #sale-proceeds-print-area table,
+.dark #crate-statement-print-area table,
+.dark #report-print-area table,
+.dark .print-bill-canvas table,
+.dark .erp-print-area table,
+.dark [data-theme-isolated="true"] table {
   background-color: #ffffff !important;
   color: #0f172a !important;
-  color-scheme: light !important;
+  border-collapse: collapse !important;
 }
-.dark #mandi-print-area table thead th, .dark #receipt-print-area table thead th {
+
+/* Table Headers: light crisp background and dark text */
+#mandi-print-area table thead tr,
+#receipt-print-area table thead tr,
+#group-sale-print-summary table thead tr,
+#ledger-print-area table thead tr,
+#sale-proceeds-print-area table thead tr,
+#crate-statement-print-area table thead tr,
+#report-print-area table thead tr,
+.print-bill-canvas table thead tr,
+.erp-print-area table thead tr,
+.dark #mandi-print-area table thead tr,
+.dark #receipt-print-area table thead tr,
+.dark #group-sale-print-summary table thead tr,
+.dark #ledger-print-area table thead tr,
+.dark #sale-proceeds-print-area table thead tr,
+.dark #crate-statement-print-area table thead tr,
+.dark #report-print-area table thead tr,
+.dark .print-bill-canvas table thead tr,
+.dark .erp-print-area table thead tr,
+#mandi-print-area table thead th,
+#receipt-print-area table thead th,
+#group-sale-print-summary table thead th,
+#ledger-print-area table thead th,
+#sale-proceeds-print-area table thead th,
+#crate-statement-print-area table thead th,
+#report-print-area table thead th,
+.print-bill-canvas table thead th,
+.erp-print-area table thead th,
+.dark #mandi-print-area table thead th,
+.dark #receipt-print-area table thead th,
+.dark #group-sale-print-summary table thead th,
+.dark #ledger-print-area table thead th,
+.dark #sale-proceeds-print-area table thead th,
+.dark #crate-statement-print-area table thead th,
+.dark #report-print-area table thead th,
+.dark .print-bill-canvas table thead th,
+.dark .erp-print-area table thead th {
   background-color: #f8fafc !important;
   color: #0f172a !important;
-  border-color: #000000 !important;
+  font-weight: 700 !important;
 }
-.dark #mandi-print-area table tbody td, .dark #receipt-print-area table tbody td, .dark #mandi-print-area table tfoot td, .dark #receipt-print-area table tfoot td {
+
+/* Table Body: white rows and dark text */
+#mandi-print-area table tbody tr,
+#receipt-print-area table tbody tr,
+#group-sale-print-summary table tbody tr,
+#ledger-print-area table tbody tr,
+#sale-proceeds-print-area table tbody tr,
+#crate-statement-print-area table tbody tr,
+#report-print-area table tbody tr,
+.print-bill-canvas table tbody tr,
+.erp-print-area table tbody tr,
+.dark #mandi-print-area table tbody tr,
+.dark #receipt-print-area table tbody tr,
+.dark #group-sale-print-summary table tbody tr,
+.dark #ledger-print-area table tbody tr,
+.dark #sale-proceeds-print-area table tbody tr,
+.dark #crate-statement-print-area table tbody tr,
+.dark #report-print-area table tbody tr,
+.dark .print-bill-canvas table tbody tr,
+.dark .erp-print-area table tbody tr,
+#mandi-print-area table tbody td,
+#receipt-print-area table tbody td,
+#group-sale-print-summary table tbody td,
+#ledger-print-area table tbody td,
+#sale-proceeds-print-area table tbody td,
+#crate-statement-print-area table tbody td,
+#report-print-area table tbody td,
+.print-bill-canvas table tbody td,
+.erp-print-area table tbody td,
+.dark #mandi-print-area table tbody td,
+.dark #receipt-print-area table tbody td,
+.dark #group-sale-print-summary table tbody td,
+.dark #ledger-print-area table tbody td,
+.dark #sale-proceeds-print-area table tbody td,
+.dark #crate-statement-print-area table tbody td,
+.dark #report-print-area table tbody td,
+.dark .print-bill-canvas table tbody td,
+.dark .erp-print-area table tbody td {
   background-color: #ffffff !important;
   color: #0f172a !important;
-  border-color: #000000 !important;
 }
-.dark #mandi-print-area table tbody tr:hover, .dark #receipt-print-area table tbody tr:hover {
+
+#mandi-print-area table tbody tr:hover,
+#receipt-print-area table tbody tr:hover,
+.print-bill-canvas table tbody tr:hover,
+.dark #mandi-print-area table tbody tr:hover,
+.dark #receipt-print-area table tbody tr:hover,
+.dark .print-bill-canvas table tbody tr:hover {
   background-color: #ffffff !important;
 }
-.dark #mandi-print-area .text-slate-400, .dark #mandi-print-area .text-slate-500, .dark #mandi-print-area .text-slate-600, .dark #mandi-print-area .text-slate-700, .dark #mandi-print-area .text-slate-800, .dark #mandi-print-area .text-slate-900, .dark #receipt-print-area .text-slate-400, .dark #receipt-print-area .text-slate-500, .dark #receipt-print-area .text-slate-600, .dark #receipt-print-area .text-slate-700, .dark #receipt-print-area .text-slate-800, .dark #receipt-print-area .text-slate-900 {
+
+/* Table Footers */
+#mandi-print-area table tfoot tr,
+#receipt-print-area table tfoot tr,
+#group-sale-print-summary table tfoot tr,
+#ledger-print-area table tfoot tr,
+#sale-proceeds-print-area table tfoot tr,
+#crate-statement-print-area table tfoot tr,
+#report-print-area table tfoot tr,
+.print-bill-canvas table tfoot tr,
+.erp-print-area table tfoot tr,
+.dark #mandi-print-area table tfoot tr,
+.dark #receipt-print-area table tfoot tr,
+.dark #group-sale-print-summary table tfoot tr,
+.dark #ledger-print-area table tfoot tr,
+.dark #sale-proceeds-print-area table tfoot tr,
+.dark #crate-statement-print-area table tfoot tr,
+.dark #report-print-area table tfoot tr,
+.dark .print-bill-canvas table tfoot tr,
+.dark .erp-print-area table tfoot tr,
+#mandi-print-area table tfoot td,
+#receipt-print-area table tfoot td,
+#group-sale-print-summary table tfoot td,
+#ledger-print-area table tfoot td,
+#sale-proceeds-print-area table tfoot td,
+#crate-statement-print-area table tfoot td,
+#report-print-area table tfoot td,
+.print-bill-canvas table tfoot td,
+.erp-print-area table tfoot td,
+.dark #mandi-print-area table tfoot td,
+.dark #receipt-print-area table tfoot td,
+.dark #group-sale-print-summary table tfoot td,
+.dark #ledger-print-area table tfoot td,
+.dark #sale-proceeds-print-area table tfoot td,
+.dark #crate-statement-print-area table tfoot td,
+.dark #report-print-area table tfoot td,
+.dark .print-bill-canvas table tfoot td,
+.dark .erp-print-area table tfoot td {
+  background-color: #f8fafc !important;
   color: #0f172a !important;
 }
-.dark #mandi-print-area .dark\:text-white, .dark #receipt-print-area .dark\:text-white {
+
+/* Explicit text color rules inside bill canvases across both themes */
+.print-bill-canvas .text-slate-950,
+.print-bill-canvas .text-slate-900,
+.dark .print-bill-canvas .text-slate-950,
+.dark .print-bill-canvas .text-slate-900,
+.dark #mandi-print-area .text-slate-950,
+.dark #mandi-print-area .text-slate-900,
+.dark #receipt-print-area .text-slate-950,
+.dark #receipt-print-area .text-slate-900 {
   color: #0f172a !important;
 }
-.dark #mandi-print-area .dark\:text-slate-200, .dark #mandi-print-area .dark\:text-slate-300, .dark #mandi-print-area .dark\:text-slate-400 {
+
+.print-bill-canvas .text-slate-800,
+.print-bill-canvas .text-slate-700,
+.dark .print-bill-canvas .text-slate-800,
+.dark .print-bill-canvas .text-slate-700,
+.dark #mandi-print-area .text-slate-800,
+.dark #mandi-print-area .text-slate-700,
+.dark #receipt-print-area .text-slate-800,
+.dark #receipt-print-area .text-slate-700 {
+  color: #1e293b !important;
+}
+
+.print-bill-canvas .text-slate-600,
+.print-bill-canvas .text-slate-500,
+.print-bill-canvas .text-slate-400,
+.dark .print-bill-canvas .text-slate-600,
+.dark .print-bill-canvas .text-slate-500,
+.dark .print-bill-canvas .text-slate-400,
+.dark #mandi-print-area .text-slate-600,
+.dark #mandi-print-area .text-slate-500,
+.dark #mandi-print-area .text-slate-400,
+.dark #receipt-print-area .text-slate-600,
+.dark #receipt-print-area .text-slate-500,
+.dark #receipt-print-area .text-slate-400 {
+  color: #475569 !important;
+}
+
+/* Neutralize any dark: text or bg utilities inside bill areas */
+.dark #mandi-print-area .dark\:text-white,
+.dark #receipt-print-area .dark\:text-white,
+.dark .print-bill-canvas .dark\:text-white {
   color: #0f172a !important;
 }
-.dark #mandi-print-area .dark\:bg-slate-900, .dark #mandi-print-area .dark\:bg-slate-800 {
+.dark #mandi-print-area .dark\:text-slate-200,
+.dark #mandi-print-area .dark\:text-slate-300,
+.dark #mandi-print-area .dark\:text-slate-400,
+.dark #receipt-print-area .dark\:text-slate-200,
+.dark #receipt-print-area .dark\:text-slate-300,
+.dark #receipt-print-area .dark\:text-slate-400,
+.dark .print-bill-canvas .dark\:text-slate-200,
+.dark .print-bill-canvas .dark\:text-slate-300,
+.dark .print-bill-canvas .dark\:text-slate-400 {
+  color: #475569 !important;
+}
+.dark #mandi-print-area .dark\:bg-slate-900,
+.dark #mandi-print-area .dark\:bg-slate-800,
+.dark #receipt-print-area .dark\:bg-slate-900,
+.dark #receipt-print-area .dark\:bg-slate-800,
+.dark .print-bill-canvas .dark\:bg-slate-900,
+.dark .print-bill-canvas .dark\:bg-slate-800 {
   background-color: #ffffff !important;
 }
-.dark #mandi-print-area .dark\:border-slate-800, .dark #mandi-print-area .dark\:border-slate-700 {
+
+/* Table and container borders inside bill areas */
+.print-bill-canvas .border-slate-300,
+.print-bill-canvas .border-slate-200,
+.print-bill-canvas .border-slate-100,
+.dark .print-bill-canvas .border-slate-300,
+.dark .print-bill-canvas .border-slate-200,
+.dark .print-bill-canvas .border-slate-100,
+.dark #mandi-print-area .border-slate-300,
+.dark #mandi-print-area .border-slate-200,
+.dark #mandi-print-area .border-slate-100,
+.dark #receipt-print-area .border-slate-300,
+.dark #receipt-print-area .border-slate-200,
+.dark #receipt-print-area .border-slate-100 {
+  border-color: #cbd5e1 !important;
+}
+
+.print-bill-canvas .border-black,
+.dark .print-bill-canvas .border-black,
+.dark #mandi-print-area .border-black {
   border-color: #000000 !important;
+}
+
+/* Accent Colors */
+.print-bill-canvas .text-emerald-700,
+.print-bill-canvas .text-emerald-800,
+.print-bill-canvas .text-emerald-600,
+.dark .print-bill-canvas .text-emerald-700,
+.dark .print-bill-canvas .text-emerald-800,
+.dark .print-bill-canvas .text-emerald-600,
+.dark #mandi-print-area .text-emerald-700,
+.dark #mandi-print-area .text-emerald-800,
+.dark #receipt-print-area .text-emerald-700,
+.dark #receipt-print-area .text-emerald-800 {
+  color: #047857 !important;
+}
+
+.print-bill-canvas .bg-emerald-50,
+.dark .print-bill-canvas .bg-emerald-50,
+.dark #mandi-print-area .bg-emerald-50,
+.dark #receipt-print-area .bg-emerald-50 {
+  background-color: #ecfdf5 !important;
+  color: #047857 !important;
+}
+
+.print-bill-canvas .text-rose-700,
+.print-bill-canvas .text-rose-800,
+.print-bill-canvas .text-rose-600,
+.dark .print-bill-canvas .text-rose-700,
+.dark .print-bill-canvas .text-rose-800,
+.dark .print-bill-canvas .text-rose-600,
+.dark #mandi-print-area .text-rose-700,
+.dark #mandi-print-area .text-rose-800,
+.dark #receipt-print-area .text-rose-700,
+.dark #receipt-print-area .text-rose-800 {
+  color: #b91c1c !important;
+}
+
+.print-bill-canvas .bg-rose-50,
+.dark .print-bill-canvas .bg-rose-50,
+.dark #mandi-print-area .bg-rose-50,
+.dark #receipt-print-area .bg-rose-50 {
+  background-color: #fff1f2 !important;
+  color: #b91c1c !important;
+}
+
+.print-bill-canvas .text-blue-600,
+.dark .print-bill-canvas .text-blue-600,
+.dark #mandi-print-area .text-blue-600 {
+  color: #1d4ed8 !important;
+}
+
+.print-bill-canvas .bg-blue-50,
+.dark .print-bill-canvas .bg-blue-50,
+.dark #mandi-print-area .bg-blue-50 {
+  background-color: #eff6ff !important;
+  color: #1d4ed8 !important;
+}
+
+/* Logos & Images: no filters or invert */
+#mandi-print-area img,
+#mandi-print-area svg,
+#receipt-print-area img,
+#receipt-print-area svg,
+.print-bill-canvas img,
+.print-bill-canvas svg,
+.erp-print-area img,
+.erp-print-area svg,
+.dark #mandi-print-area img,
+.dark #mandi-print-area svg,
+.dark #receipt-print-area img,
+.dark #receipt-print-area svg,
+.dark .print-bill-canvas img,
+.dark .print-bill-canvas svg,
+.dark .erp-print-area img,
+.dark .erp-print-area svg {
+  filter: none !important;
+  opacity: 1 !important;
 }
 
 /* =========================================================================
@@ -399,7 +781,7 @@ input.no-spinners {
    ========================================================================= */
 @media print {
   @page {
-    margin: 8mm;
+    margin: 4mm;
     size: auto;
   }
   html, body, html.dark, body.dark, .dark, [data-theme="dark"] {
@@ -443,6 +825,9 @@ input.no-spinners {
     margin: 0 !important;
     padding: 0 !important;
     gap: 0 !important;
+  }
+  main > div > *:not(:has(#mandi-print-area)) {
+    display: none !important;
   }
   body * {
     visibility: hidden;

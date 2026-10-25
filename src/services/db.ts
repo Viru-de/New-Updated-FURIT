@@ -675,7 +675,7 @@ const INITIAL_RECEIPTS: Receipt[] = [
     date: '2026-10-08',
     paymentMode: 'Cash',
     amount: 10000,
-    notes: 'Cash A/C payment against ledger',
+    notes: '',
     createdAt: '2026-10-08T11:00:00.000Z',
   },
 ];

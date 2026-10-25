@@ -319,11 +319,10 @@ export const FruitMasterView: React.FC = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="mb-1 block text-xs font-semibold text-slate-700 dark:text-slate-300">
-                    Unit (free-text) *
+                    Unit (free-text)
                   </label>
                   <input
                     type="text"
-                    required
                     list="edit-fruit-units"
                     placeholder="e.g. Crate, Peti, Box, KG"
                     value={editUnit}

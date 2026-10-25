@@ -32,7 +32,7 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
   const [date, setDate] = useState(getTodayIso());
   const [paymentMode, setPaymentMode] = useState<Receipt['paymentMode']>('Cash');
   const [amount, setAmount] = useState<number | ''>(10000);
-  const [notes, setNotes] = useState('Cash A/C payment against ledger');
+  const [notes, setNotes] = useState('');
   const [isPrintOpen, setIsPrintOpen] = useState(false);
 
   const [isAddCustomerOpen, setIsAddCustomerOpen] = useState(false);
@@ -50,7 +50,7 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
       setDate(getTodayIso());
       setPaymentMode('Cash');
       setAmount(10000);
-      setNotes('Cash A/C payment against ledger');
+      setNotes('');
     }
   }, [editItem, isOpen, preselectedCustomerId]);
 
@@ -218,7 +218,7 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
               </label>
               <input
                 type="text"
-                placeholder="e.g. Cash A/C, Cheque No, Transaction ID"
+                placeholder="e.g. Cheque No, Transaction ID, Reference"
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
