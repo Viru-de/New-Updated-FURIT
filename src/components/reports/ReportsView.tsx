@@ -5,7 +5,7 @@ import {
   getCustomerLedger,
   getSaleProceedsLedger,
 } from '../../services/accounting';
-import { formatCurrency, formatDate, toIsoDate, getTodayIso } from '../../utils/formatters';
+import { formatCurrency, formatDate, toIsoDate, getTodayIso, formatCompanySignature } from '../../utils/formatters';
 import { DatePickerInput } from '../common/DatePickerInput';
 import {
   BarChart3,
@@ -59,15 +59,23 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
     }
   };
 
-  const [filterStartDate, setFilterStartDate] = useState(getTodayIso());
-  const [filterEndDate, setFilterEndDate] = useState(getTodayIso());
+  const [filterStartDate, setFilterStartDate] = useState('');
+  const [filterEndDate, setFilterEndDate] = useState('');
 
   const saleProceeds = db.getSaleProceeds();
   const creditSales = db.getCreditSales();
   const receipts = db.getReceipts();
   const customers = db.getCustomers();
   const vendors = db.getVendors();
-  const customerOutstandings = getAllCustomerOutstandings();
+
+  const dateFilter = (filterStartDate || filterEndDate)
+    ? {
+        startDate: filterStartDate ? toIsoDate(filterStartDate) : undefined,
+        endDate: filterEndDate ? toIsoDate(filterEndDate) : undefined,
+      }
+    : undefined;
+
+  const customerOutstandings = getAllCustomerOutstandings(dateFilter);
   const profiles = db.getCompanyProfiles();
   const defaultProfile = db.getDefaultProfile() || profiles[0];
   const [selectedProfileId, setSelectedProfileId] = useState<string>(
@@ -82,7 +90,16 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
     creditSales.forEach((c) => datesSet.add(c.date));
     receipts.forEach((r) => datesSet.add(r.date));
 
-    const sortedDates = Array.from(datesSet).sort().reverse();
+    let sortedDates = Array.from(datesSet).sort().reverse();
+
+    if (filterStartDate || filterEndDate) {
+      sortedDates = sortedDates.filter((d) => {
+        const dIso = toIsoDate(d);
+        if (filterStartDate && dIso < toIsoDate(filterStartDate)) return false;
+        if (filterEndDate && dIso > toIsoDate(filterEndDate)) return false;
+        return true;
+      });
+    }
 
     return sortedDates.map((d) => {
       const spForDate = saleProceeds.filter((s) => s.date === d);
@@ -112,7 +129,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
 
   // 2. Expense Report Aggregator
   const getExpenseData = () => {
-    const list: {
+    let list: {
       date: string;
       expenseType: string;
       amount: number;
@@ -144,14 +161,41 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
       });
     });
 
+    if (filterStartDate || filterEndDate) {
+      list = list.filter((e) => {
+        const dIso = toIsoDate(e.date);
+        if (filterStartDate && dIso < toIsoDate(filterStartDate)) return false;
+        if (filterEndDate && dIso > toIsoDate(filterEndDate)) return false;
+        return true;
+      });
+    }
+
     return list.sort((a, b) => b.date.localeCompare(a.date));
   };
 
   // 3. Profit Report
-  const totalSales = saleProceeds.reduce((sum, s) => sum + s.netAmount, 0) +
-    creditSales.reduce((sum, c) => sum + c.finalAmount, 0);
-  const totalExpenses = saleProceeds.reduce((sum, s) => sum + s.totalExpense, 0) +
-    creditSales.reduce((sum, c) => sum + c.expenseTotal, 0);
+  const filteredSaleProceeds = (filterStartDate || filterEndDate)
+    ? saleProceeds.filter((s) => {
+        const sIso = toIsoDate(s.date);
+        if (filterStartDate && sIso < toIsoDate(filterStartDate)) return false;
+        if (filterEndDate && sIso > toIsoDate(filterEndDate)) return false;
+        return true;
+      })
+    : saleProceeds;
+
+  const filteredCreditSales = (filterStartDate || filterEndDate)
+    ? creditSales.filter((c) => {
+        const cIso = toIsoDate(c.date);
+        if (filterStartDate && cIso < toIsoDate(filterStartDate)) return false;
+        if (filterEndDate && cIso > toIsoDate(filterEndDate)) return false;
+        return true;
+      })
+    : creditSales;
+
+  const totalSales = filteredSaleProceeds.reduce((sum, s) => sum + s.netAmount, 0) +
+    filteredCreditSales.reduce((sum, c) => sum + c.finalAmount, 0);
+  const totalExpenses = filteredSaleProceeds.reduce((sum, s) => sum + s.totalExpense, 0) +
+    filteredCreditSales.reduce((sum, c) => sum + c.expenseTotal, 0);
   const netProfit = totalSales - totalExpenses;
 
   const handleExportCsv = () => {
@@ -318,6 +362,63 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
             <Printer className="h-3.5 w-3.5" /> Print Report
           </button>
         </div>
+      </div>
+
+      {/* Date Filter Bar */}
+      <div className="rounded-xl border border-slate-200 bg-white p-3.5 shadow-2xs dark:border-slate-800 dark:bg-slate-900 no-print flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-end gap-2.5">
+          <div className="w-36 sm:w-40">
+            <DatePickerInput
+              label="From Date"
+              value={filterStartDate}
+              onChange={setFilterStartDate}
+            />
+          </div>
+          <div className="w-36 sm:w-40">
+            <DatePickerInput
+              label="To Date"
+              value={filterEndDate}
+              onChange={setFilterEndDate}
+            />
+          </div>
+          <div className="flex items-center gap-1.5 pb-0.5">
+            <button
+              type="button"
+              onClick={() => {
+                const today = getTodayIso();
+                setFilterStartDate(today);
+                setFilterEndDate(today);
+              }}
+              className={`rounded-lg px-2.5 py-2 text-xs font-semibold border cursor-pointer transition-colors ${
+                filterStartDate === getTodayIso() && filterEndDate === getTodayIso()
+                  ? 'bg-emerald-600 text-white border-emerald-600 shadow-2xs'
+                  : 'border-slate-300 text-slate-700 bg-white hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300'
+              }`}
+              title="Filter reports for today"
+            >
+              Today
+            </button>
+            {(filterStartDate || filterEndDate) && (
+              <button
+                type="button"
+                onClick={() => {
+                  setFilterStartDate('');
+                  setFilterEndDate('');
+                }}
+                className="rounded-lg border border-slate-200 px-2.5 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 cursor-pointer"
+                title="Clear date filter"
+              >
+                All Time
+              </button>
+            )}
+          </div>
+        </div>
+
+        {(filterStartDate || filterEndDate) && (
+          <div className="text-xs font-medium text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-3 py-1.5 rounded-lg border border-emerald-200 dark:border-emerald-800">
+            Showing records from {filterStartDate ? formatDate(filterStartDate) : 'Beginning'} to {filterEndDate ? formatDate(filterEndDate) : 'Today'}
+          </div>
+        )}
       </div>
 
       {/* Tabs */}
@@ -693,7 +794,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
             Software Developed by: {currentProfile.softwareDevelopedBy || 'Klyia Technology'}
           </div>
           <div className="text-right font-bold uppercase text-[11px]">
-            FOR, {currentProfile.signatureTitle || currentProfile.name}
+            {formatCompanySignature(currentProfile)}
           </div>
         </div>
       </div>

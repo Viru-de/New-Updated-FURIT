@@ -36,6 +36,7 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
   const [isPrintOpen, setIsPrintOpen] = useState(false);
 
   const [isAddCustomerOpen, setIsAddCustomerOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (editItem) {
@@ -63,7 +64,9 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
     if (!customerId || !amount) return;
+    setIsSubmitting(true);
 
     const seq = editItem ? editItem.sequenceNumber : db.getNextReceiptNumber();
     const receiptNo = editItem
@@ -85,6 +88,7 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
 
     db.saveReceipt(receiptRecord);
     onSaved(receiptRecord);
+    setIsSubmitting(false);
     onClose();
   };
 
@@ -242,9 +246,10 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
                 </button>
                 <button
                   type="submit"
-                  className="rounded-lg bg-emerald-600 px-5 py-2 text-xs font-semibold text-white shadow-xs hover:bg-emerald-700 cursor-pointer"
+                  disabled={isSubmitting}
+                  className="rounded-lg bg-emerald-600 px-5 py-2 text-xs font-semibold text-white shadow-xs hover:bg-emerald-700 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                  {editItem ? 'Update Receipt' : 'Save Receipt'}
+                  {isSubmitting ? 'Saving...' : editItem ? 'Update Receipt' : 'Save Receipt'}
                 </button>
               </div>
             </div>

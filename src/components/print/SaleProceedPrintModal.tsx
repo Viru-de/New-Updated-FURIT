@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { CompanyProfile, SaleProceeds } from '../../types';
 import { db } from '../../services/db';
-import { formatDate, formatBillAmount, numberToWordsIndian } from '../../utils/formatters';
+import { formatDate, formatBillAmount, numberToWordsIndian, formatCompanySignature } from '../../utils/formatters';
 import { Printer, Download, X, Building2 } from 'lucide-react';
 import { BillShareButtons } from '../common/BillShareButtons';
 import { ChooseBillPrintFormatModal } from '../common/ChooseBillPrintFormatModal';
@@ -17,7 +17,7 @@ interface SaleProceedPrintModalProps {
 export const SaleProceedPrintModal: React.FC<SaleProceedPrintModalProps> = ({
   isOpen,
   onClose,
-  proceeds,
+  proceeds: initialProceeds,
 }) => {
   const profiles = db.getCompanyProfiles();
   const defaultProfile = db.getDefaultProfile();
@@ -28,6 +28,9 @@ export const SaleProceedPrintModal: React.FC<SaleProceedPrintModalProps> = ({
 
   if (!isOpen) return null;
 
+  // Always fetch latest proceeds from database if it exists to ensure fresh saved values
+  const proceeds = (initialProceeds?.id ? db.getSaleProceeds().find((s) => s.id === initialProceeds.id) : null) || initialProceeds;
+
   const currentProfile: CompanyProfile =
     profiles.find((p) => p.id === selectedProfileId) || defaultProfile || profiles[0];
 
@@ -36,24 +39,26 @@ export const SaleProceedPrintModal: React.FC<SaleProceedPrintModalProps> = ({
   };
 
   // Vendor / Consignor information
-  const vendorName = proceeds.vendorName || 'RAFAT RANA TRADERS';
   const vendor = proceeds.vendorId ? db.getVendorById(proceeds.vendorId) : undefined;
+  const vendorName = proceeds.vendorName || vendor?.name || 'RAFAT RANA TRADERS';
   const vendorAddress = vendor?.address || vendor?.city || '';
 
   // Extract sequence number (e.g. 503 or 1)
   const proceedsDisplayNumber = proceeds.sequenceNumber || proceeds.proceedsNo.replace(/\D/g, '') || '503';
 
   // Items formatting
+  const effectiveWeight = proceeds.weight !== undefined && proceeds.weight !== null ? proceeds.weight : proceeds.kg;
   const items = proceeds.items && proceeds.items.length > 0
     ? proceeds.items
     : [
         {
           id: 'spi1',
-          fruitId: 'f1',
-          fruitName: 'STRAWBERRY',
+          fruitId: (proceeds as any).fruitId || 'f1',
+          fruitName: (proceeds as any).fruitName || 'STRAWBERRY',
           quantity: proceeds.quantity,
           unit: proceeds.unit,
-          kg: proceeds.kg,
+          kg: effectiveWeight,
+          weight: effectiveWeight,
           rate: proceeds.rate,
           amount: proceeds.amount,
         },
@@ -239,7 +244,23 @@ export const SaleProceedPrintModal: React.FC<SaleProceedPrintModalProps> = ({
                     <td className="border-r border-black p-1 font-semibold uppercase">{it.fruitName}</td>
                     <td className="border-r border-black p-1 text-right font-mono">{it.quantity}</td>
                     <td className="border-r border-black p-1 text-right font-mono">
-                      {it.kg && it.kg > 0 ? it.kg : (proceeds.kg && proceeds.kg > 0 ? proceeds.kg : '')}
+                      {(() => {
+                        const itemWeight = it.weight !== undefined && it.weight !== null
+                          ? it.weight
+                          : (it.kg !== undefined && it.kg !== null ? it.kg : undefined);
+                        const numW = itemWeight !== undefined ? Number(itemWeight) : undefined;
+                        if (numW !== undefined && !isNaN(numW) && numW > 0) {
+                          return numW;
+                        }
+                        if (items.length === 1 && itemWeight === undefined) {
+                          const topWeight = proceeds.weight !== undefined && proceeds.weight !== null
+                            ? proceeds.weight
+                            : proceeds.kg;
+                          const topNum = topWeight !== undefined ? Number(topWeight) : 0;
+                          return topNum > 0 ? topNum : '';
+                        }
+                        return '';
+                      })()}
                     </td>
                     <td className="border-r border-black p-1 text-right font-mono">
                       {formatBillAmount(it.rate)}
@@ -325,7 +346,7 @@ export const SaleProceedPrintModal: React.FC<SaleProceedPrintModalProps> = ({
 
               {/* Signatory for company profile */}
               <div className="text-right font-bold uppercase text-slate-950 dark:text-slate-950 print:text-black">
-                <div>FOR, {currentProfile.signatureTitle || currentProfile.name}</div>
+                <div>{formatCompanySignature(currentProfile)}</div>
               </div>
             </div>
 

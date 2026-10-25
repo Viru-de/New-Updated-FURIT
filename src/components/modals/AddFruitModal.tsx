@@ -17,7 +17,7 @@ export const AddFruitModal: React.FC<AddFruitModalProps> = ({
   onFruitCreated,
 }) => {
   const [name, setName] = useState('');
-  const [unit, setUnit] = useState('Crate');
+  const [unit, setUnit] = useState('');
   const [crateType, setCrateType] = useState('');
   // Default Price/Rate is 1 for new items
   const [price, setPrice] = useState<number | ''>(1);
@@ -29,7 +29,8 @@ export const AddFruitModal: React.FC<AddFruitModalProps> = ({
     e.preventDefault();
     if (!name.trim()) return;
 
-    const savedUnit = unit.trim() || 'Crate';
+    // Save exact unit text entered by user without altering capitalization, spacing, or defaulting
+    const savedUnit = unit;
     const savedCrateType = crateType.trim();
 
     const newFruit: Fruit = {
@@ -51,9 +52,9 @@ export const AddFruitModal: React.FC<AddFruitModalProps> = ({
     onFruitCreated(newFruit);
     onClose();
 
-    // Reset form for next use
+    // Reset form for next use - Unit must be completely blank
     setName('');
-    setUnit('Crate');
+    setUnit('');
     setCrateType('');
     setPrice(1);
     setFruitIcon(undefined);
@@ -104,26 +105,15 @@ export const AddFruitModal: React.FC<AddFruitModalProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="mb-1 block text-xs font-semibold text-slate-700 dark:text-slate-300">
-                Unit (free-text) <span className="text-rose-500">*</span>
+                Unit
               </label>
               <input
                 type="text"
-                required
-                list="add-fruit-units"
-                placeholder="e.g. Crate, Peti, Box, KG"
+                placeholder=""
                 value={unit}
                 onChange={(e) => setUnit(e.target.value)}
                 className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
               />
-              <datalist id="add-fruit-units">
-                <option value="Crate" />
-                <option value="Peti" />
-                <option value="Box" />
-                <option value="KG" />
-                <option value="Bag" />
-                <option value="Piece" />
-                <option value="Nag" />
-              </datalist>
             </div>
 
             <div>

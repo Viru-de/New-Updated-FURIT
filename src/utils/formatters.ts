@@ -154,3 +154,30 @@ export function formatBillAmount(amount: number | null | undefined): string {
   if (amount === null || amount === undefined || isNaN(amount)) return '0.00';
   return amount.toFixed(2);
 }
+
+/**
+ * Format the company signature for printed bills across the ERP,
+ * ensuring "FOR, [Full Company Name]" appears exactly once,
+ * using the full company name dynamically loaded from Company Profile / Company Settings.
+ */
+export function formatCompanySignature(
+  profile?: { name?: string; signatureTitle?: string } | null,
+  fallbackName: string = 'Hari Kripa'
+): string {
+  // Use the full company name exactly as saved in the existing Company Profile / Company Settings
+  let rawName = profile?.name ? profile.name.trim() : '';
+
+  // If profile.name wasn't available, check if signatureTitle has the name
+  if (!rawName && profile?.signatureTitle) {
+    rawName = profile.signatureTitle.trim();
+  }
+
+  if (!rawName) {
+    rawName = fallbackName;
+  }
+
+  // Remove duplicate/redundant leading "FOR, " or "FOR " (case-insensitive)
+  const cleanName = rawName.replace(/^FOR,?\s*/i, '').trim();
+
+  return `FOR, ${cleanName}`;
+}

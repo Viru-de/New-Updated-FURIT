@@ -21,7 +21,15 @@ import {
 } from 'lucide-react';
 import { AdminPasswordModal } from '../common/AdminPasswordModal';
 
-export const SaleProceedsListView: React.FC = () => {
+interface SaleProceedsListViewProps {
+  onNavigateToCreateBill?: (proceeds: SaleProceeds) => void;
+  onNavigateToCustomerLedger?: (customerId: string) => void;
+}
+
+export const SaleProceedsListView: React.FC<SaleProceedsListViewProps> = ({
+  onNavigateToCreateBill,
+  onNavigateToCustomerLedger,
+}) => {
   const [sales, setSales] = useState<SaleProceeds[]>(db.getSaleProceeds());
   const [searchTerm, setSearchTerm] = useState('');
   const [expandedId, setExpandedId] = useState<string | null>(sales[0]?.id || null);
@@ -198,13 +206,27 @@ export const SaleProceedsListView: React.FC = () => {
                       {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                     </button>
                     <div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex flex-wrap items-center gap-2">
                         <span className="font-bold text-sm text-slate-900">
                           {sale.proceedsNo}
                         </span>
                         {sale.billNumber && (
-                          <span className="text-[11px] text-slate-500 font-mono-numbers">
-                            · Bill: {sale.billNumber}
+                          <span className="inline-flex items-center gap-1 rounded bg-blue-50 px-2 py-0.5 text-[11px] font-semibold text-blue-700">
+                            <FileText className="h-3 w-3" />
+                            Bill: {sale.billNumber}
+                          </span>
+                        )}
+                        {sale.customerName && (
+                          <span
+                            onClick={(e) => {
+                              if (sale.customerId && onNavigateToCustomerLedger) {
+                                e.stopPropagation();
+                                onNavigateToCustomerLedger(sale.customerId);
+                              }
+                            }}
+                            className={`inline-flex items-center gap-1 text-[11px] font-medium text-slate-600 ${sale.customerId && onNavigateToCustomerLedger ? 'hover:text-emerald-700 hover:underline cursor-pointer' : ''}`}
+                          >
+                            · Cust: {sale.customerName}
                           </span>
                         )}
                       </div>
@@ -392,15 +414,43 @@ export const SaleProceedsListView: React.FC = () => {
                       </p>
                     )}
 
-                    {/* Print Action in Expanded View */}
-                    <div className="flex justify-end pt-2 border-t border-slate-300/30">
-                      <button
-                        type="button"
-                        onClick={() => setPrintingItem(sale)}
-                        className="neu-btn flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-blue-700 hover:text-blue-900"
-                      >
-                        <Printer className="h-4 w-4 text-blue-600" /> Print Sale Proceed (Ref 1)
-                      </button>
+                    {/* Action Bar in Expanded View */}
+                    <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-300/30">
+                      <div className="flex items-center gap-2">
+                        {sale.customerId && (
+                          <span className="text-xs text-slate-600">
+                            Customer: <strong>{sale.customerName || 'Customer'}</strong>
+                            {onNavigateToCustomerLedger && (
+                              <button
+                                type="button"
+                                onClick={() => onNavigateToCustomerLedger(sale.customerId!)}
+                                className="ml-2 text-xs text-emerald-600 hover:underline font-semibold cursor-pointer"
+                              >
+                                View Ledger →
+                              </button>
+                            )}
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {onNavigateToCreateBill && (
+                          <button
+                            type="button"
+                            onClick={() => onNavigateToCreateBill(sale)}
+                            className="neu-btn flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-emerald-700 hover:text-emerald-900"
+                          >
+                            <FileText className="h-3.5 w-3.5 text-emerald-600" />
+                            {sale.billNumber ? 'View / Edit Bill' : '+ Create Customer Bill'}
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => setPrintingItem(sale)}
+                          className="neu-btn flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-blue-700 hover:text-blue-900"
+                        >
+                          <Printer className="h-4 w-4 text-blue-600" /> Print Sale Proceed (Ref 1)
+                        </button>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -424,9 +474,25 @@ export const SaleProceedsListView: React.FC = () => {
       {/* Modal for Add / Edit */}
       <SaleProceedsModal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={() => {
+          setIsModalOpen(false);
+          setEditingItem(null);
+        }}
         editItem={editingItem}
-        onSaved={refreshList}
+        onSaved={(savedItem) => {
+          refreshList();
+          setIsModalOpen(false);
+          setEditingItem(null);
+          if (printingItem && printingItem.id === savedItem.id) {
+            setPrintingItem(savedItem);
+          }
+        }}
+        onSaveAndPrint={(savedItem) => {
+          refreshList();
+          setIsModalOpen(false);
+          setEditingItem(null);
+          setPrintingItem(savedItem);
+        }}
       />
 
       {/* Traditional Bill Print Modal (Reference 1) */}

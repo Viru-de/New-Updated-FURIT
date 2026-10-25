@@ -148,6 +148,7 @@ export function getCustomerLedger(
   totalDebit: number;
   totalCredit: number;
   overallClosingBalance?: number;
+  periodOpeningBalance?: number;
 } {
   const customer = db.getCustomerById(customerId);
   const creditSales = db.getCreditSales().filter((cs) => cs.customerId === customerId);
@@ -201,16 +202,69 @@ export function getCustomerLedger(
     return (a.createdAt || '').localeCompare(b.createdAt || '');
   });
 
-  const entries: LedgerEntry[] = [];
-  let currentBalance = 0;
-
-  // 1. Customer Opening Balance
+  // Calculate master initial balance from customer record
+  let masterInitialBalance = 0;
   if (customer && customer.openingBalance !== 0) {
-    const isDebit = customer.openingBalanceType === 'debit';
-    const debit = isDebit ? customer.openingBalance : null;
-    const credit = isDebit ? null : customer.openingBalance;
-    currentBalance = isDebit ? customer.openingBalance : -customer.openingBalance;
+    masterInitialBalance =
+      customer.openingBalanceType === 'debit'
+        ? customer.openingBalance
+        : -customer.openingBalance;
+  }
 
+  const startIso = filter?.startDate ? toIsoDate(filter.startDate) : undefined;
+  const endIso = filter?.endDate ? toIsoDate(filter.endDate) : undefined;
+
+  // Calculate opening balance immediately before start date
+  let periodOpeningBalance = masterInitialBalance;
+  const inPeriodTxs: RawTx[] = [];
+
+  for (const tx of rawTxList) {
+    const txIso = toIsoDate(tx.date);
+    if (startIso && txIso < startIso) {
+      // Occurred prior to start date -> rolls into periodOpeningBalance
+      if (tx.type === 'CREDIT_SALE') {
+        const cs = tx.data as CreditSale;
+        periodOpeningBalance += cs.finalAmount;
+      } else if (tx.type === 'RECEIPT') {
+        const r = tx.data as Receipt;
+        periodOpeningBalance -= r.amount;
+      } else if (tx.type === 'SALE_PROCEEDS') {
+        const sp = tx.data as SaleProceeds;
+        if (sp.netAmount >= 0) {
+          periodOpeningBalance -= sp.netAmount;
+        } else {
+          periodOpeningBalance += Math.abs(sp.netAmount);
+        }
+      }
+      // Cash sales do not alter balance (immediate settlement offset)
+    } else if (!endIso || txIso <= endIso) {
+      // Transaction within selected date filter
+      inPeriodTxs.push(tx);
+    }
+  }
+
+  const entries: LedgerEntry[] = [];
+  let runningBalance = periodOpeningBalance;
+
+  // 1. Opening Balance row
+  if (startIso) {
+    // Single-day or date-range filter: show opening balance as of the start date
+    const isDr = periodOpeningBalance > 0;
+    const isCr = periodOpeningBalance < 0;
+    entries.push({
+      id: `ob-period-${customerId}`,
+      date: startIso,
+      particulars: `Opening Balance (b/f as on ${formatDate(startIso)})`,
+      referenceType: 'Opening Balance',
+      debit: isDr ? periodOpeningBalance : null,
+      credit: isCr ? Math.abs(periodOpeningBalance) : null,
+      balance: periodOpeningBalance,
+    });
+  } else if (customer) {
+    // All-time statement: show customer's master opening balance row
+    const isDebit = customer.openingBalanceType === 'debit';
+    const debit = isDebit && customer.openingBalance !== 0 ? customer.openingBalance : null;
+    const credit = !isDebit && customer.openingBalance !== 0 ? customer.openingBalance : null;
     entries.push({
       id: `ob-${customer.id}`,
       date: customer.createdAt ? customer.createdAt.split('T')[0] : '2026-10-01',
@@ -218,55 +272,56 @@ export function getCustomerLedger(
       referenceType: 'Opening Balance',
       debit,
       credit,
-      balance: currentBalance,
-    });
-  } else if (customer) {
-    // Show 0 opening balance row
-    entries.push({
-      id: `ob-${customer.id}`,
-      date: customer.createdAt ? customer.createdAt.split('T')[0] : '2026-10-01',
-      particulars: 'Opening Balance',
-      referenceType: 'Opening Balance',
-      debit: null,
-      credit: null,
-      balance: 0,
+      balance: periodOpeningBalance,
     });
   }
 
-  // 2. Transactions
-  for (const tx of rawTxList) {
+  // 2. In-Period Transactions
+  let totalDebit = 0;
+  let totalCredit = 0;
+
+  for (const tx of inPeriodTxs) {
     if (tx.type === 'CREDIT_SALE') {
       const cs = tx.data as CreditSale;
       const debit = cs.finalAmount;
-      currentBalance += debit;
+      runningBalance += debit;
+      totalDebit += debit;
+
+      const isGroup = cs.saleType === 'group' || cs.isGroupSale === true;
+      const refType = isGroup ? 'Group Sale' : 'Credit Sale';
+      const particularTitle = isGroup
+        ? (cs.notes?.includes('Group Sale') ? cs.notes : `${cs.creditSaleNo} (Group Sale)`)
+        : cs.creditSaleNo;
 
       entries.push({
         id: cs.id,
         date: cs.date,
-        particulars: cs.creditSaleNo,
-        referenceType: 'Credit Sale',
+        particulars: particularTitle,
+        referenceType: refType,
         referenceId: cs.id,
         referenceNo: cs.creditSaleNo,
         debit,
         credit: null,
-        balance: currentBalance,
+        balance: runningBalance,
         notes: cs.notes,
         subDetails: {
-          items: cs.items?.map(it => ({
+          items: cs.items?.map((it) => ({
             name: it.fruitName,
             qty: it.quantity,
             unit: it.unit,
             rate: it.rate,
-            amount: it.amount
+            amount: it.amount,
           })),
-          expenses: cs.expenses?.map(e => ({ name: e.name, amount: e.amount })),
+          expenses: cs.expenses?.map((e) => ({ name: e.name, amount: e.amount })),
           crateIn: cs.crateIn,
           crateOut: cs.crateOut,
         },
       });
     } else if (tx.type === 'CASH_SALE') {
       const cs = tx.data as CashSale;
-      // Cash Sale is settled immediately; it records transaction history but does not increase outstanding due
+      totalDebit += cs.finalAmount;
+      totalCredit += cs.finalAmount;
+
       entries.push({
         id: cs.id,
         date: cs.date,
@@ -275,18 +330,18 @@ export function getCustomerLedger(
         referenceId: cs.id,
         referenceNo: cs.cashSaleNo,
         debit: cs.finalAmount,
-        credit: cs.finalAmount, // Immediate settlement offset
-        balance: currentBalance, // Outstanding remains unchanged
+        credit: cs.finalAmount,
+        balance: runningBalance,
         notes: cs.notes,
         subDetails: {
-          items: cs.items?.map(it => ({
+          items: cs.items?.map((it) => ({
             name: it.fruitName,
             qty: it.quantity,
             unit: it.unit,
             rate: it.rate,
-            amount: it.amount
+            amount: it.amount,
           })),
-          expenses: cs.expenses?.map(e => ({ name: e.name, amount: e.amount })),
+          expenses: cs.expenses?.map((e) => ({ name: e.name, amount: e.amount })),
           crateIn: cs.crateIn,
           crateOut: cs.crateOut,
         },
@@ -294,7 +349,8 @@ export function getCustomerLedger(
     } else if (tx.type === 'RECEIPT') {
       const r = tx.data as Receipt;
       const credit = r.amount;
-      currentBalance -= credit;
+      runningBalance -= credit;
+      totalCredit += credit;
 
       entries.push({
         id: r.id,
@@ -305,7 +361,7 @@ export function getCustomerLedger(
         referenceNo: r.receiptNo,
         debit: null,
         credit,
-        balance: currentBalance,
+        balance: runningBalance,
         notes: r.notes,
       });
     } else if (tx.type === 'SALE_PROCEEDS') {
@@ -313,10 +369,15 @@ export function getCustomerLedger(
       const isCredit = sp.netAmount >= 0;
       const credit = isCredit ? sp.netAmount : null;
       const debit = isCredit ? null : Math.abs(sp.netAmount);
-      
-      // Net proceeds credited to customer ledger reduces due, negative net proceeds increases due
-      if (credit) currentBalance -= credit;
-      if (debit) currentBalance += debit;
+
+      if (credit) {
+        runningBalance -= credit;
+        totalCredit += credit;
+      }
+      if (debit) {
+        runningBalance += debit;
+        totalDebit += debit;
+      }
 
       entries.push({
         id: sp.id,
@@ -327,48 +388,46 @@ export function getCustomerLedger(
         referenceNo: sp.proceedsNo,
         debit,
         credit,
-        balance: currentBalance,
+        balance: runningBalance,
         notes: sp.notes,
         subDetails: {
           qty: sp.quantity,
           rate: sp.rate,
-          items: sp.items?.map(it => ({
+          items: sp.items?.map((it) => ({
             name: it.fruitName,
             qty: it.quantity,
             unit: it.unit,
             rate: it.rate,
-            amount: it.amount
+            amount: it.amount,
           })),
-          expenses: sp.expenses?.map(e => ({ name: e.name, amount: e.amount })),
+          expenses: sp.expenses?.map((e) => ({ name: e.name, amount: e.amount })),
         },
       });
     }
   }
 
-  let filteredEntries = entries;
-  if (filter?.startDate || filter?.endDate) {
-    filteredEntries = entries.filter((e) => {
-      const eDate = toIsoDate(e.date);
-      if (filter.startDate && eDate < filter.startDate) return false;
-      if (filter.endDate && eDate > filter.endDate) return false;
-      return true;
-    });
+  // Calculate overall un-filtered closing balance for comparison
+  let overallBalance = masterInitialBalance;
+  for (const tx of rawTxList) {
+    if (tx.type === 'CREDIT_SALE') {
+      overallBalance += (tx.data as CreditSale).finalAmount;
+    } else if (tx.type === 'RECEIPT') {
+      overallBalance -= (tx.data as Receipt).amount;
+    } else if (tx.type === 'SALE_PROCEEDS') {
+      const sp = tx.data as SaleProceeds;
+      if (sp.netAmount >= 0) overallBalance -= sp.netAmount;
+      else overallBalance += Math.abs(sp.netAmount);
+    }
   }
-
-  // Recalculate totals strictly from the applicable transactions in date range
-  const totalDebit = filteredEntries.reduce((sum, e) => sum + (e.debit || 0), 0);
-  const totalCredit = filteredEntries.reduce((sum, e) => sum + (e.credit || 0), 0);
-  const closingBalance = filteredEntries.length > 0
-    ? filteredEntries[filteredEntries.length - 1].balance
-    : (entries.length > 0 ? entries[entries.length - 1].balance : 0);
 
   return {
     customer,
-    entries: filteredEntries,
-    closingBalance,
+    entries,
+    closingBalance: runningBalance,
     totalDebit,
     totalCredit,
-    overallClosingBalance: currentBalance,
+    overallClosingBalance: overallBalance,
+    periodOpeningBalance,
   };
 }
 
@@ -542,35 +601,63 @@ export function getCustomerCrateStatement(
     return (a.createdAt || '').localeCompare(b.createdAt || '');
   });
 
+  const startIso = filter?.startDate ? toIsoDate(filter.startDate) : undefined;
+  const endIso = filter?.endDate ? toIsoDate(filter.endDate) : undefined;
+
+  let masterCrateBalance = customer?.openingCrateBalance || 0;
+  let periodOpeningCrateBalance = masterCrateBalance;
+  const inPeriodCrates: RawCrateItem[] = [];
+
+  for (const item of list) {
+    const itemIso = toIsoDate(item.date);
+    if (startIso && itemIso < startIso) {
+      periodOpeningCrateBalance += (item.outQuantity - item.inQuantity);
+    } else if (!endIso || itemIso <= endIso) {
+      inPeriodCrates.push(item);
+    }
+  }
+
   const entries: CrateLedgerEntry[] = [];
-  let currentBalance = customer?.openingCrateBalance || 0;
+  let currentBalance = periodOpeningCrateBalance;
 
   // Running balance map per crate type
   const typeRunningBalances = new Map<string, number>();
   const openingTypeId = customer?.crateTypeId || defaultCrateId;
   const openingTypeName = (customer?.crateTypeId ? crateTypes.find((c) => c.id === customer.crateTypeId)?.name : undefined) || defaultCrateName;
 
-  if (customer && customer.openingCrateBalance !== undefined && customer.openingCrateBalance !== 0) {
-    typeRunningBalances.set(openingTypeId, customer.openingCrateBalance);
+  if (startIso) {
+    entries.push({
+      id: `ob-period-crate-${customerId}`,
+      date: startIso,
+      particulars: `Opening Crate Balance (b/f as on ${formatDate(startIso)})`,
+      referenceNo: 'OB',
+      crateTypeId: openingTypeId,
+      crateName: openingTypeName,
+      inQuantity: 0,
+      outQuantity: 0,
+      balance: periodOpeningCrateBalance,
+      typeBalance: periodOpeningCrateBalance,
+      weightKg: defaultWeightKg,
+      totalKg: periodOpeningCrateBalance * defaultWeightKg,
+    });
+  } else {
+    entries.push({
+      id: `ob-crate-${customerId}`,
+      date: customer?.createdAt ? customer.createdAt.split('T')[0] : '2026-10-01',
+      particulars: 'Opening Crate Balance',
+      referenceNo: 'OB',
+      crateTypeId: openingTypeId,
+      crateName: openingTypeName,
+      inQuantity: 0,
+      outQuantity: 0,
+      balance: masterCrateBalance,
+      typeBalance: masterCrateBalance,
+      weightKg: defaultWeightKg,
+      totalKg: masterCrateBalance * defaultWeightKg,
+    });
   }
 
-  // Opening entry
-  entries.push({
-    id: `ob-crate-${customerId}`,
-    date: customer?.createdAt ? customer.createdAt.split('T')[0] : '2026-10-01',
-    particulars: 'Opening Crate Balance',
-    referenceNo: 'OB',
-    crateTypeId: openingTypeId,
-    crateName: openingTypeName,
-    inQuantity: 0,
-    outQuantity: 0,
-    balance: currentBalance,
-    typeBalance: customer?.openingCrateBalance || 0,
-    weightKg: defaultWeightKg,
-    totalKg: currentBalance * defaultWeightKg,
-  });
-
-  for (const item of list) {
+  for (const item of inPeriodCrates) {
     currentBalance = currentBalance + item.outQuantity - item.inQuantity;
     const prevTypeBal = typeRunningBalances.get(item.crateTypeId) || 0;
     const nextTypeBal = prevTypeBal + item.outQuantity - item.inQuantity;
@@ -606,7 +693,7 @@ export function getCustomerCrateStatement(
     const cWeight = matchedType ? matchedType.defaultWeightKg : defaultWeightKg;
 
     const ob = (openingTypeId === tid && customer) ? (customer.openingCrateBalance || 0) : 0;
-    const typeEntries = entries.filter((e) => e.crateTypeId === tid && e.id !== `ob-crate-${customerId}`);
+    const typeEntries = entries.filter((e) => e.crateTypeId === tid && !e.id.startsWith('ob-'));
     const issued = ob + typeEntries.reduce((sum, e) => sum + (e.outQuantity || 0), 0);
     const returned = typeEntries.reduce((sum, e) => sum + (e.inQuantity || 0), 0);
     const bal = issued - returned;
@@ -629,19 +716,9 @@ export function getCustomerCrateStatement(
     return a.crateName.localeCompare(b.crateName);
   });
 
-  let filtered = entries;
-  if (filter?.startDate || filter?.endDate) {
-    filtered = entries.filter((e) => {
-      const eDate = toIsoDate(e.date);
-      if (filter.startDate && eDate < filter.startDate) return false;
-      if (filter.endDate && eDate > filter.endDate) return false;
-      return true;
-    });
-  }
-
   return {
     customer,
-    entries: filtered,
+    entries,
     closingCrates: currentBalance,
     crateWeightKg: defaultWeightKg,
     closingTotalKg: currentBalance * defaultWeightKg,
@@ -681,7 +758,7 @@ export function getCustomerCrateBalanceByType(
 /**
  * Computes total outstanding for all customers
  */
-export function getAllCustomerOutstandings(): {
+export function getAllCustomerOutstandings(filter?: DateFilterRange): {
   customer: Customer;
   openingBalance: number;
   totalDebit: number;
@@ -692,11 +769,11 @@ export function getAllCustomerOutstandings(): {
 }[] {
   const customers = db.getCustomers();
   return customers.map((c) => {
-    const ledger = getCustomerLedger(c.id);
-    const crateStmt = getCustomerCrateStatement(c.id);
+    const ledger = getCustomerLedger(c.id, filter);
+    const crateStmt = getCustomerCrateStatement(c.id, filter);
     return {
       customer: c,
-      openingBalance: c.openingBalanceType === 'debit' ? c.openingBalance : -c.openingBalance,
+      openingBalance: filter?.startDate ? (ledger.periodOpeningBalance || 0) : (c.openingBalanceType === 'debit' ? c.openingBalance : -c.openingBalance),
       totalDebit: ledger.totalDebit,
       totalCredit: ledger.totalCredit,
       closingBalance: ledger.closingBalance,

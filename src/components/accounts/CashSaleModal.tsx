@@ -78,6 +78,7 @@ export const CashSaleModal: React.FC<CashSaleModalProps> = ({
   const [expenses, setExpenses] = useState<ExpenseItem[]>([
     { id: 'cse-1', name: 'Hamali', amount: 50 },
   ]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const allUnitOptions = useMemo(() => {
     const set = new Set<string>();
@@ -392,10 +393,13 @@ export const CashSaleModal: React.FC<CashSaleModalProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
     if (items.length === 0) return;
+    setIsSubmitting(true);
 
     db.saveCashSale(currentSaleRecord);
     onSaved(currentSaleRecord);
+    setIsSubmitting(false);
     onClose();
   };
 
@@ -868,9 +872,10 @@ export const CashSaleModal: React.FC<CashSaleModalProps> = ({
                   </button>
                   <button
                     type="submit"
-                    className="rounded-lg bg-emerald-600 px-5 py-2 text-xs font-semibold text-white shadow-xs hover:bg-emerald-700 cursor-pointer"
+                    disabled={isSubmitting}
+                    className="rounded-lg bg-emerald-600 px-5 py-2 text-xs font-semibold text-white shadow-xs hover:bg-emerald-700 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
                   >
-                    {editItem ? 'Update Cash Sale' : 'Save Cash Sale'}
+                    {isSubmitting ? 'Saving...' : editItem ? 'Update Cash Sale' : 'Save Cash Sale'}
                   </button>
                 </div>
               </div>

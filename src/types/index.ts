@@ -141,6 +141,7 @@ export interface SaleProceeds {
   date: string; // YYYY-MM-DD
   challanDate: string; // YYYY-MM-DD
   billNumber?: string;
+  billId?: string;
   items: SaleProceedsItem[];
   quantity: number;
   unit: string;
@@ -156,10 +157,15 @@ export interface SaleProceeds {
   vendorName?: string;
   customerId?: string;
   customerName?: string;
+  customerMobile?: string;
+  customerAddress?: string;
+  customerAadhaarNo?: string;
+  paymentMode?: string;
   notes?: string;
   crateTypeId?: string;
   crateName?: string;
   createdAt: string;
+  updatedAt?: string;
 }
 
 export interface SaleProceedsOpeningBalance {
@@ -227,6 +233,10 @@ export interface CreditSale {
   totalCrateBalance?: number;
   notes?: string;
   createdAt: string;
+  saleType?: 'wholesale' | 'group';
+  isGroupSale?: boolean;
+  groupId?: string;
+  groupTitle?: string;
 }
 
 export interface CashSaleItem {
@@ -336,6 +346,9 @@ export interface Bill {
   notes?: string;
   status: 'Paid' | 'Unpaid' | 'Partial';
   createdAt: string;
+  sourceTransactionId?: string;
+  sourceTransactionNo?: string;
+  sourceType?: 'saleProceeds' | 'direct' | 'creditSale';
 }
 
 export interface LedgerEntry {

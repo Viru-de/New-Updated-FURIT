@@ -540,6 +540,8 @@ const INITIAL_CREDIT_SALES: CreditSale[] = [
     finalAmount: 1250,
     notes: 'Morning wholesale auction lot',
     createdAt: '2026-10-08T09:00:00.000Z',
+    saleType: 'wholesale',
+    isGroupSale: false,
   },
   {
     id: 'cs2',
@@ -573,6 +575,8 @@ const INITIAL_CREDIT_SALES: CreditSale[] = [
     finalAmount: 920,
     notes: '2nd dispatch',
     createdAt: '2026-10-08T10:00:00.000Z',
+    saleType: 'wholesale',
+    isGroupSale: false,
   },
   {
     id: 'cs3',
@@ -606,6 +610,8 @@ const INITIAL_CREDIT_SALES: CreditSale[] = [
     finalAmount: 2200,
     notes: '5 Crates issued to ABC Customer (out: 5)',
     createdAt: '2026-10-09T08:30:00.000Z',
+    saleType: 'wholesale',
+    isGroupSale: false,
   },
 ];
 
@@ -1018,13 +1024,77 @@ export const db = {
   },
   saveSaleProceeds(item: SaleProceeds): void {
     const list = this.getSaleProceeds();
+    const updatedRecord: SaleProceeds = {
+      ...item,
+      updatedAt: new Date().toISOString(),
+    };
+
     const idx = list.findIndex((sp) => sp.id === item.id);
     if (idx >= 0) {
-      list[idx] = item;
+      list[idx] = updatedRecord;
     } else {
-      list.push(item);
+      const billNoIdx = list.findIndex((sp) => sp.proceedsNo === item.proceedsNo);
+      if (billNoIdx >= 0) {
+        list[billNoIdx] = updatedRecord;
+      } else {
+        // Debounce rapid duplicate submission within 3 seconds
+        const dupIdx = list.findIndex(
+          (sp) =>
+            sp.vendorId === item.vendorId &&
+            sp.customerId === item.customerId &&
+            sp.date === item.date &&
+            sp.amount === item.amount &&
+            sp.items?.length === item.items?.length &&
+            Math.abs(new Date(item.createdAt || '').getTime() - new Date(sp.createdAt || '').getTime()) < 3000
+        );
+        if (dupIdx >= 0) {
+          list[dupIdx] = updatedRecord;
+        } else {
+          list.push(updatedRecord);
+        }
+      }
     }
     setItem(STORAGE_KEYS.SALE_PROCEEDS, list);
+
+    // If there is a linked bill or billId, keep the bill updated as well
+    if (item.billId || item.id) {
+      const bills = this.getBills();
+      const bIdx = bills.findIndex((b) => b.id === item.billId || b.sourceTransactionId === item.id);
+      if (bIdx >= 0) {
+        const existingBill = bills[bIdx];
+        bills[bIdx] = {
+          ...existingBill,
+          billNo: item.billNumber || existingBill.billNo,
+          customerId: item.customerId || existingBill.customerId,
+          customerName: item.customerName || existingBill.customerName,
+          customerMobile: item.customerMobile || existingBill.customerMobile,
+          customerAddress: item.customerAddress || existingBill.customerAddress,
+          customerAadhaarNo: item.customerAadhaarNo || existingBill.customerAadhaarNo,
+          date: item.date,
+          challanNumber: item.billNumber || item.proceedsNo,
+          challanDate: item.challanDate || item.date,
+          subtotal: item.amount,
+          expenseTotal: item.totalExpense,
+          totalAmount: item.amount + item.totalExpense,
+          sourceTransactionId: item.id,
+          sourceTransactionNo: item.proceedsNo,
+          sourceType: 'saleProceeds',
+          items: item.items.map((it) => ({
+            id: it.id,
+            fruitId: it.fruitId,
+            fruitName: it.fruitName,
+            quantity: it.quantity,
+            unit: it.unit,
+            kg: it.weight !== undefined ? it.weight : it.kg,
+            rate: it.rate,
+            amount: it.amount,
+            crateSize: it.crateName || undefined,
+          })),
+          expenses: item.expenses,
+        };
+        setItem(STORAGE_KEYS.BILLS, bills);
+      }
+    }
   },
   deleteSaleProceeds(id: string): void {
     const list = this.getSaleProceeds().filter((sp) => sp.id !== id);
@@ -1033,7 +1103,15 @@ export const db = {
 
   // Credit Sales
   getCreditSales(): CreditSale[] {
-    return getItem<CreditSale[]>(STORAGE_KEYS.CREDIT_SALES, INITIAL_CREDIT_SALES);
+    const rawList = getItem<CreditSale[]>(STORAGE_KEYS.CREDIT_SALES, INITIAL_CREDIT_SALES);
+    return rawList.map((cs) => {
+      const isGroup = cs.saleType === 'group' || cs.isGroupSale === true || Boolean(cs.notes?.toLowerCase().includes('group sale'));
+      return {
+        ...cs,
+        saleType: cs.saleType || (isGroup ? 'group' : 'wholesale'),
+        isGroupSale: isGroup,
+      };
+    });
   },
   getNextCreditSaleNumber(): number {
     const list = this.getCreditSales();
@@ -1047,18 +1125,48 @@ export const db = {
     if (idx >= 0) {
       list[idx] = sale;
     } else {
-      list.push(sale);
+      // 1. Check if a sale with identical bill number already exists
+      const billNoIdx = list.findIndex((cs) => cs.creditSaleNo === sale.creditSaleNo);
+      if (billNoIdx >= 0) {
+        list[billNoIdx] = sale;
+      } else {
+        // 2. Prevent rapid duplicate submission (within 3 seconds with same customer, date, amount)
+        const dupIdx = list.findIndex(
+          (cs) =>
+            cs.customerId === sale.customerId &&
+            cs.date === sale.date &&
+            cs.finalAmount === sale.finalAmount &&
+            cs.items?.length === sale.items?.length &&
+            Math.abs(new Date(sale.createdAt || '').getTime() - new Date(cs.createdAt || '').getTime()) < 3000
+        );
+        if (dupIdx >= 0) {
+          list[dupIdx] = sale;
+        } else {
+          list.push(sale);
+        }
+      }
     }
     setItem(STORAGE_KEYS.CREDIT_SALES, list);
   },
   saveCreditSalesBatch(salesToSave: CreditSale[]): void {
     const list = this.getCreditSales();
+    const idMap = new Map<string, number>();
+    const billMap = new Map<string, number>();
+    list.forEach((s, idx) => {
+      idMap.set(s.id, idx);
+      if (s.creditSaleNo) billMap.set(s.creditSaleNo, idx);
+    });
+
     for (const sale of salesToSave) {
-      const idx = list.findIndex((cs) => cs.id === sale.id);
-      if (idx >= 0) {
-        list[idx] = sale;
+      if (idMap.has(sale.id)) {
+        list[idMap.get(sale.id)!] = sale;
+      } else if (sale.creditSaleNo && billMap.has(sale.creditSaleNo)) {
+        list[billMap.get(sale.creditSaleNo)!] = sale;
       } else {
         list.push(sale);
+        const newIdx = list.length - 1;
+        idMap.set(sale.id, newIdx);
+        if (sale.creditSaleNo) billMap.set(sale.creditSaleNo, newIdx);
       }
     }
     setItem(STORAGE_KEYS.CREDIT_SALES, list);
@@ -1089,7 +1197,24 @@ export const db = {
     if (idx >= 0) {
       list[idx] = sale;
     } else {
-      list.push(sale);
+      const billNoIdx = list.findIndex((cs) => cs.cashSaleNo === sale.cashSaleNo);
+      if (billNoIdx >= 0) {
+        list[billNoIdx] = sale;
+      } else {
+        const dupIdx = list.findIndex(
+          (cs) =>
+            cs.customerId === sale.customerId &&
+            cs.date === sale.date &&
+            cs.finalAmount === sale.finalAmount &&
+            cs.items?.length === sale.items?.length &&
+            Math.abs(new Date(sale.createdAt || '').getTime() - new Date(cs.createdAt || '').getTime()) < 3000
+        );
+        if (dupIdx >= 0) {
+          list[dupIdx] = sale;
+        } else {
+          list.push(sale);
+        }
+      }
     }
     setItem(STORAGE_KEYS.CASH_SALES, list);
   },
@@ -1114,7 +1239,24 @@ export const db = {
     if (idx >= 0) {
       list[idx] = receipt;
     } else {
-      list.push(receipt);
+      const recNoIdx = list.findIndex((r) => r.receiptNo === receipt.receiptNo);
+      if (recNoIdx >= 0) {
+        list[recNoIdx] = receipt;
+      } else {
+        const dupIdx = list.findIndex(
+          (r) =>
+            r.customerId === receipt.customerId &&
+            r.date === receipt.date &&
+            r.amount === receipt.amount &&
+            r.paymentMode === receipt.paymentMode &&
+            Math.abs(new Date(receipt.createdAt || '').getTime() - new Date(r.createdAt || '').getTime()) < 3000
+        );
+        if (dupIdx >= 0) {
+          list[dupIdx] = receipt;
+        } else {
+          list.push(receipt);
+        }
+      }
     }
     setItem(STORAGE_KEYS.RECEIPTS, list);
   },
@@ -1158,9 +1300,34 @@ export const db = {
     if (idx >= 0) {
       list[idx] = bill;
     } else {
-      list.push(bill);
+      const billNoIdx = list.findIndex((b) => b.billNo === bill.billNo);
+      if (billNoIdx >= 0) {
+        list[billNoIdx] = bill;
+      } else {
+        list.push(bill);
+      }
     }
     setItem(STORAGE_KEYS.BILLS, list);
+
+    // If this bill originated from a Sale Proceeds, synchronize the sale proceeds record
+    if (bill.sourceTransactionId) {
+      const proceeds = this.getSaleProceeds();
+      const pIdx = proceeds.findIndex((p) => p.id === bill.sourceTransactionId);
+      if (pIdx >= 0) {
+        proceeds[pIdx] = {
+          ...proceeds[pIdx],
+          billId: bill.id,
+          billNumber: bill.billNo,
+          customerId: bill.customerId || proceeds[pIdx].customerId,
+          customerName: bill.customerName || proceeds[pIdx].customerName,
+          customerMobile: bill.customerMobile || proceeds[pIdx].customerMobile,
+          customerAddress: bill.customerAddress || proceeds[pIdx].customerAddress,
+          customerAadhaarNo: bill.customerAadhaarNo || proceeds[pIdx].customerAadhaarNo,
+          updatedAt: new Date().toISOString(),
+        };
+        setItem(STORAGE_KEYS.SALE_PROCEEDS, proceeds);
+      }
+    }
   },
   deleteBill(id: string): void {
     const list = this.getBills().filter((b) => b.id !== id);

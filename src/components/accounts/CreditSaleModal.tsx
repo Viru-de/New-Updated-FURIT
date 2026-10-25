@@ -57,6 +57,7 @@ export const CreditSaleModal: React.FC<CreditSaleModalProps> = ({
   const [customerError, setCustomerError] = useState(false);
 
   const [isAddCustomerOpen, setIsAddCustomerOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Initialize or reset form
   useEffect(() => {
@@ -389,11 +390,13 @@ export const CreditSaleModal: React.FC<CreditSaleModalProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
     if (!customerId) {
       setCustomerError(true);
       return;
     }
     if (items.length === 0) return;
+    setIsSubmitting(true);
 
     const cust = customers.find((c) => c.id === customerId);
     const seq = editItem ? editItem.sequenceNumber : db.getNextCreditSaleNumber();
@@ -465,6 +468,9 @@ export const CreditSaleModal: React.FC<CreditSaleModalProps> = ({
       totalCrateBalance: totalCrateOut,
       notes: notes.trim() || undefined,
       createdAt: editItem ? editItem.createdAt : new Date().toISOString(),
+      saleType: editItem ? (editItem.saleType || 'wholesale') : 'wholesale',
+      isGroupSale: editItem ? Boolean(editItem.isGroupSale) : false,
+      groupId: editItem ? editItem.groupId : undefined,
     };
 
     // Save credit sale to database
@@ -491,6 +497,7 @@ export const CreditSaleModal: React.FC<CreditSaleModalProps> = ({
     }
 
     onSaved(saleRecord);
+    setIsSubmitting(false);
     onClose();
   };
 
@@ -888,9 +895,10 @@ export const CreditSaleModal: React.FC<CreditSaleModalProps> = ({
               </button>
               <button
                 type="submit"
-                className="rounded-lg bg-emerald-600 px-5 py-2 text-xs font-semibold text-white shadow-xs hover:bg-emerald-700 cursor-pointer"
+                disabled={isSubmitting}
+                className="rounded-lg bg-emerald-600 px-5 py-2 text-xs font-semibold text-white shadow-xs hover:bg-emerald-700 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                {editItem ? 'Update Credit Sale' : 'Save Credit Sale'}
+                {isSubmitting ? 'Saving...' : editItem ? 'Update Credit Sale' : 'Save Credit Sale'}
               </button>
             </div>
           </form>

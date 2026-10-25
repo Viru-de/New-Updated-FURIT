@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { db } from '../../services/db';
 import { getCustomerCrateStatement, getCustomerCrateBalanceByType } from '../../services/accounting';
-import { formatDate, toIsoDate, getTodayIso } from '../../utils/formatters';
+import { formatDate, toIsoDate, getTodayIso, formatCompanySignature } from '../../utils/formatters';
 import { DatePickerInput } from '../common/DatePickerInput';
 import { CrateTransaction } from '../../types';
 import { Box, Download, Printer, Plus, ArrowDownLeft, ArrowUpRight, Building2, AlertTriangle } from 'lucide-react';
@@ -529,7 +529,7 @@ export const CrateStatementView: React.FC<CrateStatementViewProps> = ({
             Software Developed by: {defaultProfile.softwareDevelopedBy || 'Klyia Technology'}
           </div>
           <div className="hidden print:block text-right font-bold uppercase text-[11px]">
-            FOR, {defaultProfile.signatureTitle || defaultProfile.name}
+            {formatCompanySignature(defaultProfile)}
           </div>
         </div>
       </div>

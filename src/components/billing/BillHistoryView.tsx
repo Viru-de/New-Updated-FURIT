@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Bill } from '../../types';
 import { db } from '../../services/db';
-import { formatCurrency, formatDate, formatBillAmount, numberToWordsIndian } from '../../utils/formatters';
+import { formatCurrency, formatDate, formatBillAmount, numberToWordsIndian, formatCompanySignature } from '../../utils/formatters';
 import { ExcelActionBar } from '../common/ExcelActionBar';
 import { exportBillHistory } from '../../utils/excelEngine';
 import {
@@ -527,7 +527,7 @@ export const BillHistoryView: React.FC<BillHistoryViewProps> = ({
                   </div>
 
                   <div className="text-right font-bold uppercase text-slate-950 dark:text-slate-950 print:text-black">
-                    <div>FOR, {selectedBillForPreview.companyProfileSnapshot?.signatureTitle || selectedBillForPreview.companyProfileSnapshot?.name}</div>
+                    <div>{formatCompanySignature(selectedBillForPreview.companyProfileSnapshot)}</div>
                   </div>
                 </div>
 

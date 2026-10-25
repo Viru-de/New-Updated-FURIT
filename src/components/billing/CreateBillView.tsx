@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Bill, BillItem, CompanyProfile, Customer, ExpenseItem, Fruit } from '../../types';
+import { Bill, BillItem, CompanyProfile, Customer, ExpenseItem, Fruit, SaleProceeds } from '../../types';
 import { db } from '../../services/db';
-import { formatCurrency, formatSequence, getTodayIso, formatDate, formatBillAmount, numberToWordsIndian } from '../../utils/formatters';
+import { formatCurrency, formatSequence, getTodayIso, formatDate, formatBillAmount, numberToWordsIndian, formatCompanySignature } from '../../utils/formatters';
 import { getFruitEffectivePrice } from '../../utils/fruitUtils';
 import { calculateWholesaleItemAmount } from '../../utils/billingCalculations';
 import { maskAadhaar } from '../../utils/aadhaarUtils';
@@ -30,16 +30,21 @@ import {
   Phone,
   Mail,
   MapPin,
+  Link as LinkIcon,
 } from 'lucide-react';
 
 interface CreateBillViewProps {
   editBill?: Bill | null;
+  sourceProceeds?: SaleProceeds | null;
+  initialCustomerId?: string;
   onSaved?: (bill: Bill) => void;
   onNavigateToHistory?: () => void;
 }
 
 export const CreateBillView: React.FC<CreateBillViewProps> = ({
   editBill,
+  sourceProceeds,
+  initialCustomerId,
   onSaved,
   onNavigateToHistory,
 }) => {
@@ -54,14 +59,20 @@ export const CreateBillView: React.FC<CreateBillViewProps> = ({
     editBill?.companyProfileId || defaultProfile?.id || profiles[0]?.id || ''
   );
   const [selectedCustomerId, setSelectedCustomerId] = useState<string>(
-    editBill?.customerId || customers[0]?.id || ''
+    editBill?.customerId || sourceProceeds?.customerId || initialCustomerId || customers[0]?.id || ''
   );
-  const [billDate, setBillDate] = useState<string>(editBill?.date || getTodayIso());
+  const [billDate, setBillDate] = useState<string>(
+    editBill?.date || sourceProceeds?.date || getTodayIso()
+  );
   const [billNo, setBillNo] = useState<string>(
-    editBill?.billNo || `BILL-${formatSequence(db.getNextBillNumber(), 3)}`
+    editBill?.billNo || sourceProceeds?.billNumber || `BILL-${formatSequence(db.getNextBillNumber(), 3)}`
   );
-  const [challanNo, setChallanNo] = useState<string>(editBill?.challanNumber || '');
-  const [challanDate, setChallanDate] = useState<string>(editBill?.challanDate || getTodayIso());
+  const [challanNo, setChallanNo] = useState<string>(
+    editBill?.challanNumber || sourceProceeds?.proceedsNo || ''
+  );
+  const [challanDate, setChallanDate] = useState<string>(
+    editBill?.challanDate || sourceProceeds?.challanDate || sourceProceeds?.date || getTodayIso()
+  );
   const [items, setItems] = useState<BillItem[]>(
     editBill?.items || [
       {
@@ -78,7 +89,7 @@ export const CreateBillView: React.FC<CreateBillViewProps> = ({
   const [expenses, setExpenses] = useState<ExpenseItem[]>(
     editBill?.expenses || [{ id: 'be-1', name: 'Freight & Hamali', amount: 150 }]
   );
-  const [notes, setNotes] = useState<string>(editBill?.notes || '');
+  const [notes, setNotes] = useState<string>(editBill?.notes || sourceProceeds?.notes || '');
   const [status, setStatus] = useState<Bill['status']>(editBill?.status || 'Unpaid');
 
   // Preview Modal
@@ -99,8 +110,46 @@ export const CreateBillView: React.FC<CreateBillViewProps> = ({
       setExpenses(editBill.expenses);
       setNotes(editBill.notes || '');
       setStatus(editBill.status);
+    } else if (sourceProceeds) {
+      if (sourceProceeds.customerId) {
+        setSelectedCustomerId(sourceProceeds.customerId);
+      }
+      setBillDate(sourceProceeds.date);
+      if (sourceProceeds.billNumber) {
+        setBillNo(sourceProceeds.billNumber);
+      }
+      setChallanNo(sourceProceeds.proceedsNo || '');
+      setChallanDate(sourceProceeds.challanDate || sourceProceeds.date);
+      if (sourceProceeds.items && sourceProceeds.items.length > 0) {
+        setItems(
+          sourceProceeds.items.map((it, idx) => ({
+            id: `bi-${Date.now()}-${idx}`,
+            fruitId: it.fruitId || '',
+            fruitName: it.fruitName || 'Fruit',
+            quantity: it.quantity,
+            unit: it.unit || 'Crate',
+            kg: it.kg || it.weight || 0,
+            rate: it.rate,
+            amount: it.amount,
+          }))
+        );
+      }
+      if (sourceProceeds.expenses && sourceProceeds.expenses.length > 0) {
+        setExpenses(
+          sourceProceeds.expenses.map((e, idx) => ({
+            id: `be-${Date.now()}-${idx}`,
+            name: e.name,
+            amount: e.amount,
+          }))
+        );
+      }
+      if (sourceProceeds.notes) {
+        setNotes(sourceProceeds.notes);
+      }
+    } else if (initialCustomerId) {
+      setSelectedCustomerId(initialCustomerId);
     }
-  }, [editBill]);
+  }, [editBill, sourceProceeds, initialCustomerId]);
 
   const activeProfile =
     profiles.find((p) => p.id === selectedProfileId) || defaultProfile || profiles[0];
@@ -189,8 +238,12 @@ export const CreateBillView: React.FC<CreateBillViewProps> = ({
       customerId: selectedCustomerId,
       customerName: activeCustomer ? activeCustomer.name : '',
       customerMobile: activeCustomer?.mobile,
-      customerAddress: activeCustomer?.address,
+      customerAddress: activeCustomer?.address || activeCustomer?.city,
       customerGstin: activeCustomer?.gstin,
+      customerAadhaarNo: activeCustomer?.aadhaarNo,
+      sourceTransactionId: editBill?.sourceTransactionId || sourceProceeds?.id || undefined,
+      sourceTransactionNo: editBill?.sourceTransactionNo || sourceProceeds?.proceedsNo || undefined,
+      sourceType: editBill?.sourceType || (sourceProceeds ? 'saleProceeds' : 'direct'),
       date: billDate,
       challanNumber: challanNo.trim() || undefined,
       challanDate: challanDate || billDate,
@@ -258,6 +311,15 @@ export const CreateBillView: React.FC<CreateBillViewProps> = ({
           )}
         </div>
       </div>
+
+      {sourceProceeds && (
+        <div className="flex items-center gap-2 rounded-lg bg-emerald-50 border border-emerald-200 p-3 text-xs text-emerald-800 dark:bg-emerald-950/40 dark:border-emerald-800 dark:text-emerald-300 no-print">
+          <LinkIcon className="h-4 w-4 shrink-0 text-emerald-600" />
+          <span>
+            Prefilled and linked to Sale Proceeds <strong>{sourceProceeds.proceedsNo}</strong>. Saving this bill will update the proceeds transaction and customer ledger automatically.
+          </span>
+        </div>
+      )}
 
       <form onSubmit={handleSave} className="space-y-5 no-print">
         {/* Company Bill Profile Selector Card (Critical Requirement #20 & #21) */}
@@ -794,7 +856,7 @@ export const CreateBillView: React.FC<CreateBillViewProps> = ({
                   </div>
 
                   <div className="text-right font-bold uppercase text-slate-950 dark:text-slate-950 print:text-black">
-                    <div>FOR, {activeProfile?.signatureTitle || activeProfile?.name}</div>
+                    <div>{formatCompanySignature(activeProfile)}</div>
                   </div>
                 </div>
 

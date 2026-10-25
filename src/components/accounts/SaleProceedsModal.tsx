@@ -1,22 +1,26 @@
-import React, { useState, useEffect } from 'react';
-import { ExpenseItem, Fruit, SaleProceeds, SaleProceedsItem } from '../../types';
+import React, { useState, useEffect, useRef } from 'react';
+import { Bill, Customer, ExpenseItem, Fruit, SaleProceeds, SaleProceedsItem } from '../../types';
 import { db } from '../../services/db';
 import { formatCurrency, formatSequence, getTodayIso } from '../../utils/formatters';
 import { getFruitEffectivePrice } from '../../utils/fruitUtils';
+import { getCustomerLedger } from '../../services/accounting';
 import { DatePickerInput } from '../common/DatePickerInput';
 import { AddFruitModal } from '../modals/AddFruitModal';
+import { AddCustomerModal } from '../modals/AddCustomerModal';
+import { CustomerAvatar } from '../common/CustomerAvatar';
 import { FruitAutocomplete } from '../common/FruitAutocomplete';
 import { CustomerAutocomplete } from '../common/CustomerAutocomplete';
 import { VendorAutocomplete } from '../common/VendorAutocomplete';
 import { QuantityInput } from '../common/QuantityInput';
 import { calculateWholesaleItemAmount } from '../../utils/billingCalculations';
-import { X, Plus, Trash2, Calculator } from 'lucide-react';
+import { X, Plus, Trash2, Calculator, Printer, FileText, CheckCircle2, AlertCircle, UserPlus, Phone, MapPin, CreditCard } from 'lucide-react';
 
 interface SaleProceedsModalProps {
   isOpen: boolean;
   onClose: () => void;
   editItem?: SaleProceeds | null;
   onSaved: (item: SaleProceeds) => void;
+  onSaveAndPrint?: (item: SaleProceeds) => void;
 }
 
 export interface FormSaleProceedItem {
@@ -37,6 +41,7 @@ export const SaleProceedsModal: React.FC<SaleProceedsModalProps> = ({
   onClose,
   editItem,
   onSaved,
+  onSaveAndPrint,
 }) => {
   const fruits = db.getFruits();
   const vendors = db.getVendors();
@@ -61,9 +66,26 @@ export const SaleProceedsModal: React.FC<SaleProceedsModalProps> = ({
   ]);
 
   const [isAddFruitOpen, setIsAddFruitOpen] = useState(false);
+  const [isAddCustomerOpen, setIsAddCustomerOpen] = useState(false);
+  const [generateCustomerBill, setGenerateCustomerBill] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [activeFruitRowIndex, setActiveFruitRowIndex] = useState<number>(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const lastInitializedIdRef = useRef<string | null>(null);
 
   useEffect(() => {
+    if (!isOpen) {
+      lastInitializedIdRef.current = null;
+      return;
+    }
+
+    const currentEditId = editItem ? editItem.id : '__new__';
+    if (lastInitializedIdRef.current === currentEditId) {
+      return; // Protect user's in-progress manual edits from being overwritten
+    }
+    lastInitializedIdRef.current = currentEditId;
+
     if (editItem) {
       setDate(editItem.date);
       setChallanDate(editItem.challanDate || editItem.date);
@@ -71,6 +93,9 @@ export const SaleProceedsModal: React.FC<SaleProceedsModalProps> = ({
       setVendorId(editItem.vendorId || '');
       setCustomerId(editItem.customerId || '');
       setNotes(editItem.notes || '');
+      setGenerateCustomerBill(Boolean(editItem.billId));
+      setErrorMessage(null);
+      setSuccessMessage(null);
 
       // Load items from editItem (preserve existing item rows or map fallback)
       if (editItem.items && editItem.items.length > 0) {
@@ -180,6 +205,9 @@ export const SaleProceedsModal: React.FC<SaleProceedsModalProps> = ({
       setVendorId('');
       setCustomerId('');
       setNotes('');
+      setGenerateCustomerBill(false);
+      setErrorMessage(null);
+      setSuccessMessage(null);
 
       const ct20 = crateTypes.find((c) => c.name.includes('20')) || crateTypes[0];
       setItems([
@@ -366,83 +394,178 @@ export const SaleProceedsModal: React.FC<SaleProceedsModalProps> = ({
   const netAmount = totalProductAmount - totalExpense;
   const difference = netAmount - totalProductAmount; // = -totalExpense
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent, andPrint: boolean = false) => {
     e.preventDefault();
-    if (items.length === 0) return;
+    if (isSubmitting) return;
 
-    const seq = editItem ? editItem.sequenceNumber : db.getNextSaleProceedsNumber();
-    const proceedsNo = editItem
-      ? editItem.proceedsNo
-      : `Sale Proceeds No. ${formatSequence(seq, 3)}`;
+    setErrorMessage(null);
+    setSuccessMessage(null);
 
-    const selectedVendor = vendors.find((v) => v.id === vendorId);
-    const selectedCustomer = customers.find((c) => c.id === customerId);
+    // Validation 1: At least one item with fruit name
+    const validItems = items.filter((it) => it.fruitName && it.fruitName.trim());
+    if (validItems.length === 0) {
+      setErrorMessage('Please enter at least one fruit item with a valid name.');
+      return;
+    }
 
-    const saleItems: SaleProceedsItem[] = items.map((it, idx) => {
-      const itemWeight = it.weight === '' ? 0 : Number(it.weight) || 0;
-      const itemQty = it.quantity === '' ? 0 : Number(it.quantity) || 0;
-      const itemRate = it.rate === '' ? 0 : Number(it.rate) || 0;
-      const calculatedAmount = calculateWholesaleItemAmount(itemQty, it.unit, itemWeight, itemRate);
-      const itemAmount = it.amount !== '' && it.amount !== undefined ? Number(it.amount) : calculatedAmount;
+    // Validation 2: If generating customer bill, customer must be selected
+    if (generateCustomerBill && !customerId) {
+      setErrorMessage('Please select a Customer in order to generate a linked Customer Bill.');
+      return;
+    }
 
-      return {
-        id: it.id || `spi-${Date.now()}-${idx}`,
-        fruitId: it.fruitId,
-        fruitName: it.fruitName || 'Fruit',
-        quantity: itemQty,
-        unit: it.unit || 'Crate',
-        kg: itemWeight,
-        weight: itemWeight,
-        crateTypeId: it.crateName ? (it.crateTypeId || 'ct_20') : undefined,
-        crateName: it.crateName || undefined,
-        rate: itemRate,
-        amount: itemAmount,
+    setIsSubmitting(true);
+
+    try {
+      const seq = editItem ? editItem.sequenceNumber : db.getNextSaleProceedsNumber();
+      const proceedsNo = editItem
+        ? editItem.proceedsNo
+        : `Sale Proceeds No. ${formatSequence(seq, 3)}`;
+
+      const selectedVendor = vendors.find((v) => v.id === vendorId);
+      const selectedCustomer = customers.find((c) => c.id === customerId);
+
+      const saleItems: SaleProceedsItem[] = validItems.map((it, idx) => {
+        const itemWeight = it.weight === '' ? 0 : Number(it.weight) || 0;
+        const itemQty = it.quantity === '' ? 0 : Number(it.quantity) || 0;
+        const itemRate = it.rate === '' ? 0 : Number(it.rate) || 0;
+        const calculatedAmount = calculateWholesaleItemAmount(itemQty, it.unit, itemWeight, itemRate);
+        const itemAmount = it.amount !== '' && it.amount !== undefined ? Number(it.amount) : calculatedAmount;
+
+        return {
+          id: it.id || `spi-${Date.now()}-${idx}`,
+          fruitId: it.fruitId,
+          fruitName: it.fruitName || 'Fruit',
+          quantity: itemQty,
+          unit: it.unit || 'Crate',
+          kg: itemWeight,
+          weight: itemWeight,
+          crateTypeId: it.crateName ? (it.crateTypeId || 'ct_20') : undefined,
+          crateName: it.crateName || undefined,
+          rate: itemRate,
+          amount: itemAmount,
+        };
+      });
+
+      const primaryItem = saleItems[0] || {
+        id: `spi-${Date.now()}`,
+        fruitId: '',
+        fruitName: 'Fruit',
+        quantity: 0,
+        unit: 'Crate',
+        kg: 0,
+        weight: 0,
+        rate: 0,
+        amount: 0,
       };
-    });
 
-    const primaryItem = saleItems[0] || {
-      id: `spi-${Date.now()}`,
-      fruitId: '',
-      fruitName: 'Fruit',
-      quantity: 0,
-      unit: 'Crate',
-      kg: 0,
-      weight: 0,
-      rate: 0,
-      amount: 0,
-    };
+      const calculatedTotalProductAmount = saleItems.reduce((sum, it) => sum + (Number(it.amount) || 0), 0);
+      const calculatedTotalQty = saleItems.reduce((sum, it) => sum + (Number(it.quantity) || 0), 0);
+      const calculatedTotalWeight = saleItems.reduce((sum, it) => sum + (Number(it.weight) || 0), 0);
+      const calculatedTotalExpense = expenses.reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
+      const calculatedNetAmount = calculatedTotalProductAmount - calculatedTotalExpense;
+      const calculatedDifference = calculatedNetAmount - calculatedTotalProductAmount;
 
-    const saleRecord: SaleProceeds = {
-      id: editItem ? editItem.id : `sp-${Date.now()}`,
-      proceedsNo,
-      sequenceNumber: seq,
-      date,
-      challanDate,
-      billNumber: editItem ? editItem.billNumber : undefined,
-      crateTypeId: primaryItem.unit === 'Crate' ? primaryItem.crateTypeId : undefined,
-      crateName: primaryItem.unit === 'Crate' ? primaryItem.crateName : undefined,
-      items: saleItems,
-      quantity: totalQuantity,
-      unit: primaryItem.unit || 'Crate',
-      kg: totalWeight,
-      weight: totalWeight,
-      rate: saleItems.length === 1 ? primaryItem.rate : 0,
-      amount: totalProductAmount,
-      expenses,
-      totalExpense,
-      netAmount,
-      difference,
-      vendorId: vendorId || undefined,
-      vendorName: selectedVendor?.name,
-      customerId: customerId || undefined,
-      customerName: selectedCustomer?.name,
-      notes: notes.trim() || undefined,
-      createdAt: editItem ? editItem.createdAt : new Date().toISOString(),
-    };
+      const saleRecordId = editItem ? editItem.id : `sp-${Date.now()}`;
+      let finalBillNumber = billNumber.trim() || (editItem ? editItem.billNumber : undefined);
+      let finalBillId = editItem ? editItem.billId : undefined;
 
-    db.saveSaleProceeds(saleRecord);
-    onSaved(saleRecord);
-    onClose();
+      // If user requested Customer Bill generation or bill already exists, create / update the linked Bill
+      if (generateCustomerBill && selectedCustomer) {
+        const defaultProfile = db.getDefaultProfile() || db.getCompanyProfiles()[0];
+        const nextBillSeq = finalBillId
+          ? (db.getBills().find((b) => b.id === finalBillId)?.sequenceNumber || db.getNextBillNumber())
+          : db.getNextBillNumber();
+        const generatedBillNo = finalBillNumber || `BILL-${formatSequence(nextBillSeq, 3)}`;
+        finalBillNumber = generatedBillNo;
+        finalBillId = finalBillId || `bill-${Date.now()}`;
+
+        const linkedCustomerBill: Bill = {
+          id: finalBillId,
+          billNo: generatedBillNo,
+          sequenceNumber: nextBillSeq,
+          companyProfileId: defaultProfile.id,
+          companyProfileSnapshot: defaultProfile,
+          customerId: selectedCustomer.id,
+          customerName: selectedCustomer.name,
+          customerMobile: selectedCustomer.mobile,
+          customerAddress: selectedCustomer.address || selectedCustomer.city,
+          customerGstin: selectedCustomer.gstin,
+          customerAadhaarNo: selectedCustomer.aadhaarNo,
+          date,
+          challanNumber: finalBillNumber || proceedsNo,
+          challanDate: challanDate || date,
+          items: saleItems.map((it) => ({
+            id: it.id,
+            fruitId: it.fruitId,
+            fruitName: it.fruitName,
+            quantity: it.quantity,
+            unit: it.unit,
+            kg: it.weight,
+            rate: it.rate,
+            amount: it.amount,
+            crateSize: it.crateName,
+          })),
+          expenses,
+          subtotal: calculatedTotalProductAmount,
+          expenseTotal: calculatedTotalExpense,
+          totalAmount: calculatedTotalProductAmount + calculatedTotalExpense,
+          notes: notes.trim() || undefined,
+          status: 'Unpaid',
+          sourceTransactionId: saleRecordId,
+          sourceTransactionNo: proceedsNo,
+          sourceType: 'saleProceeds',
+          createdAt: editItem ? editItem.createdAt : new Date().toISOString(),
+        };
+
+        db.saveBill(linkedCustomerBill);
+      }
+
+      const saleRecord: SaleProceeds = {
+        id: saleRecordId,
+        proceedsNo,
+        sequenceNumber: seq,
+        date,
+        challanDate,
+        billNumber: finalBillNumber,
+        billId: finalBillId,
+        crateTypeId: primaryItem.unit === 'Crate' ? primaryItem.crateTypeId : undefined,
+        crateName: primaryItem.unit === 'Crate' ? primaryItem.crateName : undefined,
+        items: saleItems,
+        quantity: calculatedTotalQty,
+        unit: primaryItem.unit || 'Crate',
+        kg: calculatedTotalWeight,
+        weight: calculatedTotalWeight,
+        rate: saleItems.length === 1 ? primaryItem.rate : 0,
+        amount: calculatedTotalProductAmount,
+        expenses,
+        totalExpense: calculatedTotalExpense,
+        netAmount: calculatedNetAmount,
+        difference: calculatedDifference,
+        vendorId: vendorId || undefined,
+        vendorName: selectedVendor?.name,
+        customerId: customerId || undefined,
+        customerName: selectedCustomer?.name,
+        customerMobile: selectedCustomer?.mobile,
+        customerAddress: selectedCustomer?.address || selectedCustomer?.city,
+        customerAadhaarNo: selectedCustomer?.aadhaarNo,
+        notes: notes.trim() || undefined,
+        createdAt: editItem ? editItem.createdAt : new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      db.saveSaleProceeds(saleRecord);
+      onSaved(saleRecord);
+      if (andPrint && onSaveAndPrint) {
+        onSaveAndPrint(saleRecord);
+      }
+      setIsSubmitting(false);
+      onClose();
+    } catch (err: any) {
+      console.error('Error saving sale proceeds:', err);
+      setErrorMessage(err?.message || 'An error occurred while saving. Your data has been retained.');
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -469,8 +592,21 @@ export const SaleProceedsModal: React.FC<SaleProceedsModalProps> = ({
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5 p-4 sm:p-6">
-            {/* Row 1: Dates */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {errorMessage && (
+              <div className="flex items-center gap-2 rounded-lg bg-rose-50 border border-rose-200 p-3 text-xs font-medium text-rose-700 dark:bg-rose-950/40 dark:border-rose-900 dark:text-rose-300">
+                <AlertCircle className="h-4 w-4 shrink-0 text-rose-600 dark:text-rose-400" />
+                <span>{errorMessage}</span>
+              </div>
+            )}
+            {successMessage && (
+              <div className="flex items-center gap-2 rounded-lg bg-emerald-50 border border-emerald-200 p-3 text-xs font-medium text-emerald-700 dark:bg-emerald-950/40 dark:border-emerald-900 dark:text-emerald-300">
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
+                <span>{successMessage}</span>
+              </div>
+            )}
+
+            {/* Row 1: Dates & Bill Reference */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <DatePickerInput
                 label="Date"
                 required
@@ -482,6 +618,138 @@ export const SaleProceedsModal: React.FC<SaleProceedsModalProps> = ({
                 value={challanDate}
                 onChange={setChallanDate}
               />
+              <div>
+                <label className="mb-1 block text-xs font-semibold text-slate-700 dark:text-slate-300">
+                  Bill No. / Challan No.
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. BILL-001 (auto if blank)"
+                  value={billNumber}
+                  onChange={(e) => setBillNumber(e.target.value)}
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                />
+              </div>
+            </div>
+
+            {/* Consignor and Customer Information Card */}
+            <div className="rounded-lg border border-slate-200 bg-white p-3.5 sm:p-4 shadow-2xs dark:border-slate-800 dark:bg-slate-800/40 space-y-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Consignor / Vendor */}
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                      Wholesale Consignor / Vendor
+                    </label>
+                    <span className="text-[11px] text-slate-400">Supplier of fruit</span>
+                  </div>
+                  <VendorAutocomplete
+                    valueVendorId={vendorId}
+                    onChange={(v) => setVendorId(v ? v.id : '')}
+                    placeholder="Search vendor / consignor name..."
+                  />
+                </div>
+
+                {/* Customer / Buyer */}
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                      Customer / Buyer
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setIsAddCustomerOpen(true)}
+                      className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 cursor-pointer"
+                    >
+                      <UserPlus className="h-3.5 w-3.5" /> + New Customer
+                    </button>
+                  </div>
+                  <CustomerAutocomplete
+                    valueCustomerId={customerId}
+                    onChange={(c) => {
+                      setCustomerId(c ? c.id : '');
+                      if (c && !generateCustomerBill) {
+                        setGenerateCustomerBill(true);
+                      }
+                    }}
+                    placeholder="Select customer for billing & ledger..."
+                  />
+                </div>
+              </div>
+
+              {/* Selected Customer Details Card */}
+              {customerId && (
+                (() => {
+                  const cust = customers.find((c) => c.id === customerId);
+                  const ledger = cust ? getCustomerLedger(cust.id) : null;
+                  return (
+                    <div className="mt-2 rounded-lg border border-emerald-100 bg-emerald-50/60 p-3 dark:border-emerald-900/40 dark:bg-emerald-950/20">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                        <div className="flex items-center gap-3">
+                          <CustomerAvatar name={cust?.name || 'Customer'} size="md" />
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="font-bold text-sm text-slate-900 dark:text-white">
+                                {cust?.name}
+                              </span>
+                              {cust?.aadhaarNo && (
+                                <span className="inline-flex items-center gap-1 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-400">
+                                  <CreditCard className="h-3 w-3" />
+                                  UID: •••• {cust.aadhaarNo.slice(-4)}
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex flex-wrap items-center gap-3 text-xs text-slate-600 dark:text-slate-400 mt-0.5">
+                              {cust?.mobile && (
+                                <span className="flex items-center gap-1">
+                                  <Phone className="h-3 w-3 text-slate-400" />
+                                  {cust.mobile}
+                                </span>
+                              )}
+                              {(cust?.address || cust?.city) && (
+                                <span className="flex items-center gap-1">
+                                  <MapPin className="h-3 w-3 text-slate-400" />
+                                  {[cust.address, cust.city].filter(Boolean).join(', ')}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+
+                        {ledger && (
+                          <div className="text-right sm:border-l sm:border-emerald-200 sm:pl-3 dark:border-emerald-800">
+                            <span className="text-[10px] uppercase font-bold text-slate-500 block">
+                              Outstanding Balance
+                            </span>
+                            <span className={`text-sm font-bold font-mono-numbers ${ledger.closingBalance > 0 ? 'text-amber-700 dark:text-amber-400' : 'text-slate-700 dark:text-slate-300'}`}>
+                              {formatCurrency(ledger.closingBalance)}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Linked Bill Toggle */}
+                      <div className="mt-3 pt-2.5 border-t border-emerald-200/60 dark:border-emerald-900/60 flex items-center justify-between">
+                        <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-slate-800 dark:text-slate-200 select-none">
+                          <input
+                            type="checkbox"
+                            checked={generateCustomerBill}
+                            onChange={(e) => setGenerateCustomerBill(e.target.checked)}
+                            className="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
+                          />
+                          <span className="flex items-center gap-1.5">
+                            <FileText className="h-3.5 w-3.5 text-emerald-600" />
+                            Generate Linked Customer Bill & Ledger Posting
+                          </span>
+                        </label>
+                        <span className="text-[11px] text-slate-500 hidden sm:inline">
+                          Creates/syncs official Customer Bill with items & totals
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })()
+              )}
             </div>
 
             {/* Product Section: Table Format */}
@@ -787,46 +1055,22 @@ export const SaleProceedsModal: React.FC<SaleProceedsModalProps> = ({
               </div>
             </div>
 
-            {/* Additional info */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              <div>
-                <label className="mb-1 block text-xs font-semibold text-slate-700 dark:text-slate-300">
-                  Wholesale Vendor / Consignor
-                </label>
-                <VendorAutocomplete
-                  valueVendorId={vendorId}
-                  onChange={(v) => setVendorId(v ? v.id : '')}
-                  placeholder="Search vendor / consignor name..."
-                />
-              </div>
-
-              <div>
-                <label className="mb-1 block text-xs font-semibold text-slate-700 dark:text-slate-300">
-                  Customer (Optional)
-                </label>
-                <CustomerAutocomplete
-                  valueCustomerId={customerId}
-                  onChange={(c) => setCustomerId(c ? c.id : '')}
-                  placeholder="Search customer name..."
-                />
-              </div>
-
-              <div>
-                <label className="mb-1 block text-xs font-semibold text-slate-700 dark:text-slate-300">
-                  Notes / Consignment Remarks
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. Hill harvest quality, vehicle no."
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-                />
-              </div>
+            {/* Notes / Consignment Remarks */}
+            <div>
+              <label className="mb-1 block text-xs font-semibold text-slate-700 dark:text-slate-300">
+                Notes / Consignment Remarks
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. Hill harvest quality, vehicle no., consignment details"
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+              />
             </div>
 
             {/* Actions */}
-            <div className="flex justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+            <div className="flex flex-wrap items-center justify-end gap-2.5 sm:gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
               <button
                 type="button"
                 onClick={onClose}
@@ -834,11 +1078,27 @@ export const SaleProceedsModal: React.FC<SaleProceedsModalProps> = ({
               >
                 Cancel
               </button>
+              {onSaveAndPrint && (
+                <button
+                  type="button"
+                  disabled={isSubmitting}
+                  onClick={(e) => handleSubmit(e, true)}
+                  className="flex items-center gap-1.5 rounded-lg border border-blue-600 bg-blue-50 px-4 py-2 text-xs font-bold text-blue-700 hover:bg-blue-100 dark:border-blue-500 dark:bg-blue-950/40 dark:text-blue-300 dark:hover:bg-blue-900/50 cursor-pointer transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  <Printer className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                  {isSubmitting ? 'Processing...' : editItem ? 'Update & Print' : 'Save & Print'}
+                </button>
+              )}
               <button
                 type="submit"
-                className="rounded-lg bg-emerald-600 px-5 py-2 text-xs font-semibold text-white shadow-xs hover:bg-emerald-700 cursor-pointer"
+                disabled={isSubmitting}
+                className="rounded-lg bg-emerald-600 px-5 py-2 text-xs font-semibold text-white shadow-xs hover:bg-emerald-700 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                {editItem ? 'Update Sale Proceeds' : 'Save Sale Proceeds'}
+                {isSubmitting
+                  ? 'Saving...'
+                  : generateCustomerBill && customerId
+                  ? editItem ? 'Update Sale Proceeds & Bill' : 'Save & Generate Customer Bill'
+                  : editItem ? 'Update Sale Proceeds' : 'Save Sale Proceeds'}
               </button>
             </div>
           </form>
@@ -849,6 +1109,16 @@ export const SaleProceedsModal: React.FC<SaleProceedsModalProps> = ({
         isOpen={isAddFruitOpen}
         onClose={() => setIsAddFruitOpen(false)}
         onFruitCreated={handleFruitCreated}
+      />
+
+      <AddCustomerModal
+        isOpen={isAddCustomerOpen}
+        onClose={() => setIsAddCustomerOpen(false)}
+        onCustomerCreated={(newCust) => {
+          setCustomerId(newCust.id);
+          setGenerateCustomerBill(true);
+          setIsAddCustomerOpen(false);
+        }}
       />
     </>
   );

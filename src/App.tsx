@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ThemeProvider } from './context/ThemeContext';
 import { db } from './services/db';
-import { Bill, User } from './types';
+import { Bill, SaleProceeds, User } from './types';
 import { TopNavbar } from './components/layout/TopNavbar';
 import { LoginView } from './components/auth/LoginView';
 import { DashboardView } from './components/dashboard/DashboardView';
@@ -35,6 +35,7 @@ function AppContent() {
   >('general');
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | undefined>(undefined);
   const [editingBill, setEditingBill] = useState<Bill | null>(null);
+  const [sourceProceedsForBill, setSourceProceedsForBill] = useState<SaleProceeds | null>(null);
 
   useEffect(() => {
     const cleanupScroll = initDisableNumberInputScroll();
@@ -86,6 +87,7 @@ function AppContent() {
 
     if (view === 'createBill') {
       setEditingBill(null);
+      setSourceProceedsForBill(null);
       setCurrentView('createBill');
       return;
     }
@@ -109,7 +111,19 @@ function AppContent() {
       case 'dashboard':
         return <DashboardView onNavigate={handleNavigate} />;
       case 'saleProceeds':
-        return <SaleProceedsListView />;
+        return (
+          <SaleProceedsListView
+            onNavigateToCreateBill={(sp) => {
+              setEditingBill(null);
+              setSourceProceedsForBill(sp);
+              setCurrentView('createBill');
+            }}
+            onNavigateToCustomerLedger={(cId) => {
+              setSelectedCustomerId(cId);
+              setCurrentView('customerLedger');
+            }}
+          />
+        );
       case 'cashSales':
         return (
           <CashSaleListView
@@ -191,12 +205,15 @@ function AppContent() {
         return (
           <CreateBillView
             editBill={editingBill}
+            sourceProceeds={sourceProceedsForBill}
             onSaved={() => {
               setEditingBill(null);
+              setSourceProceedsForBill(null);
               setCurrentView('billHistory');
             }}
             onNavigateToHistory={() => {
               setEditingBill(null);
+              setSourceProceedsForBill(null);
               setCurrentView('billHistory');
             }}
           />

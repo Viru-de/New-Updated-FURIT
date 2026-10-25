@@ -9,6 +9,7 @@ import {
   toIsoDate,
   getTodayIso,
   formatSequence,
+  formatCompanySignature,
 } from '../../utils/formatters';
 import {
   isCrateUnit,
@@ -128,7 +129,10 @@ export const GroupSaleView: React.FC<GroupSaleViewProps> = ({
   const loadSalesForDate = (dateToLoad: string) => {
     const allCreditSales = db.getCreditSales();
     const targetIso = toIsoDate(dateToLoad);
-    const dateSales = allCreditSales.filter((cs) => cs.date === targetIso);
+    // ONLY load records belonging to Group Sale. Independent Wholesale Credit Sales must never appear here.
+    const dateSales = allCreditSales.filter(
+      (cs) => cs.date === targetIso && (cs.saleType === 'group' || cs.isGroupSale === true)
+    );
 
     // Map existing credit sales into editable rows
     const loadedRows: GroupSaleRow[] = [];
@@ -666,9 +670,11 @@ export const GroupSaleView: React.FC<GroupSaleViewProps> = ({
           }
         }
 
+        const existing = row.id ? currentSavedSales.find((s) => s.id === row.id) : undefined;
+        const groupTxId = existing?.groupId || `grp-${dateIso.replace(/-/g, '')}`;
+
         if (row.isExisting && row.id) {
           // UPDATE existing record without corrupting historical sequence or duplicate entries
-          const existing = currentSavedSales.find((s) => s.id === row.id);
           const updatedSale: CreditSale = {
             id: row.id,
             creditSaleNo: existing?.creditSaleNo || row.creditSaleNo,
@@ -695,15 +701,21 @@ export const GroupSaleView: React.FC<GroupSaleViewProps> = ({
             totalCrateBalance: isCrate ? (crates > 0 ? crates : q) : 0,
             notes: row.notes || existing?.notes,
             createdAt: existing?.createdAt || new Date().toISOString(),
+            saleType: 'group',
+            isGroupSale: true,
+            groupId: groupTxId,
+            groupTitle: `Group Sale (${formatDate(dateIso)})`,
           };
           salesToBatch.push(updatedSale);
         } else {
           // INSERT NEW record under respective customer's account
           const assignedSeq = nextAvailableSeq++;
-          const billNo = `Credit Sale No. ${formatSequence(assignedSeq, 3)}`;
+          const billNo = row.creditSaleNo && row.creditSaleNo.includes('Group')
+            ? row.creditSaleNo
+            : `Group Sale No. ${formatSequence(assignedSeq, 3)}`;
 
           const newSale: CreditSale = {
-            id: `cs-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`,
+            id: row.id || `cs-grp-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`,
             creditSaleNo: billNo,
             sequenceNumber: assignedSeq,
             customerId: row.customerId,
@@ -728,6 +740,10 @@ export const GroupSaleView: React.FC<GroupSaleViewProps> = ({
             totalCrateBalance: isCrate ? (crates > 0 ? crates : q) : 0,
             notes: row.notes || `Group Sale on ${formatDate(dateIso)}`,
             createdAt: new Date().toISOString(),
+            saleType: 'group',
+            isGroupSale: true,
+            groupId: groupTxId,
+            groupTitle: `Group Sale (${formatDate(dateIso)})`,
           };
           salesToBatch.push(newSale);
         }
@@ -1535,7 +1551,7 @@ export const GroupSaleView: React.FC<GroupSaleViewProps> = ({
 
         <div className="mt-8 flex justify-between text-xs pt-8 border-t border-dashed border-gray-400">
           <div>Prepared By: Mandi Accountant</div>
-          <div>Authorized Signature: FOR, HARI KRIPA</div>
+          <div>Authorized Signature: {formatCompanySignature(currentProfile)}</div>
         </div>
       </div>
     </div>

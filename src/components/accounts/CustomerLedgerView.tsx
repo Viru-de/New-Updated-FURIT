@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../../services/db';
 import { getCustomerLedger } from '../../services/accounting';
-import { formatCurrency, formatDate, toIsoDate, getTodayIso } from '../../utils/formatters';
+import { formatCurrency, formatDate, toIsoDate, getTodayIso, formatCompanySignature } from '../../utils/formatters';
 import { DatePickerInput } from '../common/DatePickerInput';
 import { CreditSaleModal } from './CreditSaleModal';
 import { ReceiptModal } from './ReceiptModal';
@@ -265,7 +265,7 @@ export const CustomerLedgerView: React.FC<CustomerLedgerViewProps> = ({
             />
           </div>
 
-          <div className="lg:col-span-7 flex flex-wrap items-end gap-3">
+          <div className="lg:col-span-7 flex flex-wrap items-end gap-2.5">
             <div className="w-36 sm:w-40 flex-1 sm:flex-none">
               <DatePickerInput
                 label="From Date"
@@ -280,18 +280,37 @@ export const CustomerLedgerView: React.FC<CustomerLedgerViewProps> = ({
                 onChange={setFilterEndDate}
               />
             </div>
-            {(filterStartDate || filterEndDate) && (
+            <div className="flex items-center gap-1.5 pb-0.5">
               <button
                 type="button"
                 onClick={() => {
-                  setFilterStartDate('');
-                  setFilterEndDate('');
+                  const today = getTodayIso();
+                  setFilterStartDate(today);
+                  setFilterEndDate(today);
                 }}
-                className="rounded-lg border border-slate-200 px-3 py-2 text-xs text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 cursor-pointer"
+                className={`rounded-lg px-2.5 py-2 text-xs font-semibold border cursor-pointer transition-colors ${
+                  filterStartDate === getTodayIso() && filterEndDate === getTodayIso()
+                    ? 'bg-emerald-600 text-white border-emerald-600 shadow-2xs'
+                    : 'border-slate-300 text-slate-700 bg-white hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300'
+                }`}
+                title="View today's transactions and single-day ledger"
               >
-                Clear
+                Today
               </button>
-            )}
+              {(filterStartDate || filterEndDate) && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setFilterStartDate('');
+                    setFilterEndDate('');
+                  }}
+                  className="rounded-lg border border-slate-200 px-2.5 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 cursor-pointer"
+                  title="Clear date filter and view all-time ledger"
+                >
+                  All Time
+                </button>
+              )}
+            </div>
 
             {onNavigateToCrate && activeCustomer && (
               <button
@@ -467,7 +486,7 @@ export const CustomerLedgerView: React.FC<CustomerLedgerViewProps> = ({
               <div>
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                    Current Balance
+                    {(filterStartDate || filterEndDate) ? 'Period Balance' : 'Current Balance'}
                   </span>
                   <span
                     className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
@@ -496,15 +515,33 @@ export const CustomerLedgerView: React.FC<CustomerLedgerViewProps> = ({
               </div>
 
               {/* Summary totals inside balance box */}
-              <div className="mt-3 pt-3 border-t border-slate-200 dark:border-slate-700 text-[11px] flex items-center justify-between gap-4 text-slate-500 font-mono-numbers">
-                <div>
-                  <span className="block text-[9px] uppercase tracking-wider text-slate-400">Total Debit</span>
-                  <span className="font-bold text-rose-600 dark:text-rose-400">{formatCurrency(ledger.totalDebit)}</span>
+              <div className="mt-3 pt-3 border-t border-slate-200 dark:border-slate-700 text-[11px] space-y-1.5 text-slate-500 font-mono-numbers">
+                {(filterStartDate || filterEndDate) && ledger.periodOpeningBalance !== undefined && (
+                  <div className="flex items-center justify-between gap-2 text-[10px]">
+                    <span className="uppercase tracking-wider text-slate-400">Opening (b/f)</span>
+                    <span className="font-semibold text-slate-700 dark:text-slate-300">
+                      {formatCurrency(ledger.periodOpeningBalance)}
+                    </span>
+                  </div>
+                )}
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <span className="block text-[9px] uppercase tracking-wider text-slate-400">Total Debit</span>
+                    <span className="font-bold text-rose-600 dark:text-rose-400">{formatCurrency(ledger.totalDebit)}</span>
+                  </div>
+                  <div className="text-right">
+                    <span className="block text-[9px] uppercase tracking-wider text-slate-400">Total Credit</span>
+                    <span className="font-bold text-emerald-600 dark:text-emerald-400">{formatCurrency(ledger.totalCredit)}</span>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <span className="block text-[9px] uppercase tracking-wider text-slate-400">Total Credit</span>
-                  <span className="font-bold text-emerald-600 dark:text-emerald-400">{formatCurrency(ledger.totalCredit)}</span>
-                </div>
+                {(filterStartDate || filterEndDate) && ledger.overallClosingBalance !== undefined && (
+                  <div className="flex items-center justify-between gap-2 pt-1.5 border-t border-slate-200/60 dark:border-slate-700/60 text-[10px]">
+                    <span className="uppercase tracking-wider text-slate-400">All-Time Due</span>
+                    <span className="font-bold text-slate-900 dark:text-white">
+                      {formatCurrency(ledger.overallClosingBalance)}
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -733,7 +770,7 @@ export const CustomerLedgerView: React.FC<CustomerLedgerViewProps> = ({
             Software Developed by: {defaultProfile.softwareDevelopedBy || 'Klyia Technology'}
           </div>
           <div className="hidden print:block text-right font-bold uppercase text-[11px]">
-            FOR, {defaultProfile.signatureTitle || defaultProfile.name}
+            {formatCompanySignature(defaultProfile)}
           </div>
         </div>
       </div>

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { CompanyProfile, Receipt } from '../../types';
 import { db } from '../../services/db';
 import { getCustomerLedger } from '../../services/accounting';
-import { formatDate, formatCurrency, formatBillAmount, numberToWordsIndian } from '../../utils/formatters';
+import { formatDate, formatCurrency, formatBillAmount, numberToWordsIndian, formatCompanySignature } from '../../utils/formatters';
 import { maskAadhaar } from '../../utils/aadhaarUtils';
 import { Printer, X, Building2, CheckCircle2 } from 'lucide-react';
 import { BillShareButtons } from '../common/BillShareButtons';
@@ -268,7 +268,7 @@ export const ReceiptPrintModal: React.FC<ReceiptPrintModalProps> = ({
               </div>
               <div className="text-right">
                 <div className="font-bold uppercase text-[11px]">
-                  FOR, {currentProfile.signatureTitle || currentProfile.name}
+                  {formatCompanySignature(currentProfile)}
                 </div>
                 <div className="text-[10px] text-slate-500 print:text-black mt-4">Authorized Signatory</div>
               </div>

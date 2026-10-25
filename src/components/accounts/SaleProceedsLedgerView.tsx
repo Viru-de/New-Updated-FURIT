@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { db } from '../../services/db';
 import { getSaleProceedsLedger } from '../../services/accounting';
-import { formatCurrency, formatDate, toIsoDate, getTodayIso } from '../../utils/formatters';
+import { formatCurrency, formatDate, toIsoDate, getTodayIso, formatCompanySignature } from '../../utils/formatters';
 import { DatePickerInput } from '../common/DatePickerInput';
 import { Customer, LedgerEntry, SaleProceeds, SaleProceedsOpeningBalance } from '../../types';
 import { SaleProceedsModal } from './SaleProceedsModal';
@@ -459,7 +459,7 @@ export const SaleProceedsLedgerView: React.FC = () => {
             Software Developed by: {defaultProfile.softwareDevelopedBy || 'Klyia Technology'}
           </div>
           <div className="hidden print:block text-right font-bold uppercase text-[11px]">
-            FOR, {defaultProfile.signatureTitle || defaultProfile.name}
+            {formatCompanySignature(defaultProfile)}
           </div>
         </div>
       </div>

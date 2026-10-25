@@ -31,7 +31,7 @@ export const FruitMasterView: React.FC = () => {
 
   // Edit modal state
   const [editName, setEditName] = useState('');
-  const [editUnit, setEditUnit] = useState('Crate');
+  const [editUnit, setEditUnit] = useState('');
   const [editCrateType, setEditCrateType] = useState('');
   const [editPrice, setEditPrice] = useState<number | ''>(1);
   const [editFruitIcon, setEditFruitIcon] = useState<string | undefined>(undefined);
@@ -44,7 +44,8 @@ export const FruitMasterView: React.FC = () => {
   const handleEditClick = (f: Fruit) => {
     setEditingFruit(f);
     setEditName(f.name);
-    const unitVal = f.unit || f.defaultUnit || 'Crate';
+    // Load exact saved unit without forcing 'Crate'
+    const unitVal = f.unit !== undefined && f.unit !== null ? f.unit : (f.defaultUnit || '');
     setEditUnit(unitVal);
     const ctVal = f.crateType !== undefined ? f.crateType : (f.crateName || '');
     setEditCrateType(ctVal);
@@ -53,13 +54,12 @@ export const FruitMasterView: React.FC = () => {
     setEditFruitIcon(f.fruitIcon);
   };
 
-
-
   const handleSaveEdit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingFruit || !editName.trim()) return;
 
-    const savedUnit = editUnit.trim() || 'Crate';
+    // Preserve exact user unit text without forcing 'Crate' or changing casing
+    const savedUnit = editUnit !== undefined ? editUnit : (editingFruit.unit || editingFruit.defaultUnit || '');
     const savedCrateType = editCrateType !== undefined ? editCrateType.trim() : '';
 
     const updated: Fruit = {

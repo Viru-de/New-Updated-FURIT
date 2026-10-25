@@ -1,6 +1,6 @@
 import React from 'react';
 import { CompanyProfile, CrateMovementItem } from '../../types';
-import { formatDate, formatBillAmount, numberToWordsIndian } from '../../utils/formatters';
+import { formatDate, formatBillAmount, numberToWordsIndian, formatCompanySignature } from '../../utils/formatters';
 import {
   BillingLineItem,
   formatQtyWithUnit,
@@ -390,7 +390,7 @@ export const BillTableCanvas: React.FC<BillTableCanvasProps> = ({
           {words}
         </div>
         <div className="text-right font-bold uppercase text-[11px] text-slate-950 dark:text-slate-950 print:text-black">
-          <div>FOR, {currentProfile.signatureTitle || currentProfile.name}</div>
+          <div>{formatCompanySignature(currentProfile)}</div>
         </div>
       </div>
 
