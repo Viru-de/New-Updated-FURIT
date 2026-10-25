@@ -4,7 +4,7 @@ import { Fruit } from '../../types';
 import { db } from '../../services/db';
 import { getFruitEffectivePrice } from '../../utils/fruitUtils';
 import { FruitBadge } from './FruitIconHelper';
-import { Apple, Search, Check, X } from 'lucide-react';
+import { Apple, Search } from 'lucide-react';
 
 interface FruitAutocompleteProps {
   valueFruitId?: string;
@@ -59,7 +59,7 @@ export const FruitAutocomplete: React.FC<FruitAutocompleteProps> = ({
     left: number;
     width: number;
     openAbove: boolean;
-  }>({ top: 0, left: 0, width: 280, openAbove: false });
+  }>({ top: 0, left: 0, width: 260, openAbove: false });
 
   // Sync internal search input if external value changes (only if user is not actively typing)
   useEffect(() => {
@@ -86,16 +86,16 @@ export const FruitAutocomplete: React.FC<FruitAutocompleteProps> = ({
   const updateCoords = () => {
     if (!inputRef.current) return;
     const rect = inputRef.current.getBoundingClientRect();
-    const dropdownHeight = 260;
+    const dropdownHeight = 240;
     const spaceBelow = window.innerHeight - rect.bottom;
     const spaceAbove = rect.top;
-    const openAbove = spaceBelow < 220 && spaceAbove > spaceBelow;
+    const openAbove = spaceBelow < 200 && spaceAbove > spaceBelow;
 
     const calculatedTop = openAbove
       ? Math.max(8, rect.top - dropdownHeight - 4)
       : rect.bottom + 4;
 
-    const targetWidth = Math.max(rect.width, 280);
+    const targetWidth = Math.max(rect.width, 240);
     let calculatedLeft = rect.left;
     if (calculatedLeft + targetWidth > window.innerWidth - 8) {
       calculatedLeft = Math.max(8, window.innerWidth - targetWidth - 8);
@@ -137,9 +137,9 @@ export const FruitAutocomplete: React.FC<FruitAutocompleteProps> = ({
 
         // Exact match
         if (nameLower === query) return { fruit: f, score: 0 };
-        // Name starts with query (e.g. 'a' -> 'Apple')
+        // Name starts with query (e.g. 'g' -> 'Grapes Green')
         if (nameLower.startsWith(query)) return { fruit: f, score: 1 };
-        // Word in name starts with query (e.g. 'apple' -> 'Maharaji Apple')
+        // Word in name starts with query (e.g. 'green' -> 'Grapes Green')
         const words = nameLower.split(/\s+/);
         if (words.some((w) => w.startsWith(query))) return { fruit: f, score: 2 };
         // Name contains query
@@ -166,6 +166,18 @@ export const FruitAutocomplete: React.FC<FruitAutocompleteProps> = ({
   useEffect(() => {
     setHighlightedIndex(0);
   }, [searchTerm]);
+
+  // Keep highlighted item visible in scrolling dropdown
+  useEffect(() => {
+    if (isOpen && dropdownRef.current) {
+      const itemEl = dropdownRef.current.querySelector(
+        `[data-index="${highlightedIndex}"]`
+      ) as HTMLElement | null;
+      if (itemEl) {
+        itemEl.scrollIntoView({ block: 'nearest' });
+      }
+    }
+  }, [highlightedIndex, isOpen]);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -197,7 +209,7 @@ export const FruitAutocomplete: React.FC<FruitAutocompleteProps> = ({
           } else if (selectedFruit && trimmed.toLowerCase() === selectedFruit.name.toLowerCase()) {
             setSearchTerm(selectedFruit.name);
           } else {
-            // Keep custom name
+            // Keep custom name without creating duplicate item
             onChange(null, trimmed);
           }
         }
@@ -219,22 +231,11 @@ export const FruitAutocomplete: React.FC<FruitAutocompleteProps> = ({
     }
   };
 
-  const handleClear = (e?: React.MouseEvent) => {
-    if (e) e.stopPropagation();
-    isUserInputActiveRef.current = false;
-    lastPropFruitIdRef.current = '';
-    lastPropFruitNameRef.current = '';
-    setSearchTerm('');
-    onChange(null, '');
-    setIsOpen(true);
-    inputRef.current?.focus();
-    updateCoords();
-  };
-
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'ArrowDown') {
       e.preventDefault();
       if (!isOpen) {
+        updateCoords();
         setIsOpen(true);
       } else {
         setHighlightedIndex((prev) =>
@@ -264,6 +265,9 @@ export const FruitAutocomplete: React.FC<FruitAutocompleteProps> = ({
       } else {
         setSearchTerm(valueFruitName || '');
       }
+    } else if (e.key === 'Tab') {
+      setIsOpen(false);
+      isUserInputActiveRef.current = false;
     }
   };
 
@@ -279,19 +283,21 @@ export const FruitAutocomplete: React.FC<FruitAutocompleteProps> = ({
               size="xs"
             />
           ) : (
-            <Search className="h-4 w-4 text-slate-400" />
+            <Search className="h-3.5 w-3.5 text-slate-400" />
           )}
         </div>
 
+        {/* Clean, standard autocomplete input with NO X or ✓ buttons */}
         <input
           ref={inputRef}
           type="text"
           value={searchTerm}
           disabled={disabled}
           placeholder={placeholder}
-          onFocus={() => {
+          onFocus={(e) => {
             updateCoords();
             setIsOpen(true);
+            e.currentTarget.select();
           }}
           onChange={(e) => {
             const val = e.target.value;
@@ -299,54 +305,21 @@ export const FruitAutocomplete: React.FC<FruitAutocompleteProps> = ({
             setSearchTerm(val);
             updateCoords();
             setIsOpen(true);
-            const exactMatch = fruits.find((f) => f.name.toLowerCase() === val.trim().toLowerCase());
+            const exactMatch = fruits.find(
+              (f) => f.name.toLowerCase() === val.trim().toLowerCase()
+            );
             onChange(exactMatch || null, val);
           }}
           onKeyDown={handleKeyDown}
-          className={`w-full rounded-lg pl-8.5 pr-14 py-1.5 text-xs font-semibold text-slate-900 dark:text-white outline-none transition-all placeholder:text-slate-400 border ${
+          className={`w-full rounded-lg pl-8 pr-3 py-1.5 text-xs font-semibold text-slate-900 dark:text-white outline-none transition-all placeholder:text-slate-400 border ${
             hasError
               ? 'border-rose-500 bg-rose-50/50 dark:bg-rose-950/20 text-rose-900 dark:text-rose-200'
               : 'border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:border-emerald-500 dark:focus:border-emerald-400 focus:ring-1 focus:ring-emerald-500'
           }`}
         />
-
-        {/* Right side controls: Clear (X) button & selection checkmark / search toggle */}
-        <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1 z-10">
-          {(searchTerm || selectedFruit) && (
-            <button
-              type="button"
-              onClick={handleClear}
-              className="p-1 rounded-md text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer"
-              title="Clear selection (or edit text with Backspace / Delete)"
-            >
-              <X className="h-3.5 w-3.5" />
-            </button>
-          )}
-
-          {selectedFruit ? (
-            <span
-              className="flex items-center text-emerald-600 dark:text-emerald-400 pointer-events-none p-0.5"
-              title="Fruit selected"
-            >
-              <Check className="h-3.5 w-3.5" />
-            </span>
-          ) : (
-            <button
-              type="button"
-              onClick={() => {
-                updateCoords();
-                setIsOpen(true);
-                inputRef.current?.focus();
-              }}
-              className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-0.5 cursor-pointer"
-              title="Search fruit items"
-            >
-              <Search className="h-3.5 w-3.5" />
-            </button>
-          )}
-        </div>
       </div>
 
+      {/* Suggestion Dropdown portal to body (never clipped by table/modal overflow) */}
       {isOpen &&
         createPortal(
           <div
@@ -363,7 +336,7 @@ export const FruitAutocomplete: React.FC<FruitAutocompleteProps> = ({
             {matchingFruits.length === 0 ? (
               <div className="p-3 text-center text-slate-400 dark:text-slate-500">
                 <Apple className="mx-auto h-5 w-5 mb-1 opacity-50 text-slate-400 dark:text-slate-500" />
-                <span>No matching items found</span>
+                <span>No matching items</span>
               </div>
             ) : (
               matchingFruits.map((fruit, idx) => {
@@ -372,6 +345,7 @@ export const FruitAutocomplete: React.FC<FruitAutocompleteProps> = ({
                 return (
                   <div
                     key={fruit.id}
+                    data-index={idx}
                     onMouseDown={(e) => {
                       e.preventDefault();
                       handleSelect(fruit);
@@ -407,18 +381,13 @@ export const FruitAutocomplete: React.FC<FruitAutocompleteProps> = ({
                     <div className="flex items-center gap-2">
                       <span
                         className={`font-mono-numbers text-[11px] ${
-                          isHighlighted ? 'text-emerald-100' : 'text-slate-500 dark:text-slate-400'
+                          isHighlighted
+                            ? 'text-emerald-100'
+                            : 'text-slate-500 dark:text-slate-400'
                         }`}
                       >
                         ₹{getFruitEffectivePrice(fruit)}/{fruit.unit || fruit.defaultUnit}
                       </span>
-                      {isSelected && (
-                        <Check
-                          className={`h-3.5 w-3.5 ${
-                            isHighlighted ? 'text-white' : 'text-emerald-600 dark:text-emerald-400'
-                          }`}
-                        />
-                      )}
                     </div>
                   </div>
                 );
