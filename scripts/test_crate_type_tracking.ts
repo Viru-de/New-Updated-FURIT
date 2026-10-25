@@ -29,7 +29,7 @@ async function runTests() {
   // 2. Rule: "10kg Crate" and "20kg Crate" are crate type names only.
   // Quantity entered as 5 with unit "Crate" and weight 100kg does NOT multiply by 10 or 20.
   const amountApple = calculateWholesaleItemAmount(5, 'Crate', 100, 80);
-  assert(amountApple === 8000, `Item amount with 100kg @ 80/kg is exactly 8000 (was ${amountApple})`);
+  assert(amountApple === 8000, `Item amount with 100kg / 80/kg is exactly 8000 (was ${amountApple})`);
 
   // 3. Create fresh test customer
   const testCustomerId = `test-cust-crate-${Date.now()}`;

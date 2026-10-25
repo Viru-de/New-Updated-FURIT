@@ -313,7 +313,7 @@ export const CreditSaleListView: React.FC<CreditSaleListViewProps> = ({
                               </span>
                               <span className="text-slate-500 ml-2">
                                 {it.quantity} {it.unit}
-                                {it.kg !== undefined && it.kg > 0 ? ` · ${it.kg} Kg` : ''} @ {formatCurrency(it.rate)}
+                                {it.kg !== undefined && it.kg > 0 ? ` · ${it.kg} Kg` : ''} / {formatCurrency(it.rate)}
                               </span>
                             </div>
                             <span className="font-mono-numbers font-bold text-slate-900 dark:text-white">

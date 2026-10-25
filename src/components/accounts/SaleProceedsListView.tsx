@@ -310,7 +310,7 @@ export const SaleProceedsListView: React.FC = () => {
                                 {it.fruitName}
                               </span>
                               <span className="font-mono-numbers text-slate-600">
-                                {it.quantity} {it.unit} @ {formatCurrency(it.rate)} ={' '}
+                                {it.quantity} {it.unit} / {formatCurrency(it.rate)} ={' '}
                                 <strong className="text-slate-900">
                                   {formatCurrency(it.amount)}
                                 </strong>
@@ -323,7 +323,7 @@ export const SaleProceedsListView: React.FC = () => {
                               Product
                             </span>
                             <span className="font-mono-numbers text-slate-600">
-                              {sale.quantity} {sale.unit} @ {formatCurrency(sale.rate)}
+                              {sale.quantity} {sale.unit} / {formatCurrency(sale.rate)}
                             </span>
                           </div>
                         )}

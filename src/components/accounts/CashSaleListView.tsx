@@ -308,7 +308,7 @@ export const CashSaleListView: React.FC<CashSaleListViewProps> = ({
                                 </span>
                               </div>
                               <div className="font-mono-numbers font-medium text-slate-900 dark:text-white">
-                                @ ₹{it.rate} = {formatCurrency(it.amount)}
+                                / ₹{it.rate} = {formatCurrency(it.amount)}
                               </div>
                             </div>
                           ))}

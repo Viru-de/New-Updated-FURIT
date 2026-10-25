@@ -634,7 +634,7 @@ export const CustomerLedgerView: React.FC<CustomerLedgerViewProps> = ({
                                 <span className="font-semibold text-slate-900 dark:text-slate-100">{it.name}</span>
                                 <span className="text-slate-400 dark:text-slate-500 mx-1.5">—</span>
                                 <span className="font-mono text-slate-800 dark:text-slate-200">
-                                  {it.qty} {it.unit} @ ₹{it.rate}
+                                  {it.qty} {it.unit} / ₹{it.rate}
                                 </span>
                               </div>
                             ))}
