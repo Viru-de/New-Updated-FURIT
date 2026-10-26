@@ -157,9 +157,9 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
 
   return (
     <>
-      <header className="sticky top-0 z-40 bg-white border-b border-slate-200 shadow-2xs no-print">
+      <header className="sticky top-0 z-40 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-2xs no-print">
         {/* ROW 1: Brand & Top Utilities Header */}
-        <div className="flex h-14 items-center justify-between px-4 sm:px-6 lg:px-8 border-b border-slate-100">
+        <div className="flex h-14 items-center justify-between px-4 sm:px-6 lg:px-8 border-b border-slate-100 dark:border-slate-800">
           {/* Left: Mobile hamburger & Brand */}
           <div className="flex items-center gap-3">
             <button
@@ -408,7 +408,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
         </div>
 
         {/* ROW 2: Desktop Horizontal Navigation Bar */}
-        <div ref={navRef} className="hidden lg:block bg-slate-50/90 border-t border-slate-100 px-4 sm:px-6 lg:px-8">
+        <div ref={navRef} className="hidden lg:block bg-slate-50/90 dark:bg-slate-900/95 border-t border-slate-100 dark:border-slate-800 px-4 sm:px-6 lg:px-8">
           <div className="max-w-7xl mx-auto">
             <nav className="flex items-center space-x-1.5 py-1.5 text-xs">
               {/* 1. Dashboard Link */}
@@ -793,9 +793,9 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
           />
 
           {/* Drawer Sheet */}
-          <div className="fixed inset-y-0 left-0 w-80 max-w-[85vw] bg-white shadow-2xl flex flex-col z-50 border-r border-slate-200 animate-in slide-in-from-left duration-200">
+          <div className="fixed inset-y-0 left-0 w-80 max-w-[85vw] bg-white dark:bg-slate-900 shadow-2xl flex flex-col z-50 border-r border-slate-200 dark:border-slate-800 animate-in slide-in-from-left duration-200">
             {/* Drawer Header */}
-            <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3 bg-white">
+            <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 px-4 py-3 bg-white dark:bg-slate-900">
               <div className="flex items-center gap-2.5">
                 {customLogo && (
                   <img
@@ -1135,7 +1135,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
             </div>
 
             {/* Drawer Footer with User & Logout */}
-            <div className="border-t border-slate-200 p-3 bg-slate-50">
+            <div className="border-t border-slate-200 dark:border-slate-800 p-3 bg-slate-50 dark:bg-slate-900">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-600 text-white font-bold text-xs shadow-xs">

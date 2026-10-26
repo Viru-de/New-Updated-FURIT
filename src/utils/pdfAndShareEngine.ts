@@ -101,7 +101,7 @@ export function applyPrintPageSize(size: BillPaperSize = 'compact', targetElemen
     document.head.appendChild(styleEl);
   }
 
-  const margin = size === 'b7' ? '3mm' : size === 'b6' ? '4mm' : size === 'a5' ? '5mm' : size === 'compact' ? '4mm' : '7mm';
+  const margin = size === 'b7' ? '3mm' : size === 'b6' ? '4mm' : size === 'a5' ? '4mm' : size === 'compact' ? '4mm' : '6mm';
 
   styleEl.textContent = `
     @media print {
@@ -129,8 +129,17 @@ export async function triggerPrint(
   const body = typeof document !== 'undefined' ? document.body : null;
   const isDark = Boolean(root?.classList.contains('dark') || body?.classList.contains('dark'));
 
+  const isSinglePage =
+    !targetElementId ||
+    targetElementId === 'mandi-print-area' ||
+    targetElementId === 'receipt-print-area' ||
+    targetElementId === 'sale-proceeds-print-area';
+
   if (targetElementId && body) {
     body.setAttribute('data-print-target', targetElementId);
+  }
+  if (isSinglePage && body) {
+    body.classList.add('print-single-page-bill');
   }
 
   // Temporarily switch DOM to light mode during browser print/preview
@@ -148,6 +157,7 @@ export async function triggerPrint(
     cleanedUp = true;
     if (body) {
       body.removeAttribute('data-print-target');
+      body.classList.remove('print-single-page-bill');
     }
     if (isDark && root && body) {
       root.classList.add('dark');

@@ -267,84 +267,165 @@ input.no-spinners {
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3);
 }
 
-/* Comprehensive dark mode adaptors for tables, inputs, text, and containers */
+/* =========================================================================
+   COMPREHENSIVE DARK MODE SYSTEM RULES
+   Clean slate tones, comfortable eye contrast, no pure-black harshness,
+   100% legible typography with zero invisible text or white flash panels.
+   ========================================================================= */
 .dark body {
   background-color: #0b1120;
+  color: #f8fafc;
 }
-.dark div.bg-white, .dark section.bg-white, .dark article.bg-white, .dark main.bg-white, .dark aside.bg-white, .dark header.bg-white, .dark footer.bg-white {
-  background-color: #131d31;
+
+/* Background containers inside dark mode (excluding isolated bill canvases) */
+.dark *:not([data-theme-isolated="true"]):not([data-theme-isolated="true"] *):not(.print-bill-canvas):not(.print-bill-canvas *).bg-white,
+.dark *:not([data-theme-isolated="true"]):not([data-theme-isolated="true"] *):not(.print-bill-canvas):not(.print-bill-canvas *)[class*="bg-white/"] {
+  background-color: #131d31 !important;
 }
-.dark div.bg-slate-50, .dark section.bg-slate-50, .dark header.bg-slate-50, .dark footer.bg-slate-50 {
-  background-color: #0d1527;
+
+.dark *:not([data-theme-isolated="true"]):not([data-theme-isolated="true"] *):not(.print-bill-canvas):not(.print-bill-canvas *).bg-slate-50,
+.dark *:not([data-theme-isolated="true"]):not([data-theme-isolated="true"] *):not(.print-bill-canvas):not(.print-bill-canvas *)[class*="bg-slate-50/"] {
+  background-color: #0d1527 !important;
 }
-.dark div.bg-slate-100 {
-  background-color: #10192a;
+
+.dark *:not([data-theme-isolated="true"]):not([data-theme-isolated="true"] *):not(.print-bill-canvas):not(.print-bill-canvas *).bg-slate-100,
+.dark *:not([data-theme-isolated="true"]):not([data-theme-isolated="true"] *):not(.print-bill-canvas):not(.print-bill-canvas *)[class*="bg-slate-100/"] {
+  background-color: #10192a !important;
 }
-.dark .border-slate-100 {
+
+/* Borders in dark mode */
+.dark *:not([data-theme-isolated="true"]):not([data-theme-isolated="true"] *):not(.print-bill-canvas):not(.print-bill-canvas *).border-slate-100,
+.dark *:not([data-theme-isolated="true"]):not([data-theme-isolated="true"] *):not(.print-bill-canvas):not(.print-bill-canvas *)[class*="border-slate-100/"] {
   border-color: #1a253a !important;
 }
-.dark .border-slate-200 {
+
+.dark *:not([data-theme-isolated="true"]):not([data-theme-isolated="true"] *):not(.print-bill-canvas):not(.print-bill-canvas *).border-slate-200,
+.dark *:not([data-theme-isolated="true"]):not([data-theme-isolated="true"] *):not(.print-bill-canvas):not(.print-bill-canvas *)[class*="border-slate-200/"] {
   border-color: #24344d !important;
 }
-.dark .border-slate-300 {
+
+.dark *:not([data-theme-isolated="true"]):not([data-theme-isolated="true"] *):not(.print-bill-canvas):not(.print-bill-canvas *).border-slate-300,
+.dark *:not([data-theme-isolated="true"]):not([data-theme-isolated="true"] *):not(.print-bill-canvas):not(.print-bill-canvas *)[class*="border-slate-300/"] {
   border-color: #334668 !important;
 }
-.dark .text-slate-900 {
+
+.dark *:not([data-theme-isolated="true"]):not([data-theme-isolated="true"] *):not(.print-bill-canvas):not(.print-bill-canvas *).border-slate-400 {
+  border-color: #475569 !important;
+}
+
+/* Text colors in dark mode (excluding isolated bill canvases) */
+.dark *:not([data-theme-isolated="true"]):not([data-theme-isolated="true"] *):not(.print-bill-canvas):not(.print-bill-canvas *).text-slate-950 {
   color: #f8fafc !important;
 }
-.dark .text-slate-800 {
+.dark *:not([data-theme-isolated="true"]):not([data-theme-isolated="true"] *):not(.print-bill-canvas):not(.print-bill-canvas *).text-slate-900 {
+  color: #f8fafc !important;
+}
+.dark *:not([data-theme-isolated="true"]):not([data-theme-isolated="true"] *):not(.print-bill-canvas):not(.print-bill-canvas *).text-slate-800 {
   color: #f1f5f9 !important;
 }
-.dark .text-slate-700 {
+.dark *:not([data-theme-isolated="true"]):not([data-theme-isolated="true"] *):not(.print-bill-canvas):not(.print-bill-canvas *).text-slate-700 {
   color: #cbd5e1 !important;
 }
-.dark .text-slate-600 {
+.dark *:not([data-theme-isolated="true"]):not([data-theme-isolated="true"] *):not(.print-bill-canvas):not(.print-bill-canvas *).text-slate-600 {
   color: #94a3b8 !important;
 }
-.dark .text-slate-500 {
+.dark *:not([data-theme-isolated="true"]):not([data-theme-isolated="true"] *):not(.print-bill-canvas):not(.print-bill-canvas *).text-slate-500 {
+  color: #94a3b8 !important;
+}
+.dark *:not([data-theme-isolated="true"]):not([data-theme-isolated="true"] *):not(.print-bill-canvas):not(.print-bill-canvas *).text-slate-400 {
+  color: #94a3b8 !important;
+}
+
+/* Inputs, selects, and textareas in dark mode */
+.dark input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]):not(.bill-input):not([data-theme-isolated="true"] *):not(.print-bill-canvas *),
+.dark select:not([data-theme-isolated="true"] *):not(.print-bill-canvas *),
+.dark textarea:not([data-theme-isolated="true"] *):not(.print-bill-canvas *) {
+  background-color: #0b1324 !important;
+  color: #f8fafc !important;
+  border-color: #263554 !important;
+}
+.dark input::placeholder,
+.dark textarea::placeholder {
   color: #64748b !important;
 }
-.dark input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]), .dark select, .dark textarea {
-  background-color: #0b1324;
-  color: #f8fafc;
-  border-color: #263554;
-}
-.dark input::placeholder, .dark textarea::placeholder {
-  color: #64748b;
-}
+
 .dark .neu-dropdown input {
   background-color: #0b1324 !important;
   color: #f8fafc !important;
 }
-.dark .neu-dropdown .hover\:bg-slate-100\/70:hover, .dark .neu-dropdown .hover\:bg-slate-100:hover {
+.dark .neu-dropdown .hover\:bg-slate-100\/70:hover,
+.dark .neu-dropdown .hover\:bg-slate-100:hover {
   background-color: #1c2942 !important;
 }
-.dark table thead th {
-  background-color: #0d1629;
-  color: #cbd5e1;
-  border-color: #24344d;
+
+/* Table styling in dark mode */
+.dark table:not([data-theme-isolated="true"] *):not(.print-bill-canvas *) thead th {
+  background-color: #0d1629 !important;
+  color: #cbd5e1 !important;
+  border-color: #24344d !important;
 }
-.dark table tbody td {
-  border-color: #24344d;
+.dark table:not([data-theme-isolated="true"] *):not(.print-bill-canvas *) tbody td {
+  border-color: #24344d !important;
+  color: #f1f5f9;
 }
-.dark table tbody tr:hover {
-  background-color: #17243b;
+.dark table:not([data-theme-isolated="true"] *):not(.print-bill-canvas *) tbody tr:hover {
+  background-color: #17243b !important;
 }
-.dark .bg-emerald-50, .dark .bg-emerald-100, .dark .bg-emerald-100\/70 {
-  background-color: rgba(6, 78, 59, 0.35) !important;
+
+/* Status and badge pill styling in dark mode */
+.dark .bg-emerald-50,
+.dark .bg-emerald-100,
+.dark [class*="bg-emerald-100/"],
+.dark [class*="bg-emerald-50/"] {
+  background-color: rgba(6, 78, 59, 0.45) !important;
   color: #6ee7b7 !important;
 }
-.dark .bg-rose-50, .dark .bg-rose-100, .dark .bg-rose-100\/70 {
-  background-color: rgba(136, 19, 55, 0.35) !important;
+
+.dark .bg-rose-50,
+.dark .bg-rose-100,
+.dark [class*="bg-rose-100/"],
+.dark [class*="bg-rose-50/"] {
+  background-color: rgba(136, 19, 55, 0.45) !important;
   color: #fda4af !important;
 }
-.dark .bg-blue-50, .dark .bg-blue-100, .dark .bg-blue-100\/70 {
-  background-color: rgba(30, 58, 138, 0.35) !important;
+
+.dark .bg-blue-50,
+.dark .bg-blue-100,
+.dark [class*="bg-blue-100/"],
+.dark [class*="bg-blue-50/"] {
+  background-color: rgba(30, 58, 138, 0.45) !important;
   color: #93c5fd !important;
 }
-.dark .bg-amber-50, .dark .bg-amber-100 {
-  background-color: rgba(120, 53, 15, 0.35) !important;
+
+.dark .bg-amber-50,
+.dark .bg-amber-100,
+.dark [class*="bg-amber-100/"],
+.dark [class*="bg-amber-50/"] {
+  background-color: rgba(120, 53, 15, 0.45) !important;
   color: #fcd34d !important;
+}
+
+.dark .bg-purple-50,
+.dark .bg-purple-100,
+.dark [class*="bg-purple-100/"] {
+  background-color: rgba(88, 28, 135, 0.45) !important;
+  color: #d8b4fe !important;
+}
+
+/* Dark mode custom scrollbars */
+.dark ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.dark ::-webkit-scrollbar-track {
+  background: #0b1120;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #24344d;
+  border-radius: 4px;
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #334668;
 }
 
 /* =========================================================================
@@ -782,27 +863,28 @@ input.no-spinners {
 @media print {
   @page {
     margin: 4mm;
-    size: auto;
   }
   html, body, html.dark, body.dark, .dark, [data-theme="dark"] {
     background-color: #ffffff !important;
     background: #ffffff !important;
     color: #000000 !important;
     color-scheme: light !important;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-  /* Prevent 100vh viewport height or body flex layout from pushing content to page 2 */
-  html, body, #root, .min-h-screen {
-    min-height: 0 !important;
-    height: auto !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
     margin: 0 !important;
     padding: 0 !important;
-    overflow: visible !important;
-    background-color: #ffffff !important;
-    background: #ffffff !important;
   }
-  .no-print, [class*="no-print"], nav {
+
+  /* Hide all non-printable application shell elements:
+     Navigation bars, headers, sidebars, buttons, toolbars, search modals, Excel export bars */
+  nav,
+  header,
+  aside,
+  footer,
+  button,
+  .no-print,
+  [class*="no-print"],
+  .neu-header {
     display: none !important;
   }
 
@@ -814,7 +896,24 @@ input.no-spinners {
     margin: 0 !important;
     overflow: visible !important;
     display: block !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
   }
+
+  .fixed.inset-0 > div {
+    max-height: none !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: visible !important;
+  }
+
+  /* Reset layout containers */
   main {
     padding: 0 !important;
     margin: 0 !important;
@@ -826,22 +925,56 @@ input.no-spinners {
     padding: 0 !important;
     gap: 0 !important;
   }
-  main > div > *:not(:has(#mandi-print-area)) {
+
+  /* =========================================================================
+     SINGLE-PAGE BILL GUARANTEE (Mandi Invoices, Cash Sales, Credit Sales, Proceeds, Receipts)
+     Prevents any preceding or background page content from pushing the bill to page 2,
+     and enforces strict 1-page viewport bounds so NO trailing blank page is printed.
+     ========================================================================= */
+  body.print-single-page-bill,
+  body:has(#mandi-print-area),
+  body:has(#receipt-print-area),
+  body:has(#sale-proceeds-print-area),
+  body[data-print-target="mandi-print-area"],
+  body[data-print-target="receipt-print-area"],
+  body[data-print-target="sale-proceeds-print-area"] {
+    height: 100% !important;
+    max-height: 100% !important;
+    overflow: hidden !important;
+  }
+
+  /* Completely collapse all elements in main that don't contain the bill canvas */
+  body:has(#mandi-print-area) main > div > *:not(:has(#mandi-print-area)),
+  body:has(#receipt-print-area) main > div > *:not(:has(#receipt-print-area)),
+  body:has(#sale-proceeds-print-area) main > div > *:not(:has(#sale-proceeds-print-area)),
+  body[data-print-target="mandi-print-area"] main > div > *:not(:has(#mandi-print-area)),
+  body[data-print-target="receipt-print-area"] main > div > *:not(:has(#receipt-print-area)),
+  body[data-print-target="sale-proceeds-print-area"] main > div > *:not(:has(#sale-proceeds-print-area)) {
     display: none !important;
   }
-  body * {
-    visibility: hidden;
-  }
-  #mandi-print-area, #mandi-print-area *,
-  #receipt-print-area, #receipt-print-area *,
-  #ledger-print-area, #ledger-print-area *,
-  #group-sale-print-summary, #group-sale-print-summary *,
-  #sale-proceeds-print-area, #sale-proceeds-print-area *,
-  #crate-statement-print-area, #crate-statement-print-area *,
-  #report-print-area, #report-print-area *,
-  .erp-print-area, .erp-print-area *,
-  .print-bill-canvas, .print-bill-canvas * {
-    visibility: visible;
+
+  /* Single-page bill canvases: exactly 1 page, centered, no margin/padding push */
+  #mandi-print-area,
+  #receipt-print-area,
+  #sale-proceeds-print-area {
+    position: relative !important;
+    left: 0 !important;
+    top: 0 !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    box-shadow: none !important;
+    border: none !important;
+    outline: none !important;
+    overflow: visible !important;
+    page-break-before: avoid !important;
+    break-before: avoid !important;
+    page-break-after: avoid !important;
+    break-after: avoid !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
   }
 
   /* Ensure print header blocks are always displayed */
@@ -857,7 +990,6 @@ input.no-spinners {
   /* Multi-page statements, ledgers, summaries, and reports */
   #ledger-print-area,
   #group-sale-print-summary,
-  #sale-proceeds-print-area,
   #crate-statement-print-area,
   #report-print-area,
   .erp-print-area,
@@ -877,26 +1009,6 @@ input.no-spinners {
     outline: none !important;
     overflow: visible !important;
     page-break-after: auto;
-    page-break-before: avoid !important;
-    break-before: avoid !important;
-  }
-
-  /* Bill and receipt canvas */
-  #mandi-print-area,
-  #receipt-print-area {
-    position: relative !important;
-    left: 0 !important;
-    top: 0 !important;
-    width: 100% !important;
-    margin: 0 auto !important;
-    padding: 0 !important;
-    background-color: #ffffff !important;
-    background: #ffffff !important;
-    color: #000000 !important;
-    box-shadow: none !important;
-    border: none !important;
-    outline: none !important;
-    overflow: visible !important;
     page-break-before: avoid !important;
     break-before: avoid !important;
   }

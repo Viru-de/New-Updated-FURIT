@@ -167,6 +167,8 @@ export const CreateBillView: React.FC<CreateBillViewProps> = ({
         current.rate = getFruitEffectivePrice(f);
         current.amount = calculateWholesaleItemAmount(current.quantity || 1, current.unit, current.kg, current.rate);
       }
+    } else if (field === 'fruitName') {
+      current.fruitName = val;
     } else if (field === 'quantity' || field === 'rate' || field === 'unit' || field === 'kg') {
       const q = field === 'quantity' ? (val === '' ? 0 : Number(val)) : current.quantity;
       const r = field === 'rate' ? (val === '' ? 0 : Number(val)) : current.rate;
@@ -455,11 +457,12 @@ export const CreateBillView: React.FC<CreateBillViewProps> = ({
                   <FruitAutocomplete
                     valueFruitId={it.fruitId}
                     valueFruitName={it.fruitName}
-                    onChange={(f) => {
+                    onChange={(f, customName) => {
                       if (f) {
                         handleItemChange(idx, 'fruitId', f.id);
                       } else {
                         handleItemChange(idx, 'fruitId', '');
+                        handleItemChange(idx, 'fruitName', customName || '');
                       }
                     }}
                     placeholder="Search fruit / item..."
@@ -673,7 +676,7 @@ export const CreateBillView: React.FC<CreateBillViewProps> = ({
               <div
                 id="mandi-print-area"
                 data-theme-isolated="true"
-                className={`bg-white text-slate-900 font-sans leading-tight border border-slate-300 print:border-none shadow-md print-bill-canvas ${
+                className={`bg-white text-slate-900 font-sans leading-tight border border-slate-300 print:border-none print:shadow-none print:p-0 print:m-0 shadow-md print-bill-canvas ${
                   pageSize === 'a4'
                     ? 'max-w-[730px] w-full text-[12px] p-5 sm:p-6'
                     : pageSize === 'a5'
