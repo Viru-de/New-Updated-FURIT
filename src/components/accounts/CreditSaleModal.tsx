@@ -596,6 +596,7 @@ export const CreditSaleModal: React.FC<CreditSaleModalProps> = ({
     } else {
       // Remove any previously recorded cash receipt if updated to 0
       db.deleteReceipt(linkedReceiptId);
+    }
     onSaved(saleRecord);
     if (andPrint && onSaveAndPrint) {
       onSaveAndPrint(saleRecord);

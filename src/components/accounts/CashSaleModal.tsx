@@ -416,6 +416,22 @@ export const CashSaleModal: React.FC<CashSaleModalProps> = ({
     onClose();
   };
 
+  const handleSaveAndPrint = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (isSubmitting) return;
+    if (items.length === 0) return;
+    setIsSubmitting(true);
+
+    db.saveCashSale(currentSaleRecord);
+    if (onSaveAndPrint) {
+      onSaveAndPrint(currentSaleRecord);
+    } else {
+      onSaved(currentSaleRecord);
+      setIsPrintModalOpen(true);
+    }
+    setIsSubmitting(false);
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -903,6 +919,15 @@ export const CashSaleModal: React.FC<CashSaleModalProps> = ({
                     className="rounded-lg border border-slate-300 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 cursor-pointer"
                   >
                     Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleSaveAndPrint}
+                    disabled={isSubmitting || items.length === 0}
+                    className="flex items-center gap-1.5 rounded-lg border border-emerald-600 bg-emerald-50 px-4 py-2 text-xs font-bold text-emerald-800 hover:bg-emerald-100 dark:border-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 dark:hover:bg-emerald-900/60 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+                  >
+                    <Printer className="h-3.5 w-3.5" />
+                    {isSubmitting ? 'Processing...' : editItem ? 'Update & Print' : 'Save & Print'}
                   </button>
                   <button
                     type="submit"

@@ -374,6 +374,11 @@ export const CashSaleListView: React.FC<CashSaleListViewProps> = ({
         onClose={() => setIsModalOpen(false)}
         editItem={editingItem}
         onSaved={refreshList}
+        onSaveAndPrint={(savedSale) => {
+          refreshList();
+          setIsModalOpen(false);
+          setPrintingItem(savedSale);
+        }}
       />
 
       {/* Print Modal */}

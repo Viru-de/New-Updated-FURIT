@@ -17,6 +17,7 @@ interface ReceiptModalProps {
   editItem?: Receipt | null;
   onSaved: (item: Receipt) => void;
   preselectedCustomerId?: string;
+  onSaveAndPrint?: (item: Receipt) => void;
 }
 
 export const ReceiptModal: React.FC<ReceiptModalProps> = ({
@@ -25,6 +26,7 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
   editItem,
   onSaved,
   preselectedCustomerId,
+  onSaveAndPrint,
 }) => {
   const customers = db.getCustomers();
 
@@ -90,6 +92,42 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
     onSaved(receiptRecord);
     setIsSubmitting(false);
     onClose();
+  };
+
+  const handleSaveAndPrint = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!customerId) return;
+    const numAmount = Number(amount);
+    if (!numAmount || numAmount <= 0) return;
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+
+    const seq = editItem ? editItem.sequenceNumber : db.getNextReceiptNumber();
+    const receiptNo = editItem
+      ? editItem.receiptNo
+      : `Receipt No. ${formatSequence(seq, 3)}`;
+
+    const receiptRecord: Receipt = {
+      id: editItem ? editItem.id : `r-${Date.now()}`,
+      receiptNo,
+      sequenceNumber: seq,
+      customerId,
+      customerName: selectedCustomer ? selectedCustomer.name : 'Customer',
+      date,
+      paymentMode,
+      amount: numAmount,
+      notes: notes.trim() || undefined,
+      createdAt: editItem ? editItem.createdAt : new Date().toISOString(),
+    };
+
+    db.saveReceipt(receiptRecord);
+    if (onSaveAndPrint) {
+      onSaveAndPrint(receiptRecord);
+    } else {
+      onSaved(receiptRecord);
+      setIsPrintOpen(true);
+    }
+    setIsSubmitting(false);
   };
 
   return (
@@ -243,6 +281,15 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
                   className="rounded-lg border border-slate-300 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 cursor-pointer"
                 >
                   Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSaveAndPrint}
+                  disabled={isSubmitting || !customerId || numAmount <= 0}
+                  className="flex items-center gap-1.5 rounded-lg border border-emerald-600 bg-emerald-50 px-4 py-2 text-xs font-bold text-emerald-800 hover:bg-emerald-100 dark:border-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 dark:hover:bg-emerald-900/60 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  <Printer className="h-3.5 w-3.5" />
+                  {isSubmitting ? 'Processing...' : editItem ? 'Update & Print' : 'Save & Print'}
                 </button>
                 <button
                   type="submit"

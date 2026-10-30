@@ -795,6 +795,11 @@ input.no-spinners {
   opacity: 1 !important;
 }
 
+/* Screen mode: hide isolated print mount completely */
+#erp-isolated-print-mount {
+  display: none !important;
+}
+
 /* =========================================================================
    PRINT STYLES — MULTI-PAGE PAGINATION & TRADITIONAL MANDI INVOICE FORMAT
    CRITICAL: Do not apply neumorphic shadows or dark theme to printed documents.
@@ -817,6 +822,55 @@ input.no-spinners {
     min-height: 0 !important;
     max-height: none !important;
     overflow: visible !important;
+  }
+
+  /* When isolated print mount is active, hide #root completely and show ONLY the isolated clone */
+  body.has-print-mount #root {
+    display: none !important;
+  }
+  body.has-print-mount #erp-isolated-print-mount {
+    display: block !important;
+    visibility: visible !important;
+    position: static !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    box-shadow: none !important;
+    border: none !important;
+    outline: none !important;
+    overflow: visible !important;
+  }
+
+  body.has-print-mount #erp-isolated-print-mount * {
+    color: #000000 !important;
+    border-color: #000000 !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  body.has-print-mount #erp-isolated-print-mount thead th {
+    background-color: #f1f5f9 !important;
+    background: #f1f5f9 !important;
+    color: #000000 !important;
+    border-color: #000000 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  body.has-print-mount #erp-isolated-print-mount tfoot td {
+    background-color: #f8fafc !important;
+    background: #f8fafc !important;
+    color: #000000 !important;
+    border-color: #000000 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 
   /* Hide all non-printable application shell elements:
@@ -900,14 +954,12 @@ input.no-spinners {
     min-height: 0 !important;
   }
 
-  /* Target isolation when printing specific documents via data-print-target */
-  body[data-print-target="mandi-print-area"] main > div > *:not(:has(#mandi-print-area)),
-  body[data-print-target="receipt-print-area"] main > div > *:not(:has(#receipt-print-area)),
-  body[data-print-target="sale-proceeds-print-area"] main > div > *:not(:has(#sale-proceeds-print-area)),
-  body[data-print-target="ledger-print-area"] main > div > *:not(:has(#ledger-print-area)),
-  body[data-print-target="group-sale-print-summary"] main > div > *:not(:has(#group-sale-print-summary)),
-  body[data-print-target="crate-statement-print-area"] main > div > *:not(:has(#crate-statement-print-area)),
-  body[data-print-target="report-print-area"] main > div > *:not(:has(#report-print-area)) {
+  /* Safe isolation when data-print-target is present */
+  body[data-print-target] nav,
+  body[data-print-target] header,
+  body[data-print-target] aside,
+  body[data-print-target] footer,
+  body[data-print-target] .no-print {
     display: none !important;
   }
 

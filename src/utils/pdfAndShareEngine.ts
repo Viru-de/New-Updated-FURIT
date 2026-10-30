@@ -113,57 +113,148 @@ export function applyPrintPageSize(size: BillPaperSize = 'compact', targetElemen
   `;
 }
 
+// Concurrent print guard
+let isPrintingActive = false;
+
 /**
- * Safely trigger browser print with selected paper dimensions after ensuring all
- * web fonts (such as Noto Sans Devanagari) are resolved.
+ * Safely trigger browser print using an isolated print mount outside #root.
+ * This completely avoids blank screen issues caused by modal backdrops,
+ * overflow clipping, parent scroll containers, and dark theme bleed-through.
  */
 export async function triggerPrint(
   paperSize: BillPaperSize = 'compact',
   targetElementId?: string
 ): Promise<void> {
+  if (typeof window === 'undefined' || typeof document === 'undefined') return;
+  if (isPrintingActive) return; // Prevent duplicate concurrent triggers
+
   const chosenSize = paperSize || getLastSelectedPaperSize('compact');
   applyPrintPageSize(chosenSize, targetElementId);
   saveLastSelectedPaperSize(chosenSize);
 
-  const root = typeof document !== 'undefined' ? document.documentElement : null;
-  const body = typeof document !== 'undefined' ? document.body : null;
-
-  const isSinglePage =
-    !targetElementId ||
-    targetElementId === 'mandi-print-area' ||
-    targetElementId === 'receipt-print-area' ||
-    targetElementId === 'sale-proceeds-print-area';
-
-  if (targetElementId && body) {
-    body.setAttribute('data-print-target', targetElementId);
-  }
-  if (isSinglePage && body) {
-    body.classList.add('print-single-page-bill');
+  // 1. Locate the printable element
+  let targetEl: HTMLElement | null = null;
+  if (targetElementId) {
+    targetEl = document.getElementById(targetElementId);
   }
 
-  // Ensure target element is mounted and visible
-  if (targetElementId && typeof document !== 'undefined') {
-    const el = document.getElementById(targetElementId);
-    if (el) {
-      el.scrollIntoView?.({ block: 'start' });
+  // Fallback search through standard ERP print IDs
+  if (!targetEl) {
+    const candidateIds = [
+      'mandi-print-area',
+      'receipt-print-area',
+      'ledger-print-area',
+      'crate-statement-print-area',
+      'sale-proceeds-print-area',
+      'group-sale-print-summary',
+      'report-print-area',
+    ];
+    for (const cid of candidateIds) {
+      const candidate = document.getElementById(cid);
+      if (candidate) {
+        targetEl = candidate;
+        break;
+      }
     }
   }
 
-  let cleanedUp = false;
-  const cleanup = () => {
-    if (cleanedUp) return;
-    cleanedUp = true;
-    if (body) {
-      body.removeAttribute('data-print-target');
-      body.classList.remove('print-single-page-bill');
+  // If still not found, search by recognizable printable class
+  if (!targetEl) {
+    targetEl =
+      (document.querySelector('.print-bill-canvas') as HTMLElement) ||
+      (document.querySelector('.erp-print-area') as HTMLElement) ||
+      (document.querySelector('[data-theme-isolated="true"]') as HTMLElement);
+  }
+
+  // If no specific container is found, fall back to standard window.print()
+  if (!targetEl) {
+    window.print();
+    return;
+  }
+
+  isPrintingActive = true;
+
+  // 2. Setup isolated print container attached directly to document.body (outside #root)
+  const MOUNT_ID = 'erp-isolated-print-mount';
+  let mountEl = document.getElementById(MOUNT_ID) as HTMLElement | null;
+  if (!mountEl) {
+    mountEl = document.createElement('div');
+    mountEl.id = MOUNT_ID;
+    document.body.appendChild(mountEl);
+  }
+  mountEl.innerHTML = '';
+
+  // 3. Deep-clone the target printable node
+  const clone = targetEl.cloneNode(true) as HTMLElement;
+
+  // 4. Sanitize and prepare clone for pristine white-background print
+  clone.classList.remove('hidden');
+  clone.style.display = 'block';
+  clone.style.visibility = 'visible';
+  clone.style.position = 'static';
+  clone.style.width = '100%';
+  clone.style.maxWidth = '100%';
+  clone.style.height = 'auto';
+  clone.style.minHeight = '0';
+  clone.style.maxHeight = 'none';
+  clone.style.margin = '0 auto';
+  clone.style.overflow = 'visible';
+  clone.style.backgroundColor = '#ffffff';
+  clone.style.color = '#000000';
+  clone.style.boxShadow = 'none';
+  clone.style.border = 'none';
+
+  // Strip non-printable UI elements (action buttons, tabs, pagination bars)
+  const noPrints = clone.querySelectorAll('.no-print, [class*="no-print"], button:not(.keep-in-print)');
+  noPrints.forEach((el) => el.remove());
+
+  // Unhide print headers and summary sections
+  const printBlocks = clone.querySelectorAll('.print\\:block, [class*="print:block"], [class*="print:flex"]');
+  printBlocks.forEach((el) => {
+    const htmlEl = el as HTMLElement;
+    htmlEl.classList.remove('hidden');
+    if (htmlEl.classList.contains('print:flex') || htmlEl.className.includes('print:flex')) {
+      htmlEl.style.display = 'flex';
+    } else {
+      htmlEl.style.display = 'block';
     }
-    window.removeEventListener('afterprint', cleanup);
-  };
+    htmlEl.style.visibility = 'visible';
+  });
 
-  // Only run cleanup after the browser print dialog has actually finished / dismissed
-  window.addEventListener('afterprint', cleanup, { once: true });
+  // Strip dark mode classes from clone & descendants so dark theme NEVER bleeds into print
+  clone.classList.remove('dark');
+  const darkEls = clone.querySelectorAll('.dark');
+  darkEls.forEach((el) => el.classList.remove('dark'));
 
-  if (typeof document !== 'undefined' && document.fonts) {
+  // Ensure normal unslashed zero and tabular numerals throughout the cloned element
+  const allSubEls = clone.querySelectorAll('*');
+  allSubEls.forEach((node) => {
+    const el = node as HTMLElement;
+    el.style.fontFeatureSettings = '"tnum" 1, "zero" 0';
+    if (el.classList.contains('font-devanagari')) {
+      el.style.fontFamily = "'Noto Sans Devanagari', 'Plus Jakarta Sans', Arial, sans-serif";
+    }
+    if (
+      el.classList.contains('font-mono') ||
+      el.classList.contains('font-mono-numbers') ||
+      el.tagName === 'TD' ||
+      el.tagName === 'TH'
+    ) {
+      el.style.fontFamily = "'Plus Jakarta Sans', 'Noto Sans Devanagari', Arial, sans-serif";
+      el.style.fontVariantNumeric = 'tabular-nums';
+    }
+  });
+
+  mountEl.appendChild(clone);
+
+  // Set print state on body
+  document.body.classList.add('has-print-mount');
+  if (targetElementId || targetEl.id) {
+    document.body.setAttribute('data-print-target', targetElementId || targetEl.id);
+  }
+
+  // 5. Ensure web fonts loaded before opening print dialog
+  if (document.fonts) {
     try {
       await document.fonts.ready;
     } catch {
@@ -172,13 +263,28 @@ export async function triggerPrint(
   }
 
   // Allow browser layout engine to paint DOM changes before opening print dialog
-  await new Promise((resolve) => setTimeout(resolve, 60));
+  await new Promise((resolve) => setTimeout(resolve, 80));
+
+  let cleanedUp = false;
+  const cleanup = () => {
+    if (cleanedUp) return;
+    cleanedUp = true;
+    isPrintingActive = false;
+    document.body.classList.remove('has-print-mount');
+    document.body.removeAttribute('data-print-target');
+    if (mountEl) {
+      mountEl.innerHTML = '';
+    }
+    window.removeEventListener('afterprint', cleanup);
+  };
+
+  // Only run cleanup after the browser print dialog has actually finished / dismissed
+  window.addEventListener('afterprint', cleanup, { once: true });
 
   window.print();
 
-  // Safety fallback: only run cleanup after 60 seconds in case afterprint does not fire in an embedded iframe.
-  // Never run a short 1500ms timeout which fires right while Chrome preview is rendering!
-  setTimeout(cleanup, 60000);
+  // Safety fallback in case afterprint does not fire in an embedded iframe
+  setTimeout(cleanup, 45000);
 }
 
 export interface ShareOptions {

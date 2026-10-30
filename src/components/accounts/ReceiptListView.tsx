@@ -273,6 +273,11 @@ export const ReceiptListView: React.FC<ReceiptListViewProps> = ({
         onClose={() => setIsModalOpen(false)}
         editItem={editingItem}
         onSaved={refreshList}
+        onSaveAndPrint={(savedReceipt) => {
+          refreshList();
+          setIsModalOpen(false);
+          setPrintingReceipt(savedReceipt);
+        }}
       />
 
       {/* Print Receipt Modal */}
