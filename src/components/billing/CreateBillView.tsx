@@ -77,12 +77,12 @@ export const CreateBillView: React.FC<CreateBillViewProps> = ({
     editBill?.items || [
       {
         id: `bi-${Date.now()}-1`,
-        fruitId: fruits[0]?.id || '',
-        fruitName: fruits[0]?.name || 'Strawberry',
-        quantity: 10,
+        fruitId: '',
+        fruitName: '',
+        quantity: 1,
         unit: 'Crate',
-        rate: 450,
-        amount: 4500,
+        rate: '' as any,
+        amount: 0,
       },
     ]
   );
@@ -166,7 +166,10 @@ export const CreateBillView: React.FC<CreateBillViewProps> = ({
       if (f) {
         current.fruitName = f.name;
         current.unit = f.defaultUnit || 'Crate';
-        current.rate = getFruitEffectivePrice(f);
+        current.rate = '' as any;
+      } else {
+        current.fruitName = '';
+        current.rate = '' as any;
       }
     } else if (field === 'fruitName') {
       current.fruitName = val;
@@ -177,7 +180,7 @@ export const CreateBillView: React.FC<CreateBillViewProps> = ({
       current.unit = String(val);
     } else if (field === 'rate') {
       const r = val === '' ? '' : Number(val);
-      current.rate = (r === '' || isNaN(r as number)) ? (val === '' ? '' : 0) as any : r;
+      current.rate = (r === '' || isNaN(r as number)) ? ('' as any) : r;
     } else if (field === 'kg') {
       const k = val === '' ? '' : Number(val);
       current.kg = (k === '' || isNaN(k as number)) ? (val === '' ? '' : 0) as any : k;
@@ -186,7 +189,7 @@ export const CreateBillView: React.FC<CreateBillViewProps> = ({
     }
 
     const qNum = (current.quantity as any) === '' ? 0 : (Number(current.quantity) || 0);
-    const rNum = (current.rate as any) === '' ? 0 : (Number(current.rate) || 0);
+    const rNum = (current.rate as any) === '' || (current.rate as any) === undefined ? 0 : (Number(current.rate) || 0);
     const kNum = (current.kg as any) === '' ? 0 : (Number(current.kg) || 0);
     current.amount = calculateWholesaleItemAmount(qNum, current.unit, kNum, rNum);
 
@@ -195,18 +198,16 @@ export const CreateBillView: React.FC<CreateBillViewProps> = ({
   };
 
   const handleAddItem = () => {
-    const firstFruit = fruits[0];
-    const initialRate = getFruitEffectivePrice(firstFruit);
     setItems([
       ...items,
       {
         id: `bi-${Date.now()}`,
-        fruitId: firstFruit?.id || '',
-        fruitName: firstFruit?.name || 'Fruit',
+        fruitId: '',
+        fruitName: '',
         quantity: 1,
-        unit: firstFruit?.defaultUnit || 'Crate',
-        rate: initialRate,
-        amount: initialRate,
+        unit: 'Crate',
+        rate: '' as any,
+        amount: 0,
       },
     ]);
   };
@@ -281,7 +282,6 @@ export const CreateBillView: React.FC<CreateBillViewProps> = ({
   };
 
   const handleFruitCreated = (f: Fruit) => {
-    const itemRate = getFruitEffectivePrice(f);
     setItems([
       ...items,
       {
@@ -290,8 +290,8 @@ export const CreateBillView: React.FC<CreateBillViewProps> = ({
         fruitName: f.name,
         quantity: 1,
         unit: f.defaultUnit || 'Crate',
-        rate: itemRate,
-        amount: itemRate,
+        rate: '' as any,
+        amount: 0,
       },
     ]);
   };
@@ -519,7 +519,7 @@ export const CreateBillView: React.FC<CreateBillViewProps> = ({
                         min={0}
                         step="any"
                         placeholder="Rate"
-                        value={it.rate === 0 ? '' : it.rate}
+                        value={(it.rate as any) === '' || it.rate === undefined ? '' : it.rate}
                         onChange={(val) => handleItemChange(idx, 'rate', val)}
                         className="w-full rounded-lg border border-slate-300 pl-5 pr-2 py-1.5 text-right text-xs font-mono-numbers text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                       />

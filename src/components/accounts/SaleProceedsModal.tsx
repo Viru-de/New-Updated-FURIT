@@ -219,7 +219,7 @@ export const SaleProceedsModal: React.FC<SaleProceedsModalProps> = ({
           weight: 0,
           crateTypeId: '',
           crateName: '',
-          rate: 0,
+          rate: '' as any,
           amount: 0,
         },
       ]);
@@ -244,10 +244,8 @@ export const SaleProceedsModal: React.FC<SaleProceedsModalProps> = ({
       current.fruitName = fruit.name;
       // 1. Auto-fill Unit
       current.unit = fruit.unit || fruit.defaultUnit || 'Crate';
-      // 2. Auto-fill Rate
-      const r = getFruitEffectivePrice(fruit);
-      const newRate = typeof r === 'number' && !isNaN(r) ? r : (fruit.defaultRate || 1);
-      current.rate = newRate;
+      // 2. Rate must be blank by default: user must manually enter it
+      current.rate = '' as any;
       // 3. Crate Type: automatically fetched from Fruit / Item Master (exact value or blank)
       const fruitCrate = getFruitSavedCrateType(fruit);
       current.crateName = fruitCrate;
@@ -260,15 +258,15 @@ export const SaleProceedsModal: React.FC<SaleProceedsModalProps> = ({
       if (current.weight === '') {
         current.weight = 0;
       }
-      // Calculate Amount: Weight > 0 ? Weight * Rate : Qty * Rate
-      const numQ = Number(current.quantity) || 0;
-      const numW = Number(current.weight) || 0;
-      current.amount = calculateWholesaleItemAmount(numQ, current.unit, numW, newRate);
+      // Live amount calculation: 0 until valid rate is entered
+      current.amount = 0;
     } else {
       current.fruitId = '';
       current.fruitName = typeof target === 'string' ? target : '';
       current.crateName = '';
       current.crateTypeId = '';
+      current.rate = '' as any;
+      current.amount = 0;
     }
 
     updated[index] = current;
@@ -285,14 +283,15 @@ export const SaleProceedsModal: React.FC<SaleProceedsModalProps> = ({
       if (fr) {
         current.fruitName = fr.name;
         current.unit = fr.unit || fr.defaultUnit || 'Crate';
-        const r = getFruitEffectivePrice(fr);
-        current.rate = typeof r === 'number' && !isNaN(r) ? r : (fr.defaultRate || 1);
+        // Rate must remain completely blank by default: user must manually enter it
+        current.rate = '' as any;
         const fruitCrate = getFruitSavedCrateType(fr);
         current.crateName = fruitCrate;
         current.crateTypeId = fruitCrate ? (fr.crateTypeId || 'ct_20') : '';
       } else {
         current.crateName = '';
         current.crateTypeId = '';
+        current.rate = '' as any;
       }
     } else if (field === 'fruitName') {
       current.fruitName = val;
@@ -302,10 +301,12 @@ export const SaleProceedsModal: React.FC<SaleProceedsModalProps> = ({
         const fruitCrate = getFruitSavedCrateType(fr);
         current.crateName = fruitCrate;
         current.crateTypeId = fruitCrate ? (fr.crateTypeId || 'ct_20') : '';
+        current.rate = '' as any;
       } else {
         current.fruitId = '';
         current.crateName = '';
         current.crateTypeId = '';
+        current.rate = '' as any;
       }
     } else if (field === 'quantity') {
       const q = val === '' ? '' : Number(val);
@@ -326,7 +327,7 @@ export const SaleProceedsModal: React.FC<SaleProceedsModalProps> = ({
       current.crateName = ct ? ct.name.replace(/\s*crate$/i, '').trim() : '';
     } else if (field === 'rate') {
       const r = val === '' ? '' : Number(val);
-      current.rate = (r === '' || isNaN(r as number)) ? (val === '' ? '' : 0) as any : r;
+      current.rate = (r === '' || isNaN(r as number)) ? ('' as any) : r;
     } else if (field === 'amount') {
       current.amount = val === '' ? '' : Number(val);
     }
@@ -334,7 +335,7 @@ export const SaleProceedsModal: React.FC<SaleProceedsModalProps> = ({
     if (field !== 'amount') {
       const numQ = current.quantity === '' ? 0 : (Number(current.quantity) || 0);
       const numW = current.weight === '' ? 0 : (Number(current.weight) || 0);
-      const numR = current.rate === '' ? 0 : (Number(current.rate) || 0);
+      const numR = current.rate === '' || current.rate === undefined ? 0 : (Number(current.rate) || 0);
       current.amount = calculateWholesaleItemAmount(numQ, current.unit, numW, numR);
     }
 
@@ -354,7 +355,7 @@ export const SaleProceedsModal: React.FC<SaleProceedsModalProps> = ({
         weight: 0,
         crateTypeId: '',
         crateName: '',
-        rate: 0,
+        rate: '' as any,
         amount: 0,
       },
     ]);
@@ -912,7 +913,7 @@ export const SaleProceedsModal: React.FC<SaleProceedsModalProps> = ({
                             min={0}
                             step="any"
                             placeholder="0.00"
-                            value={it.rate === 0 ? '' : it.rate}
+                            value={it.rate === '' || it.rate === undefined ? '' : it.rate}
                             onChange={(val) => handleItemChange(idx, 'rate', val)}
                             className="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-xs font-mono font-bold text-slate-900 text-right outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                           />

@@ -276,7 +276,7 @@ export const GroupSaleView: React.FC<GroupSaleViewProps> = ({
       unit: 'Crate',
       kg: 0, // Default Kg to 0 for new rows
       crateSize: undefined,
-      rate: 0,
+      rate: '' as any,
       crateTypeId: '',
       crateName: '',
       crateCount: 0,
@@ -343,6 +343,10 @@ export const GroupSaleView: React.FC<GroupSaleViewProps> = ({
             updated.crateName = '';
             updated.crateTypeId = '';
           }
+          // Do not retain old item's rate
+          updated.rate = '' as any;
+          updated.totalAmount = 0;
+          updated.netTotal = updated.expenseTotal || 0;
         }
 
         if (field === 'fruitName') {
@@ -356,6 +360,9 @@ export const GroupSaleView: React.FC<GroupSaleViewProps> = ({
             updated.crateName = '';
             updated.crateTypeId = '';
           }
+          updated.rate = '' as any;
+          updated.totalAmount = 0;
+          updated.netTotal = updated.expenseTotal || 0;
         }
 
         // 1b. When Unit changes
@@ -395,11 +402,16 @@ export const GroupSaleView: React.FC<GroupSaleViewProps> = ({
           updated.crateSize = value !== '' && value !== undefined ? Number(value) : undefined;
         }
 
+        if (field === 'rate') {
+          const r = value === '' ? '' : Number(value);
+          updated.rate = (r === '' || isNaN(r as number)) ? ('' as any) : r;
+        }
+
         // 3. Recalculate amount whenever Qty, Unit, Kg, or Rate changes
         if (field === 'quantity' || field === 'kg' || field === 'rate' || field === 'unit') {
           const q = updated.quantity === '' ? 0 : (Number(updated.quantity) || 0);
           const k = updated.kg === '' ? 0 : (Number(updated.kg) || 0);
-          const p = updated.rate === '' ? 0 : (Number(updated.rate) || 0);
+          const p = updated.rate === '' || updated.rate === undefined ? 0 : (Number(updated.rate) || 0);
 
           if (field === 'quantity' && isCrateUnit(updated.unit)) {
             updated.crateCount = q;
@@ -459,24 +471,25 @@ export const GroupSaleView: React.FC<GroupSaleViewProps> = ({
             crateSize: undefined,
             crateName: '',
             crateTypeId: '',
-            rate: 0,
+            rate: '' as any,
             kg: 0,
             totalAmount: 0,
+            netTotal: r.expenseTotal || 0,
             crateCount: 0,
             isDirty: true,
           };
         }
         // 1. Qty defaults to 1 but remains editable
         const currentQty = 1;
-        // 2. Auto-fill Rate
-        const newRate = getFruitEffectivePrice(fruit);
+        // 2. Rate must be blank by default: user must manually enter it
+        const newRate = '' as any;
         // 3. Auto-fill Unit
         const newUnit = fruit.unit || fruit.defaultUnit || 'Crate';
         const isCrate = isCrateUnit(newUnit);
         // 4. Crate Type: automatically fetched from Fruit / Item Master (exact value or blank)
         const fruitCrate = getFruitSavedCrateType(fruit);
         const currentKg = 0;
-        const newAmount = calculateWholesaleItemAmount(currentQty, newUnit, currentKg, newRate);
+        const newAmount = 0;
 
         return {
           ...r,
@@ -490,6 +503,7 @@ export const GroupSaleView: React.FC<GroupSaleViewProps> = ({
           crateTypeId: fruitCrate ? (fruit.crateTypeId || 'ct_20') : '',
           rate: newRate,
           totalAmount: newAmount,
+          netTotal: r.expenseTotal || 0,
           crateCount: isCrate ? currentQty : 0,
           isDirty: true,
           errors: { ...r.errors, item: undefined },
@@ -1335,7 +1349,7 @@ export const GroupSaleView: React.FC<GroupSaleViewProps> = ({
                           min={0}
                           step="any"
                           placeholder="0.00"
-                          value={row.rate === 0 ? '' : row.rate}
+                          value={row.rate === '' || row.rate === undefined ? '' : row.rate}
                           onChange={(val) =>
                             handleRowFieldChange(
                               row.rowId,

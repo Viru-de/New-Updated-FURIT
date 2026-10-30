@@ -19,9 +19,20 @@ export const AddFruitModal: React.FC<AddFruitModalProps> = ({
   const [name, setName] = useState('');
   const [unit, setUnit] = useState('');
   const [crateType, setCrateType] = useState('');
-  // Default Price/Rate is 1 for new items
-  const [price, setPrice] = useState<number | ''>(1);
+  // Default Price/Rate is 0 for new items
+  const [price, setPrice] = useState<number | ''>(0);
   const [fruitIcon, setFruitIcon] = useState<string | undefined>(undefined);
+
+  // Reset form with default Rate 0 whenever modal opens
+  React.useEffect(() => {
+    if (isOpen) {
+      setName('');
+      setUnit('');
+      setCrateType('');
+      setPrice(0);
+      setFruitIcon(undefined);
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -42,7 +53,7 @@ export const AddFruitModal: React.FC<AddFruitModalProps> = ({
       crateName: savedCrateType,
       crateTypeId: savedCrateType ? 'ct_20' : undefined,
       crateWeightKg: savedCrateType ? 20 : 0,
-      defaultRate: price !== '' ? Number(price) : 1, // Default price is 1
+      defaultRate: price !== '' && !isNaN(Number(price)) ? Number(price) : 0, // Default price is 0
       fruitIcon,
       active: true,
       createdAt: new Date().toISOString(),
@@ -52,11 +63,11 @@ export const AddFruitModal: React.FC<AddFruitModalProps> = ({
     onFruitCreated(newFruit);
     onClose();
 
-    // Reset form for next use - Unit must be completely blank
+    // Reset form for next use with default Rate 0
     setName('');
     setUnit('');
     setCrateType('');
-    setPrice(1);
+    setPrice(0);
     setFruitIcon(undefined);
   };
 
@@ -124,12 +135,12 @@ export const AddFruitModal: React.FC<AddFruitModalProps> = ({
                 min={0}
                 step="any"
                 required
-                placeholder="1"
+                placeholder="0"
                 value={price}
                 onChange={(val) => setPrice(val)}
                 onBlur={() => {
                   if (price === '' || price === undefined) {
-                    setPrice(1);
+                    setPrice(0);
                   }
                 }}
                 className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm font-mono-numbers text-slate-900 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"

@@ -33,7 +33,7 @@ export const FruitMasterView: React.FC = () => {
   const [editName, setEditName] = useState('');
   const [editUnit, setEditUnit] = useState('');
   const [editCrateType, setEditCrateType] = useState('');
-  const [editPrice, setEditPrice] = useState<number | ''>(1);
+  const [editPrice, setEditPrice] = useState<number | ''>(0);
   const [editFruitIcon, setEditFruitIcon] = useState<string | undefined>(undefined);
 
   const refreshList = () => {
@@ -49,9 +49,9 @@ export const FruitMasterView: React.FC = () => {
     setEditUnit(unitVal);
     const ctVal = f.crateType !== undefined ? f.crateType : (f.crateName || '');
     setEditCrateType(ctVal);
-    // Preserve existing saved price; default 1 if unset, missing, empty, or undefined
+    // Preserve existing saved price; default 0 if unset, missing, empty, or undefined
     const rawRate = f.defaultRate ?? (f as any).rate ?? (f as any).price;
-    let initialPrice = 1;
+    let initialPrice = 0;
     if (rawRate !== undefined && rawRate !== null && String(rawRate).trim() !== '') {
       const parsed = Number(rawRate);
       if (!isNaN(parsed)) {
@@ -70,10 +70,10 @@ export const FruitMasterView: React.FC = () => {
     const savedUnit = editUnit !== undefined ? editUnit : (editingFruit.unit || editingFruit.defaultUnit || '');
     const savedCrateType = editCrateType !== undefined ? editCrateType.trim() : '';
 
-    // If editPrice was entered, use it; if blank/empty, prevent unintentional wiping: fallback to existing saved price or 1
+    // If editPrice was entered, use it; if blank/empty, preserve existing saved price, otherwise fallback to 0
     const savedPrice = editPrice !== '' && !isNaN(Number(editPrice))
       ? Number(editPrice)
-      : (typeof editingFruit.defaultRate === 'number' && !isNaN(editingFruit.defaultRate) ? editingFruit.defaultRate : 1);
+      : (typeof editingFruit.defaultRate === 'number' && !isNaN(editingFruit.defaultRate) ? editingFruit.defaultRate : 0);
 
     const updated: Fruit = {
       ...editingFruit,
@@ -361,12 +361,12 @@ export const FruitMasterView: React.FC = () => {
                     step="any"
                     min={0}
                     required
-                    placeholder="1"
+                    placeholder="0"
                     value={editPrice}
                     onChange={(val) => setEditPrice(val)}
                     onBlur={() => {
                       if (editPrice === '' || editPrice === undefined) {
-                        setEditPrice(1);
+                        setEditPrice(typeof editingFruit?.defaultRate === 'number' && !isNaN(editingFruit.defaultRate) ? editingFruit.defaultRate : 0);
                       }
                     }}
                     className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm font-mono-numbers text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"

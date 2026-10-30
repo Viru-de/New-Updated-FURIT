@@ -132,7 +132,7 @@ export const CreditSaleModal: React.FC<CreditSaleModalProps> = ({
       setDate(getTodayIso());
       setNotes('');
 
-      // Start with a clean, blank item row for new bill
+      // Start with a clean, blank item row for new bill with blank Rate
       setItems([
         {
           id: `csi-${Date.now()}-1`,
@@ -142,7 +142,7 @@ export const CreditSaleModal: React.FC<CreditSaleModalProps> = ({
           unit: 'Crate',
           crateTypeId: '',
           crateName: '',
-          rate: 0,
+          rate: '' as any,
           amount: 0,
         },
       ]);
@@ -208,14 +208,15 @@ export const CreditSaleModal: React.FC<CreditSaleModalProps> = ({
       if (fr) {
         current.fruitName = fr.name;
         current.unit = fr.unit || fr.defaultUnit || 'Crate';
-        const r = getFruitEffectivePrice(fr);
-        current.rate = typeof r === 'number' && !isNaN(r) ? r : (fr.defaultRate || 1);
+        // Rate must remain completely blank by default: user must manually enter it
+        current.rate = '' as any;
         const fruitCrateType = getFruitSavedCrateType(fr);
         current.crateName = fruitCrateType;
         current.crateTypeId = fruitCrateType ? (fr.crateTypeId || 'ct_20') : '';
       } else {
         current.crateName = '';
         current.crateTypeId = '';
+        current.rate = '' as any;
       }
     } else if (field === 'fruitName') {
       current.fruitName = val;
@@ -225,10 +226,12 @@ export const CreditSaleModal: React.FC<CreditSaleModalProps> = ({
         const fruitCrateType = getFruitSavedCrateType(fr);
         current.crateName = fruitCrateType;
         current.crateTypeId = fruitCrateType ? (fr.crateTypeId || 'ct_20') : '';
+        current.rate = '' as any;
       } else {
         current.fruitId = '';
         current.crateName = '';
         current.crateTypeId = '';
+        current.rate = '' as any;
       }
     } else if (field === 'quantity') {
       const q = val === '' ? '' : Number(val);
@@ -253,12 +256,12 @@ export const CreditSaleModal: React.FC<CreditSaleModalProps> = ({
       current.kg = (k === '' || isNaN(k as number)) ? (val === '' ? '' : 0) as any : k;
     } else if (field === 'rate') {
       const r = val === '' ? '' : Number(val);
-      current.rate = (r === '' || isNaN(r as number)) ? (val === '' ? '' : 0) as any : r;
+      current.rate = (r === '' || isNaN(r as number)) ? ('' as any) : r;
     }
 
     const qNum = (current.quantity as any) === '' ? 0 : (Number(current.quantity) || 0);
     const kNum = (current.kg as any) === '' ? 0 : (Number(current.kg) || 0);
-    const rNum = (current.rate as any) === '' ? 0 : (Number(current.rate) || 0);
+    const rNum = (current.rate as any) === '' || (current.rate as any) === undefined ? 0 : (Number(current.rate) || 0);
 
     // Live amount calculation: updates immediately whenever Qty, unit, Kg, or Rate changes
     current.amount = calculateWholesaleItemAmount(
@@ -282,9 +285,8 @@ export const CreditSaleModal: React.FC<CreditSaleModalProps> = ({
     // 1. Auto-fill Unit
     current.unit = fruit.unit || fruit.defaultUnit || 'Crate';
 
-    // 2. Auto-fill Rate
-    const rate = getFruitEffectivePrice(fruit);
-    current.rate = typeof rate === 'number' && !isNaN(rate) ? rate : (fruit.defaultRate || 1);
+    // 2. Rate must be blank by default: user must manually enter it
+    current.rate = '' as any;
 
     // 3. Crate Type: automatically fetched from Fruit / Item Master (exact value or blank)
     const fruitCrateType = getFruitSavedCrateType(fruit);
@@ -297,13 +299,8 @@ export const CreditSaleModal: React.FC<CreditSaleModalProps> = ({
     // 5. Weight defaults to 0
     current.kg = 0;
 
-    // Live amount calculation: Qty × Rate (Weight and Crate Type are separate informational fields)
-    current.amount = calculateWholesaleItemAmount(
-      current.quantity,
-      current.unit,
-      current.kg,
-      current.rate
-    );
+    // Live amount calculation: 0 until valid rate is entered
+    current.amount = 0;
     updated[index] = current;
     setItems(updated);
   };
@@ -320,7 +317,7 @@ export const CreditSaleModal: React.FC<CreditSaleModalProps> = ({
         kg: 0,
         crateTypeId: '',
         crateName: '',
-        rate: 0,
+        rate: '' as any,
         amount: 0,
       },
     ]);
@@ -336,7 +333,7 @@ export const CreditSaleModal: React.FC<CreditSaleModalProps> = ({
           unit: 'Crate',
           crateTypeId: '',
           crateName: '',
-          rate: 0,
+          rate: '' as any,
           amount: 0,
         },
       ]);
@@ -812,7 +809,7 @@ export const CreditSaleModal: React.FC<CreditSaleModalProps> = ({
                                 min={0}
                                 step="any"
                                 placeholder="0.00"
-                                value={it.rate === 0 ? '' : it.rate}
+                                value={(it.rate as any) === '' || it.rate === undefined ? '' : it.rate}
                                 onChange={(val) => handleItemChange(idx, 'rate', val)}
                                 className="w-full rounded-lg border border-slate-300 bg-white pl-5 pr-2 py-1.5 text-right font-medium text-xs text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                               />

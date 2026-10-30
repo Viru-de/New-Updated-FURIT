@@ -120,7 +120,7 @@ export const CashSaleModal: React.FC<CashSaleModalProps> = ({
 
       const ct20 = crateTypes.find((c) => c.name.includes('20')) || crateTypes[0];
 
-      // Start with a clean, blank item row for new bill
+      // Start with a clean, blank item row for new bill with completely blank Rate
       setItems([
         {
           id: `casi-${Date.now()}-1`,
@@ -130,7 +130,7 @@ export const CashSaleModal: React.FC<CashSaleModalProps> = ({
           unit: 'Crate',
           crateTypeId: '',
           crateName: '',
-          rate: 0,
+          rate: '' as any,
           amount: 0,
         },
       ]);
@@ -152,9 +152,8 @@ export const CashSaleModal: React.FC<CashSaleModalProps> = ({
     current.fruitName = f.name;
     // 1. Auto-fill Unit
     current.unit = f.unit || f.defaultUnit || 'Crate';
-    // 2. Auto-fill Rate
-    const r = getFruitEffectivePrice(f);
-    current.rate = typeof r === 'number' && !isNaN(r) ? r : (f.defaultRate || 1);
+    // 2. Rate must be blank by default: user must manually enter it
+    current.rate = '' as any;
     // 3. Crate Type: automatically fetched from Fruit / Item Master (exact value or blank)
     const fruitCrateType = getFruitSavedCrateType(f);
     current.crateName = fruitCrateType;
@@ -163,7 +162,7 @@ export const CashSaleModal: React.FC<CashSaleModalProps> = ({
     current.quantity = 1;
     // 5. Weight defaults to 0
     current.kg = 0;
-    current.amount = calculateWholesaleItemAmount(1, current.unit, 0, current.rate);
+    current.amount = 0;
     updated[index] = current;
     setItems(updated);
   };
@@ -180,9 +179,8 @@ export const CashSaleModal: React.FC<CashSaleModalProps> = ({
         current.fruitName = fr.name;
         // 1. Auto-fill Unit
         current.unit = fr.unit || fr.defaultUnit || 'Crate';
-        // 2. Auto-fill Rate
-        const r = getFruitEffectivePrice(fr);
-        current.rate = typeof r === 'number' && !isNaN(r) ? r : (fr.defaultRate || 1);
+        // 2. Rate must be blank by default: user must manually enter it
+        current.rate = '' as any;
         // 3. Crate Type: automatically fetched from Fruit / Item Master
         const fruitCrateType = getFruitSavedCrateType(fr);
         current.crateName = fruitCrateType;
@@ -195,6 +193,8 @@ export const CashSaleModal: React.FC<CashSaleModalProps> = ({
         current.fruitId = '';
         current.crateName = '';
         current.crateTypeId = '';
+        // When clearing fruit, do not retain old rate
+        current.rate = '' as any;
       }
     } else if (field === 'fruitName') {
       current.fruitName = val;
@@ -204,10 +204,12 @@ export const CashSaleModal: React.FC<CashSaleModalProps> = ({
         const fruitCrateType = getFruitSavedCrateType(fr);
         current.crateName = fruitCrateType;
         current.crateTypeId = fruitCrateType ? (fr.crateTypeId || 'ct_20') : '';
+        current.rate = '' as any;
       } else {
         current.fruitId = '';
         current.crateName = '';
         current.crateTypeId = '';
+        current.rate = '' as any;
       }
     } else if (field === 'unit') {
       const nextUnit = String(val);
@@ -232,14 +234,14 @@ export const CashSaleModal: React.FC<CashSaleModalProps> = ({
       current.kg = (k === '' || isNaN(k as number)) ? (val === '' ? '' : 0) as any : k;
     } else if (field === 'rate') {
       const r = val === '' ? '' : Number(val);
-      current.rate = (r === '' || isNaN(r as number)) ? (val === '' ? '' : 0) as any : r;
+      current.rate = (r === '' || isNaN(r as number)) ? ('' as any) : r;
     } else if (field === 'crateSize') {
       current.crateSize = val;
     }
 
     const qNum = (current.quantity as any) === '' ? 0 : (Number(current.quantity) || 0);
     const kNum = (current.kg as any) === '' ? 0 : (Number(current.kg) || 0);
-    const rNum = (current.rate as any) === '' ? 0 : (Number(current.rate) || 0);
+    const rNum = (current.rate as any) === '' || (current.rate as any) === undefined ? 0 : (Number(current.rate) || 0);
 
     // Live calculation:
     // For crate items: Amount = Qty × Rate (Crate Name 20kg or 10kg is only a label for identification & balance tracking)
@@ -267,7 +269,7 @@ export const CashSaleModal: React.FC<CashSaleModalProps> = ({
         crateTypeId: '',
         crateName: '',
         kg: 0,
-        rate: 0,
+        rate: '' as any,
         amount: 0,
       },
     ]);
@@ -721,7 +723,7 @@ export const CashSaleModal: React.FC<CashSaleModalProps> = ({
                                 min={0}
                                 step="any"
                                 placeholder="0.00"
-                                value={it.rate === 0 ? '' : it.rate}
+                                value={(it.rate as any) === '' || it.rate === undefined ? '' : it.rate}
                                 onChange={(val) => handleItemChange(idx, 'rate', val)}
                                 className="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-xs font-mono font-bold text-slate-900 text-right outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                               />
