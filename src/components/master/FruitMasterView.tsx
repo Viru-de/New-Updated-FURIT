@@ -49,8 +49,16 @@ export const FruitMasterView: React.FC = () => {
     setEditUnit(unitVal);
     const ctVal = f.crateType !== undefined ? f.crateType : (f.crateName || '');
     setEditCrateType(ctVal);
-    // Preserve existing saved price; default 1 if unset
-    setEditPrice(typeof f.defaultRate === 'number' && !isNaN(f.defaultRate) ? f.defaultRate : 1);
+    // Preserve existing saved price; default 1 if unset, missing, empty, or undefined
+    const rawRate = f.defaultRate ?? (f as any).rate ?? (f as any).price;
+    let initialPrice = 1;
+    if (rawRate !== undefined && rawRate !== null && String(rawRate).trim() !== '') {
+      const parsed = Number(rawRate);
+      if (!isNaN(parsed)) {
+        initialPrice = parsed;
+      }
+    }
+    setEditPrice(initialPrice);
     setEditFruitIcon(f.fruitIcon);
   };
 
@@ -62,6 +70,11 @@ export const FruitMasterView: React.FC = () => {
     const savedUnit = editUnit !== undefined ? editUnit : (editingFruit.unit || editingFruit.defaultUnit || '');
     const savedCrateType = editCrateType !== undefined ? editCrateType.trim() : '';
 
+    // If editPrice was entered, use it; if blank/empty, prevent unintentional wiping: fallback to existing saved price or 1
+    const savedPrice = editPrice !== '' && !isNaN(Number(editPrice))
+      ? Number(editPrice)
+      : (typeof editingFruit.defaultRate === 'number' && !isNaN(editingFruit.defaultRate) ? editingFruit.defaultRate : 1);
+
     const updated: Fruit = {
       ...editingFruit,
       name: editName.trim(),
@@ -71,7 +84,7 @@ export const FruitMasterView: React.FC = () => {
       crateName: savedCrateType,
       crateTypeId: savedCrateType ? (editingFruit.crateTypeId || 'ct_20') : undefined,
       crateWeightKg: 0,
-      defaultRate: editPrice !== '' ? Number(editPrice) : 1,
+      defaultRate: savedPrice,
       fruitIcon: editFruitIcon,
     };
 
@@ -348,8 +361,14 @@ export const FruitMasterView: React.FC = () => {
                     step="any"
                     min={0}
                     required
+                    placeholder="1"
                     value={editPrice}
                     onChange={(val) => setEditPrice(val)}
+                    onBlur={() => {
+                      if (editPrice === '' || editPrice === undefined) {
+                        setEditPrice(1);
+                      }
+                    }}
                     className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm font-mono-numbers text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                   />
                 </div>

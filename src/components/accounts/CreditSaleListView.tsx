@@ -448,6 +448,11 @@ export const CreditSaleListView: React.FC<CreditSaleListViewProps> = ({
         onClose={() => setIsModalOpen(false)}
         editItem={editingItem}
         onSaved={refreshList}
+        onSaveAndPrint={(savedSale) => {
+          refreshList();
+          setIsModalOpen(false);
+          setPrintingItem(savedSale);
+        }}
       />
 
       {/* Traditional Bill Print Modal (Reference 2) */}

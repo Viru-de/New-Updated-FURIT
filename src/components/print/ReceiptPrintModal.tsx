@@ -77,29 +77,21 @@ export const ReceiptPrintModal: React.FC<ReceiptPrintModalProps> = ({
                 ))}
               </select>
             </div>
-            <div className="flex items-center gap-1 text-xs">
-              <button
-                type="button"
-                onClick={() => setPageSize('compact')}
-                className={`px-2.5 py-1 rounded text-xs font-semibold ${
-                  pageSize === 'compact'
-                    ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'
-                    : 'bg-white text-slate-600 border border-slate-200'
-                }`}
-              >
-                Compact (Mandi)
-              </button>
-              <button
-                type="button"
-                onClick={() => setPageSize('a4')}
-                className={`px-2.5 py-1 rounded text-xs font-semibold ${
-                  pageSize === 'a4'
-                    ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'
-                    : 'bg-white text-slate-600 border border-slate-200'
-                }`}
-              >
-                A4 Standard
-              </button>
+            <div className="flex flex-wrap items-center gap-1 text-xs">
+              {(['compact', 'b7', 'b6', 'a5', 'a4'] as BillPaperSize[]).map((sizeKey) => (
+                <button
+                  key={sizeKey}
+                  type="button"
+                  onClick={() => setPageSize(sizeKey)}
+                  className={`px-2 py-0.5 sm:px-2.5 sm:py-1 rounded text-[11px] sm:text-xs font-semibold cursor-pointer transition-all ${
+                    pageSize === sizeKey
+                      ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 shadow-2xs font-bold'
+                      : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700'
+                  }`}
+                >
+                  {sizeKey === 'compact' ? 'Compact' : sizeKey.toUpperCase()}
+                </button>
+              ))}
             </div>
           </div>
 

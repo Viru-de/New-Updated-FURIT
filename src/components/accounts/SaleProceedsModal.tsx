@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Bill, Customer, ExpenseItem, Fruit, SaleProceeds, SaleProceedsItem } from '../../types';
 import { db } from '../../services/db';
 import { formatCurrency, formatSequence, getTodayIso } from '../../utils/formatters';
-import { getFruitEffectivePrice } from '../../utils/fruitUtils';
+import { getFruitEffectivePrice, getFruitSavedCrateType } from '../../utils/fruitUtils';
 import { getCustomerLedger } from '../../services/accounting';
 import { DatePickerInput } from '../common/DatePickerInput';
 import { AddFruitModal } from '../modals/AddFruitModal';
@@ -134,9 +134,9 @@ export const SaleProceedsModal: React.FC<SaleProceedsModalProps> = ({
             quantity: q,
             unit: u,
             weight: w,
-            crateTypeId: it.crateTypeId || ctMatch?.id || 'ct_20',
+            crateTypeId: it.crateTypeId || (it.crateName && ctMatch ? ctMatch.id : ''),
             crateName:
-              it.crateName || (ctMatch ? ctMatch.name.replace(/\s*crate$/i, '').trim() : '20kg'),
+              it.crateName !== undefined ? it.crateName : (ctMatch ? ctMatch.name.replace(/\s*crate$/i, '').trim() : ''),
             rate: r,
             amount: a,
           };
@@ -172,9 +172,9 @@ export const SaleProceedsModal: React.FC<SaleProceedsModalProps> = ({
             quantity: q,
             unit: u,
             weight: w,
-            crateTypeId: editItem.crateTypeId || ctMatch?.id || 'ct_20',
+            crateTypeId: editItem.crateTypeId || (editItem.crateName && ctMatch ? ctMatch.id : ''),
             crateName:
-              editItem.crateName || (ctMatch ? ctMatch.name.replace(/\s*crate$/i, '').trim() : '20kg'),
+              editItem.crateName !== undefined ? editItem.crateName : (ctMatch ? ctMatch.name.replace(/\s*crate$/i, '').trim() : ''),
             rate: r,
             amount: a,
           },
@@ -209,7 +209,6 @@ export const SaleProceedsModal: React.FC<SaleProceedsModalProps> = ({
       setErrorMessage(null);
       setSuccessMessage(null);
 
-      const ct20 = crateTypes.find((c) => c.name.includes('20')) || crateTypes[0];
       setItems([
         {
           id: `spi-${Date.now()}-1`,
@@ -218,8 +217,8 @@ export const SaleProceedsModal: React.FC<SaleProceedsModalProps> = ({
           quantity: 1,
           unit: 'Crate',
           weight: 0,
-          crateTypeId: ct20?.id || 'ct_20',
-          crateName: ct20 ? ct20.name.replace(/\s*crate$/i, '').trim() : '20kg',
+          crateTypeId: '',
+          crateName: '',
           rate: 0,
           amount: 0,
         },
@@ -249,14 +248,10 @@ export const SaleProceedsModal: React.FC<SaleProceedsModalProps> = ({
       const r = getFruitEffectivePrice(fruit);
       const newRate = typeof r === 'number' && !isNaN(r) ? r : (fruit.defaultRate || 1);
       current.rate = newRate;
-      // 3. Auto-fill Crate Type
-      const ctName = fruit.crateType !== undefined ? fruit.crateType : (fruit.crateName || '');
-      current.crateName = ctName || '20kg';
-      current.crateTypeId = ctName
-        ? (crateTypes.find((c) => c.name.toLowerCase().includes(ctName.toLowerCase()))?.id ||
-            fruit.crateTypeId ||
-            'ct_20')
-        : 'ct_20';
+      // 3. Crate Type: automatically fetched from Fruit / Item Master (exact value or blank)
+      const fruitCrate = getFruitSavedCrateType(fruit);
+      current.crateName = fruitCrate;
+      current.crateTypeId = fruitCrate ? (fruit.crateTypeId || 'ct_20') : '';
       // 4. Qty defaults to 1 if empty or 0
       if (!current.quantity || current.quantity === 0) {
         current.quantity = 1;
@@ -272,6 +267,8 @@ export const SaleProceedsModal: React.FC<SaleProceedsModalProps> = ({
     } else {
       current.fruitId = '';
       current.fruitName = typeof target === 'string' ? target : '';
+      current.crateName = '';
+      current.crateTypeId = '';
     }
 
     updated[index] = current;
@@ -282,41 +279,63 @@ export const SaleProceedsModal: React.FC<SaleProceedsModalProps> = ({
     const updated = [...items];
     const current = { ...updated[index] };
 
-    if (field === 'fruitName') {
+    if (field === 'fruitId') {
+      current.fruitId = val;
+      const fr = fruits.find((f) => f.id === val);
+      if (fr) {
+        current.fruitName = fr.name;
+        current.unit = fr.unit || fr.defaultUnit || 'Crate';
+        const r = getFruitEffectivePrice(fr);
+        current.rate = typeof r === 'number' && !isNaN(r) ? r : (fr.defaultRate || 1);
+        const fruitCrate = getFruitSavedCrateType(fr);
+        current.crateName = fruitCrate;
+        current.crateTypeId = fruitCrate ? (fr.crateTypeId || 'ct_20') : '';
+      } else {
+        current.crateName = '';
+        current.crateTypeId = '';
+      }
+    } else if (field === 'fruitName') {
       current.fruitName = val;
+      const fr = fruits.find((f) => f.name.toLowerCase() === String(val).toLowerCase());
+      if (fr) {
+        current.fruitId = fr.id;
+        const fruitCrate = getFruitSavedCrateType(fr);
+        current.crateName = fruitCrate;
+        current.crateTypeId = fruitCrate ? (fr.crateTypeId || 'ct_20') : '';
+      } else {
+        current.fruitId = '';
+        current.crateName = '';
+        current.crateTypeId = '';
+      }
     } else if (field === 'quantity') {
       const q = val === '' ? '' : Number(val);
-      current.quantity = q;
-      const numQ = q === '' ? 0 : q;
-      const numW = current.weight === '' ? 0 : Number(current.weight);
-      const numR = current.rate === '' ? 0 : Number(current.rate);
-      current.amount = calculateWholesaleItemAmount(numQ, current.unit, numW, numR);
+      current.quantity = (q === '' || isNaN(q as number)) ? (val === '' ? '' : 0) as any : q;
     } else if (field === 'unit') {
-      current.unit = val;
-      const numQ = current.quantity === '' ? 0 : Number(current.quantity);
-      const numW = current.weight === '' ? 0 : Number(current.weight);
-      const numR = current.rate === '' ? 0 : Number(current.rate);
-      current.amount = calculateWholesaleItemAmount(numQ, val, numW, numR);
+      current.unit = String(val);
     } else if (field === 'weight') {
       const w = val === '' ? '' : Number(val);
-      current.weight = w;
-      const numW = w === '' ? 0 : w;
-      const numQ = current.quantity === '' ? 0 : Number(current.quantity);
-      const numR = current.rate === '' ? 0 : Number(current.rate);
-      current.amount = calculateWholesaleItemAmount(numQ, current.unit, numW, numR);
+      current.weight = (w === '' || isNaN(w as number)) ? (val === '' ? '' : 0) as any : w;
     } else if (field === 'crateName') {
       current.crateName = val;
-      const ct = crateTypes.find((c) => c.name.toLowerCase().includes(val.toLowerCase()));
+      const ct = crateTypes.find((c) => c.name.toLowerCase().includes(String(val).toLowerCase()));
       if (ct) current.crateTypeId = ct.id;
+      else current.crateTypeId = '';
+    } else if (field === 'crateTypeId') {
+      current.crateTypeId = val;
+      const ct = crateTypes.find((c) => c.id === val);
+      current.crateName = ct ? ct.name.replace(/\s*crate$/i, '').trim() : '';
     } else if (field === 'rate') {
       const r = val === '' ? '' : Number(val);
-      current.rate = r;
-      const numR = r === '' ? 0 : r;
-      const numQ = current.quantity === '' ? 0 : Number(current.quantity);
-      const numW = current.weight === '' ? 0 : Number(current.weight);
-      current.amount = calculateWholesaleItemAmount(numQ, current.unit, numW, numR);
+      current.rate = (r === '' || isNaN(r as number)) ? (val === '' ? '' : 0) as any : r;
     } else if (field === 'amount') {
       current.amount = val === '' ? '' : Number(val);
+    }
+
+    if (field !== 'amount') {
+      const numQ = current.quantity === '' ? 0 : (Number(current.quantity) || 0);
+      const numW = current.weight === '' ? 0 : (Number(current.weight) || 0);
+      const numR = current.rate === '' ? 0 : (Number(current.rate) || 0);
+      current.amount = calculateWholesaleItemAmount(numQ, current.unit, numW, numR);
     }
 
     updated[index] = current;
@@ -324,7 +343,6 @@ export const SaleProceedsModal: React.FC<SaleProceedsModalProps> = ({
   };
 
   const handleAddRow = () => {
-    const ct20 = crateTypes.find((c) => c.name.includes('20')) || crateTypes[0];
     setItems((prev) => [
       ...prev,
       {
@@ -334,8 +352,8 @@ export const SaleProceedsModal: React.FC<SaleProceedsModalProps> = ({
         quantity: 1,
         unit: 'Crate',
         weight: 0,
-        crateTypeId: ct20?.id || 'ct_20',
-        crateName: ct20 ? ct20.name.replace(/\s*crate$/i, '').trim() : '20kg',
+        crateTypeId: '',
+        crateName: '',
         rate: 0,
         amount: 0,
       },
@@ -763,7 +781,10 @@ export const SaleProceedsModal: React.FC<SaleProceedsModalProps> = ({
                     Exact column layout: No., Item Name, Qty, Unit, Weight, Crate Type, Rate, Amount
                   </p>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-300 bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300">
+                    Total Qty: <strong className="font-mono text-emerald-900 dark:text-emerald-200">{totalQuantity}</strong>
+                  </span>
                   <button
                     type="button"
                     onClick={() => {
@@ -818,6 +839,8 @@ export const SaleProceedsModal: React.FC<SaleProceedsModalProps> = ({
                               } else {
                                 handleItemChange(idx, 'fruitId', '');
                                 handleItemChange(idx, 'fruitName', name || '');
+                                handleItemChange(idx, 'crateName', '');
+                                handleItemChange(idx, 'crateTypeId', '');
                               }
                             }}
                             placeholder="Search fruit / item name..."
@@ -840,21 +863,11 @@ export const SaleProceedsModal: React.FC<SaleProceedsModalProps> = ({
                         <td className="py-2 px-2 text-center">
                           <input
                             type="text"
-                            list={`sp-unit-options-${idx}`}
                             placeholder="Unit"
-                            value={it.unit}
+                            value={it.unit || ''}
                             onChange={(e) => handleItemChange(idx, 'unit', e.target.value)}
                             className="w-full rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-xs font-semibold text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white text-center"
                           />
-                          <datalist id={`sp-unit-options-${idx}`}>
-                            <option value="Crate" />
-                            <option value="Peti" />
-                            <option value="Box" />
-                            <option value="KG" />
-                            <option value="Bag" />
-                            <option value="Piece" />
-                            <option value="Nag" />
-                          </datalist>
                         </td>
 
                         {/* 5. Weight (default 0) */}
@@ -863,7 +876,7 @@ export const SaleProceedsModal: React.FC<SaleProceedsModalProps> = ({
                             min={0}
                             step="any"
                             placeholder="0"
-                            value={it.weight}
+                            value={it.weight === 0 ? '' : it.weight}
                             onChange={(val) => handleItemChange(idx, 'weight', val)}
                             className="w-full rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-xs text-right font-mono outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800"
                           />
@@ -874,11 +887,16 @@ export const SaleProceedsModal: React.FC<SaleProceedsModalProps> = ({
                           <input
                             type="text"
                             list={`sp-crate-types-${idx}`}
-                            placeholder="e.g. 20kg"
+                            placeholder={it.fruitName ? "e.g. 20kg" : "-"}
+                            disabled={!it.fruitName}
                             value={it.crateName || ''}
                             onChange={(e) => handleItemChange(idx, 'crateName', e.target.value)}
-                            className="w-full rounded-lg border border-sky-300 bg-sky-50/60 dark:bg-slate-800 px-2 py-1.5 text-xs font-bold text-sky-800 dark:text-sky-300 outline-none focus:border-sky-500 dark:border-slate-700 text-center"
-                            title="Crate Name is only a label for identification & balance tracking"
+                            className={`w-full rounded-lg border px-2 py-1.5 text-xs font-bold text-center outline-none ${
+                              !it.fruitName
+                                ? 'border-slate-200 bg-slate-100/70 text-slate-400 dark:border-slate-800 dark:bg-slate-800/40 cursor-not-allowed'
+                                : 'border-sky-300 bg-sky-50/60 text-sky-800 dark:bg-slate-800 dark:text-sky-300 focus:border-sky-500 dark:border-slate-700'
+                            }`}
+                            title={it.fruitName ? "Crate Name is only a label for identification & balance tracking" : "Select a fruit item first"}
                           />
                           <datalist id={`sp-crate-types-${idx}`}>
                             <option value="20kg" />
@@ -927,6 +945,23 @@ export const SaleProceedsModal: React.FC<SaleProceedsModalProps> = ({
                       </tr>
                     ))}
                   </tbody>
+                  <tfoot>
+                    <tr className="border-t-2 border-slate-200 bg-slate-100/70 font-bold dark:border-slate-800 dark:bg-slate-800/60">
+                      <td colSpan={2} className="py-2.5 px-2 text-right text-xs uppercase tracking-wider text-slate-600 dark:text-slate-300">
+                        Total Qty:
+                      </td>
+                      <td className="py-2.5 px-2 text-right font-mono text-xs font-bold text-emerald-700 dark:text-emerald-400">
+                        {totalQuantity}
+                      </td>
+                      <td colSpan={4} className="py-2.5 px-2 text-right text-xs uppercase tracking-wider text-slate-600 dark:text-slate-300">
+                        Items Subtotal:
+                      </td>
+                      <td className="py-2.5 px-2 text-right font-mono text-xs font-bold text-slate-900 dark:text-white">
+                        {formatCurrency(totalProductAmount)}
+                      </td>
+                      <td></td>
+                    </tr>
+                  </tfoot>
                 </table>
               </div>
 

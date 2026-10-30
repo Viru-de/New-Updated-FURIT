@@ -124,8 +124,14 @@ export const AddFruitModal: React.FC<AddFruitModalProps> = ({
                 min={0}
                 step="any"
                 required
+                placeholder="1"
                 value={price}
                 onChange={(val) => setPrice(val)}
+                onBlur={() => {
+                  if (price === '' || price === undefined) {
+                    setPrice(1);
+                  }
+                }}
                 className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm font-mono-numbers text-slate-900 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
               />
             </div>

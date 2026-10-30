@@ -5,14 +5,15 @@ import { getCustomerLedger, getCustomerCrateBalanceByType } from '../../services
 import { formatCurrency, formatSequence, getTodayIso } from '../../utils/formatters';
 import { isCrateUnit } from '../../utils/crateUtils';
 import { calculateSaleCrateSummary, formatQtyWithUnit, calculateWholesaleItemAmount } from '../../utils/billingCalculations';
-import { getFruitEffectivePrice } from '../../utils/fruitUtils';
+import { getFruitEffectivePrice, getFruitSavedCrateType } from '../../utils/fruitUtils';
 import { DatePickerInput } from '../common/DatePickerInput';
 import { AddCustomerModal } from '../modals/AddCustomerModal';
 import { CustomerAvatar } from '../common/CustomerAvatar';
 import { CustomerAutocomplete } from '../common/CustomerAutocomplete';
 import { FruitAutocomplete } from '../common/FruitAutocomplete';
 import { QuantityInput } from '../common/QuantityInput';
-import { X, Plus, Trash2, UserPlus, Calculator, Users, AlertTriangle } from 'lucide-react';
+import { CreditSalePrintModal } from '../print/CreditSalePrintModal';
+import { X, Plus, Trash2, UserPlus, Calculator, Users, AlertTriangle, Printer } from 'lucide-react';
 
 interface CreditSaleModalProps {
   isOpen: boolean;
@@ -20,9 +21,8 @@ interface CreditSaleModalProps {
   editItem?: CreditSale | null;
   onSaved: (item: CreditSale) => void;
   preselectedCustomerId?: string;
+  onSaveAndPrint?: (item: CreditSale) => void;
 }
-
-const COMMON_UNITS = ['Crate', 'Box', 'DABBA', 'Peti', 'KG', 'Bag', 'Carton'];
 
 export const CreditSaleModal: React.FC<CreditSaleModalProps> = ({
   isOpen,
@@ -30,9 +30,11 @@ export const CreditSaleModal: React.FC<CreditSaleModalProps> = ({
   editItem,
   onSaved,
   preselectedCustomerId,
+  onSaveAndPrint,
 }) => {
   const customers = db.getCustomers();
   const fruitsCatalog = db.getFruits();
+  const fruits = fruitsCatalog;
   const crateTypes = db.getCrateTypes();
 
   // Basic info
@@ -58,6 +60,7 @@ export const CreditSaleModal: React.FC<CreditSaleModalProps> = ({
 
   const [isAddCustomerOpen, setIsAddCustomerOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
 
   // Initialize or reset form
   useEffect(() => {
@@ -85,8 +88,8 @@ export const CreditSaleModal: React.FC<CreditSaleModalProps> = ({
           quantity: it.quantity || 1,
           unit: it.unit || 'Crate',
           kg: kgVal,
-          crateTypeId: it.crateTypeId || ctMatch?.id || 'ct_20',
-          crateName: it.crateName || (ctMatch ? ctMatch.name.replace(/\s*crate$/i, '').trim() : '20kg'),
+          crateTypeId: it.crateTypeId || (it.crateName && ctMatch ? ctMatch.id : ''),
+          crateName: it.crateName !== undefined ? it.crateName : (ctMatch ? ctMatch.name.replace(/\s*crate$/i, '').trim() : ''),
           rate: rateVal,
           amount: it.amount !== undefined ? it.amount : calculatedAmount,
           crateSize: it.crateSize,
@@ -130,8 +133,6 @@ export const CreditSaleModal: React.FC<CreditSaleModalProps> = ({
       setNotes('');
 
       // Start with a clean, blank item row for new bill
-      const ct20 = crateTypes.find((c) => c.name.includes('20')) || crateTypes[0];
-
       setItems([
         {
           id: `csi-${Date.now()}-1`,
@@ -139,8 +140,8 @@ export const CreditSaleModal: React.FC<CreditSaleModalProps> = ({
           fruitName: '',
           quantity: 1,
           unit: 'Crate',
-          crateTypeId: ct20?.id || 'ct_20',
-          crateName: ct20 ? ct20.name.replace(/\s*crate$/i, '').trim() : '20kg',
+          crateTypeId: '',
+          crateName: '',
           rate: 0,
           amount: 0,
         },
@@ -201,41 +202,70 @@ export const CreditSaleModal: React.FC<CreditSaleModalProps> = ({
     const updated = [...items];
     const current = { ...updated[index] };
 
-    if (field === 'fruitName') {
-      current.fruitName = val;
-    } else if (field === 'quantity') {
-      const q = val === '' ? 0 : Number(val);
-      current.quantity = isNaN(q) ? 0 : q;
-    } else if (field === 'unit') {
-      const nextUnit = String(val).trim();
-      current.unit = nextUnit;
-      if (isCrateUnit(nextUnit)) {
-        if (!current.crateTypeId) {
-          const ct20 = crateTypes.find((c) => c.name.includes('20')) || crateTypes[0];
-          current.crateTypeId = ct20?.id || 'ct_20';
-          current.crateName = ct20 ? ct20.name.replace(/\s*crate$/i, '').trim() : '20kg';
-        }
+    if (field === 'fruitId') {
+      current.fruitId = val;
+      const fr = fruits.find((f) => f.id === val);
+      if (fr) {
+        current.fruitName = fr.name;
+        current.unit = fr.unit || fr.defaultUnit || 'Crate';
+        const r = getFruitEffectivePrice(fr);
+        current.rate = typeof r === 'number' && !isNaN(r) ? r : (fr.defaultRate || 1);
+        const fruitCrateType = getFruitSavedCrateType(fr);
+        current.crateName = fruitCrateType;
+        current.crateTypeId = fruitCrateType ? (fr.crateTypeId || 'ct_20') : '';
+      } else {
+        current.crateName = '';
+        current.crateTypeId = '';
       }
+    } else if (field === 'fruitName') {
+      current.fruitName = val;
+      const fr = fruits.find((f) => f.name.toLowerCase() === String(val).toLowerCase());
+      if (fr) {
+        current.fruitId = fr.id;
+        const fruitCrateType = getFruitSavedCrateType(fr);
+        current.crateName = fruitCrateType;
+        current.crateTypeId = fruitCrateType ? (fr.crateTypeId || 'ct_20') : '';
+      } else {
+        current.fruitId = '';
+        current.crateName = '';
+        current.crateTypeId = '';
+      }
+    } else if (field === 'quantity') {
+      const q = val === '' ? '' : Number(val);
+      current.quantity = (q === '' || isNaN(q as number)) ? (val === '' ? '' : 0) as any : q;
+    } else if (field === 'unit') {
+      const nextUnit = String(val);
+      current.unit = nextUnit;
     } else if (field === 'crateTypeId') {
       current.crateTypeId = val;
       const ct = crateTypes.find((c) => c.id === val);
-      current.crateName = ct ? ct.name.replace(/\s*crate$/i, '').trim() : '20kg';
+      current.crateName = ct ? ct.name.replace(/\s*crate$/i, '').trim() : '';
     } else if (field === 'crateName') {
       current.crateName = val;
+      if (val) {
+        const ct = crateTypes.find((c) => c.name.toLowerCase().includes(String(val).toLowerCase()));
+        current.crateTypeId = ct ? ct.id : '';
+      } else {
+        current.crateTypeId = '';
+      }
     } else if (field === 'kg') {
-      const k = val === '' ? 0 : Number(val);
-      current.kg = isNaN(k) ? 0 : k;
+      const k = val === '' ? '' : Number(val);
+      current.kg = (k === '' || isNaN(k as number)) ? (val === '' ? '' : 0) as any : k;
     } else if (field === 'rate') {
-      const r = val === '' ? 0 : Number(val);
-      current.rate = isNaN(r) ? 0 : r;
+      const r = val === '' ? '' : Number(val);
+      current.rate = (r === '' || isNaN(r as number)) ? (val === '' ? '' : 0) as any : r;
     }
+
+    const qNum = (current.quantity as any) === '' ? 0 : (Number(current.quantity) || 0);
+    const kNum = (current.kg as any) === '' ? 0 : (Number(current.kg) || 0);
+    const rNum = (current.rate as any) === '' ? 0 : (Number(current.rate) || 0);
 
     // Live amount calculation: updates immediately whenever Qty, unit, Kg, or Rate changes
     current.amount = calculateWholesaleItemAmount(
-      current.quantity,
+      qNum,
       current.unit,
-      current.kg,
-      current.rate
+      kNum,
+      rNum
     );
 
     updated[index] = current;
@@ -256,15 +286,10 @@ export const CreditSaleModal: React.FC<CreditSaleModalProps> = ({
     const rate = getFruitEffectivePrice(fruit);
     current.rate = typeof rate === 'number' && !isNaN(rate) ? rate : (fruit.defaultRate || 1);
 
-    // 3. Auto-fill Crate Type (save exactly what was entered, e.g. 20kg or 10kg, or blank)
-    const ctName = fruit.crateType !== undefined ? fruit.crateType : (fruit.crateName || '');
-    current.crateName = ctName;
-    if (ctName) {
-      const matched = crateTypes.find((c) => c.name.toLowerCase().includes(ctName.toLowerCase()) || c.id === fruit.crateTypeId);
-      current.crateTypeId = matched?.id || fruit.crateTypeId || 'ct_20';
-    } else {
-      current.crateTypeId = '';
-    }
+    // 3. Crate Type: automatically fetched from Fruit / Item Master (exact value or blank)
+    const fruitCrateType = getFruitSavedCrateType(fruit);
+    current.crateName = fruitCrateType;
+    current.crateTypeId = fruitCrateType ? (fruit.crateTypeId || 'ct_20') : '';
 
     // 4. Qty defaults to 1 but remains editable
     current.quantity = 1;
@@ -293,8 +318,8 @@ export const CreditSaleModal: React.FC<CreditSaleModalProps> = ({
         quantity: 1,
         unit: 'Crate',
         kg: 0,
-        crateTypeId: 'ct_20',
-        crateName: '20kg',
+        crateTypeId: '',
+        crateName: '',
         rate: 0,
         amount: 0,
       },
@@ -303,15 +328,14 @@ export const CreditSaleModal: React.FC<CreditSaleModalProps> = ({
 
   const handleRemoveRow = (index: number) => {
     if (items.length <= 1) {
-      const ct20 = crateTypes.find((c) => c.name.includes('20')) || crateTypes[0];
       setItems([
         {
           id: `csi-${Date.now()}`,
           fruitName: '',
           quantity: 10,
           unit: 'Crate',
-          crateTypeId: ct20?.id || 'ct_20',
-          crateName: ct20 ? ct20.name.replace(/\s*crate$/i, '').trim() : '20kg',
+          crateTypeId: '',
+          crateName: '',
           rate: 0,
           amount: 0,
         },
@@ -379,6 +403,11 @@ export const CreditSaleModal: React.FC<CreditSaleModalProps> = ({
     return items.reduce((sum, it) => sum + (Number(it.amount) || 0), 0);
   }, [items]);
 
+  // Total Qty = sum of all item quantities (empty treated as 0, decimals supported, Weight strictly not included)
+  const totalQty = useMemo(() => {
+    return Math.round(items.reduce((sum, it) => sum + (Number(it.quantity) || 0), 0) * 1000) / 1000;
+  }, [items]);
+
   // Net Total = Total + Expense
   const netTotal = Math.round((totalItemAmount + totalExpense) * 100) / 100;
 
@@ -388,7 +417,80 @@ export const CreditSaleModal: React.FC<CreditSaleModalProps> = ({
   // Total Balance = Net Total + Old Balance - Cash Receipt
   const totalBalance = Math.round((netTotal + oldBalance - numCashReceipt) * 100) / 100;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Memoized current sale record for live print preview
+  const currentSaleRecord: CreditSale = useMemo(() => {
+    const cust = customers.find((c) => c.id === customerId);
+    const seq = editItem ? editItem.sequenceNumber : 1;
+    const creditSaleNo = editItem
+      ? editItem.creditSaleNo
+      : `Credit Sale No. ${formatSequence(seq, 3)}`;
+
+    const expensesList: ExpenseItem[] = expenses.map((e, idx) => ({
+      id: e.id || `cse-${Date.now()}-${idx}`,
+      name: (e.name || '').trim() || 'Expense',
+      amount: Number(e.amount) || 0,
+    }));
+
+    const crateTypeMap = new Map<string, { crateTypeId: string; crateName: string; outQuantity: number }>();
+    items.forEach((it) => {
+      if (isCrateUnit(it.unit)) {
+        const q = Number(it.quantity) || 0;
+        if (q > 0) {
+          const ct = crateTypes.find((c) => c.id === it.crateTypeId || c.name.toLowerCase().includes(String(it.crateName || '').toLowerCase())) || crateTypes[0];
+          const ctId = ct ? ct.id : (it.crateTypeId || 'ct_20');
+          const ctName = it.crateName || (ct ? ct.name.replace(/\s*crate$/i, '').trim() : '20kg');
+          const existing = crateTypeMap.get(ctId) || { crateTypeId: ctId, crateName: ctName, outQuantity: 0 };
+          existing.outQuantity += q;
+          crateTypeMap.set(ctId, existing);
+        }
+      }
+    });
+
+    const preparedCrateMovements: CrateMovementItem[] = Array.from(crateTypeMap.values()).map((c) => ({
+      crateTypeId: c.crateTypeId,
+      crateName: c.crateName,
+      outQuantity: c.outQuantity,
+      inQuantity: 0,
+    }));
+
+    const totalCrateOut = preparedCrateMovements.reduce((sum, m) => sum + m.outQuantity, 0);
+    const firstCtId = preparedCrateMovements[0]?.crateTypeId || crateTypes[0]?.id || 'ct_20';
+    const firstCt = crateTypes.find((c) => c.id === firstCtId) || crateTypes[0];
+
+    return {
+      id: editItem ? editItem.id : 'preview-credit-sale',
+      creditSaleNo,
+      sequenceNumber: seq,
+      customerId,
+      customerName: cust ? cust.name : (selectedCustomer?.name || 'Customer'),
+      date,
+      items: items.map((it) => ({
+        ...it,
+        amount: calculateWholesaleItemAmount(it.quantity, it.unit, it.kg, it.rate),
+      })),
+      crateTypeId: firstCt?.id,
+      crateName: firstCt?.name,
+      crateIn: 0,
+      crateOut: totalCrateOut,
+      crateWeightKg: firstCt?.defaultWeightKg || 20,
+      crateMovements: preparedCrateMovements.length > 0 ? preparedCrateMovements : undefined,
+      expenses: expensesList,
+      productTotal: totalItemAmount,
+      expenseTotal: totalExpense,
+      totalDebit: netTotal,
+      finalAmount: netTotal,
+      netTotal,
+      oldBalance,
+      cashReceipt: numCashReceipt,
+      totalBalance,
+      totalCrateBalance: totalCrateOut,
+      notes: notes.trim() || undefined,
+      createdAt: editItem ? editItem.createdAt : new Date().toISOString(),
+      saleType: 'wholesale',
+    };
+  }, [editItem, customerId, customers, selectedCustomer, date, items, expenses, totalItemAmount, totalExpense, netTotal, oldBalance, numCashReceipt, totalBalance, notes, crateTypes]);
+
+  const handleSubmit = (e: React.FormEvent, andPrint = false) => {
     e.preventDefault();
     if (isSubmitting) return;
     if (!customerId) {
@@ -494,9 +596,10 @@ export const CreditSaleModal: React.FC<CreditSaleModalProps> = ({
     } else {
       // Remove any previously recorded cash receipt if updated to 0
       db.deleteReceipt(linkedReceiptId);
-    }
-
     onSaved(saleRecord);
+    if (andPrint && onSaveAndPrint) {
+      onSaveAndPrint(saleRecord);
+    }
     setIsSubmitting(false);
     onClose();
   };
@@ -580,10 +683,15 @@ export const CreditSaleModal: React.FC<CreditSaleModalProps> = ({
 
             {/* Bill Items Card */}
             <div className="rounded-lg border border-slate-200 bg-slate-50/60 p-4 dark:border-slate-800 dark:bg-slate-800/30">
-              <div className="mb-3 flex items-center justify-between">
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-                  Bill Items ({items.length})
-                </span>
+              <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                <div className="flex items-center gap-2.5">
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                    Bill Items ({items.length})
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-300 bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300">
+                    Total Qty: <strong className="font-mono text-emerald-900 dark:text-emerald-200">{totalQty}</strong>
+                  </span>
+                </div>
                 <button
                   type="button"
                   onClick={handleAddRow}
@@ -628,6 +736,8 @@ export const CreditSaleModal: React.FC<CreditSaleModalProps> = ({
                                 } else {
                                   handleItemChange(idx, 'fruitName', customName || '');
                                   handleItemChange(idx, 'fruitId', '');
+                                  handleItemChange(idx, 'crateName', '');
+                                  handleItemChange(idx, 'crateTypeId', '');
                                 }
                               }}
                               placeholder="Search fruit / item..."
@@ -650,17 +760,11 @@ export const CreditSaleModal: React.FC<CreditSaleModalProps> = ({
                           <td className="py-2 px-2 text-center">
                             <input
                               type="text"
-                              list={`unit-options-${idx}`}
                               placeholder="Unit"
-                              value={it.unit}
+                              value={it.unit || ''}
                               onChange={(e) => handleItemChange(idx, 'unit', e.target.value)}
                               className="w-full rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-xs font-semibold text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white text-center"
                             />
-                            <datalist id={`unit-options-${idx}`}>
-                              {COMMON_UNITS.map((u) => (
-                                <option key={u} value={u} />
-                              ))}
-                            </datalist>
                           </td>
 
                           {/* 5. Weight */}
@@ -669,7 +773,7 @@ export const CreditSaleModal: React.FC<CreditSaleModalProps> = ({
                               min={0}
                               step="any"
                               placeholder="0"
-                              value={it.kg === 0 ? '0' : (it.kg || '0')}
+                              value={it.kg === 0 ? '' : it.kg}
                               onChange={(val) => handleItemChange(idx, 'kg', val)}
                               className="w-full rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-xs text-right font-mono outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800"
                             />
@@ -680,11 +784,16 @@ export const CreditSaleModal: React.FC<CreditSaleModalProps> = ({
                             <input
                               type="text"
                               list={`crate-types-${idx}`}
-                              placeholder="e.g. 20kg"
+                              placeholder={it.fruitName ? "e.g. 20kg" : "-"}
+                              disabled={!it.fruitName}
                               value={it.crateName || ''}
                               onChange={(e) => handleItemChange(idx, 'crateName', e.target.value)}
-                              className="w-full rounded-lg border border-sky-300 bg-sky-50/60 dark:bg-slate-800 px-2 py-1.5 text-xs font-bold text-sky-800 dark:text-sky-300 outline-none focus:border-sky-500 dark:border-slate-700 text-center"
-                              title="Crate Name is only a label for identification & balance tracking"
+                              className={`w-full rounded-lg border px-2 py-1.5 text-xs font-bold text-center outline-none ${
+                                !it.fruitName
+                                  ? 'border-slate-200 bg-slate-100/70 text-slate-400 dark:border-slate-800 dark:bg-slate-800/40 cursor-not-allowed'
+                                  : 'border-sky-300 bg-sky-50/60 text-sky-800 dark:bg-slate-800 dark:text-sky-300 focus:border-sky-500 dark:border-slate-700'
+                              }`}
+                              title={it.fruitName ? "Crate Name is only a label for identification & balance tracking" : "Select a fruit item first"}
                             />
                             <datalist id={`crate-types-${idx}`}>
                               <option value="20kg" />
@@ -731,6 +840,23 @@ export const CreditSaleModal: React.FC<CreditSaleModalProps> = ({
                       );
                     })}
                   </tbody>
+                  <tfoot>
+                    <tr className="border-t-2 border-slate-200 bg-slate-100/70 font-bold dark:border-slate-800 dark:bg-slate-800/60">
+                      <td colSpan={2} className="py-2.5 px-2 text-right text-xs uppercase tracking-wider text-slate-600 dark:text-slate-300">
+                        Total Qty:
+                      </td>
+                      <td className="py-2.5 px-2 text-right font-mono text-xs font-bold text-emerald-700 dark:text-emerald-400">
+                        {totalQty}
+                      </td>
+                      <td colSpan={4} className="py-2.5 px-2 text-right text-xs uppercase tracking-wider text-slate-600 dark:text-slate-300">
+                        Items Subtotal:
+                      </td>
+                      <td className="py-2.5 px-2 text-right font-mono text-xs font-bold text-slate-900 dark:text-white">
+                        {formatCurrency(totalItemAmount)}
+                      </td>
+                      <td></td>
+                    </tr>
+                  </tfoot>
                 </table>
               </div>
 
@@ -885,21 +1011,43 @@ export const CreditSaleModal: React.FC<CreditSaleModalProps> = ({
             </div>
 
             {/* Actions */}
-            <div className="flex justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+            <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
               <button
                 type="button"
-                onClick={onClose}
-                className="rounded-lg border border-slate-300 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 cursor-pointer"
+                onClick={() => setIsPrintModalOpen(true)}
+                disabled={items.length === 0}
+                className="flex items-center gap-1.5 rounded-lg border border-emerald-600 px-3.5 py-2 text-xs font-semibold text-emerald-700 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-950/30 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Cancel
+                <Printer className="h-3.5 w-3.5" /> Preview / Print Bill
               </button>
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="rounded-lg bg-emerald-600 px-5 py-2 text-xs font-semibold text-white shadow-xs hover:bg-emerald-700 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
-              >
-                {isSubmitting ? 'Saving...' : editItem ? 'Update Credit Sale' : 'Save Credit Sale'}
-              </button>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="rounded-lg border border-slate-300 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 cursor-pointer"
+                >
+                  Cancel
+                </button>
+                {onSaveAndPrint && (
+                  <button
+                    type="button"
+                    disabled={isSubmitting}
+                    onClick={(e) => handleSubmit(e, true)}
+                    className="flex items-center gap-1.5 rounded-lg border border-blue-600 bg-blue-50 px-4 py-2 text-xs font-bold text-blue-700 hover:bg-blue-100 dark:border-blue-500 dark:bg-blue-950/40 dark:text-blue-300 dark:hover:bg-blue-900/50 cursor-pointer transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                  >
+                    <Printer className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
+                    {isSubmitting ? 'Processing...' : editItem ? 'Update & Print' : 'Save & Print'}
+                  </button>
+                )}
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="rounded-lg bg-emerald-600 px-5 py-2 text-xs font-semibold text-white shadow-xs hover:bg-emerald-700 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  {isSubmitting ? 'Saving...' : editItem ? 'Update Credit Sale' : 'Save Credit Sale'}
+                </button>
+              </div>
             </div>
           </form>
         </div>
@@ -913,6 +1061,14 @@ export const CreditSaleModal: React.FC<CreditSaleModalProps> = ({
           setIsAddCustomerOpen(false);
         }}
       />
+
+      {isPrintModalOpen && (
+        <CreditSalePrintModal
+          isOpen={isPrintModalOpen}
+          onClose={() => setIsPrintModalOpen(false)}
+          creditSale={currentSaleRecord}
+        />
+      )}
     </>
   );
 };

@@ -17,11 +17,10 @@ import {
   getDefaultCrateSizeForFruit,
 } from '../../utils/crateUtils';
 import { calculateWholesaleItemAmount } from '../../utils/billingCalculations';
-import { getFruitEffectivePrice } from '../../utils/fruitUtils';
+import { getFruitEffectivePrice, getFruitSavedCrateType } from '../../utils/fruitUtils';
 import { DatePickerInput } from '../common/DatePickerInput';
 import { CustomerAutocomplete } from '../common/CustomerAutocomplete';
 import { FruitAutocomplete } from '../common/FruitAutocomplete';
-import { UnitAutocomplete } from '../common/UnitAutocomplete';
 import { QuantityInput } from '../common/QuantityInput';
 import { ExcelActionBar } from '../common/ExcelActionBar';
 import { exportCreditSales } from '../../utils/excelEngine';
@@ -170,8 +169,8 @@ export const GroupSaleView: React.FC<GroupSaleViewProps> = ({
               ? (item.crateSize !== undefined ? item.crateSize : (sale.crateWeightKg || undefined))
               : undefined,
             rate: rateVal,
-            crateTypeId: item.crateTypeId || sale.crateTypeId || defaultCrate?.id || 'ct_20',
-            crateName: item.crateName || sale.crateName || (defaultCrate ? defaultCrate.name.replace(/\s*crate$/i, '').trim() : '20kg'),
+            crateTypeId: item.crateTypeId || sale.crateTypeId || '',
+            crateName: item.crateName !== undefined ? item.crateName : (sale.crateName !== undefined ? sale.crateName : ''),
             crateCount: isCrate ? (sale.crateOut || item.quantity || 0) : 0,
             totalAmount: item.amount !== undefined ? item.amount : calculatedAmount,
             freight: itemIdx === 0 ? freightExp : 0,
@@ -202,8 +201,8 @@ export const GroupSaleView: React.FC<GroupSaleViewProps> = ({
           kg: 0,
           crateSize: sale.crateWeightKg || undefined,
           rate: rateVal,
-          crateTypeId: sale.crateTypeId || defaultCrate?.id || 'ct_20',
-          crateName: sale.crateName || (defaultCrate ? defaultCrate.name.replace(/\s*crate$/i, '').trim() : '20kg'),
+          crateTypeId: sale.crateTypeId || '',
+          crateName: sale.crateName !== undefined ? sale.crateName : '',
           crateCount: sale.crateOut || 1,
           totalAmount: sale.productTotal !== undefined ? sale.productTotal : calculatedAmount,
           freight: 0,
@@ -278,8 +277,8 @@ export const GroupSaleView: React.FC<GroupSaleViewProps> = ({
       kg: 0, // Default Kg to 0 for new rows
       crateSize: undefined,
       rate: 0,
-      crateTypeId: defaultCrate?.id || 'ct_20',
-      crateName: defaultCrate ? defaultCrate.name.replace(/\s*crate$/i, '').trim() : '20kg',
+      crateTypeId: '',
+      crateName: '',
       crateCount: 0,
       totalAmount: 0,
       freight: 0,
@@ -332,16 +331,39 @@ export const GroupSaleView: React.FC<GroupSaleViewProps> = ({
         if (r.rowId !== rowId) return r;
         const updated = { ...r, [field]: value, isDirty: true };
 
-        // 1. When Unit changes
+        // 1. When Fruit ID or Name changes
+        if (field === 'fruitId') {
+          updated.fruitId = value;
+          const fr = fruits.find((f) => f.id === value);
+          if (fr) {
+            const fruitCrate = getFruitSavedCrateType(fr);
+            updated.crateName = fruitCrate;
+            updated.crateTypeId = fruitCrate ? (fr.crateTypeId || 'ct_20') : '';
+          } else {
+            updated.crateName = '';
+            updated.crateTypeId = '';
+          }
+        }
+
+        if (field === 'fruitName') {
+          updated.fruitName = value;
+          const fr = fruits.find((f) => f.name.toLowerCase() === String(value).toLowerCase());
+          if (fr) {
+            const fruitCrate = getFruitSavedCrateType(fr);
+            updated.crateName = fruitCrate;
+            updated.crateTypeId = fruitCrate ? (fr.crateTypeId || 'ct_20') : '';
+          } else {
+            updated.crateName = '';
+            updated.crateTypeId = '';
+          }
+        }
+
+        // 1b. When Unit changes
         if (field === 'unit') {
           const prevWasCrate = isCrateUnit(r.unit);
-          const nextUnit = String(value).trim();
+          const nextUnit = String(value);
           updated.unit = nextUnit;
           if (isCrateUnit(nextUnit)) {
-            if (!updated.crateTypeId) {
-              updated.crateTypeId = defaultCrate?.id || 'ct_20';
-              updated.crateName = defaultCrate ? defaultCrate.name.replace(/\s*crate$/i, '').trim() : '20kg';
-            }
             const q = typeof updated.quantity === 'number' ? updated.quantity : Number(updated.quantity) || 1;
             updated.crateCount = q;
           } else {
@@ -354,12 +376,18 @@ export const GroupSaleView: React.FC<GroupSaleViewProps> = ({
         if (field === 'crateTypeId') {
           updated.crateTypeId = value;
           const ct = crateTypes.find((c) => c.id === value);
-          updated.crateName = ct ? ct.name.replace(/\s*crate$/i, '').trim() : '20kg';
+          updated.crateName = ct ? ct.name.replace(/\s*crate$/i, '').trim() : '';
         }
 
         // 2b. When crateName changes
         if (field === 'crateName') {
           updated.crateName = value;
+          if (value) {
+            const ct = crateTypes.find((c) => c.name.toLowerCase().includes(String(value).toLowerCase()));
+            updated.crateTypeId = ct ? ct.id : '';
+          } else {
+            updated.crateTypeId = '';
+          }
         }
 
         // 3. When crateSize changes
@@ -369,9 +397,9 @@ export const GroupSaleView: React.FC<GroupSaleViewProps> = ({
 
         // 3. Recalculate amount whenever Qty, Unit, Kg, or Rate changes
         if (field === 'quantity' || field === 'kg' || field === 'rate' || field === 'unit') {
-          const q = typeof updated.quantity === 'number' ? updated.quantity : Number(updated.quantity) || 0;
-          const k = typeof updated.kg === 'number' ? updated.kg : Number(updated.kg) || 0;
-          const p = typeof updated.rate === 'number' ? updated.rate : Number(updated.rate) || 0;
+          const q = updated.quantity === '' ? 0 : (Number(updated.quantity) || 0);
+          const k = updated.kg === '' ? 0 : (Number(updated.kg) || 0);
+          const p = updated.rate === '' ? 0 : (Number(updated.rate) || 0);
 
           if (field === 'quantity' && isCrateUnit(updated.unit)) {
             updated.crateCount = q;
@@ -380,6 +408,14 @@ export const GroupSaleView: React.FC<GroupSaleViewProps> = ({
           // Exact Calculation: Weight > 0 ? Weight × Rate : Quantity × Rate (regardless of unit)
           updated.totalAmount = calculateWholesaleItemAmount(q, updated.unit, k, p);
 
+          const f = typeof updated.freight === 'number' ? updated.freight : Number(updated.freight) || 0;
+          const h = typeof updated.hamali === 'number' ? updated.hamali : Number(updated.hamali) || 0;
+          const o = typeof updated.othersExpense === 'number' ? updated.othersExpense : Number(updated.othersExpense) || 0;
+          updated.expenseTotal = Math.round((f + h + o) * 100) / 100;
+          updated.netTotal = Math.round((updated.totalAmount + updated.expenseTotal) * 100) / 100;
+        }
+
+        if (field === 'freight' || field === 'hamali' || field === 'othersExpense') {
           const f = typeof updated.freight === 'number' ? updated.freight : Number(updated.freight) || 0;
           const h = typeof updated.hamali === 'number' ? updated.hamali : Number(updated.hamali) || 0;
           const o = typeof updated.othersExpense === 'number' ? updated.othersExpense : Number(updated.othersExpense) || 0;
@@ -437,12 +473,9 @@ export const GroupSaleView: React.FC<GroupSaleViewProps> = ({
         // 3. Auto-fill Unit
         const newUnit = fruit.unit || fruit.defaultUnit || 'Crate';
         const isCrate = isCrateUnit(newUnit);
-        // 4. Auto-fill Crate Type (save exactly what was entered, e.g. 20kg or 10kg, or blank)
-        const ctName = fruit.crateType !== undefined ? fruit.crateType : (fruit.crateName || '');
-        const crateSize = isCrate ? getDefaultCrateSizeForFruit(fruit) : undefined;
-        // 5. Weight defaults to 0
+        // 4. Crate Type: automatically fetched from Fruit / Item Master (exact value or blank)
+        const fruitCrate = getFruitSavedCrateType(fruit);
         const currentKg = 0;
-
         const newAmount = calculateWholesaleItemAmount(currentQty, newUnit, currentKg, newRate);
 
         return {
@@ -452,9 +485,9 @@ export const GroupSaleView: React.FC<GroupSaleViewProps> = ({
           quantity: currentQty,
           unit: newUnit,
           kg: currentKg,
-          crateSize: crateSize,
-          crateName: ctName,
-          crateTypeId: ctName ? (crateTypes.find(c => c.name.toLowerCase().includes(ctName.toLowerCase()))?.id || fruit.crateTypeId || 'ct_20') : '',
+          crateSize: undefined,
+          crateName: fruitCrate,
+          crateTypeId: fruitCrate ? (fruit.crateTypeId || 'ct_20') : '',
           rate: newRate,
           totalAmount: newAmount,
           crateCount: isCrate ? currentQty : 0,
@@ -909,6 +942,10 @@ export const GroupSaleView: React.FC<GroupSaleViewProps> = ({
               onImportComplete={() => loadSalesForDate(selectedDate)}
             />
 
+            <span className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-300 dark:border-emerald-700 bg-emerald-50 dark:bg-emerald-950/40 px-3 py-2 text-xs font-bold text-emerald-800 dark:text-emerald-200 shadow-2xs">
+              Total Qty: <strong className="font-mono text-sm text-emerald-950 dark:text-white">{formatQuantity(summary.totalQuantity)}</strong>
+            </span>
+
             <button
               type="button"
               onClick={handleAddRow}
@@ -1227,8 +1264,9 @@ export const GroupSaleView: React.FC<GroupSaleViewProps> = ({
                       <td className="py-3 px-2 text-right">
                         <QuantityInput
                           step="any"
-                          min={0.01}
-                          value={row.quantity}
+                          min={0}
+                          placeholder="Qty"
+                          value={row.quantity === 0 ? '' : row.quantity}
                           onChange={(val) =>
                             handleRowFieldChange(row.rowId, 'quantity', val)
                           }
@@ -1242,11 +1280,14 @@ export const GroupSaleView: React.FC<GroupSaleViewProps> = ({
 
                       {/* 6. Unit */}
                       <td className="py-3 px-2">
-                        <UnitAutocomplete
-                          valueUnit={row.unit}
-                          onChange={(newUnit) =>
-                            handleRowFieldChange(row.rowId, 'unit', newUnit)
+                        <input
+                          type="text"
+                          placeholder="Unit"
+                          value={row.unit || ''}
+                          onChange={(e) =>
+                            handleRowFieldChange(row.rowId, 'unit', e.target.value)
                           }
+                          className="w-full rounded-lg px-2 py-1.5 text-xs text-center font-bold text-slate-900 dark:text-white outline-none border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:border-blue-500"
                         />
                       </td>
 
@@ -1256,7 +1297,7 @@ export const GroupSaleView: React.FC<GroupSaleViewProps> = ({
                           step="any"
                           min={0}
                           placeholder="0"
-                          value={row.kg === 0 ? '0' : row.kg}
+                          value={row.kg === 0 ? '' : row.kg}
                           onChange={(val) =>
                             handleRowFieldChange(row.rowId, 'kg', val)
                           }
@@ -1269,11 +1310,16 @@ export const GroupSaleView: React.FC<GroupSaleViewProps> = ({
                         <input
                           type="text"
                           list={`group-crate-types-${row.rowId}`}
-                          placeholder="e.g. 20kg"
+                          placeholder={row.fruitName ? "e.g. 20kg" : "-"}
+                          disabled={!row.fruitName}
                           value={row.crateName || ''}
                           onChange={(e) => handleRowFieldChange(row.rowId, 'crateName', e.target.value)}
-                          className="w-full rounded-lg px-1.5 py-1.5 text-xs font-bold text-center font-mono text-sky-800 dark:text-sky-300 outline-none border border-sky-300 bg-sky-50/60 dark:border-slate-700 dark:bg-slate-800 text-center"
-                          title="Crate Name is only a label for identification & balance tracking"
+                          className={`w-full rounded-lg px-1.5 py-1.5 text-xs font-bold text-center font-mono outline-none border ${
+                            !row.fruitName
+                              ? 'border-slate-200 bg-slate-100/70 text-slate-400 dark:border-slate-800 dark:bg-slate-800/40 cursor-not-allowed'
+                              : 'border-sky-300 bg-sky-50/60 text-sky-800 dark:border-slate-700 dark:bg-slate-800 dark:text-sky-300 focus:border-sky-500'
+                          }`}
+                          title={row.fruitName ? "Crate Name is only a label for identification & balance tracking" : "Select a fruit item first"}
                         />
                         <datalist id={`group-crate-types-${row.rowId}`}>
                           <option value="20kg" />
@@ -1289,7 +1335,7 @@ export const GroupSaleView: React.FC<GroupSaleViewProps> = ({
                           min={0}
                           step="any"
                           placeholder="0.00"
-                          value={row.rate}
+                          value={row.rate === 0 ? '' : row.rate}
                           onChange={(val) =>
                             handleRowFieldChange(
                               row.rowId,

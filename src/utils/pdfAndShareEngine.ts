@@ -127,7 +127,6 @@ export async function triggerPrint(
 
   const root = typeof document !== 'undefined' ? document.documentElement : null;
   const body = typeof document !== 'undefined' ? document.body : null;
-  const isDark = Boolean(root?.classList.contains('dark') || body?.classList.contains('dark'));
 
   const isSinglePage =
     !targetElementId ||
@@ -142,13 +141,12 @@ export async function triggerPrint(
     body.classList.add('print-single-page-bill');
   }
 
-  // Temporarily switch DOM to light mode during browser print/preview
-  // so all computed styles, borders, text, and canvas elements render with pure white background and black text
-  if (isDark && root && body) {
-    root.classList.remove('dark');
-    body.classList.remove('dark');
-    root.setAttribute('data-theme', 'light');
-    root.style.colorScheme = 'light';
+  // Ensure target element is mounted and visible
+  if (targetElementId && typeof document !== 'undefined') {
+    const el = document.getElementById(targetElementId);
+    if (el) {
+      el.scrollIntoView?.({ block: 'start' });
+    }
   }
 
   let cleanedUp = false;
@@ -159,16 +157,11 @@ export async function triggerPrint(
       body.removeAttribute('data-print-target');
       body.classList.remove('print-single-page-bill');
     }
-    if (isDark && root && body) {
-      root.classList.add('dark');
-      body.classList.add('dark');
-      root.setAttribute('data-theme', 'dark');
-      root.style.colorScheme = 'dark';
-    }
     window.removeEventListener('afterprint', cleanup);
   };
 
-  window.addEventListener('afterprint', cleanup);
+  // Only run cleanup after the browser print dialog has actually finished / dismissed
+  window.addEventListener('afterprint', cleanup, { once: true });
 
   if (typeof document !== 'undefined' && document.fonts) {
     try {
@@ -178,10 +171,14 @@ export async function triggerPrint(
     }
   }
 
+  // Allow browser layout engine to paint DOM changes before opening print dialog
+  await new Promise((resolve) => setTimeout(resolve, 60));
+
   window.print();
 
-  // Safety fallback: ensure cleanup runs even if afterprint is cancelled or missed in embedded iframes
-  setTimeout(cleanup, 1500);
+  // Safety fallback: only run cleanup after 60 seconds in case afterprint does not fire in an embedded iframe.
+  // Never run a short 1500ms timeout which fires right while Chrome preview is rendering!
+  setTimeout(cleanup, 60000);
 }
 
 export interface ShareOptions {

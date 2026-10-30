@@ -70,8 +70,17 @@ export const ChooseBillPrintFormatModal: React.FC<ChooseBillPrintFormatModalProp
       setIsPrinting(true);
       setErrorMessage(null);
       saveLastSelectedPaperSize(selectedSize);
-      await triggerPrint(selectedSize, elementId);
+      onPaperSizeChange?.(selectedSize);
+
+      // Close the format selection modal FIRST so it completely unmounts from the DOM
+      // and CANNOT be printed or cause any blank page
       onClose();
+
+      // Give React a small tick to unmount the modal from DOM
+      await new Promise((resolve) => setTimeout(resolve, 80));
+
+      // Now invoke print on the target bill element with the selected paper size
+      await triggerPrint(selectedSize, elementId);
     } catch (err: any) {
       console.error('Print trigger failed:', err);
       setErrorMessage(err.message || 'Unable to open print dialogue. Please try again.');
@@ -87,6 +96,7 @@ export const ChooseBillPrintFormatModal: React.FC<ChooseBillPrintFormatModalProp
       setErrorMessage(null);
       setDownloadSuccess(false);
       saveLastSelectedPaperSize(selectedSize);
+      onPaperSizeChange?.(selectedSize);
 
       const res = await downloadPdfFromElement(elementId, filename, selectedSize);
       if (res.success) {
@@ -107,12 +117,12 @@ export const ChooseBillPrintFormatModal: React.FC<ChooseBillPrintFormatModalProp
   };
 
   const currentSpec = PAPER_SIZE_SPECS[selectedSize];
-  const sizeKeys: BillPaperSize[] = ['compact', 'a4', 'a5', 'b6', 'b7'];
+  const sizeKeys: BillPaperSize[] = ['compact', 'b7', 'b6', 'a5', 'a4'];
 
   return (
-    <div className="fixed inset-0 z-60 flex items-center justify-center bg-slate-900/70 p-2 sm:p-4 backdrop-blur-xs overflow-hidden no-print">
+    <div className="fixed inset-0 z-60 flex items-center justify-center bg-slate-900/70 p-2 sm:p-4 backdrop-blur-xs overflow-hidden no-print print:hidden">
       <div
-        className="flex flex-col w-full max-w-lg max-h-[90vh] max-h-[90dvh] rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-800 dark:bg-slate-900 overflow-hidden animate-in fade-in zoom-in-95 duration-150"
+        className="flex flex-col w-full max-w-lg max-h-[90vh] max-h-[90dvh] rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-800 dark:bg-slate-900 overflow-hidden animate-in fade-in zoom-in-95 duration-150 no-print print:hidden"
         role="dialog"
         aria-labelledby="choose-bill-print-format-title"
       >

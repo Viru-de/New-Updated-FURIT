@@ -439,22 +439,16 @@ input.no-spinners {
 #mandi-print-area,
 #receipt-print-area,
 #group-sale-print-summary,
-#ledger-print-area,
-#sale-proceeds-print-area,
 #crate-statement-print-area,
 #report-print-area,
 .print-bill-canvas,
-.erp-print-area,
 [data-theme-isolated="true"],
 .dark #mandi-print-area,
 .dark #receipt-print-area,
 .dark #group-sale-print-summary,
-.dark #ledger-print-area,
-.dark #sale-proceeds-print-area,
 .dark #crate-statement-print-area,
 .dark #report-print-area,
 .dark .print-bill-canvas,
-.dark .erp-print-area,
 .dark [data-theme-isolated="true"] {
   background-color: #ffffff !important;
   background: #ffffff !important;
@@ -468,22 +462,16 @@ input.no-spinners {
 #mandi-print-area div,
 #receipt-print-area div,
 #group-sale-print-summary div,
-#ledger-print-area div,
-#sale-proceeds-print-area div,
 #crate-statement-print-area div,
 #report-print-area div,
 .print-bill-canvas div,
-.erp-print-area div,
 [data-theme-isolated="true"] div,
 .dark #mandi-print-area div,
 .dark #receipt-print-area div,
 .dark #group-sale-print-summary div,
-.dark #ledger-print-area div,
-.dark #sale-proceeds-print-area div,
 .dark #crate-statement-print-area div,
 .dark #report-print-area div,
 .dark .print-bill-canvas div,
-.dark .erp-print-area div,
 .dark [data-theme-isolated="true"] div {
   color: #0f172a;
 }
@@ -492,12 +480,10 @@ input.no-spinners {
 #mandi-print-area div.bg-white,
 #receipt-print-area div.bg-white,
 .print-bill-canvas div.bg-white,
-.erp-print-area div.bg-white,
 [data-theme-isolated="true"] div.bg-white,
 .dark #mandi-print-area div.bg-white,
 .dark #receipt-print-area div.bg-white,
 .dark .print-bill-canvas div.bg-white,
-.dark .erp-print-area div.bg-white,
 .dark [data-theme-isolated="true"] div.bg-white {
   background-color: #ffffff !important;
 }
@@ -506,12 +492,10 @@ input.no-spinners {
 #mandi-print-area .bg-slate-50,
 #receipt-print-area .bg-slate-50,
 .print-bill-canvas .bg-slate-50,
-.erp-print-area .bg-slate-50,
 [data-theme-isolated="true"] .bg-slate-50,
 .dark #mandi-print-area .bg-slate-50,
 .dark #receipt-print-area .bg-slate-50,
 .dark .print-bill-canvas .bg-slate-50,
-.dark .erp-print-area .bg-slate-50,
 .dark [data-theme-isolated="true"] .bg-slate-50,
 #mandi-print-area .bg-slate-50\/50,
 #receipt-print-area .bg-slate-50\/50,
@@ -523,12 +507,10 @@ input.no-spinners {
 #mandi-print-area .bg-slate-100,
 #receipt-print-area .bg-slate-100,
 .print-bill-canvas .bg-slate-100,
-.erp-print-area .bg-slate-100,
 [data-theme-isolated="true"] .bg-slate-100,
 .dark #mandi-print-area .bg-slate-100,
 .dark #receipt-print-area .bg-slate-100,
 .dark .print-bill-canvas .bg-slate-100,
-.dark .erp-print-area .bg-slate-100,
 .dark [data-theme-isolated="true"] .bg-slate-100 {
   background-color: #f1f5f9 !important;
 }
@@ -537,22 +519,16 @@ input.no-spinners {
 #mandi-print-area table,
 #receipt-print-area table,
 #group-sale-print-summary table,
-#ledger-print-area table,
-#sale-proceeds-print-area table,
 #crate-statement-print-area table,
 #report-print-area table,
 .print-bill-canvas table,
-.erp-print-area table,
 [data-theme-isolated="true"] table,
 .dark #mandi-print-area table,
 .dark #receipt-print-area table,
 .dark #group-sale-print-summary table,
-.dark #ledger-print-area table,
-.dark #sale-proceeds-print-area table,
 .dark #crate-statement-print-area table,
 .dark #report-print-area table,
 .dark .print-bill-canvas table,
-.dark .erp-print-area table,
 .dark [data-theme-isolated="true"] table {
   background-color: #ffffff !important;
   color: #0f172a !important;
@@ -563,39 +539,27 @@ input.no-spinners {
 #mandi-print-area table thead tr,
 #receipt-print-area table thead tr,
 #group-sale-print-summary table thead tr,
-#ledger-print-area table thead tr,
-#sale-proceeds-print-area table thead tr,
 #crate-statement-print-area table thead tr,
 #report-print-area table thead tr,
 .print-bill-canvas table thead tr,
-.erp-print-area table thead tr,
 .dark #mandi-print-area table thead tr,
 .dark #receipt-print-area table thead tr,
 .dark #group-sale-print-summary table thead tr,
-.dark #ledger-print-area table thead tr,
-.dark #sale-proceeds-print-area table thead tr,
 .dark #crate-statement-print-area table thead tr,
 .dark #report-print-area table thead tr,
 .dark .print-bill-canvas table thead tr,
-.dark .erp-print-area table thead tr,
 #mandi-print-area table thead th,
 #receipt-print-area table thead th,
 #group-sale-print-summary table thead th,
-#ledger-print-area table thead th,
-#sale-proceeds-print-area table thead th,
 #crate-statement-print-area table thead th,
 #report-print-area table thead th,
 .print-bill-canvas table thead th,
-.erp-print-area table thead th,
 .dark #mandi-print-area table thead th,
 .dark #receipt-print-area table thead th,
 .dark #group-sale-print-summary table thead th,
-.dark #ledger-print-area table thead th,
-.dark #sale-proceeds-print-area table thead th,
 .dark #crate-statement-print-area table thead th,
 .dark #report-print-area table thead th,
-.dark .print-bill-canvas table thead th,
-.dark .erp-print-area table thead th {
+.dark .print-bill-canvas table thead th {
   background-color: #f8fafc !important;
   color: #0f172a !important;
   font-weight: 700 !important;
@@ -605,39 +569,27 @@ input.no-spinners {
 #mandi-print-area table tbody tr,
 #receipt-print-area table tbody tr,
 #group-sale-print-summary table tbody tr,
-#ledger-print-area table tbody tr,
-#sale-proceeds-print-area table tbody tr,
 #crate-statement-print-area table tbody tr,
 #report-print-area table tbody tr,
 .print-bill-canvas table tbody tr,
-.erp-print-area table tbody tr,
 .dark #mandi-print-area table tbody tr,
 .dark #receipt-print-area table tbody tr,
 .dark #group-sale-print-summary table tbody tr,
-.dark #ledger-print-area table tbody tr,
-.dark #sale-proceeds-print-area table tbody tr,
 .dark #crate-statement-print-area table tbody tr,
 .dark #report-print-area table tbody tr,
 .dark .print-bill-canvas table tbody tr,
-.dark .erp-print-area table tbody tr,
 #mandi-print-area table tbody td,
 #receipt-print-area table tbody td,
 #group-sale-print-summary table tbody td,
-#ledger-print-area table tbody td,
-#sale-proceeds-print-area table tbody td,
 #crate-statement-print-area table tbody td,
 #report-print-area table tbody td,
 .print-bill-canvas table tbody td,
-.erp-print-area table tbody td,
 .dark #mandi-print-area table tbody td,
 .dark #receipt-print-area table tbody td,
 .dark #group-sale-print-summary table tbody td,
-.dark #ledger-print-area table tbody td,
-.dark #sale-proceeds-print-area table tbody td,
 .dark #crate-statement-print-area table tbody td,
 .dark #report-print-area table tbody td,
-.dark .print-bill-canvas table tbody td,
-.dark .erp-print-area table tbody td {
+.dark .print-bill-canvas table tbody td {
   background-color: #ffffff !important;
   color: #0f172a !important;
 }
@@ -655,39 +607,27 @@ input.no-spinners {
 #mandi-print-area table tfoot tr,
 #receipt-print-area table tfoot tr,
 #group-sale-print-summary table tfoot tr,
-#ledger-print-area table tfoot tr,
-#sale-proceeds-print-area table tfoot tr,
 #crate-statement-print-area table tfoot tr,
 #report-print-area table tfoot tr,
 .print-bill-canvas table tfoot tr,
-.erp-print-area table tfoot tr,
 .dark #mandi-print-area table tfoot tr,
 .dark #receipt-print-area table tfoot tr,
 .dark #group-sale-print-summary table tfoot tr,
-.dark #ledger-print-area table tfoot tr,
-.dark #sale-proceeds-print-area table tfoot tr,
 .dark #crate-statement-print-area table tfoot tr,
 .dark #report-print-area table tfoot tr,
 .dark .print-bill-canvas table tfoot tr,
-.dark .erp-print-area table tfoot tr,
 #mandi-print-area table tfoot td,
 #receipt-print-area table tfoot td,
 #group-sale-print-summary table tfoot td,
-#ledger-print-area table tfoot td,
-#sale-proceeds-print-area table tfoot td,
 #crate-statement-print-area table tfoot td,
 #report-print-area table tfoot td,
 .print-bill-canvas table tfoot td,
-.erp-print-area table tfoot td,
 .dark #mandi-print-area table tfoot td,
 .dark #receipt-print-area table tfoot td,
 .dark #group-sale-print-summary table tfoot td,
-.dark #ledger-print-area table tfoot td,
-.dark #sale-proceeds-print-area table tfoot td,
 .dark #crate-statement-print-area table tfoot td,
 .dark #report-print-area table tfoot td,
-.dark .print-bill-canvas table tfoot td,
-.dark .erp-print-area table tfoot td {
+.dark .print-bill-canvas table tfoot td {
   background-color: #f8fafc !important;
   color: #0f172a !important;
 }
@@ -864,7 +804,7 @@ input.no-spinners {
   @page {
     margin: 4mm;
   }
-  html, body, html.dark, body.dark, .dark, [data-theme="dark"] {
+  html, body, html.dark, body.dark, .dark, [data-theme="dark"], #root {
     background-color: #ffffff !important;
     background: #ffffff !important;
     color: #000000 !important;
@@ -873,10 +813,14 @@ input.no-spinners {
     print-color-adjust: exact !important;
     margin: 0 !important;
     padding: 0 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
   }
 
   /* Hide all non-printable application shell elements:
-     Navigation bars, headers, sidebars, buttons, toolbars, search modals, Excel export bars */
+     Navigation bars, headers, sidebars, buttons, toolbars, search modals, format modals, Excel export bars */
   nav,
   header,
   aside,
@@ -884,12 +828,17 @@ input.no-spinners {
   button,
   .no-print,
   [class*="no-print"],
-  .neu-header {
+  .fixed.inset-0.no-print,
+  .fixed.inset-0.print\:hidden,
+  .no-print *,
+  .neu-header,
+  [aria-modal="true"].no-print,
+  [role="dialog"].no-print {
     display: none !important;
   }
 
-  /* Unconstrain modals so they flow from top without backdrop or scrolling clipping */
-  .fixed.inset-0 {
+  /* Unconstrain active print preview modals so they flow naturally without scroll clipping or collapsed heights */
+  .fixed.inset-0:not(.no-print):not(.print\:hidden) {
     position: static !important;
     background: transparent !important;
     padding: 0 !important;
@@ -899,9 +848,12 @@ input.no-spinners {
     box-shadow: none !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
   }
 
-  .fixed.inset-0 > div {
+  .fixed.inset-0:not(.no-print):not(.print\:hidden) > div {
     max-height: none !important;
     max-width: 100% !important;
     width: 100% !important;
@@ -911,6 +863,23 @@ input.no-spinners {
     padding: 0 !important;
     margin: 0 !important;
     overflow: visible !important;
+    height: auto !important;
+    min-height: 0 !important;
+    display: block !important;
+  }
+
+  /* Unconstrain all inner modal wrappers, flex containers, and scroll areas */
+  .fixed.inset-0:not(.no-print):not(.print\:hidden) [class*="overflow-"],
+  .fixed.inset-0:not(.no-print):not(.print\:hidden) .flex-1,
+  .fixed.inset-0:not(.no-print):not(.print\:hidden) .min-h-0 {
+    flex: none !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+    display: block !important;
+    background: transparent !important;
+    padding: 0 !important;
   }
 
   /* Reset layout containers */
@@ -919,44 +888,36 @@ input.no-spinners {
     margin: 0 !important;
     max-width: 100% !important;
     width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
   }
   main > div {
     margin: 0 !important;
     padding: 0 !important;
     gap: 0 !important;
+    height: auto !important;
+    min-height: 0 !important;
   }
 
-  /* =========================================================================
-     SINGLE-PAGE BILL GUARANTEE (Mandi Invoices, Cash Sales, Credit Sales, Proceeds, Receipts)
-     Prevents any preceding or background page content from pushing the bill to page 2,
-     and enforces strict 1-page viewport bounds so NO trailing blank page is printed.
-     ========================================================================= */
-  body.print-single-page-bill,
-  body:has(#mandi-print-area),
-  body:has(#receipt-print-area),
-  body:has(#sale-proceeds-print-area),
-  body[data-print-target="mandi-print-area"],
-  body[data-print-target="receipt-print-area"],
-  body[data-print-target="sale-proceeds-print-area"] {
-    height: 100% !important;
-    max-height: 100% !important;
-    overflow: hidden !important;
-  }
-
-  /* Completely collapse all elements in main that don't contain the bill canvas */
-  body:has(#mandi-print-area) main > div > *:not(:has(#mandi-print-area)),
-  body:has(#receipt-print-area) main > div > *:not(:has(#receipt-print-area)),
-  body:has(#sale-proceeds-print-area) main > div > *:not(:has(#sale-proceeds-print-area)),
+  /* Target isolation when printing specific documents via data-print-target */
   body[data-print-target="mandi-print-area"] main > div > *:not(:has(#mandi-print-area)),
   body[data-print-target="receipt-print-area"] main > div > *:not(:has(#receipt-print-area)),
-  body[data-print-target="sale-proceeds-print-area"] main > div > *:not(:has(#sale-proceeds-print-area)) {
+  body[data-print-target="sale-proceeds-print-area"] main > div > *:not(:has(#sale-proceeds-print-area)),
+  body[data-print-target="ledger-print-area"] main > div > *:not(:has(#ledger-print-area)),
+  body[data-print-target="group-sale-print-summary"] main > div > *:not(:has(#group-sale-print-summary)),
+  body[data-print-target="crate-statement-print-area"] main > div > *:not(:has(#crate-statement-print-area)),
+  body[data-print-target="report-print-area"] main > div > *:not(:has(#report-print-area)) {
     display: none !important;
   }
 
-  /* Single-page bill canvases: exactly 1 page, centered, no margin/padding push */
+  /* Single-page bill canvases: centered, visible, no margins or scroll pushes */
   #mandi-print-area,
   #receipt-print-area,
   #sale-proceeds-print-area {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
     position: relative !important;
     left: 0 !important;
     top: 0 !important;
@@ -973,8 +934,6 @@ input.no-spinners {
     break-before: avoid !important;
     page-break-after: avoid !important;
     break-after: avoid !important;
-    page-break-inside: avoid !important;
-    break-inside: avoid !important;
   }
 
   /* Ensure print header blocks are always displayed */

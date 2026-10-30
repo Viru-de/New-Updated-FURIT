@@ -8,7 +8,7 @@ import {
   getAvailableCrateSizes,
   getDefaultCrateSizeForFruit,
 } from '../../utils/crateUtils';
-import { getFruitEffectivePrice } from '../../utils/fruitUtils';
+import { getFruitEffectivePrice, getFruitSavedCrateType } from '../../utils/fruitUtils';
 import {
   calculateLineKg,
   calculateLineAmount,
@@ -46,15 +46,13 @@ interface SaleCrateRow {
   outQuantity: number | '';
   inQuantity: number | '';
 }
-
-const COMMON_UNITS = ['Crate', 'Box', 'Peti', 'DABBA', 'Packet', 'Bag', 'KG', 'Nag', 'Piece'];
-
 interface CashSaleModalProps {
   isOpen: boolean;
   onClose: () => void;
   editItem?: CashSale | null;
   onSaved: (item: CashSale) => void;
   preselectedCustomerId?: string;
+  onSaveAndPrint?: (item: CashSale) => void;
 }
 
 export const CashSaleModal: React.FC<CashSaleModalProps> = ({
@@ -63,6 +61,7 @@ export const CashSaleModal: React.FC<CashSaleModalProps> = ({
   editItem,
   onSaved,
   preselectedCustomerId,
+  onSaveAndPrint,
 }) => {
   const customers = db.getCustomers();
   const fruits = db.getFruits();
@@ -79,16 +78,6 @@ export const CashSaleModal: React.FC<CashSaleModalProps> = ({
     { id: 'cse-1', name: 'Hamali', amount: 50 },
   ]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const allUnitOptions = useMemo(() => {
-    const set = new Set<string>();
-    COMMON_UNITS.forEach((u) => set.add(u));
-    units.forEach((u) => set.add(u.symbol));
-    items.forEach((it) => {
-      if (it.unit) set.add(it.unit);
-    });
-    return Array.from(set);
-  }, [units, items]);
 
   // Manual final amount adjustment option
   const [isManualAmountOverridden, setIsManualAmountOverridden] = useState(false);
@@ -108,8 +97,8 @@ export const CashSaleModal: React.FC<CashSaleModalProps> = ({
         const ctMatch = crateTypes.find((c) => c.id === it.crateTypeId || c.name.toLowerCase().includes(String(it.crateName || '').toLowerCase()));
         return {
           ...it,
-          crateTypeId: it.crateTypeId || ctMatch?.id || 'ct_20',
-          crateName: it.crateName || (ctMatch ? ctMatch.name.replace(/\s*crate$/i, '').trim() : '20kg'),
+          crateTypeId: it.crateTypeId || (it.crateName && ctMatch ? ctMatch.id : ''),
+          crateName: it.crateName !== undefined ? it.crateName : (ctMatch ? ctMatch.name.replace(/\s*crate$/i, '').trim() : ''),
           amount: it.amount !== undefined ? it.amount : calculateWholesaleItemAmount(it.quantity, it.unit, it.kg, it.rate),
         };
       });
@@ -139,8 +128,8 @@ export const CashSaleModal: React.FC<CashSaleModalProps> = ({
           fruitName: '',
           quantity: 1,
           unit: 'Crate',
-          crateTypeId: ct20?.id || 'ct_20',
-          crateName: ct20 ? ct20.name.replace(/\s*crate$/i, '').trim() : '20kg',
+          crateTypeId: '',
+          crateName: '',
           rate: 0,
           amount: 0,
         },
@@ -166,12 +155,10 @@ export const CashSaleModal: React.FC<CashSaleModalProps> = ({
     // 2. Auto-fill Rate
     const r = getFruitEffectivePrice(f);
     current.rate = typeof r === 'number' && !isNaN(r) ? r : (f.defaultRate || 1);
-    // 3. Auto-fill Crate Type (save exactly what was entered, e.g. 20kg or 10kg, or blank)
-    const ctName = f.crateType !== undefined ? f.crateType : (f.crateName || '');
-    current.crateName = ctName;
-    current.crateTypeId = ctName
-      ? (crateTypes.find((c) => c.name.toLowerCase().includes(ctName.toLowerCase()))?.id || f.crateTypeId || 'ct_20')
-      : '';
+    // 3. Crate Type: automatically fetched from Fruit / Item Master (exact value or blank)
+    const fruitCrateType = getFruitSavedCrateType(f);
+    current.crateName = fruitCrateType;
+    current.crateTypeId = fruitCrateType ? (f.crateTypeId || 'ct_20') : '';
     // 4. Qty defaults to 1 but remains editable
     current.quantity = 1;
     // 5. Weight defaults to 0
@@ -196,47 +183,72 @@ export const CashSaleModal: React.FC<CashSaleModalProps> = ({
         // 2. Auto-fill Rate
         const r = getFruitEffectivePrice(fr);
         current.rate = typeof r === 'number' && !isNaN(r) ? r : (fr.defaultRate || 1);
-        // 3. Auto-fill Crate Type (save exactly what was entered, e.g. 20kg or 10kg, or blank)
-        const ctName = fr.crateType !== undefined ? fr.crateType : (fr.crateName || '');
-        current.crateName = ctName;
-        current.crateTypeId = ctName ? (crateTypes.find(c => c.name.toLowerCase().includes(ctName.toLowerCase()))?.id || fr.crateTypeId || 'ct_20') : '';
+        // 3. Crate Type: automatically fetched from Fruit / Item Master
+        const fruitCrateType = getFruitSavedCrateType(fr);
+        current.crateName = fruitCrateType;
+        current.crateTypeId = fruitCrateType ? (fr.crateTypeId || 'ct_20') : '';
         // 4. Qty defaults to 1 but remains editable
         current.quantity = 1;
         // 5. Weight defaults to 0
         current.kg = 0;
+      } else {
+        current.fruitId = '';
+        current.crateName = '';
+        current.crateTypeId = '';
       }
     } else if (field === 'fruitName') {
       current.fruitName = val;
+      const fr = fruits.find((f) => f.name.toLowerCase() === String(val).toLowerCase());
+      if (fr) {
+        current.fruitId = fr.id;
+        const fruitCrateType = getFruitSavedCrateType(fr);
+        current.crateName = fruitCrateType;
+        current.crateTypeId = fruitCrateType ? (fr.crateTypeId || 'ct_20') : '';
+      } else {
+        current.fruitId = '';
+        current.crateName = '';
+        current.crateTypeId = '';
+      }
     } else if (field === 'unit') {
-      const nextUnit = String(val).trim();
+      const nextUnit = String(val);
       current.unit = nextUnit;
     } else if (field === 'crateTypeId') {
       current.crateTypeId = val;
       const ct = crateTypes.find((c) => c.id === val);
-      current.crateName = ct ? ct.name.replace(/\s*crate$/i, '').trim() : '20kg';
+      current.crateName = ct ? ct.name.replace(/\s*crate$/i, '').trim() : '';
     } else if (field === 'crateName') {
       current.crateName = val;
+      if (val) {
+        const ct = crateTypes.find((c) => c.name.toLowerCase().includes(String(val).toLowerCase()));
+        current.crateTypeId = ct ? ct.id : '';
+      } else {
+        current.crateTypeId = '';
+      }
     } else if (field === 'quantity') {
-      const q = val === '' ? 0 : Number(val);
-      current.quantity = isNaN(q) ? 0 : q;
+      const q = val === '' ? '' : Number(val);
+      current.quantity = (q === '' || isNaN(q as number)) ? (val === '' ? '' : 0) as any : q;
     } else if (field === 'kg') {
-      const k = val === '' ? 0 : Number(val);
-      current.kg = isNaN(k) ? 0 : k;
+      const k = val === '' ? '' : Number(val);
+      current.kg = (k === '' || isNaN(k as number)) ? (val === '' ? '' : 0) as any : k;
     } else if (field === 'rate') {
-      const r = val === '' ? 0 : Number(val);
-      current.rate = isNaN(r) ? 0 : r;
+      const r = val === '' ? '' : Number(val);
+      current.rate = (r === '' || isNaN(r as number)) ? (val === '' ? '' : 0) as any : r;
     } else if (field === 'crateSize') {
       current.crateSize = val;
     }
+
+    const qNum = (current.quantity as any) === '' ? 0 : (Number(current.quantity) || 0);
+    const kNum = (current.kg as any) === '' ? 0 : (Number(current.kg) || 0);
+    const rNum = (current.rate as any) === '' ? 0 : (Number(current.rate) || 0);
 
     // Live calculation:
     // For crate items: Amount = Qty × Rate (Crate Name 20kg or 10kg is only a label for identification & balance tracking)
     // For non-crate items: Amount = Kg × Rate if Kg > 0, else Qty × Rate
     current.amount = calculateWholesaleItemAmount(
-      current.quantity,
+      qNum,
       current.unit,
-      current.kg,
-      current.rate
+      kNum,
+      rNum
     );
 
     updated[index] = current;
@@ -244,8 +256,6 @@ export const CashSaleModal: React.FC<CashSaleModalProps> = ({
   };
 
   const handleAddItem = () => {
-    const ct20 = crateTypes.find((c) => c.name.includes('20')) || crateTypes[0];
-
     setItems([
       ...items,
       {
@@ -254,8 +264,8 @@ export const CashSaleModal: React.FC<CashSaleModalProps> = ({
         fruitName: '',
         quantity: 1,
         unit: 'Crate',
-        crateTypeId: ct20?.id || 'ct_20',
-        crateName: ct20 ? ct20.name.replace(/\s*crate$/i, '').trim() : '20kg',
+        crateTypeId: '',
+        crateName: '',
         kg: 0,
         rate: 0,
         amount: 0,
@@ -349,6 +359,9 @@ export const CashSaleModal: React.FC<CashSaleModalProps> = ({
 
   // Calculations
   const productTotal = items.reduce((sum, it) => sum + (Number(it.amount) || 0), 0);
+  const totalQty = useMemo(() => {
+    return Math.round(items.reduce((sum, it) => sum + (Number(it.quantity) || 0), 0) * 1000) / 1000;
+  }, [items]);
   const expenseTotal = expenses.reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
   const totalAmount = productTotal + expenseTotal;
   const finalAmount = isManualAmountOverridden && manualAmount !== ''
@@ -563,7 +576,10 @@ export const CashSaleModal: React.FC<CashSaleModalProps> = ({
                       Exact column layout: No., Item Name, Qty, Unit, Crate Type, Rate, Amount
                     </p>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-300 bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300">
+                      Total Qty: <strong className="font-mono text-emerald-900 dark:text-emerald-200">{totalQty}</strong>
+                    </span>
                     <button
                       type="button"
                       onClick={() => setIsAddFruitOpen(true)}
@@ -616,6 +632,8 @@ export const CashSaleModal: React.FC<CashSaleModalProps> = ({
                                   } else {
                                     handleItemChange(idx, 'fruitId', '');
                                     handleItemChange(idx, 'fruitName', customName || '');
+                                    handleItemChange(idx, 'crateName', '');
+                                    handleItemChange(idx, 'crateTypeId', '');
                                   }
                                 }}
                                 placeholder="Search fruit / item..."
@@ -638,17 +656,11 @@ export const CashSaleModal: React.FC<CashSaleModalProps> = ({
                             <td className="py-2 px-2 text-center">
                               <input
                                 type="text"
-                                list={`cash-units-${idx}`}
-                                value={it.unit}
+                                value={it.unit || ''}
                                 onChange={(e) => handleItemChange(idx, 'unit', e.target.value)}
                                 className="w-full rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-xs text-center font-semibold text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                                 placeholder="Unit"
                               />
-                              <datalist id={`cash-units-${idx}`}>
-                                {allUnitOptions.map((u) => (
-                                  <option key={u} value={u} />
-                                ))}
-                              </datalist>
                             </td>
 
                             {/* 5. Weight */}
@@ -657,7 +669,7 @@ export const CashSaleModal: React.FC<CashSaleModalProps> = ({
                                 min={0}
                                 step="any"
                                 placeholder="0"
-                                value={it.kg === 0 ? '0' : (it.kg || '0')}
+                                value={it.kg === 0 ? '' : it.kg}
                                 onChange={(val) => handleItemChange(idx, 'kg', val)}
                                 className="w-full rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-xs text-right font-mono outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800"
                               />
@@ -668,11 +680,16 @@ export const CashSaleModal: React.FC<CashSaleModalProps> = ({
                               <input
                                 type="text"
                                 list={`cash-crate-types-${idx}`}
-                                placeholder="e.g. 20kg"
+                                placeholder={it.fruitName ? "e.g. 20kg" : "-"}
+                                disabled={!it.fruitName}
                                 value={it.crateName || ''}
                                 onChange={(e) => handleItemChange(idx, 'crateName', e.target.value)}
-                                className="w-full rounded-lg border border-sky-300 bg-sky-50/60 dark:bg-slate-800 px-2 py-1.5 text-xs font-bold text-sky-800 dark:text-sky-300 outline-none focus:border-sky-500 dark:border-slate-700 text-center"
-                                title="Crate Name is only a label for identification & balance tracking"
+                                className={`w-full rounded-lg border px-2 py-1.5 text-xs font-bold text-center outline-none ${
+                                  !it.fruitName
+                                    ? 'border-slate-200 bg-slate-100/70 text-slate-400 dark:border-slate-800 dark:bg-slate-800/40 cursor-not-allowed'
+                                    : 'border-sky-300 bg-sky-50/60 text-sky-800 dark:bg-slate-800 dark:text-sky-300 focus:border-sky-500 dark:border-slate-700'
+                                }`}
+                                title={it.fruitName ? "Crate Name is only a label for identification & balance tracking" : "Select a fruit item first"}
                               />
                               <datalist id={`cash-crate-types-${idx}`}>
                                 <option value="20kg" />
@@ -715,6 +732,23 @@ export const CashSaleModal: React.FC<CashSaleModalProps> = ({
                         );
                       })}
                   </tbody>
+                  <tfoot>
+                    <tr className="border-t-2 border-slate-200 bg-slate-50/80 font-bold dark:border-slate-800 dark:bg-slate-800/60">
+                      <td colSpan={2} className="py-2.5 px-2 text-right text-xs uppercase tracking-wider text-slate-600 dark:text-slate-300">
+                        Total Qty:
+                      </td>
+                      <td className="py-2.5 px-2 text-right font-mono text-xs font-bold text-emerald-700 dark:text-emerald-400">
+                        {totalQty}
+                      </td>
+                      <td colSpan={4} className="py-2.5 px-2 text-right text-xs uppercase tracking-wider text-slate-600 dark:text-slate-300">
+                        Items Subtotal:
+                      </td>
+                      <td className="py-2.5 px-2 text-right font-mono text-xs font-bold text-slate-900 dark:text-white">
+                        {formatCurrency(productTotal)}
+                      </td>
+                      <td></td>
+                    </tr>
+                  </tfoot>
                 </table>
               </div>
 

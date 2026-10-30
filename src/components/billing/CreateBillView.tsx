@@ -158,23 +158,38 @@ export const CreateBillView: React.FC<CreateBillViewProps> = ({
   // Item manipulations
   const handleItemChange = (index: number, field: keyof BillItem, val: any) => {
     const updated = [...items];
-    const current = { ...updated[index], [field]: val };
+    const current = { ...updated[index] };
+
     if (field === 'fruitId') {
+      current.fruitId = val;
       const f = fruits.find((fr) => fr.id === val);
       if (f) {
         current.fruitName = f.name;
         current.unit = f.defaultUnit || 'Crate';
         current.rate = getFruitEffectivePrice(f);
-        current.amount = calculateWholesaleItemAmount(current.quantity || 1, current.unit, current.kg, current.rate);
       }
     } else if (field === 'fruitName') {
       current.fruitName = val;
-    } else if (field === 'quantity' || field === 'rate' || field === 'unit' || field === 'kg') {
-      const q = field === 'quantity' ? (val === '' ? 0 : Number(val)) : current.quantity;
-      const r = field === 'rate' ? (val === '' ? 0 : Number(val)) : current.rate;
-      const k = field === 'kg' ? (val === '' ? 0 : Number(val)) : current.kg;
-      current.amount = calculateWholesaleItemAmount(q, current.unit, k, r);
+    } else if (field === 'quantity') {
+      const q = val === '' ? '' : Number(val);
+      current.quantity = (q === '' || isNaN(q as number)) ? (val === '' ? '' : 0) as any : q;
+    } else if (field === 'unit') {
+      current.unit = String(val);
+    } else if (field === 'rate') {
+      const r = val === '' ? '' : Number(val);
+      current.rate = (r === '' || isNaN(r as number)) ? (val === '' ? '' : 0) as any : r;
+    } else if (field === 'kg') {
+      const k = val === '' ? '' : Number(val);
+      current.kg = (k === '' || isNaN(k as number)) ? (val === '' ? '' : 0) as any : k;
+    } else {
+      (current as any)[field] = val;
     }
+
+    const qNum = (current.quantity as any) === '' ? 0 : (Number(current.quantity) || 0);
+    const rNum = (current.rate as any) === '' ? 0 : (Number(current.rate) || 0);
+    const kNum = (current.kg as any) === '' ? 0 : (Number(current.kg) || 0);
+    current.amount = calculateWholesaleItemAmount(qNum, current.unit, kNum, rNum);
+
     updated[index] = current;
     setItems(updated);
   };
@@ -221,6 +236,7 @@ export const CreateBillView: React.FC<CreateBillViewProps> = ({
 
   // Totals
   const subtotal = items.reduce((sum, it) => sum + (Number(it.amount) || 0), 0);
+  const totalQty = Math.round(items.reduce((sum, it) => sum + (Number(it.quantity) || 0), 0) * 1000) / 1000;
   const expenseTotal = expenses.reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
   const totalAmount = subtotal + expenseTotal;
 
@@ -425,10 +441,15 @@ export const CreateBillView: React.FC<CreateBillViewProps> = ({
 
         {/* Bill Items Table */}
         <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-2xs dark:border-slate-800 dark:bg-slate-900">
-          <div className="mb-3 flex items-center justify-between">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-              Bill Products & Quantities
-            </h4>
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <div className="flex items-center gap-2.5">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                Bill Products & Quantities
+              </h4>
+              <span className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-300 bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300">
+                Total Qty: <strong className="font-mono text-emerald-900 dark:text-emerald-200">{totalQty}</strong>
+              </span>
+            </div>
             <div className="flex items-center gap-2">
               <button
                 type="button"
@@ -482,17 +503,13 @@ export const CreateBillView: React.FC<CreateBillViewProps> = ({
                   </div>
 
                   <div className="col-span-3 sm:col-span-3">
-                    <select
-                      value={it.unit}
+                    <input
+                      type="text"
+                      placeholder="Unit"
+                      value={it.unit || ''}
                       onChange={(e) => handleItemChange(idx, 'unit', e.target.value)}
-                      className="w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-                    >
-                      {units.map((u) => (
-                        <option key={u.id} value={u.symbol}>
-                          {u.symbol}
-                        </option>
-                      ))}
-                    </select>
+                      className="w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-center text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white font-medium"
+                    />
                   </div>
 
                   <div className="col-span-4 sm:col-span-4">
@@ -526,11 +543,17 @@ export const CreateBillView: React.FC<CreateBillViewProps> = ({
             ))}
           </div>
 
-          <div className="mt-3 flex justify-between items-center pt-2 border-t border-slate-100 dark:border-slate-800">
-            <span className="text-xs text-slate-500">Items Subtotal</span>
-            <span className="font-mono-numbers text-sm font-bold text-slate-900 dark:text-white">
-              {formatCurrency(subtotal)}
-            </span>
+          <div className="mt-3 flex justify-between items-center pt-2 border-t border-slate-100 dark:border-slate-800 text-xs">
+            <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400 font-semibold">
+              <span>Total Qty:</span>
+              <strong className="font-mono text-emerald-700 dark:text-emerald-400">{totalQty}</strong>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-slate-500">Items Subtotal:</span>
+              <span className="font-mono-numbers text-sm font-bold text-slate-900 dark:text-white">
+                {formatCurrency(subtotal)}
+              </span>
+            </div>
           </div>
         </div>
 
@@ -621,29 +644,21 @@ export const CreateBillView: React.FC<CreateBillViewProps> = ({
                 Invoice Preview — Using Profile: {activeProfile?.name}
               </span>
               <div className="flex flex-wrap items-center gap-2">
-                <div className="flex items-center gap-1 text-xs">
-                  <button
-                    type="button"
-                    onClick={() => setPageSize('compact')}
-                    className={`px-2.5 py-1 rounded text-xs font-semibold ${
-                      pageSize === 'compact'
-                        ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'
-                        : 'bg-white text-slate-600 border border-slate-200'
-                    }`}
-                  >
-                    Compact (Mandi)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setPageSize('a4')}
-                    className={`px-2.5 py-1 rounded text-xs font-semibold ${
-                      pageSize === 'a4'
-                        ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'
-                        : 'bg-white text-slate-600 border border-slate-200'
-                    }`}
-                  >
-                    A4 Standard
-                  </button>
+                <div className="flex flex-wrap items-center gap-1 text-xs">
+                  {(['compact', 'b7', 'b6', 'a5', 'a4'] as BillPaperSize[]).map((sizeKey) => (
+                    <button
+                      key={sizeKey}
+                      type="button"
+                      onClick={() => setPageSize(sizeKey)}
+                      className={`px-2 py-0.5 sm:px-2.5 sm:py-1 rounded text-[11px] sm:text-xs font-semibold cursor-pointer transition-all ${
+                        pageSize === sizeKey
+                          ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 shadow-2xs font-bold'
+                          : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700'
+                      }`}
+                    >
+                      {sizeKey === 'compact' ? 'Compact' : sizeKey.toUpperCase()}
+                    </button>
+                  ))}
                 </div>
                 <BillShareButtons
                   elementId="mandi-print-area"

@@ -18,3 +18,19 @@ export function getFruitEffectivePrice(fruit?: Fruit | null): number {
   }
   return 1;
 }
+
+/**
+ * Resolves the saved Crate Type for a fruit item from Fruit / Item Master:
+ * 1. If the selected fruit/item has a saved Crate Type, return that exact value.
+ * 2. If the selected fruit/item has no saved Crate Type, return ''.
+ * 3. Never return a hardcoded or default crate type.
+ */
+export function getFruitSavedCrateType(fruit?: Fruit | null): string {
+  if (!fruit) return '';
+  const raw = fruit.crateType !== undefined ? fruit.crateType : (fruit.crateName !== undefined ? fruit.crateName : '');
+  if (typeof raw === 'string') {
+    return raw.trim();
+  }
+  return '';
+}
+

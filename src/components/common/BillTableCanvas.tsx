@@ -149,7 +149,7 @@ export const BillTableCanvas: React.FC<BillTableCanvasProps> = ({
 
   return (
     <div
-      id="mandi-print-area"
+      id={isLivePreview ? 'mandi-live-preview-canvas' : 'mandi-print-area'}
       data-theme-isolated="true"
       className={`bg-white text-slate-900 font-sans leading-tight border border-slate-300 print:border-none print:shadow-none print:p-0 print:m-0 shadow-sm mx-auto print-bill-canvas ${sizeClasses}`}
       style={{ fontFamily: "'Plus Jakarta Sans', 'Noto Sans Devanagari', Arial, sans-serif" }}
