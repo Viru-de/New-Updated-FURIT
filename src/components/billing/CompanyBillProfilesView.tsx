@@ -61,9 +61,16 @@ export const CompanyBillProfilesView: React.FC = () => {
     setRevealedAadhaar((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
+  const [profileToDelete, setProfileToDelete] = useState<CompanyProfile | null>(null);
+  const [deleteWarning, setDeleteWarning] = useState<string | null>(null);
+
   const refreshList = () => {
     setProfiles(db.getCompanyProfiles());
   };
+
+  React.useEffect(() => {
+    return db.subscribe(refreshList);
+  }, []);
 
   const openAdd = () => {
     setEditingProfile(null);
@@ -183,11 +190,19 @@ export const CompanyBillProfilesView: React.FC = () => {
 
   const handleDelete = (id: string) => {
     if (profiles.length <= 1) {
-      alert('Cannot delete the last company profile.');
+      setDeleteWarning('Cannot delete the last company profile. At least one company bill profile must be maintained.');
       return;
     }
-    if (confirm('Delete this company bill profile?')) {
-      db.deleteCompanyProfile(id);
+    const target = profiles.find((p) => p.id === id);
+    if (target) {
+      setProfileToDelete(target);
+    }
+  };
+
+  const confirmDeleteProfile = () => {
+    if (profileToDelete) {
+      db.deleteCompanyProfile(profileToDelete.id);
+      setProfileToDelete(null);
       refreshList();
     }
   };
@@ -720,6 +735,67 @@ export const CompanyBillProfilesView: React.FC = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Warning Modal */}
+      {deleteWarning && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-xs">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl dark:bg-slate-900 border border-slate-200 dark:border-slate-800 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-start gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-600 dark:bg-amber-950/50 dark:text-amber-400">
+                <AlertCircle className="h-5 w-5" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-base font-bold text-slate-900 dark:text-white">Cannot Delete Profile</h3>
+                <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">{deleteWarning}</p>
+              </div>
+            </div>
+            <div className="mt-5 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setDeleteWarning(null)}
+                className="rounded-xl bg-slate-900 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 cursor-pointer"
+              >
+                Dismiss
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {profileToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-xs">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl dark:bg-slate-900 border border-slate-200 dark:border-slate-800 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-start gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-rose-100 text-rose-600 dark:bg-rose-950/50 dark:text-rose-400">
+                <Trash2 className="h-5 w-5" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-base font-bold text-slate-900 dark:text-white">Delete Billing Profile?</h3>
+                <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">
+                  Are you sure you want to delete <span className="font-bold text-slate-800 dark:text-slate-200">{profileToDelete.name}</span>? This action cannot be undone.
+                </p>
+              </div>
+            </div>
+            <div className="mt-5 flex justify-end gap-2.5">
+              <button
+                type="button"
+                onClick={() => setProfileToDelete(null)}
+                className="rounded-xl border border-slate-300 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={confirmDeleteProfile}
+                className="rounded-xl bg-rose-600 px-4 py-2 text-xs font-semibold text-white hover:bg-rose-700 cursor-pointer shadow-xs"
+              >
+                Delete Profile
+              </button>
+            </div>
           </div>
         </div>
       )}

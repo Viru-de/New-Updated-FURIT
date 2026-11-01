@@ -41,6 +41,10 @@ export const FruitMasterView: React.FC = () => {
     setCrateTypes(db.getCrateTypes());
   };
 
+  React.useEffect(() => {
+    return db.subscribe(refreshList);
+  }, []);
+
   const handleEditClick = (f: Fruit) => {
     setEditingFruit(f);
     setEditName(f.name);

@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { Upload, X, Image as ImageIcon } from 'lucide-react';
 import { processAndCompressImage } from '../../utils/imageStorage';
 
@@ -18,6 +18,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
   onChange,
   previewShape = 'rounded',
 }) => {
+  const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -25,10 +26,11 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
     if (!file) return;
 
     try {
+      setError(null);
       const dataUri = await processAndCompressImage(file, { maxWidth: 512, maxHeight: 512 });
       onChange(dataUri);
     } catch (err: any) {
-      alert(err.message || 'Error processing image');
+      setError(err.message || 'Error processing image');
     } finally {
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
@@ -38,6 +40,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
 
   const handleRemove = (e: React.MouseEvent) => {
     e.stopPropagation();
+    setError(null);
     onChange(undefined);
   };
 
@@ -104,6 +107,11 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
           <p className="text-[11px] text-slate-500 dark:text-slate-400">
             {helperText}
           </p>
+          {error && (
+            <p className="text-[11px] font-medium text-rose-600 dark:text-rose-400">
+              {error}
+            </p>
+          )}
         </div>
 
         <input

@@ -43,6 +43,11 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
   const [showUnlockPassword, setShowUnlockPassword] = useState(false);
   const [unlockError, setUnlockError] = useState<string | null>(null);
 
+  const [, setTick] = useState(0);
+  React.useEffect(() => {
+    return db.subscribe(() => setTick((t) => t + 1));
+  }, []);
+
   const metrics = getDashboardMetrics(toIsoDate(customDate), datePreset);
 
   const handleLockClick = () => {

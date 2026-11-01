@@ -44,6 +44,10 @@ export const BillHistoryView: React.FC<BillHistoryViewProps> = ({
     setBills(db.getBills());
   };
 
+  React.useEffect(() => {
+    return db.subscribe(refreshList);
+  }, []);
+
   const handleDuplicate = (b: Bill) => {
     const seq = db.getNextBillNumber();
     const duplicated: Bill = {

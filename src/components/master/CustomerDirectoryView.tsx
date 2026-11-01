@@ -41,6 +41,11 @@ export const CustomerDirectoryView: React.FC<CustomerDirectoryViewProps> = ({
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [, setVersion] = useState(0);
+
+  React.useEffect(() => {
+    return db.subscribe(() => setVersion((v) => v + 1));
+  }, []);
+
   const [isAddCustomerOpen, setIsAddCustomerOpen] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -138,6 +143,7 @@ export const CustomerDirectoryView: React.FC<CustomerDirectoryViewProps> = ({
 
     db.saveCustomer(updated);
     setEditingCustomer(null);
+    setVersion((v) => v + 1);
   };
 
   const confirmDelete = () => {
@@ -378,7 +384,10 @@ export const CustomerDirectoryView: React.FC<CustomerDirectoryViewProps> = ({
       <AddCustomerModal
         isOpen={isAddCustomerOpen}
         onClose={() => setIsAddCustomerOpen(false)}
-        onCustomerCreated={() => setIsAddCustomerOpen(false)}
+        onCustomerCreated={() => {
+          setIsAddCustomerOpen(false);
+          setVersion((v) => v + 1);
+        }}
       />
 
       {/* Edit Customer Modal */}

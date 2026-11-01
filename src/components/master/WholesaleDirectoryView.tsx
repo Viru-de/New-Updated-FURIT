@@ -39,6 +39,10 @@ export const WholesaleDirectoryView: React.FC = () => {
     setVendors(db.getVendors());
   };
 
+  React.useEffect(() => {
+    return db.subscribe(refreshList);
+  }, []);
+
   const openAdd = () => {
     setEditingVendor(null);
     setName('');

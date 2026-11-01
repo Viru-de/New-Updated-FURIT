@@ -33,6 +33,18 @@ export const CrateStatementView: React.FC<CrateStatementViewProps> = ({
   const [selectedCustomerId, setSelectedCustomerId] = useState(
     initialCustomerId || customers[0]?.id || ''
   );
+  const [, setRefreshKey] = useState(0);
+
+  React.useEffect(() => {
+    if (initialCustomerId) {
+      setSelectedCustomerId(initialCustomerId);
+    }
+  }, [initialCustomerId]);
+
+  React.useEffect(() => {
+    return db.subscribe(() => setRefreshKey((k) => k + 1));
+  }, []);
+
   const [filterStartDate, setFilterStartDate] = useState('');
   const [filterEndDate, setFilterEndDate] = useState('');
 
