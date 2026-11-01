@@ -22,7 +22,7 @@ import { AdminPasswordModal } from '../common/AdminPasswordModal';
 import { triggerPrint, BillPaperSize, getLastSelectedPaperSize } from '../../utils/pdfAndShareEngine';
 import { CompanyContactsHeader } from '../common/CompanyContactsHeader';
 import { ChooseBillPrintFormatModal } from '../common/ChooseBillPrintFormatModal';
-import { getCustomerPrintContactLines } from '../../utils/customerContactUtils';
+import { getCustomerPrintContactLines, formatCustomerContactsInline } from '../../utils/customerContactUtils';
 
 interface BillHistoryViewProps {
   onCreateNewBill: () => void;
@@ -127,6 +127,8 @@ export const BillHistoryView: React.FC<BillHistoryViewProps> = ({
             filteredCount={filteredBills.length}
             totalCount={bills.length}
             onImportComplete={refreshList}
+            hideImport={true}
+            hideTemplate={true}
           />
           <button
             type="button"
@@ -363,7 +365,11 @@ export const BillHistoryView: React.FC<BillHistoryViewProps> = ({
                         {city ? `, ${city}` : ''}
                         {state ? `, ${state}` : ''}
                       </div>
-                      <CompanyContactsHeader profile={snap || fallbackProf} className="mt-0.5" />
+                      <CompanyContactsHeader
+                        profile={snap || fallbackProf}
+                        className="mt-0.5"
+                        itemClassName={pageSize === 'b7' ? 'text-[7.5px]' : pageSize === 'b6' ? 'text-[8.5px]' : 'text-[10px] sm:text-[11px]'}
+                      />
                     </div>
                   );
                 })()}
@@ -377,10 +383,20 @@ export const BillHistoryView: React.FC<BillHistoryViewProps> = ({
 
                 {/* Metadata Section */}
                 <div className={`flex justify-between items-start ${pageSize === 'b7' ? 'text-[8.5px] mb-1' : 'text-xs mb-2'} pt-1 font-medium`}>
-                  {/* Left Side: M/s. Customer Name */}
+                  {/* Left Side: M/s. Customer Name & Inline Contact */}
                   <div className="max-w-[65%]">
                     <div className="font-bold text-slate-500 print:text-black">M/s.</div>
                     <div className={`font-bold uppercase ${pageSize === 'b7' ? 'text-[9px] sm:text-[10px]' : pageSize === 'b6' ? 'text-xs' : 'text-xs sm:text-sm'}`}>{selectedBillForPreview.customerName}</div>
+                    {(() => {
+                      const cust = selectedBillForPreview.customerId ? db.getCustomerById(selectedBillForPreview.customerId) : undefined;
+                      const contactText = cust ? formatCustomerContactsInline(cust) : (selectedBillForPreview.customerMobile ? `Contact: ${selectedBillForPreview.customerMobile}` : '');
+                      if (!contactText) return null;
+                      return (
+                        <div className={`${pageSize === 'b7' ? 'text-[7.5px]' : pageSize === 'b6' ? 'text-[8.5px]' : 'text-[10px]'} font-medium text-slate-800 dark:text-slate-800 print:text-black leading-tight mt-0.5`}>
+                          {contactText}
+                        </div>
+                      );
+                    })()}
                     {selectedBillForPreview.challanNumber && (
                       <div className={`mt-0.5 ${pageSize === 'b7' ? 'text-[8px]' : 'text-[11px]'}`}>
                         Challan DT: <strong>{formatDate(selectedBillForPreview.challanDate || selectedBillForPreview.date)}</strong>
@@ -412,7 +428,13 @@ export const BillHistoryView: React.FC<BillHistoryViewProps> = ({
                   const tableHeadFont = isB7 ? 'text-[8px]' : isB6 ? 'text-[9.5px]' : 'text-[11px]';
                   const tableBodyFont = isB7 ? 'text-[8px]' : isB6 ? 'text-[10px]' : 'text-xs';
                   const footerFont = isB7 ? 'text-[7.5px]' : isB6 ? 'text-[9.5px]' : 'text-xs';
-                  const blankRows = Math.max(0, (isB7 ? 1 : isB6 ? 3 : 6) - selectedBillForPreview.items.length);
+                  const totalQty = Math.round(
+                    (selectedBillForPreview.items || []).reduce(
+                      (sum, it) => sum + (Number(it.quantity) || 0),
+                      0
+                    ) * 1000
+                  ) / 1000;
+                  const blankRows = Math.max(0, (isB7 ? 1 : isB6 ? 3 : 6) - selectedBillForPreview.items.length - 1);
 
                   return (
                     <table className={`w-full border-collapse border border-black ${tableBodyFont}`}>
@@ -443,6 +465,17 @@ export const BillHistoryView: React.FC<BillHistoryViewProps> = ({
                             </td>
                           </tr>
                         ))}
+
+                        {/* Total Qty Row: immediately below the item rows */}
+                        <tr className="border-b-2 border-t border-black font-bold bg-slate-50/50 print:bg-transparent text-slate-900 print:text-black">
+                          <td colSpan={2} className={`border-r border-black ${tablePad} text-right font-bold text-slate-900 print:text-black`}>
+                            Total Qty:
+                          </td>
+                          <td className={`border-r border-black ${tablePad} text-right font-mono font-bold text-slate-900 print:text-black`}>
+                            {totalQty}
+                          </td>
+                          <td colSpan={3} className={tablePad}>&nbsp;</td>
+                        </tr>
 
                         {/* Preserved Blank Rows to maintain traditional wholesale bill spacing */}
                         {Array.from({ length: blankRows }).map((_, bIdx) => (

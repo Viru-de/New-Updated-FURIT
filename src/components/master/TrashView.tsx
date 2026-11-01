@@ -56,7 +56,7 @@ export const TrashView: React.FC<TrashViewProps> = () => {
       showToast(result.message);
       refreshTrash();
     } else {
-      alert(result.message);
+      showToast(result.message);
     }
   };
 

@@ -13,6 +13,7 @@ import { CustomerAutocomplete } from '../common/CustomerAutocomplete';
 import { VendorAutocomplete } from '../common/VendorAutocomplete';
 import { QuantityInput } from '../common/QuantityInput';
 import { calculateWholesaleItemAmount } from '../../utils/billingCalculations';
+import { SaleProceedPrintModal } from '../print/SaleProceedPrintModal';
 import { X, Plus, Trash2, Calculator, Printer, FileText, CheckCircle2, AlertCircle, UserPlus, Phone, MapPin, CreditCard } from 'lucide-react';
 
 interface SaleProceedsModalProps {
@@ -54,6 +55,11 @@ export const SaleProceedsModal: React.FC<SaleProceedsModalProps> = ({
   const [vendorId, setVendorId] = useState('');
   const [customerId, setCustomerId] = useState('');
   const [notes, setNotes] = useState('');
+  const [savedProceedsForPrint, setSavedProceedsForPrint] = useState<SaleProceeds | null>(null);
+  const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
+
+  const selectedVendor = vendors.find((v) => v.id === vendorId);
+  const selectedCustomer = customers.find((c) => c.id === customerId);
 
   // Multi-item rows support
   const [items, setItems] = useState<FormSaleProceedItem[]>([]);
@@ -413,6 +419,48 @@ export const SaleProceedsModal: React.FC<SaleProceedsModalProps> = ({
   const netAmount = totalProductAmount - totalExpense;
   const difference = netAmount - totalProductAmount; // = -totalExpense
 
+  const currentProceedsRecord: SaleProceeds = {
+    id: editItem ? editItem.id : `sp-${Date.now()}`,
+    proceedsNo: editItem ? editItem.proceedsNo : billNumber || 'SP-001',
+    sequenceNumber: editItem ? editItem.sequenceNumber : 1,
+    date,
+    challanDate,
+    billNumber: billNumber || '001',
+    billId: editItem?.billId,
+    items: items.map((it, idx) => ({
+      id: it.id || `spi-${idx}`,
+      fruitId: it.fruitId,
+      fruitName: it.fruitName,
+      quantity: Number(it.quantity) || 0,
+      unit: it.unit || 'Crate',
+      kg: Number(it.weight) || 0,
+      weight: Number(it.weight) || 0,
+      rate: Number(it.rate) || 0,
+      amount: Number(it.amount) || 0,
+      crateTypeId: it.crateTypeId,
+      crateName: it.crateName,
+    })),
+    quantity: totalQuantity,
+    unit: items[0]?.unit || 'Crate',
+    kg: totalWeight,
+    weight: totalWeight,
+    rate: items.length === 1 ? (Number(items[0]?.rate) || 0) : 0,
+    amount: totalProductAmount,
+    expenses,
+    totalExpense,
+    netAmount,
+    difference,
+    vendorId: vendorId || undefined,
+    vendorName: selectedVendor?.name,
+    customerId: customerId || undefined,
+    customerName: selectedCustomer?.name,
+    customerMobile: selectedCustomer?.mobile,
+    customerAddress: selectedCustomer?.address || selectedCustomer?.city,
+    notes: notes.trim() || undefined,
+    createdAt: editItem ? editItem.createdAt : new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+
   const handleSubmit = (e: React.FormEvent, andPrint: boolean = false) => {
     e.preventDefault();
     if (isSubmitting) return;
@@ -575,11 +623,19 @@ export const SaleProceedsModal: React.FC<SaleProceedsModalProps> = ({
 
       db.saveSaleProceeds(saleRecord);
       onSaved(saleRecord);
-      if (andPrint && onSaveAndPrint) {
-        onSaveAndPrint(saleRecord);
+      if (andPrint) {
+        if (onSaveAndPrint) {
+          onSaveAndPrint(saleRecord);
+          setIsSubmitting(false);
+          onClose();
+        } else {
+          setSavedProceedsForPrint(saleRecord);
+          setIsSubmitting(false);
+        }
+      } else {
+        setIsSubmitting(false);
+        onClose();
       }
-      setIsSubmitting(false);
-      onClose();
     } catch (err: any) {
       console.error('Error saving sale proceeds:', err);
       setErrorMessage(err?.message || 'An error occurred while saving. Your data has been retained.');
@@ -1106,36 +1162,45 @@ export const SaleProceedsModal: React.FC<SaleProceedsModalProps> = ({
             </div>
 
             {/* Actions */}
-            <div className="flex flex-wrap items-center justify-end gap-2.5 sm:gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+            <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
               <button
                 type="button"
-                onClick={onClose}
-                className="rounded-lg border border-slate-300 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 cursor-pointer"
+                onClick={() => setIsPrintModalOpen(true)}
+                disabled={items.length === 0}
+                className="flex items-center gap-1.5 rounded-lg border border-emerald-600 px-3.5 py-2 text-xs font-semibold text-emerald-700 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-950/30 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Cancel
+                <Printer className="h-3.5 w-3.5" /> Preview / Print Bill
               </button>
-              {onSaveAndPrint && (
+
+              <div className="flex flex-wrap items-center gap-2">
                 <button
                   type="button"
-                  disabled={isSubmitting}
+                  onClick={onClose}
+                  className="rounded-lg border border-slate-300 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  disabled={isSubmitting || items.length === 0}
                   onClick={(e) => handleSubmit(e, true)}
                   className="flex items-center gap-1.5 rounded-lg border border-blue-600 bg-blue-50 px-4 py-2 text-xs font-bold text-blue-700 hover:bg-blue-100 dark:border-blue-500 dark:bg-blue-950/40 dark:text-blue-300 dark:hover:bg-blue-900/50 cursor-pointer transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   <Printer className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                   {isSubmitting ? 'Processing...' : editItem ? 'Update & Print' : 'Save & Print'}
                 </button>
-              )}
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="rounded-lg bg-emerald-600 px-5 py-2 text-xs font-semibold text-white shadow-xs hover:bg-emerald-700 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
-              >
-                {isSubmitting
-                  ? 'Saving...'
-                  : generateCustomerBill && customerId
-                  ? editItem ? 'Update Sale Proceeds & Bill' : 'Save & Generate Customer Bill'
-                  : editItem ? 'Update Sale Proceeds' : 'Save Sale Proceeds'}
-              </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="rounded-lg bg-emerald-600 px-5 py-2 text-xs font-semibold text-white shadow-xs hover:bg-emerald-700 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  {isSubmitting
+                    ? 'Saving...'
+                    : generateCustomerBill && customerId
+                    ? editItem ? 'Update Sale Proceeds & Bill' : 'Save & Generate Customer Bill'
+                    : editItem ? 'Update Sale Proceeds' : 'Save Sale Proceeds'}
+                </button>
+              </div>
             </div>
           </form>
         </div>
@@ -1156,6 +1221,20 @@ export const SaleProceedsModal: React.FC<SaleProceedsModalProps> = ({
           setIsAddCustomerOpen(false);
         }}
       />
+
+      {(isPrintModalOpen || savedProceedsForPrint) && (
+        <SaleProceedPrintModal
+          isOpen={true}
+          onClose={() => {
+            setIsPrintModalOpen(false);
+            if (savedProceedsForPrint) {
+              setSavedProceedsForPrint(null);
+              onClose();
+            }
+          }}
+          proceeds={savedProceedsForPrint || currentProceedsRecord}
+        />
+      )}
     </>
   );
 };

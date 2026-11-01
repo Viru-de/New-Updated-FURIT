@@ -45,7 +45,6 @@ export const CreditSalePrintModal: React.FC<CreditSalePrintModalProps> = ({
     customer?.address ||
     (customer?.city ? `${customer.city}${customer.state ? `, ${customer.state}` : ''}` : '');
   const customerMobile = customer?.mobile || '';
-  const customerAadhaarNo = customer?.aadhaarNo || customer?.gstin;
 
   const summaryText = `Bill No: ${creditSale.creditSaleNo}\nDate: ${creditSale.date}\nCustomer: ${customerName}\nDebit Amount: ₹${creditSale.finalAmount.toLocaleString('en-IN')}\nStatus: Added to Customer Ledger`;
 
@@ -126,8 +125,8 @@ export const CreditSalePrintModal: React.FC<CreditSalePrintModalProps> = ({
             customerName={customerName}
             customerAddress={customerAddress}
             customerMobile={customerMobile}
+            customerContactPerson={customer?.contactPerson}
             customerAlternateContacts={getCustomerPrintContactLines(customer).map((c) => c.text)}
-            customerAadhaarNo={customerAadhaarNo}
             items={creditSale.items || []}
             expenses={creditSale.expenses || []}
             productTotal={creditSale.productTotal}

@@ -3,13 +3,12 @@ import { CompanyProfile, Receipt } from '../../types';
 import { db } from '../../services/db';
 import { getCustomerLedger } from '../../services/accounting';
 import { formatDate, formatCurrency, formatBillAmount, numberToWordsIndian, formatCompanySignature } from '../../utils/formatters';
-import { maskAadhaar } from '../../utils/aadhaarUtils';
 import { Printer, X, Building2, CheckCircle2 } from 'lucide-react';
 import { BillShareButtons } from '../common/BillShareButtons';
 import { ChooseBillPrintFormatModal } from '../common/ChooseBillPrintFormatModal';
 import { CompanyContactsHeader } from '../common/CompanyContactsHeader';
 import { BillPaperSize, getLastSelectedPaperSize } from '../../utils/pdfAndShareEngine';
-import { getCustomerPrintContactLines } from '../../utils/customerContactUtils';
+import { getCustomerPrintContactLines, formatCustomerContactsInline } from '../../utils/customerContactUtils';
 
 interface ReceiptPrintModalProps {
   isOpen: boolean;
@@ -46,7 +45,6 @@ export const ReceiptPrintModal: React.FC<ReceiptPrintModalProps> = ({
     customer?.address ||
     (customer?.city ? `${customer.city}${customer.state ? `, ${customer.state}` : ''}` : '');
   const customerMobile = customer?.mobile || '';
-  const customerAadhaarNo = customer?.aadhaarNo || customer?.gstin;
 
   // Customer outstanding balance calculation
   const ledger = receipt.customerId ? getCustomerLedger(receipt.customerId) : null;
@@ -160,7 +158,11 @@ export const ReceiptPrintModal: React.FC<ReceiptPrintModalProps> = ({
                 {currentProfile.city ? `, ${currentProfile.city}` : ''}
                 {currentProfile.state ? `, ${currentProfile.state}` : ''}
               </div>
-              <CompanyContactsHeader profile={currentProfile} className="mt-0.5" />
+              <CompanyContactsHeader
+                profile={currentProfile}
+                className="mt-0.5"
+                itemClassName={pageSize === 'b7' ? 'text-[7.5px]' : pageSize === 'b6' ? 'text-[8.5px]' : 'text-[10px] sm:text-[11px]'}
+              />
             </div>
 
             {/* Document Title */}
@@ -182,7 +184,7 @@ export const ReceiptPrintModal: React.FC<ReceiptPrintModalProps> = ({
               </div>
             </div>
 
-            {/* Customer Details (Only M/s Customer Name) */}
+            {/* Customer Details (M/s Customer Name & Inline Contact) */}
             <div className={`bg-slate-50 print:bg-transparent rounded border border-slate-200 print:border-black/30 ${pageSize === 'b7' ? 'p-1.5 mb-1.5 text-[8.5px]' : pageSize === 'b6' ? 'p-2 mb-2 text-[9.5px]' : 'p-2.5 mb-3 text-xs'}`}>
               <div className="flex justify-between items-center">
                 <div>
@@ -192,6 +194,11 @@ export const ReceiptPrintModal: React.FC<ReceiptPrintModalProps> = ({
                   <div className={`font-bold text-slate-900 print:text-black uppercase ${pageSize === 'b7' ? 'text-xs' : 'text-sm'}`}>
                     {customerName}
                   </div>
+                  {customer && formatCustomerContactsInline(customer) && (
+                    <div className={`${pageSize === 'b7' ? 'text-[7.5px]' : pageSize === 'b6' ? 'text-[8.5px]' : 'text-[10px]'} font-medium text-slate-800 dark:text-slate-800 print:text-black leading-tight mt-0.5`}>
+                      {formatCustomerContactsInline(customer)}
+                    </div>
+                  )}
                 </div>
                 <div className="text-right">
                   <span className={`text-slate-500 print:text-black ${pageSize === 'b7' ? 'text-[8px]' : 'text-[10px]'} uppercase font-bold block`}>

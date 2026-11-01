@@ -24,36 +24,37 @@ export function getCompanyContactEntries(profile?: Partial<CompanyProfile> | nul
   const pMobile = (profile.mobile || '').trim();
   const pName = (profile.primaryContactName || '').trim();
   if (pMobile) {
-    if (pName) {
-      entries.push({ id: 'primary', text: `Contact: ${pName} — Mobile: ${pMobile}` });
-    } else {
-      entries.push({ id: 'primary', text: `Mobile: ${pMobile}` });
-    }
+    const text = pName ? `${pName}: ${pMobile}` : `Contact: ${pMobile}`;
+    entries.push({ id: 'primary', text });
   }
 
-  // 2. Alternate 1 Contact (Word "Alternate" removed for print documents)
+  // 2. Alternate 1 Contact (No "Alt" label; show Name: Mobile or Mobile only)
   const alt1Mobile = (profile.alternate1Mobile || profile.alternateMobile || '').trim();
   const alt1Name = (profile.alternate1ContactName || '').trim();
-  if (alt1Mobile) {
-    if (alt1Name) {
-      entries.push({ id: 'alt1', text: `${alt1Name} — Mobile: ${alt1Mobile}` });
-    } else {
-      entries.push({ id: 'alt1', text: `Mobile: ${alt1Mobile}` });
-    }
+  if (alt1Mobile && alt1Mobile !== pMobile) {
+    const text = alt1Name ? `${alt1Name}: ${alt1Mobile}` : alt1Mobile;
+    entries.push({ id: 'alt1', text });
   }
 
-  // 3. Alternate 2 Contact (Word "Alternate" removed for print documents)
+  // 3. Alternate 2 Contact (No "Alt" label; show Name: Mobile or Mobile only)
   const alt2Mobile = (profile.alternate2Mobile || '').trim();
   const alt2Name = (profile.alternate2ContactName || '').trim();
-  if (alt2Mobile) {
-    if (alt2Name) {
-      entries.push({ id: 'alt2', text: `${alt2Name} — Mobile: ${alt2Mobile}` });
-    } else {
-      entries.push({ id: 'alt2', text: `Mobile: ${alt2Mobile}` });
-    }
+  if (alt2Mobile && alt2Mobile !== pMobile && alt2Mobile !== alt1Mobile) {
+    const text = alt2Name ? `${alt2Name}: ${alt2Mobile}` : alt2Mobile;
+    entries.push({ id: 'alt2', text });
   }
 
   return entries;
+}
+
+/**
+ * Returns all available company contact numbers formatted in a single inline horizontal string:
+ * E.g. "Contact: 9876543210 | Nikita: 9123456780 | Rahul: 9988776655"
+ */
+export function formatCompanyContactsInline(profile?: Partial<CompanyProfile> | null): string {
+  return getCompanyContactEntries(profile)
+    .map((e) => e.text)
+    .join(' | ');
 }
 
 interface CompanyContactsHeaderProps {
@@ -71,14 +72,22 @@ export const CompanyContactsHeader: React.FC<CompanyContactsHeaderProps> = ({
   if (entries.length === 0) return null;
 
   return (
-    <div className={`space-y-0.5 ${className}`}>
-      {entries.map((entry) => (
-        <div
-          key={entry.id}
-          className={`text-[11px] font-medium text-slate-800 dark:text-slate-800 print:text-black leading-snug ${itemClassName}`}
-        >
-          {entry.text}
-        </div>
+    <div
+      className={`flex flex-wrap items-center justify-center gap-x-2 gap-y-0.5 text-center leading-snug ${className}`}
+    >
+      {entries.map((entry, idx) => (
+        <React.Fragment key={entry.id}>
+          {idx > 0 && (
+            <span className="text-slate-400 print:text-black font-normal select-none" aria-hidden="true">
+              |
+            </span>
+          )}
+          <span
+            className={`text-[10px] sm:text-[11px] font-medium text-slate-800 dark:text-slate-800 print:text-black whitespace-nowrap ${itemClassName}`}
+          >
+            {entry.text}
+          </span>
+        </React.Fragment>
       ))}
     </div>
   );

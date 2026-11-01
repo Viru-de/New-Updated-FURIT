@@ -320,7 +320,7 @@ export const SaleProceedsLedgerView: React.FC = () => {
               <div className="font-bold text-sm">Account: Mandi Sale Consignment Proceeds</div>
               {selectedCustomer && (
                 <div className="font-bold text-xs mt-0.5 text-slate-900 print:text-black">
-                  Customer: {selectedCustomer.name} {selectedCustomer.mobile ? `· Mob: ${selectedCustomer.mobile}` : ''}
+                  Customer: {selectedCustomer.name} {selectedCustomer.mobile ? `· Contact: ${selectedCustomer.mobile}` : ''}
                 </div>
               )}
               <div className="text-[11px]">Entity: {currentProfile.name}</div>

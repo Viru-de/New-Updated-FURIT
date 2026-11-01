@@ -8,7 +8,6 @@ import {
   calculateSaleCrateSummary,
   calculateWholesaleItemAmount,
 } from '../../utils/billingCalculations';
-import { maskAadhaar } from '../../utils/aadhaarUtils';
 import { db } from '../../services/db';
 import { CompanyContactsHeader } from './CompanyContactsHeader';
 import { BillPaperSize } from '../../utils/pdfAndShareEngine';
@@ -20,8 +19,8 @@ export interface BillTableCanvasProps {
   customerName: string;
   customerAddress?: string;
   customerMobile?: string;
+  customerContactPerson?: string;
   customerAlternateContacts?: string[];
-  customerAadhaarNo?: string;
   items: BillingLineItem[];
   expenses?: Array<{ id?: string; name: string; amount: number }>;
   productTotal?: number;
@@ -48,8 +47,8 @@ export const BillTableCanvas: React.FC<BillTableCanvasProps> = ({
   customerName,
   customerAddress,
   customerMobile,
+  customerContactPerson,
   customerAlternateContacts,
-  customerAadhaarNo,
   items,
   expenses = [],
   productTotal,
@@ -97,10 +96,15 @@ export const BillTableCanvas: React.FC<BillTableCanvasProps> = ({
   // Balance Crate calculation
   const crateSummary = calculateSaleCrateSummary(items, crateOut, crateIn, crateWeightKg);
 
+  // Total Qty across all bill items (excluding weight)
+  const totalQty = Math.round(
+    items.reduce((sum, it) => sum + (Number(it.quantity) || 0), 0) * 1000
+  ) / 1000;
+
   // Minimum rows for clean mandi layout based on paper size
   const minRows =
     pageSize === 'b7' ? 2 : pageSize === 'b6' ? 4 : pageSize === 'a5' || pageSize === 'compact' ? 6 : 8;
-  const blankRowsCount = Math.max(0, minRows - items.length);
+  const blankRowsCount = Math.max(0, minRows - items.length - 1);
 
   const isB7 = pageSize === 'b7';
   const isB6 = pageSize === 'b6';
@@ -147,6 +151,31 @@ export const BillTableCanvas: React.FC<BillTableCanvasProps> = ({
   const tableBodyFont = isB7 ? 'text-[8px]' : isB6 ? 'text-[10px]' : 'text-xs';
   const footerFont = isB7 ? 'text-[7.5px]' : isB6 ? 'text-[9.5px]' : 'text-[11px]';
 
+  // Customer contact numbers arranged in a single horizontal inline row: Contact: 9876543210 | Nikita: 9876543210
+  const customerContactLine = React.useMemo(() => {
+    const parts: string[] = [];
+    const pMobile = (customerMobile || '').trim();
+    const pName = (customerContactPerson || '').trim();
+    if (pMobile) {
+      parts.push(pName ? `${pName}: ${pMobile}` : `Contact: ${pMobile}`);
+    }
+    if (customerAlternateContacts && customerAlternateContacts.length > 0) {
+      customerAlternateContacts.forEach((c) => {
+        if (!c || !c.trim()) return;
+        const cleaned = c
+          .replace(/^(Alt|Alternate)\s*\d*:\s*/i, '')
+          .replace(/^(Alt|Alternate)\s*\d*\s+/i, '')
+          .replace(/^Mob:\s*/i, '')
+          .replace(/^Contact:\s*/i, '')
+          .trim();
+        if (cleaned && !parts.some((p) => p.includes(cleaned))) {
+          parts.push(cleaned);
+        }
+      });
+    }
+    return parts.join(' | ');
+  }, [customerMobile, customerContactPerson, customerAlternateContacts]);
+
   return (
     <div
       id={isLivePreview ? 'mandi-live-preview-canvas' : 'mandi-print-area'}
@@ -174,12 +203,11 @@ export const BillTableCanvas: React.FC<BillTableCanvasProps> = ({
           {currentProfile.city ? `, ${currentProfile.city}` : ''}
           {currentProfile.state ? `, ${currentProfile.state}` : ''}
         </div>
-        <CompanyContactsHeader profile={currentProfile} className="mt-0.5" />
-        {currentProfile.aadhaarNo && (
-          <div className={`${isB7 ? 'text-[7.5px]' : 'text-[10px]'} font-mono text-slate-800 dark:text-slate-800 print:text-black`}>
-            Aadhaar: {maskAadhaar(currentProfile.aadhaarNo)}
-          </div>
-        )}
+        <CompanyContactsHeader
+          profile={currentProfile}
+          className="mt-0.5"
+          itemClassName={isB7 ? 'text-[7.5px]' : isB6 ? 'text-[8.5px]' : 'text-[10px] sm:text-[11px]'}
+        />
       </div>
 
       {/* Sale Document Title: CREDIT SALE or CASH SALE */}
@@ -199,9 +227,9 @@ export const BillTableCanvas: React.FC<BillTableCanvasProps> = ({
         )}
       </div>
 
-      {/* Customer and Metadata Section (Only M/s Customer Name - no address, mobile, or Aadhaar) */}
+      {/* Customer and Metadata Section (M/s Customer Name & Inline Contact Numbers) */}
       <div className={`flex justify-between items-start ${isB7 ? 'text-[8.5px] mb-1 pb-1' : 'text-xs mb-2 pb-2'} pt-1 font-medium border-b border-slate-200 print:border-black/40`}>
-        {/* Left Side: M/s. Customer Name */}
+        {/* Left Side: M/s. Customer Name & Contact */}
         <div className={`max-w-[65%] ${isB7 ? 'min-h-[24px]' : 'min-h-[36px]'}`}>
           {saleType === 'CASH SALE' && !customerName?.trim() ? (
             /* Blank customer area for Cash Sale when customer is not provided */
@@ -212,6 +240,11 @@ export const BillTableCanvas: React.FC<BillTableCanvasProps> = ({
               <div className={`font-bold uppercase text-slate-900 print:text-black ${isB7 ? 'text-[9px] sm:text-[10px]' : isB6 ? 'text-xs' : 'text-xs sm:text-sm'}`}>
                 {customerName?.trim() || (saleType === 'CREDIT SALE' ? 'Customer' : '')}
               </div>
+              {customerContactLine && (
+                <div className={`${isB7 ? 'text-[7.5px]' : isB6 ? 'text-[8.5px]' : 'text-[10px]'} font-medium text-slate-800 dark:text-slate-800 print:text-black leading-tight mt-0.5`}>
+                  {customerContactLine}
+                </div>
+              )}
             </>
           )}
         </div>
@@ -270,6 +303,17 @@ export const BillTableCanvas: React.FC<BillTableCanvasProps> = ({
               </tr>
             );
           })}
+
+          {/* Total Qty Row: immediately below the item rows */}
+          <tr className="border-b-2 border-t border-slate-300 print:border-black font-bold bg-slate-50/50 print:bg-transparent text-slate-900 print:text-black">
+            <td colSpan={2} className={`border-r border-slate-300 print:border-black ${tablePad} text-right font-bold text-slate-900 print:text-black`}>
+              Total Qty:
+            </td>
+            <td className={`border-r border-slate-300 print:border-black ${tablePad} text-right font-mono font-bold text-slate-900 print:text-black`}>
+              {totalQty}
+            </td>
+            <td colSpan={3} className={tablePad}>&nbsp;</td>
+          </tr>
 
           {/* Preserved Blank Rows for Mandi Balance */}
           {Array.from({ length: blankRowsCount }).map((_, bIdx) => (

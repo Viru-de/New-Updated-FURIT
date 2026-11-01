@@ -256,7 +256,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
 
         {/* 4. Today's Expenses */}
         <div
-          onClick={() => onNavigate('reports')}
+          onClick={() => onNavigate('reports', 'expenses')}
           className="neu-card cursor-pointer p-4 hover:translate-y-[-2px] transition-all"
           title="Click to view Expenses report"
         >
@@ -275,7 +275,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
 
         {/* 5. Net Profit */}
         <div
-          onClick={() => onNavigate('reports')}
+          onClick={() => onNavigate('reports', 'profit')}
           className="neu-card cursor-pointer p-4 hover:translate-y-[-2px] transition-all border border-emerald-300/40 dark:border-emerald-800/50"
           title="Click to view Profit report"
         >

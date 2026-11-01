@@ -64,10 +64,15 @@ export const SaleProceedPrintModal: React.FC<SaleProceedPrintModalProps> = ({
         },
       ];
 
+  // Total Qty across all bill items (excluding weight)
+  const totalQty = Math.round(
+    items.reduce((sum, it) => sum + (Number(it.quantity) || 0), 0) * 1000
+  ) / 1000 || proceeds.quantity || 0;
+
   // Number of blank rows to maintain traditional wholesale mandi bill height scaled by paper size
   const minRows =
     pageSize === 'b7' ? 2 : pageSize === 'b6' ? 4 : pageSize === 'a5' || pageSize === 'compact' ? 6 : 8;
-  const blankRowsCount = Math.max(0, minRows - items.length);
+  const blankRowsCount = Math.max(0, minRows - items.length - 1);
 
   const isB7 = pageSize === 'b7';
   const isB6 = pageSize === 'b6';
@@ -217,7 +222,11 @@ export const SaleProceedPrintModal: React.FC<SaleProceedPrintModalProps> = ({
                 {currentProfile.city ? `, ${currentProfile.city}` : ''}
                 {currentProfile.state ? `, ${currentProfile.state}` : ''}
               </div>
-              <CompanyContactsHeader profile={currentProfile} className="mt-0.5" />
+              <CompanyContactsHeader
+                profile={currentProfile}
+                className="mt-0.5"
+                itemClassName={isB7 ? 'text-[7.5px]' : isB6 ? 'text-[8.5px]' : 'text-[10px] sm:text-[11px]'}
+              />
             </div>
 
             {/* Document Title */}
@@ -229,11 +238,16 @@ export const SaleProceedPrintModal: React.FC<SaleProceedPrintModalProps> = ({
 
             {/* Metadata Section */}
             <div className={`flex justify-between items-start ${isB7 ? 'text-[8.5px] mb-1' : 'text-xs mb-2'} pt-1 font-medium`}>
-              {/* Left Side: M/s. & Address */}
+              {/* Left Side: M/s. & Address & Contact */}
               <div className="max-w-[65%]">
                 <div className="font-bold text-slate-500 print:text-black">M/s.</div>
                 <div className={`font-bold uppercase ${isB7 ? 'text-[9px] sm:text-[10px]' : isB6 ? 'text-xs' : 'text-xs sm:text-sm'}`}>{vendorName}</div>
                 {vendorAddress && <div className={isB7 ? 'text-[8px]' : 'text-[11px]'}>{vendorAddress}</div>}
+                {vendor?.contact && (
+                  <div className={`${isB7 ? 'text-[7.5px]' : isB6 ? 'text-[8.5px]' : 'text-[10px]'} font-medium text-slate-800 dark:text-slate-800 print:text-black leading-tight mt-0.5`}>
+                    Contact: {vendor.contact}
+                  </div>
+                )}
                 <div className={`mt-0.5 ${isB7 ? 'text-[8px]' : 'text-[11px]'}`}>
                   Challan DT: <strong>{formatDate(proceeds.challanDate || proceeds.date)}</strong>
                 </div>
@@ -295,6 +309,17 @@ export const SaleProceedPrintModal: React.FC<SaleProceedPrintModalProps> = ({
                     </td>
                   </tr>
                 ))}
+
+                {/* Total Qty Row: immediately below the item rows */}
+                <tr className="border-b-2 border-t border-black font-bold bg-slate-50/50 print:bg-transparent text-slate-900 print:text-black">
+                  <td colSpan={2} className={`border-r border-black ${tablePad} text-right font-bold text-slate-900 print:text-black`}>
+                    Total Qty:
+                  </td>
+                  <td className={`border-r border-black ${tablePad} text-right font-mono font-bold text-slate-900 print:text-black`}>
+                    {totalQty}
+                  </td>
+                  <td colSpan={3} className={tablePad}>&nbsp;</td>
+                </tr>
 
                 {/* Preserved Blank Rows to maintain traditional wholesale bill spacing */}
                 {Array.from({ length: blankRowsCount }).map((_, bIdx) => (

@@ -28,14 +28,15 @@ export function getCustomerPrintContactLines(
 ): PrintableCustomerContact[] {
   if (!customer) return [];
 
-  const { includePrimary = false, prefixWithMob = true } = options || {};
+  const { includePrimary = false, prefixWithMob = false } = options || {};
   const lines: PrintableCustomerContact[] = [];
 
   const primary = (customer.mobile || '').trim();
+  const primaryName = (customer.contactPerson || '').trim();
   if (includePrimary && primary) {
     lines.push({
       id: 'primary',
-      text: prefixWithMob ? `Mob: ${primary}` : primary,
+      text: primaryName ? `${primaryName}: ${primary}` : (prefixWithMob ? `Mob: ${primary}` : primary),
     });
   }
 
@@ -49,17 +50,10 @@ export function getCustomerPrintContactLines(
   const alt1Name = (customer.alternate1ContactName || '').trim();
 
   if (alt1Mobile && alt1Mobile !== primary) {
-    if (alt1Name) {
-      lines.push({
-        id: 'alt1',
-        text: `${alt1Name}: ${alt1Mobile}`,
-      });
-    } else {
-      lines.push({
-        id: 'alt1',
-        text: prefixWithMob ? `Mob: ${alt1Mobile}` : alt1Mobile,
-      });
-    }
+    lines.push({
+      id: 'alt1',
+      text: alt1Name ? `${alt1Name}: ${alt1Mobile}` : (prefixWithMob ? `Mob: ${alt1Mobile}` : alt1Mobile),
+    });
   }
 
   // Alternate Number 2
@@ -71,18 +65,53 @@ export function getCustomerPrintContactLines(
   const alt2Name = (customer.alternate2ContactName || '').trim();
 
   if (alt2Mobile && alt2Mobile !== primary && alt2Mobile !== alt1Mobile) {
-    if (alt2Name) {
-      lines.push({
-        id: 'alt2',
-        text: `${alt2Name}: ${alt2Mobile}`,
-      });
-    } else {
-      lines.push({
-        id: 'alt2',
-        text: prefixWithMob ? `Mob: ${alt2Mobile}` : alt2Mobile,
-      });
-    }
+    lines.push({
+      id: 'alt2',
+      text: alt2Name ? `${alt2Name}: ${alt2Mobile}` : (prefixWithMob ? `Mob: ${alt2Mobile}` : alt2Mobile),
+    });
   }
 
   return lines;
 }
+
+/**
+ * Returns all available customer contact numbers arranged neatly in a single horizontal inline row:
+ * E.g. "Contact: 9876543210 | Nikita: 9123456780 | 9988776655"
+ * Removes "Alt 1" and "Alt 2" labels. Displays only the saved contact person's name and phone number.
+ */
+export function formatCustomerContactsInline(customer?: Partial<Customer> | null): string {
+  if (!customer) return '';
+  const parts: string[] = [];
+
+  const primary = (customer.mobile || '').trim();
+  const primaryName = (customer.contactPerson || '').trim();
+  if (primary) {
+    parts.push(primaryName ? `${primaryName}: ${primary}` : `Contact: ${primary}`);
+  }
+
+  // Alternate 1
+  const alt1Mobile = (
+    customer.altMobile ||
+    customer.alternate1Mobile ||
+    customer.alternateNumber1 ||
+    ''
+  ).trim();
+  const alt1Name = (customer.alternate1ContactName || '').trim();
+  if (alt1Mobile && alt1Mobile !== primary) {
+    parts.push(alt1Name ? `${alt1Name}: ${alt1Mobile}` : alt1Mobile);
+  }
+
+  // Alternate 2
+  const alt2Mobile = (
+    customer.alternate2Mobile ||
+    customer.alternateNumber2 ||
+    ''
+  ).trim();
+  const alt2Name = (customer.alternate2ContactName || '').trim();
+  if (alt2Mobile && alt2Mobile !== primary && alt2Mobile !== alt1Mobile) {
+    parts.push(alt2Name ? `${alt2Name}: ${alt2Mobile}` : alt2Mobile);
+  }
+
+  return parts.join(' | ');
+}
+

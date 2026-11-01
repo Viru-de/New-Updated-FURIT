@@ -595,11 +595,19 @@ export const CreditSaleModal: React.FC<CreditSaleModalProps> = ({
       db.deleteReceipt(linkedReceiptId);
     }
     onSaved(saleRecord);
-    if (andPrint && onSaveAndPrint) {
-      onSaveAndPrint(saleRecord);
+    if (andPrint) {
+      if (onSaveAndPrint) {
+        onSaveAndPrint(saleRecord);
+        setIsSubmitting(false);
+        onClose();
+      } else {
+        setIsPrintModalOpen(true);
+        setIsSubmitting(false);
+      }
+    } else {
+      setIsSubmitting(false);
+      onClose();
     }
-    setIsSubmitting(false);
-    onClose();
   };
 
   if (!isOpen) return null;
@@ -1027,17 +1035,15 @@ export const CreditSaleModal: React.FC<CreditSaleModalProps> = ({
                 >
                   Cancel
                 </button>
-                {onSaveAndPrint && (
-                  <button
-                    type="button"
-                    disabled={isSubmitting}
-                    onClick={(e) => handleSubmit(e, true)}
-                    className="flex items-center gap-1.5 rounded-lg border border-blue-600 bg-blue-50 px-4 py-2 text-xs font-bold text-blue-700 hover:bg-blue-100 dark:border-blue-500 dark:bg-blue-950/40 dark:text-blue-300 dark:hover:bg-blue-900/50 cursor-pointer transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-                  >
-                    <Printer className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
-                    {isSubmitting ? 'Processing...' : editItem ? 'Update & Print' : 'Save & Print'}
-                  </button>
-                )}
+                <button
+                  type="button"
+                  disabled={isSubmitting || items.length === 0}
+                  onClick={(e) => handleSubmit(e, true)}
+                  className="flex items-center gap-1.5 rounded-lg border border-blue-600 bg-blue-50 px-4 py-2 text-xs font-bold text-blue-700 hover:bg-blue-100 dark:border-blue-500 dark:bg-blue-950/40 dark:text-blue-300 dark:hover:bg-blue-900/50 cursor-pointer transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  <Printer className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
+                  {isSubmitting ? 'Processing...' : editItem ? 'Update & Print' : 'Save & Print'}
+                </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}

@@ -512,7 +512,6 @@ export const CashSaleModal: React.FC<CashSaleModalProps> = ({
                 customerName={selectedCustomer?.name || ''}
                 customerAddress={selectedCustomer?.address}
                 customerMobile={selectedCustomer?.mobile}
-                customerAadhaarNo={selectedCustomer?.aadhaarNo || selectedCustomer?.gstin}
                 items={items}
                 expenses={expenses}
                 productTotal={productTotal}

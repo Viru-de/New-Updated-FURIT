@@ -1595,6 +1595,17 @@ export const GroupSaleView: React.FC<GroupSaleViewProps> = ({
                 <td className="border border-black p-1 text-right font-bold">{formatCurrency(r.totalAmount)}</td>
               </tr>
             ))}
+
+            {/* Total Qty Row: immediately below the item rows */}
+            <tr className="border-b-2 border-t border-black font-bold bg-slate-50/50 print:bg-transparent text-slate-900 print:text-black">
+              <td colSpan={4} className="border border-black p-1 text-right font-bold">
+                Total Qty:
+              </td>
+              <td className="border border-black p-1 text-right font-mono font-bold">
+                {formatQuantity(summary.totalQuantity)}
+              </td>
+              <td colSpan={5} className="border border-black p-1">&nbsp;</td>
+            </tr>
           </tbody>
           <tfoot>
             <tr className="font-bold border-t-2 border-black bg-slate-50">

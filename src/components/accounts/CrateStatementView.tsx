@@ -12,7 +12,7 @@ import { CompanyContactsHeader } from '../common/CompanyContactsHeader';
 import { CustomerAvatar } from '../common/CustomerAvatar';
 import { CustomerAutocomplete } from '../common/CustomerAutocomplete';
 import { QuantityInput } from '../common/QuantityInput';
-import { getCustomerPrintContactLines } from '../../utils/customerContactUtils';
+import { getCustomerPrintContactLines, formatCustomerContactsInline } from '../../utils/customerContactUtils';
 
 interface CrateStatementViewProps {
   initialCustomerId?: string;
@@ -372,11 +372,11 @@ export const CrateStatementView: React.FC<CrateStatementViewProps> = ({
               <div className="font-bold text-sm">M/s. {activeCustomer?.name || 'Customer'}</div>
               {activeCustomer?.address && <div className="text-[11px]">{activeCustomer.address}</div>}
               {activeCustomer?.city && <div className="text-[11px]">{activeCustomer.city}</div>}
-              {activeCustomer?.mobile && <div className="text-[11px]">Mob: {activeCustomer.mobile}</div>}
-              {activeCustomer && getCustomerPrintContactLines(activeCustomer).map((c) => (
-                <div key={c.id} className="text-[11px]">{c.text}</div>
-              ))}
-              {activeCustomer?.aadhaarNo && <div className="text-[10px]">Aadhaar: {activeCustomer.aadhaarNo}</div>}
+              {activeCustomer && formatCustomerContactsInline(activeCustomer) && (
+                <div className="text-[11px] text-slate-800 dark:text-slate-800 print:text-black font-medium mt-0.5">
+                  {formatCustomerContactsInline(activeCustomer)}
+                </div>
+              )}
             </div>
             <div className="text-right">
               <div>DATE: <strong>{formatDate(getTodayIso())}</strong></div>

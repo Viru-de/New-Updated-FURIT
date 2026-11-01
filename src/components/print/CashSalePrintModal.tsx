@@ -46,7 +46,6 @@ export const CashSalePrintModal: React.FC<CashSalePrintModalProps> = ({
     customer?.address ||
     (customer?.city ? `${customer.city}${customer.state ? `, ${customer.state}` : ''}` : '');
   const customerMobile = customer?.mobile || '';
-  const customerAadhaarNo = customer?.aadhaarNo || customer?.gstin;
 
   const summaryText = `Bill No: ${cashSale.cashSaleNo}\nDate: ${cashSale.date}${customerName ? `\nCustomer: ${customerName}` : ''}\nTotal: ₹${cashSale.finalAmount.toLocaleString('en-IN')}\nStatus: Paid (${cashSale.paymentMode})`;
 
@@ -127,8 +126,8 @@ export const CashSalePrintModal: React.FC<CashSalePrintModalProps> = ({
             customerName={customerName}
             customerAddress={customerAddress}
             customerMobile={customerMobile}
+            customerContactPerson={customer?.contactPerson}
             customerAlternateContacts={customer ? getCustomerPrintContactLines(customer).map((c) => c.text) : undefined}
-            customerAadhaarNo={customerAadhaarNo}
             items={cashSale.items || []}
             expenses={cashSale.expenses || []}
             productTotal={cashSale.productTotal}

@@ -49,13 +49,16 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ initialTab = 'genera
   // Import file
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [importStatus, setImportStatus] = useState<string | null>(null);
+  const [settingsSaveStatus, setSettingsSaveStatus] = useState<string | null>(null);
+  const [showResetConfirmModal, setShowResetConfirmModal] = useState(false);
   const [zipProgress, setZipProgress] = useState<string | null>(null);
   const [isExportingZip, setIsExportingZip] = useState(false);
 
   const handleSaveSettings = (e: React.FormEvent) => {
     e.preventDefault();
     db.saveSettings(settings);
-    alert('General settings saved successfully.');
+    setSettingsSaveStatus('General settings saved successfully.');
+    setTimeout(() => setSettingsSaveStatus(null), 3500);
   };
 
   const handleAddUnit = (e: React.FormEvent) => {
@@ -106,8 +109,8 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ initialTab = 'genera
       setZipProgress('Export completed! ZIP file downloaded.');
       setTimeout(() => setZipProgress(null), 4000);
     } catch (err: any) {
-      alert('Failed to export ERP data: ' + err.message);
-      setZipProgress(null);
+      setZipProgress('Failed to export ERP data: ' + err.message);
+      setTimeout(() => setZipProgress(null), 5000);
     } finally {
       setIsExportingZip(false);
     }
@@ -144,14 +147,14 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ initialTab = 'genera
     reader.readAsText(file);
   };
 
-  const handleResetSampleData = () => {
-    if (confirm('Load default test/sample data as specified in the test scenario? This preserves clean demo records.')) {
-      db.resetToDefaultData();
-      setSettings(db.getSettings());
-      setUnits(db.getUnits());
-      setCrateTypes(db.getCrateTypes());
-      alert('Sample test data loaded successfully.');
-    }
+  const handleConfirmReset = () => {
+    db.resetToDefaultData();
+    setSettings(db.getSettings());
+    setUnits(db.getUnits());
+    setCrateTypes(db.getCrateTypes());
+    setImportStatus('Sample test data loaded successfully.');
+    setShowResetConfirmModal(false);
+    setTimeout(() => setImportStatus(null), 4000);
   };
 
   return (
@@ -330,13 +333,19 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ initialTab = 'genera
             />
           </div>
 
-          <div className="pt-2">
+          <div className="pt-2 flex items-center gap-3">
             <button
               type="submit"
-              className="rounded-lg bg-emerald-600 px-5 py-2 text-xs font-semibold text-white hover:bg-emerald-700"
+              className="rounded-lg bg-emerald-600 px-5 py-2 text-xs font-semibold text-white hover:bg-emerald-700 cursor-pointer shadow-xs"
             >
               Save Configuration
             </button>
+            {settingsSaveStatus && (
+              <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 dark:text-emerald-400 animate-in fade-in">
+                <CheckCircle className="h-4 w-4 text-emerald-600" />
+                {settingsSaveStatus}
+              </span>
+            )}
           </div>
         </form>
       )}
@@ -592,10 +601,46 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ initialTab = 'genera
               </div>
               <button
                 type="button"
-                onClick={handleResetSampleData}
-                className="flex items-center gap-1.5 rounded-lg bg-amber-600 px-4 py-2 text-xs font-semibold text-white hover:bg-amber-700 shrink-0"
+                onClick={() => setShowResetConfirmModal(true)}
+                className="flex items-center gap-1.5 rounded-lg bg-amber-600 px-4 py-2 text-xs font-semibold text-white hover:bg-amber-700 shrink-0 cursor-pointer"
               >
                 <RefreshCw className="h-4 w-4" /> Load Sample Data
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* In-app Reset Confirmation Modal */}
+      {showResetConfirmModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-xs">
+          <div className="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl dark:border-slate-800 dark:bg-slate-900">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="p-2.5 rounded-xl bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-400">
+                <AlertTriangle className="h-5 w-5" />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-slate-900 dark:text-white">Load Sample Test Data?</h3>
+                <p className="text-[11px] text-slate-500">Restores standard demonstration records</p>
+              </div>
+            </div>
+            <p className="text-xs text-slate-600 dark:text-slate-300 mb-4 leading-relaxed">
+              This will reset sample bills, consignments, and customer accounts to default demo records. Do you wish to proceed?
+            </p>
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+              <button
+                type="button"
+                onClick={() => setShowResetConfirmModal(false)}
+                className="rounded-lg border border-slate-200 px-3.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmReset}
+                className="rounded-lg bg-amber-600 px-4 py-1.5 text-xs font-bold text-white hover:bg-amber-700 cursor-pointer shadow-xs"
+              >
+                Yes, Load Sample Data
               </button>
             </div>
           </div>
