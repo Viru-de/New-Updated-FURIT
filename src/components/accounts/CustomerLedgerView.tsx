@@ -596,7 +596,6 @@ export const CustomerLedgerView: React.FC<CustomerLedgerViewProps> = ({
       {/* Ledger Table Container (Used for on-screen viewing, PDF generation, and printing) */}
       <div
         id="ledger-print-area"
-        data-theme-isolated="true"
         className="rounded-xl border border-slate-200 bg-white shadow-2xs dark:border-slate-800 dark:bg-slate-900 overflow-hidden"
       >
         {/* Printable Traditional Mandi Statement Header (matches on-screen layout & company profile) */}
@@ -649,7 +648,7 @@ export const CustomerLedgerView: React.FC<CustomerLedgerViewProps> = ({
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm border-collapse bg-white dark:bg-slate-900">
             <thead>
-              <tr className="border-b border-slate-200 bg-slate-50 text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:border-slate-800 dark:bg-slate-800/80 dark:text-slate-300">
+              <tr className="border-b border-slate-200 bg-slate-100 text-[11px] font-bold uppercase tracking-wider text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">
                 <th className="px-5 py-3.5 w-32">Date</th>
                 <th className="px-5 py-3.5">Particulars / Transaction</th>
                 <th className="px-5 py-3.5 text-right w-36">Debit (Dr)</th>
@@ -674,14 +673,14 @@ export const CustomerLedgerView: React.FC<CustomerLedgerViewProps> = ({
                     <tr
                       key={entry.id}
                       className={`hover:bg-slate-50/60 transition-colors dark:hover:bg-slate-800/50 ${
-                        isOb ? 'bg-amber-50/30 font-medium dark:bg-amber-950/20' : ''
+                        isOb ? 'bg-amber-50/40 font-medium dark:bg-amber-950/30' : ''
                       }`}
                     >
                       <td className="px-5 py-3 font-mono-numbers text-xs text-slate-700 dark:text-slate-300 whitespace-nowrap">
                         {formatDate(entry.date)}
                       </td>
-                      <td className="px-5 py-3.5 text-slate-900 dark:text-white align-top">
-                        <div className="font-bold text-sm sm:text-base text-slate-950 dark:text-white tracking-tight leading-snug">
+                      <td className="px-5 py-3.5 text-slate-900 dark:text-slate-100 align-top">
+                        <div className={`font-bold text-sm sm:text-base tracking-tight leading-snug ${isOb ? 'text-amber-900 dark:text-amber-200 font-bold' : 'text-slate-950 dark:text-slate-100'}`}>
                           {entry.particulars}
                         </div>
                         {entry.subDetails?.items && entry.subDetails.items.length > 0 && (
@@ -721,7 +720,7 @@ export const CustomerLedgerView: React.FC<CustomerLedgerViewProps> = ({
                         {entry.credit !== null ? formatCurrency(entry.credit) : ''}
                       </td>
                       {/* Balance cell */}
-                      <td className="px-5 py-3 text-right font-mono-numbers text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
+                      <td className="px-5 py-3 text-right font-mono-numbers text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100">
                         {formatCurrency(entry.balance)}
                       </td>
                       <td className="px-4 py-3 text-center no-print whitespace-nowrap">
@@ -741,8 +740,8 @@ export const CustomerLedgerView: React.FC<CustomerLedgerViewProps> = ({
               )}
             </tbody>
             <tfoot>
-              <tr className="border-t-2 border-slate-300 bg-slate-50/90 font-bold dark:border-slate-700 dark:bg-slate-800/90">
-                <td colSpan={2} className="px-5 py-3.5 text-xs uppercase tracking-wider text-slate-700 dark:text-slate-300">
+              <tr className="border-t-2 border-slate-300 bg-slate-100 font-bold dark:border-slate-700 dark:bg-slate-800/90">
+                <td colSpan={2} className="px-5 py-3.5 text-xs uppercase tracking-wider text-slate-800 dark:text-slate-200">
                   Total Debits & Credits
                 </td>
                 <td className="px-5 py-3.5 text-right font-mono-numbers text-sm text-rose-600 dark:text-rose-400">
@@ -751,7 +750,7 @@ export const CustomerLedgerView: React.FC<CustomerLedgerViewProps> = ({
                 <td className="px-5 py-3.5 text-right font-mono-numbers text-sm text-emerald-600 dark:text-emerald-400">
                   {ledger.totalCredit > 0 ? formatCurrency(ledger.totalCredit) : ''}
                 </td>
-                <td className="px-5 py-3.5 text-right font-mono-numbers text-base text-slate-900 dark:text-white">
+                <td className="px-5 py-3.5 text-right font-mono-numbers text-base text-slate-900 dark:text-slate-100 font-extrabold">
                   {formatCurrency(ledger.closingBalance)}
                 </td>
                 <td className="no-print"></td>
@@ -762,11 +761,11 @@ export const CustomerLedgerView: React.FC<CustomerLedgerViewProps> = ({
 
         {/* Bottom Banner */}
         <div className="flex flex-col sm:flex-row items-center justify-between border-t border-slate-200 bg-slate-50 px-6 py-4 dark:border-slate-800 dark:bg-slate-800/60">
-          <div className="text-xs text-slate-500 dark:text-slate-400">
+          <div className="text-xs text-slate-600 dark:text-slate-400">
             Net balance is calculated dynamically from all historical transactions.
           </div>
           <div className="flex items-center gap-3 mt-2 sm:mt-0">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-200">
               Customer Outstanding:
             </span>
             <span
@@ -775,7 +774,7 @@ export const CustomerLedgerView: React.FC<CustomerLedgerViewProps> = ({
                   ? 'text-rose-600 dark:text-rose-400'
                   : ledger.closingBalance < 0
                   ? 'text-emerald-600 dark:text-emerald-400'
-                  : 'text-slate-900 dark:text-white'
+                  : 'text-slate-900 dark:text-slate-100'
               }`}
             >
               {formatCurrency(ledger.closingBalance)}
@@ -797,7 +796,6 @@ export const CustomerLedgerView: React.FC<CustomerLedgerViewProps> = ({
       {/* Short Print Layout for Customer Ledger Statement (Cloned & printed via Short Print button) */}
       <div
         id="customer-ledger-short-print-area"
-        data-theme-isolated="true"
         className="hidden rounded-xl border border-slate-200 bg-white shadow-2xs dark:border-slate-800 dark:bg-slate-900 overflow-hidden"
       >
         {/* Printable Traditional Mandi Statement Header */}

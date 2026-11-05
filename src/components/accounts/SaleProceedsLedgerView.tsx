@@ -304,7 +304,6 @@ export const SaleProceedsLedgerView: React.FC = () => {
       {/* Ledger Table Container */}
       <div
         id="sale-proceeds-print-area"
-        data-theme-isolated="true"
         className="rounded-xl border border-slate-200 bg-white shadow-2xs dark:border-slate-800 dark:bg-slate-900 overflow-hidden"
       >
         {/* Printable Traditional Mandi Statement Header */}
@@ -356,7 +355,7 @@ export const SaleProceedsLedgerView: React.FC = () => {
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm border-collapse bg-white dark:bg-slate-900">
             <thead>
-              <tr className="border-b border-slate-200 bg-slate-50 text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:border-slate-800 dark:bg-slate-800/60 dark:text-slate-300">
+              <tr className="border-b border-slate-200 bg-slate-100 text-[11px] font-bold uppercase tracking-wider text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">
                 <th className="px-5 py-3.5 w-32">Date</th>
                 <th className="px-5 py-3.5">Particulars</th>
                 <th className="px-5 py-3.5 text-right w-36">Debit (Dr)</th>
@@ -381,16 +380,18 @@ export const SaleProceedsLedgerView: React.FC = () => {
                     <tr
                       key={entry.id}
                       className={`hover:bg-slate-50/60 transition-colors dark:hover:bg-slate-800/40 ${
-                        isOb ? 'bg-amber-50/30 font-medium dark:bg-amber-950/10' : ''
+                        isOb ? 'bg-amber-50/40 font-medium dark:bg-amber-950/30' : ''
                       }`}
                     >
                       <td className="px-5 py-3 font-mono-numbers text-xs text-slate-700 dark:text-slate-300 whitespace-nowrap">
                         {formatDate(entry.date)}
                       </td>
-                      <td className="px-5 py-3 text-slate-900 dark:text-white">
-                        <div className="font-semibold text-xs sm:text-sm">{entry.particulars}</div>
+                      <td className="px-5 py-3 text-slate-900 dark:text-slate-100">
+                        <div className={`font-semibold text-xs sm:text-sm ${isOb ? 'text-amber-900 dark:text-amber-200 font-bold' : 'text-slate-900 dark:text-slate-100'}`}>
+                          {entry.particulars}
+                        </div>
                         {entry.subDetails?.qty && (
-                          <div className="text-[11px] text-slate-500">
+                          <div className={`text-[11px] ${isOb ? 'text-amber-700 dark:text-amber-300' : 'text-slate-500 dark:text-slate-400'}`}>
                             Qty: {entry.subDetails.qty}
                             {entry.subDetails.expenses && entry.subDetails.expenses.length > 0 && (
                               <span className="ml-2">
@@ -401,25 +402,25 @@ export const SaleProceedsLedgerView: React.FC = () => {
                         )}
                       </td>
                       {/* Debit cell - blank if null */}
-                      <td className="px-5 py-3 text-right font-mono-numbers text-xs sm:text-sm text-rose-600 dark:text-rose-400">
+                      <td className="px-5 py-3 text-right font-mono-numbers text-xs sm:text-sm text-rose-600 dark:text-rose-400 font-semibold">
                         {entry.debit !== null ? formatCurrency(entry.debit) : ''}
                       </td>
                       {/* Credit cell - blank if null */}
-                      <td className="px-5 py-3 text-right font-mono-numbers text-xs sm:text-sm text-emerald-600 dark:text-emerald-400 font-medium">
+                      <td className="px-5 py-3 text-right font-mono-numbers text-xs sm:text-sm text-emerald-600 dark:text-emerald-400 font-semibold">
                         {entry.credit !== null ? formatCurrency(entry.credit) : ''}
                       </td>
                       {/* Balance cell */}
-                      <td className="px-5 py-3 text-right font-mono-numbers text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
+                      <td className="px-5 py-3 text-right font-mono-numbers text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100">
                         {formatCurrency(entry.balance)}
                       </td>
                       <td className="px-4 py-3 text-center no-print whitespace-nowrap">
                         <button
                           type="button"
                           onClick={() => handleEditEntry(entry)}
-                          className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 hover:border-emerald-500 hover:text-emerald-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                          className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 hover:border-emerald-500 hover:text-emerald-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-emerald-500 dark:hover:text-emerald-400 dark:hover:bg-slate-700 transition-colors cursor-pointer"
                           title="Edit Entry"
                         >
-                          <Edit2 className="h-3.5 w-3.5 text-emerald-600" />
+                          <Edit2 className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
                           <span>Edit</span>
                         </button>
                       </td>
@@ -429,8 +430,8 @@ export const SaleProceedsLedgerView: React.FC = () => {
               )}
             </tbody>
             <tfoot>
-              <tr className="border-t-2 border-slate-300 bg-slate-50/90 font-bold dark:border-slate-700 dark:bg-slate-800/80">
-                <td colSpan={2} className="px-5 py-3.5 text-xs uppercase tracking-wider text-slate-700 dark:text-slate-300">
+              <tr className="border-t-2 border-slate-300 bg-slate-100 font-bold dark:border-slate-700 dark:bg-slate-800/90">
+                <td colSpan={2} className="px-5 py-3.5 text-xs uppercase tracking-wider text-slate-800 dark:text-slate-200">
                   Total & Closing Balance
                 </td>
                 <td className="px-5 py-3.5 text-right font-mono-numbers text-sm text-rose-600 dark:text-rose-400">
@@ -439,7 +440,7 @@ export const SaleProceedsLedgerView: React.FC = () => {
                 <td className="px-5 py-3.5 text-right font-mono-numbers text-sm text-emerald-600 dark:text-emerald-400">
                   {ledger.totalCredit > 0 ? formatCurrency(ledger.totalCredit) : ''}
                 </td>
-                <td className="px-5 py-3.5 text-right font-mono-numbers text-base text-emerald-700 dark:text-emerald-300">
+                <td className="px-5 py-3.5 text-right font-mono-numbers text-base text-emerald-700 dark:text-emerald-300 font-extrabold">
                   {formatCurrency(ledger.closingBalance)}
                 </td>
                 <td className="no-print"></td>
@@ -449,19 +450,19 @@ export const SaleProceedsLedgerView: React.FC = () => {
         </div>
 
         {/* Bottom Closing Balance Banner */}
-        <div className="flex flex-col sm:flex-row items-center justify-between border-t border-slate-200 bg-emerald-50/50 px-6 py-4 dark:border-slate-800 dark:bg-emerald-950/20">
-          <div className="text-xs text-slate-600 dark:text-slate-400">
+        <div className="flex flex-col sm:flex-row items-center justify-between border-t border-slate-200 bg-emerald-50/70 px-6 py-4 dark:border-slate-800 dark:bg-emerald-950/40">
+          <div className="text-xs text-emerald-900 dark:text-emerald-200">
             {selectedCustomer ? (
-              <span>Sale Proceeds Ledger Balance for <strong>{selectedCustomer.name}</strong></span>
+              <span>Sale Proceeds Ledger Balance for <strong className="text-emerald-950 dark:text-emerald-100">{selectedCustomer.name}</strong></span>
             ) : (
-              <span>Current Account Balance for <strong>Hari Kripa</strong></span>
+              <span>Current Account Balance for <strong className="text-emerald-950 dark:text-emerald-100">Hari Kripa</strong></span>
             )}
           </div>
           <div className="flex items-center gap-3 mt-2 sm:mt-0">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400">
+            <span className="text-xs font-bold uppercase tracking-wider text-emerald-900 dark:text-emerald-200">
               Closing Balance:
             </span>
-            <span className="font-mono-numbers text-lg font-extrabold text-emerald-700 dark:text-emerald-400">
+            <span className="font-mono-numbers text-lg font-extrabold text-emerald-700 dark:text-emerald-300">
               {formatCurrency(ledger.closingBalance)}
             </span>
           </div>
@@ -469,7 +470,7 @@ export const SaleProceedsLedgerView: React.FC = () => {
 
         {/* Software attribution & Signatory */}
         <div className="p-3 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 print:border-black flex justify-between items-center text-xs">
-          <div className="text-[8px] sm:text-[8.5px] text-left text-slate-500 print:text-black font-mono">
+          <div className="text-[8px] sm:text-[8.5px] text-left text-slate-500 dark:text-slate-400 print:text-black font-mono">
             Software Developed by: {defaultProfile.softwareDevelopedBy || 'Klyia Technology'}
           </div>
           <div className="hidden print:block text-right font-bold uppercase text-[11px]">
@@ -481,7 +482,6 @@ export const SaleProceedsLedgerView: React.FC = () => {
       {/* Short Print Layout for Sale Proceeds Ledger (Cloned & printed via Short Print button) */}
       <div
         id="sale-proceeds-short-print-area"
-        data-theme-isolated="true"
         className="hidden rounded-xl border border-slate-200 bg-white shadow-2xs dark:border-slate-800 dark:bg-slate-900 overflow-hidden"
       >
         {/* Printable Traditional Mandi Statement Header */}

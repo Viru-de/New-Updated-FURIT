@@ -355,7 +355,7 @@ export const CrateStatementView: React.FC<CrateStatementViewProps> = ({
       {/* Crate Statement Table */}
       <div
         id="crate-statement-print-area"
-        className="rounded-xl border border-slate-200 bg-white shadow-2xs dark:border-slate-800 dark:bg-slate-900 overflow-hidden erp-print-area print-bill-canvas"
+        className="rounded-xl border border-slate-200 bg-white shadow-2xs dark:border-slate-800 dark:bg-slate-900 overflow-hidden erp-print-area"
       >
         {/* Printable Traditional Mandi Statement Header */}
         <div className="hidden print:block p-4 border-b border-black text-center mb-1">
@@ -407,7 +407,7 @@ export const CrateStatementView: React.FC<CrateStatementViewProps> = ({
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm border-collapse">
             <thead>
-              <tr className="border-b border-slate-200 bg-slate-50 text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:border-slate-800 dark:bg-slate-800/60 dark:text-slate-300">
+              <tr className="border-b border-slate-200 bg-slate-100 text-[11px] font-bold uppercase tracking-wider text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">
                 <th className="px-4 py-3.5 w-28">Date</th>
                 <th className="px-4 py-3.5">Particulars / Reference</th>
                 <th className="px-4 py-3.5 text-center w-36">Crate Type</th>
@@ -432,14 +432,14 @@ export const CrateStatementView: React.FC<CrateStatementViewProps> = ({
                     <tr
                       key={entry.id}
                       className={`hover:bg-slate-50/60 transition-colors dark:hover:bg-slate-800/40 ${
-                        isOb ? 'bg-sky-50/20 font-medium' : ''
+                        isOb ? 'bg-sky-50/40 font-medium dark:bg-sky-950/30' : ''
                       }`}
                     >
                       <td className="px-4 py-3 font-mono-numbers text-xs text-slate-700 dark:text-slate-300 whitespace-nowrap">
                         {formatDate(entry.date)}
                       </td>
-                      <td className="px-4 py-3.5 text-slate-900 dark:text-white align-top">
-                        <div className="font-bold text-sm text-slate-950 dark:text-white tracking-tight leading-snug">
+                      <td className="px-4 py-3.5 text-slate-900 dark:text-slate-100 align-top">
+                        <div className={`font-bold text-sm tracking-tight leading-snug ${isOb ? 'text-sky-900 dark:text-sky-200 font-bold' : 'text-slate-950 dark:text-slate-100'}`}>
                           {entry.particulars}
                         </div>
                         {entry.referenceNo && entry.referenceNo !== 'OB' && (
