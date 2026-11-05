@@ -69,6 +69,11 @@ export const SaleProceedPrintModal: React.FC<SaleProceedPrintModalProps> = ({
     items.reduce((sum, it) => sum + (Number(it.quantity) || 0), 0) * 1000
   ) / 1000 || proceeds.quantity || 0;
 
+  // Total Weight across all bill items
+  const totalWeight = Math.round(
+    items.reduce((sum, it) => sum + (Number((it as any).weight ?? it.kg) || 0), 0) * 1000
+  ) / 1000 || proceeds.weight || proceeds.kg || 0;
+
   // Number of blank rows to maintain traditional wholesale mandi bill height scaled by paper size
   const minRows =
     pageSize === 'b7' ? 2 : pageSize === 'b6' ? 4 : pageSize === 'a5' || pageSize === 'compact' ? 6 : 8;
@@ -310,7 +315,7 @@ export const SaleProceedPrintModal: React.FC<SaleProceedPrintModalProps> = ({
                   </tr>
                 ))}
 
-                {/* Total Qty Row: immediately below the item rows */}
+                {/* Total Qty & Total Weight Row: immediately below the item rows */}
                 <tr className="border-b-2 border-t border-black font-bold bg-slate-50/50 print:bg-transparent text-slate-900 print:text-black">
                   <td colSpan={2} className={`border-r border-black ${tablePad} text-right font-bold text-slate-900 print:text-black`}>
                     Total Qty:
@@ -318,7 +323,12 @@ export const SaleProceedPrintModal: React.FC<SaleProceedPrintModalProps> = ({
                   <td className={`border-r border-black ${tablePad} text-right font-mono font-bold text-slate-900 print:text-black`}>
                     {totalQty}
                   </td>
-                  <td colSpan={3} className={tablePad}>&nbsp;</td>
+                  <td colSpan={3} className={`${tablePad} text-right font-bold text-slate-900 print:text-black`}>
+                    <div className="flex items-center justify-end gap-1.5 font-bold">
+                      <span>Total Weight:</span>
+                      <span className="font-mono">{totalWeight} Kg</span>
+                    </div>
+                  </td>
                 </tr>
 
                 {/* Preserved Blank Rows to maintain traditional wholesale bill spacing */}

@@ -877,12 +877,17 @@ export const GroupSaleView: React.FC<GroupSaleViewProps> = ({
       return sum + (c > 0 ? c : (Number(r.quantity) || 0));
     }, 0);
 
+    const totalWeight = Math.round(
+      rows.reduce((sum, r) => sum + (Number(r.kg) || 0), 0) * 1000
+    ) / 1000;
+
     const totalSalesAmount = rows.reduce((sum, r) => sum + (r.totalAmount || 0), 0);
 
     return {
       totalBills,
       totalCustomers,
       totalQuantity,
+      totalWeight,
       totalCrates,
       totalSalesAmount,
     };
@@ -958,6 +963,8 @@ export const GroupSaleView: React.FC<GroupSaleViewProps> = ({
 
             <span className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-300 dark:border-emerald-700 bg-emerald-50 dark:bg-emerald-950/40 px-3 py-2 text-xs font-bold text-emerald-800 dark:text-emerald-200 shadow-2xs">
               Total Qty: <strong className="font-mono text-sm text-emerald-950 dark:text-white">{formatQuantity(summary.totalQuantity)}</strong>
+              <span className="mx-1 opacity-50">·</span>
+              Total Weight: <strong className="font-mono text-sm text-emerald-950 dark:text-white">{summary.totalWeight} Kg</strong>
             </span>
 
             <button
@@ -1596,7 +1603,7 @@ export const GroupSaleView: React.FC<GroupSaleViewProps> = ({
               </tr>
             ))}
 
-            {/* Total Qty Row: immediately below the item rows */}
+            {/* Total Qty & Total Weight Row: immediately below the item rows */}
             <tr className="border-b-2 border-t border-black font-bold bg-slate-50/50 print:bg-transparent text-slate-900 print:text-black">
               <td colSpan={4} className="border border-black p-1 text-right font-bold">
                 Total Qty:
@@ -1604,7 +1611,12 @@ export const GroupSaleView: React.FC<GroupSaleViewProps> = ({
               <td className="border border-black p-1 text-right font-mono font-bold">
                 {formatQuantity(summary.totalQuantity)}
               </td>
-              <td colSpan={5} className="border border-black p-1">&nbsp;</td>
+              <td colSpan={5} className="border border-black p-1 text-right font-bold">
+                <div className="flex items-center justify-end gap-1.5 font-bold">
+                  <span>Total Weight:</span>
+                  <span className="font-mono">{summary.totalWeight} Kg</span>
+                </div>
+              </td>
             </tr>
           </tbody>
           <tfoot>

@@ -144,8 +144,10 @@ export async function triggerPrint(
       'mandi-print-area',
       'receipt-print-area',
       'ledger-print-area',
+      'customer-ledger-short-print-area',
       'crate-statement-print-area',
       'sale-proceeds-print-area',
+      'sale-proceeds-short-print-area',
       'group-sale-print-summary',
       'report-print-area',
     ];

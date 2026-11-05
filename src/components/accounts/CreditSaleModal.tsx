@@ -405,6 +405,11 @@ export const CreditSaleModal: React.FC<CreditSaleModalProps> = ({
     return Math.round(items.reduce((sum, it) => sum + (Number(it.quantity) || 0), 0) * 1000) / 1000;
   }, [items]);
 
+  // Total Weight = sum of all item weights
+  const totalWeight = useMemo(() => {
+    return Math.round(items.reduce((sum, it) => sum + (Number((it as any).weight ?? it.kg) || 0), 0) * 1000) / 1000;
+  }, [items]);
+
   // Net Total = Total + Expense
   const netTotal = Math.round((totalItemAmount + totalExpense) * 100) / 100;
 
@@ -696,6 +701,8 @@ export const CreditSaleModal: React.FC<CreditSaleModalProps> = ({
                   </span>
                   <span className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-300 bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300">
                     Total Qty: <strong className="font-mono text-emerald-900 dark:text-emerald-200">{totalQty}</strong>
+                    <span className="mx-1 opacity-50">·</span>
+                    Total Weight: <strong className="font-mono text-emerald-900 dark:text-emerald-200">{totalWeight} Kg</strong>
                   </span>
                 </div>
                 <button
@@ -854,7 +861,13 @@ export const CreditSaleModal: React.FC<CreditSaleModalProps> = ({
                       <td className="py-2.5 px-2 text-right font-mono text-xs font-bold text-emerald-700 dark:text-emerald-400">
                         {totalQty}
                       </td>
-                      <td colSpan={4} className="py-2.5 px-2 text-right text-xs uppercase tracking-wider text-slate-600 dark:text-slate-300">
+                      <td className="py-2.5 px-2 text-right text-xs uppercase tracking-wider text-slate-600 dark:text-slate-300">
+                        Total Weight:
+                      </td>
+                      <td className="py-2.5 px-2 text-right font-mono text-xs font-bold text-emerald-700 dark:text-emerald-400">
+                        {totalWeight} Kg
+                      </td>
+                      <td colSpan={2} className="py-2.5 px-2 text-right text-xs uppercase tracking-wider text-slate-600 dark:text-slate-300">
                         Items Subtotal:
                       </td>
                       <td className="py-2.5 px-2 text-right font-mono text-xs font-bold text-slate-900 dark:text-white">

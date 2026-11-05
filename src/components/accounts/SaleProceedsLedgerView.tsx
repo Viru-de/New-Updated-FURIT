@@ -87,6 +87,10 @@ export const SaleProceedsLedgerView: React.FC = () => {
     triggerPrint('a4', 'sale-proceeds-print-area');
   };
 
+  const handleShortPrint = () => {
+    triggerPrint('a4', 'sale-proceeds-short-print-area');
+  };
+
   const handleExportCsv = () => {
     const headers = ['Date', 'Particulars', 'Debit (₹)', 'Credit (₹)', 'Balance (₹)'];
     const rows = ledger.entries.map((e) => [
@@ -183,8 +187,17 @@ export const SaleProceedsLedgerView: React.FC = () => {
             type="button"
             onClick={handlePrint}
             className="flex items-center gap-1.5 rounded-lg bg-slate-900 px-3.5 py-1.5 text-xs font-semibold text-white hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 shadow-xs cursor-pointer"
+            title="Print full Sale Proceeds ledger"
           >
             <Printer className="h-3.5 w-3.5" /> Print Ledger
+          </button>
+          <button
+            type="button"
+            onClick={handleShortPrint}
+            className="flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-bold text-slate-800 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 cursor-pointer shadow-2xs"
+            title="Short Print: document number and sale proceeds only"
+          >
+            <Printer className="h-3.5 w-3.5 text-emerald-600" /> Short Print
           </button>
         </div>
       </div>
@@ -455,6 +468,149 @@ export const SaleProceedsLedgerView: React.FC = () => {
 
         {/* Software attribution & Signatory */}
         <div className="p-3 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 print:border-black flex justify-between items-center text-xs">
+          <div className="text-[8px] sm:text-[8.5px] text-left text-slate-500 print:text-black font-mono">
+            Software Developed by: {defaultProfile.softwareDevelopedBy || 'Klyia Technology'}
+          </div>
+          <div className="hidden print:block text-right font-bold uppercase text-[11px]">
+            {formatCompanySignature(defaultProfile)}
+          </div>
+        </div>
+      </div>
+
+      {/* Short Print Layout for Sale Proceeds Ledger (Cloned & printed via Short Print button) */}
+      <div
+        id="sale-proceeds-short-print-area"
+        className="hidden rounded-xl border border-slate-200 bg-white shadow-2xs dark:border-slate-800 dark:bg-slate-900 overflow-hidden"
+      >
+        {/* Printable Traditional Mandi Statement Header */}
+        <div className="p-4 border-b border-black text-center mb-1">
+          {currentProfile.shortCode && (
+            <div className="font-bold text-xs tracking-widest uppercase text-slate-700 print:text-black">
+              {currentProfile.shortCode}
+            </div>
+          )}
+          <h1 className="text-lg sm:text-xl font-black uppercase tracking-wider">{currentProfile.name}</h1>
+          {currentProfile.hindiName && (
+            <div className="text-base sm:text-lg font-bold tracking-wide mt-0.5 font-devanagari text-slate-900 print:text-black">
+              {currentProfile.hindiName}
+            </div>
+          )}
+          <div className="text-[11px] text-slate-700 leading-snug mt-1">
+            {currentProfile.address}
+            {currentProfile.city ? `, ${currentProfile.city}` : ''}
+            {currentProfile.state ? `, ${currentProfile.state}` : ''}
+          </div>
+          <CompanyContactsHeader profile={currentProfile} className="mt-0.5" />
+          <div className="my-1.5 text-xs font-bold uppercase tracking-widest border-b border-t border-black py-0.5 inline-block">
+            SALE PROCEEDS LEDGER (SHORT FORMAT)
+          </div>
+          <div className="flex justify-between items-start text-xs mt-2 text-left border-t border-slate-300 pt-1.5">
+            <div>
+              {selectedCustomer ? (
+                <>
+                  <div className="font-bold text-sm">M/s. {selectedCustomer.name}</div>
+                  {selectedCustomer.city && <div className="text-[11px]">Mandi / City: {selectedCustomer.city}</div>}
+                  {selectedCustomer.mobile && <div className="text-[11px]">Mob: {selectedCustomer.mobile}</div>}
+                </>
+              ) : (
+                <>
+                  <div className="font-bold text-sm">Account: Hari Kripa</div>
+                  <div className="text-[11px]">Mandi Sale Consignment Ledger Account</div>
+                </>
+              )}
+            </div>
+            <div className="text-right">
+              <div>DATE: <strong>{formatDate(getTodayIso())}</strong></div>
+              {(filterStartDate || filterEndDate) ? (
+                <div className="text-[11px]">
+                  Period: {filterStartDate ? formatDate(filterStartDate) : 'Opening'} to {filterEndDate ? formatDate(filterEndDate) : 'Today'}
+                </div>
+              ) : (
+                <div className="text-[11px]">Period: Complete Statement</div>
+              )}
+              <div className="mt-1 font-bold">
+                Closing Balance: <strong>{formatCurrency(ledger.closingBalance)}</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Short Table: ONLY Sale Proceeds & Document Number, NO Qty, NO Expenses breakdown */}
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm border-collapse bg-white">
+            <thead>
+              <tr className="border-b border-black bg-slate-50 text-[11px] font-bold uppercase tracking-wider text-slate-800">
+                <th className="px-5 py-3 w-32 border-b border-black">Date</th>
+                <th className="px-5 py-3 border-b border-black">Particulars / Transaction</th>
+                <th className="px-5 py-3 text-right w-36 border-b border-black">Debit (Dr)</th>
+                <th className="px-5 py-3 text-right w-36 border-b border-black">Credit (Cr)</th>
+                <th className="px-5 py-3 text-right w-44 border-b border-black">Balance (₹)</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-200 bg-white">
+              {ledger.entries.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="px-5 py-8 text-center text-xs text-slate-500">
+                    No transactions found in this period.
+                  </td>
+                </tr>
+              ) : (
+                ledger.entries.map((entry) => {
+                  const isOb = entry.referenceType === 'Opening Balance';
+                  const rawNo = entry.referenceNo || entry.particulars || '';
+                  const numMatch = rawNo.match(/\d+/);
+                  const formattedNo = numMatch ? numMatch[0].padStart(3, '0') : '001';
+
+                  return (
+                    <tr key={`short-${entry.id}`} className={isOb ? 'bg-amber-50/30 font-medium' : ''}>
+                      <td className="px-5 py-2.5 font-mono text-xs text-slate-700 whitespace-nowrap align-top">
+                        {formatDate(entry.date)}
+                      </td>
+                      <td className="px-5 py-2.5 text-slate-900 align-top">
+                        {isOb ? (
+                          <div className="font-bold text-sm">Opening Balance</div>
+                        ) : (
+                          <div className="space-y-0.5">
+                            <div className="font-bold text-sm text-slate-950">Sale Proceeds</div>
+                            <div className="font-bold text-sm text-slate-950">No. {formattedNo}</div>
+                          </div>
+                        )}
+                      </td>
+                      <td className="px-5 py-2.5 text-right font-mono text-xs sm:text-sm text-rose-600 align-top">
+                        {entry.debit !== null ? formatCurrency(entry.debit) : ''}
+                      </td>
+                      <td className="px-5 py-2.5 text-right font-mono text-xs sm:text-sm text-emerald-600 font-medium align-top">
+                        {entry.credit !== null ? formatCurrency(entry.credit) : ''}
+                      </td>
+                      <td className="px-5 py-2.5 text-right font-mono text-xs sm:text-sm font-bold text-slate-900 align-top">
+                        {formatCurrency(entry.balance)}
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+            <tfoot>
+              <tr className="border-t-2 border-black bg-slate-50 font-bold">
+                <td colSpan={2} className="px-5 py-3 text-xs uppercase tracking-wider text-slate-700">
+                  Total & Closing Balance
+                </td>
+                <td className="px-5 py-3 text-right font-mono text-sm text-rose-600">
+                  {ledger.totalDebit > 0 ? formatCurrency(ledger.totalDebit) : ''}
+                </td>
+                <td className="px-5 py-3 text-right font-mono text-sm text-emerald-600">
+                  {ledger.totalCredit > 0 ? formatCurrency(ledger.totalCredit) : ''}
+                </td>
+                <td className="px-5 py-3 text-right font-mono text-base text-emerald-700 font-black">
+                  {formatCurrency(ledger.closingBalance)}
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        {/* Software attribution & Signatory */}
+        <div className="p-3 bg-white border-t border-slate-200 print:border-black flex justify-between items-center text-xs">
           <div className="text-[8px] sm:text-[8.5px] text-left text-slate-500 print:text-black font-mono">
             Software Developed by: {defaultProfile.softwareDevelopedBy || 'Klyia Technology'}
           </div>

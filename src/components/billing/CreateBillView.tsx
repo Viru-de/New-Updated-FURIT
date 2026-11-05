@@ -238,6 +238,7 @@ export const CreateBillView: React.FC<CreateBillViewProps> = ({
   // Totals
   const subtotal = items.reduce((sum, it) => sum + (Number(it.amount) || 0), 0);
   const totalQty = Math.round(items.reduce((sum, it) => sum + (Number(it.quantity) || 0), 0) * 1000) / 1000;
+  const totalWeight = Math.round(items.reduce((sum, it) => sum + (Number((it as any).weight ?? it.kg) || 0), 0) * 1000) / 1000;
   const expenseTotal = expenses.reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
   const totalAmount = subtotal + expenseTotal;
 
@@ -448,6 +449,8 @@ export const CreateBillView: React.FC<CreateBillViewProps> = ({
               </h4>
               <span className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-300 bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300">
                 Total Qty: <strong className="font-mono text-emerald-900 dark:text-emerald-200">{totalQty}</strong>
+                <span className="mx-1 opacity-50">·</span>
+                Total Weight: <strong className="font-mono text-emerald-900 dark:text-emerald-200">{totalWeight} Kg</strong>
               </span>
             </div>
             <div className="flex items-center gap-2">
@@ -544,9 +547,16 @@ export const CreateBillView: React.FC<CreateBillViewProps> = ({
           </div>
 
           <div className="mt-3 flex justify-between items-center pt-2 border-t border-slate-100 dark:border-slate-800 text-xs">
-            <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400 font-semibold">
-              <span>Total Qty:</span>
-              <strong className="font-mono text-emerald-700 dark:text-emerald-400">{totalQty}</strong>
+            <div className="flex flex-wrap items-center gap-3 text-slate-600 dark:text-slate-400 font-semibold">
+              <div className="flex items-center gap-1.5">
+                <span>Total Qty:</span>
+                <strong className="font-mono text-emerald-700 dark:text-emerald-400">{totalQty}</strong>
+              </div>
+              <span className="opacity-40">·</span>
+              <div className="flex items-center gap-1.5">
+                <span>Total Weight:</span>
+                <strong className="font-mono text-emerald-700 dark:text-emerald-400">{totalWeight} Kg</strong>
+              </div>
             </div>
             <div className="flex items-center gap-2">
               <span className="text-slate-500">Items Subtotal:</span>
@@ -813,7 +823,7 @@ export const CreateBillView: React.FC<CreateBillViewProps> = ({
                           </tr>
                         ))}
 
-                        {/* Total Qty Row: immediately below the item rows */}
+                        {/* Total Qty & Total Weight Row: immediately below the item rows */}
                         <tr className="border-b-2 border-t border-black font-bold bg-slate-50/50 print:bg-transparent text-slate-900 print:text-black">
                           <td colSpan={2} className={`border-r border-black ${tablePad} text-right font-bold text-slate-900 print:text-black`}>
                             Total Qty:
@@ -821,7 +831,12 @@ export const CreateBillView: React.FC<CreateBillViewProps> = ({
                           <td className={`border-r border-black ${tablePad} text-right font-mono font-bold text-slate-900 print:text-black`}>
                             {totalQty}
                           </td>
-                          <td colSpan={3} className={tablePad}>&nbsp;</td>
+                          <td colSpan={3} className={`${tablePad} text-right font-bold text-slate-900 print:text-black`}>
+                            <div className="flex items-center justify-end gap-1.5 font-bold">
+                              <span>Total Weight:</span>
+                              <span className="font-mono">{totalWeight} Kg</span>
+                            </div>
+                          </td>
                         </tr>
 
                         {/* Preserved Blank Rows to maintain traditional wholesale bill spacing */}
