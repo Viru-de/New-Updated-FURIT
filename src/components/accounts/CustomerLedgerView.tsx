@@ -596,6 +596,7 @@ export const CustomerLedgerView: React.FC<CustomerLedgerViewProps> = ({
       {/* Ledger Table Container (Used for on-screen viewing, PDF generation, and printing) */}
       <div
         id="ledger-print-area"
+        data-theme-isolated="true"
         className="rounded-xl border border-slate-200 bg-white shadow-2xs dark:border-slate-800 dark:bg-slate-900 overflow-hidden"
       >
         {/* Printable Traditional Mandi Statement Header (matches on-screen layout & company profile) */}
@@ -796,6 +797,7 @@ export const CustomerLedgerView: React.FC<CustomerLedgerViewProps> = ({
       {/* Short Print Layout for Customer Ledger Statement (Cloned & printed via Short Print button) */}
       <div
         id="customer-ledger-short-print-area"
+        data-theme-isolated="true"
         className="hidden rounded-xl border border-slate-200 bg-white shadow-2xs dark:border-slate-800 dark:bg-slate-900 overflow-hidden"
       >
         {/* Printable Traditional Mandi Statement Header */}

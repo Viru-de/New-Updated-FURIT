@@ -176,7 +176,27 @@ export async function triggerPrint(
 
   isPrintingActive = true;
 
-  // 2. Setup isolated print container attached directly to document.body (outside #root)
+  // 2. Track existing dark mode state to ensure clean restoration after print dialog dismisses
+  const wasDark =
+    document.documentElement.classList.contains('dark') ||
+    document.body.classList.contains('dark') ||
+    document.documentElement.getAttribute('data-theme') === 'dark';
+  const prevHtmlClass = document.documentElement.className;
+  const prevBodyClass = document.body.className;
+  const prevDataTheme = document.documentElement.getAttribute('data-theme');
+  const prevHtmlColorScheme = document.documentElement.style.colorScheme;
+  const prevBodyColorScheme = document.body.style.colorScheme;
+
+  // Switch DOM temporarily to light mode so browser print engine renders 100% white theme
+  if (wasDark) {
+    document.documentElement.classList.remove('dark');
+    document.body.classList.remove('dark');
+    document.documentElement.setAttribute('data-theme', 'light');
+    document.documentElement.style.colorScheme = 'light';
+    document.body.style.colorScheme = 'light';
+  }
+
+  // 3. Setup isolated print container attached directly to document.body (outside #root)
   const MOUNT_ID = 'erp-isolated-print-mount';
   let mountEl = document.getElementById(MOUNT_ID) as HTMLElement | null;
   if (!mountEl) {
@@ -185,11 +205,14 @@ export async function triggerPrint(
     document.body.appendChild(mountEl);
   }
   mountEl.innerHTML = '';
+  mountEl.className = 'light bg-white text-black';
+  mountEl.setAttribute('data-theme', 'light');
+  mountEl.style.colorScheme = 'light';
 
-  // 3. Deep-clone the target printable node
+  // 4. Deep-clone the target printable node
   const clone = targetEl.cloneNode(true) as HTMLElement;
 
-  // 4. Sanitize and prepare clone for pristine white-background print
+  // 5. Sanitize and prepare clone for pristine white-background print
   clone.classList.remove('hidden');
   clone.style.display = 'block';
   clone.style.visibility = 'visible';
@@ -223,10 +246,20 @@ export async function triggerPrint(
     htmlEl.style.visibility = 'visible';
   });
 
-  // Strip dark mode classes from clone & descendants so dark theme NEVER bleeds into print
-  clone.classList.remove('dark');
-  const darkEls = clone.querySelectorAll('.dark');
-  darkEls.forEach((el) => el.classList.remove('dark'));
+  // Strip all dark mode and dark: utility classes from clone & all descendants
+  const allCloneNodes = [clone, ...Array.from(clone.querySelectorAll('*'))];
+  allCloneNodes.forEach((node) => {
+    if (node instanceof HTMLElement) {
+      const classesToRemove: string[] = [];
+      for (let i = 0; i < node.classList.length; i++) {
+        const cls = node.classList.item(i);
+        if (cls && (cls === 'dark' || cls.startsWith('dark:'))) {
+          classesToRemove.push(cls);
+        }
+      }
+      classesToRemove.forEach((cls) => node.classList.remove(cls));
+    }
+  });
 
   // Ensure normal unslashed zero and tabular numerals throughout the cloned element
   const allSubEls = clone.querySelectorAll('*');
@@ -255,7 +288,7 @@ export async function triggerPrint(
     document.body.setAttribute('data-print-target', targetElementId || targetEl.id);
   }
 
-  // 5. Ensure web fonts loaded before opening print dialog
+  // 6. Ensure web fonts loaded before opening print dialog
   if (document.fonts) {
     try {
       await document.fonts.ready;
@@ -268,6 +301,11 @@ export async function triggerPrint(
   await new Promise((resolve) => setTimeout(resolve, 80));
 
   let cleanedUp = false;
+  const mql = typeof window !== 'undefined' && window.matchMedia ? window.matchMedia('print') : null;
+  const mqlListener = (e: MediaQueryListEvent) => {
+    if (!e.matches) cleanup();
+  };
+
   const cleanup = () => {
     if (cleanedUp) return;
     cleanedUp = true;
@@ -277,11 +315,31 @@ export async function triggerPrint(
     if (mountEl) {
       mountEl.innerHTML = '';
     }
+
+    // Seamlessly restore dark mode state if it was active
+    if (wasDark) {
+      document.documentElement.className = prevHtmlClass;
+      document.body.className = prevBodyClass;
+      if (prevDataTheme) {
+        document.documentElement.setAttribute('data-theme', prevDataTheme);
+      } else {
+        document.documentElement.removeAttribute('data-theme');
+      }
+      document.documentElement.style.colorScheme = prevHtmlColorScheme || 'dark';
+      document.body.style.colorScheme = prevBodyColorScheme || 'dark';
+    }
+
     window.removeEventListener('afterprint', cleanup);
+    if (mql && mql.removeEventListener) {
+      mql.removeEventListener('change', mqlListener);
+    }
   };
 
   // Only run cleanup after the browser print dialog has actually finished / dismissed
   window.addEventListener('afterprint', cleanup, { once: true });
+  if (mql && mql.addEventListener) {
+    mql.addEventListener('change', mqlListener);
+  }
 
   window.print();
 
@@ -371,6 +429,21 @@ export async function generatePdfDoc(
         clonedElement.style.color = '#000000';
         clonedElement.style.border = 'none';
         clonedElement.style.boxShadow = 'none';
+
+        // Strip dark variant classes from all cloned elements
+        const allClonedNodes = [clonedElement, ...Array.from(clonedElement.querySelectorAll('*'))];
+        allClonedNodes.forEach((node) => {
+          if (node instanceof HTMLElement) {
+            const classesToRemove: string[] = [];
+            for (let i = 0; i < node.classList.length; i++) {
+              const cls = node.classList.item(i);
+              if (cls && (cls === 'dark' || cls.startsWith('dark:'))) {
+                classesToRemove.push(cls);
+              }
+            }
+            classesToRemove.forEach((cls) => node.classList.remove(cls));
+          }
+        });
 
         // 1. Unhide any print-only headers (such as statement and report headers) so they appear in PDFs
         const printBlocks = clonedElement.querySelectorAll('.print\\:block, [class*="print:block"], .hidden');

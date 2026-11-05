@@ -304,6 +304,7 @@ export const SaleProceedsLedgerView: React.FC = () => {
       {/* Ledger Table Container */}
       <div
         id="sale-proceeds-print-area"
+        data-theme-isolated="true"
         className="rounded-xl border border-slate-200 bg-white shadow-2xs dark:border-slate-800 dark:bg-slate-900 overflow-hidden"
       >
         {/* Printable Traditional Mandi Statement Header */}
@@ -480,6 +481,7 @@ export const SaleProceedsLedgerView: React.FC = () => {
       {/* Short Print Layout for Sale Proceeds Ledger (Cloned & printed via Short Print button) */}
       <div
         id="sale-proceeds-short-print-area"
+        data-theme-isolated="true"
         className="hidden rounded-xl border border-slate-200 bg-white shadow-2xs dark:border-slate-800 dark:bg-slate-900 overflow-hidden"
       >
         {/* Printable Traditional Mandi Statement Header */}

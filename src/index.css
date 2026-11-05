@@ -809,7 +809,15 @@ input.no-spinners {
   @page {
     margin: 4mm;
   }
-  html, body, html.dark, body.dark, .dark, [data-theme="dark"], #root {
+
+  /* Universal reset for print medium: Force pure white page, black text, and light color-scheme */
+  html,
+  html.dark,
+  body,
+  body.dark,
+  .dark,
+  [data-theme="dark"],
+  #root {
     background-color: #ffffff !important;
     background: #ffffff !important;
     color: #000000 !important;
@@ -824,10 +832,49 @@ input.no-spinners {
     overflow: visible !important;
   }
 
+  /* =========================================================================
+     FORCIBLY NEUTRALIZE ALL TAILWIND DARK-MODE UTILITY CLASSES IN PRINT
+     Regardless of whether html has class="dark" or data-theme="dark", any dark
+     background, text, or border class must become clean light print styling.
+     ========================================================================= */
+  [class*="dark:bg-"],
+  html.dark [class*="dark:bg-"],
+  body.dark [class*="dark:bg-"],
+  .dark [class*="dark:bg-"] {
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+  }
+
+  [class*="dark:text-"],
+  html.dark [class*="dark:text-"],
+  body.dark [class*="dark:text-"],
+  .dark [class*="dark:text-"] {
+    color: #000000 !important;
+  }
+
+  [class*="dark:border-"],
+  html.dark [class*="dark:border-"],
+  body.dark [class*="dark:border-"],
+  .dark [class*="dark:border-"] {
+    border-color: #000000 !important;
+  }
+
+  [class*="dark:divide-"],
+  html.dark [class*="dark:divide-"] > :not([hidden]) ~ :not([hidden]),
+  body.dark [class*="dark:divide-"] > :not([hidden]) ~ :not([hidden]),
+  .dark [class*="dark:divide-"] > :not([hidden]) ~ :not([hidden]) {
+    border-color: #cbd5e1 !important;
+  }
+
+  [class*="dark:hover:bg-"] {
+    background-color: transparent !important;
+  }
+
   /* When isolated print mount is active, hide #root completely and show ONLY the isolated clone */
   body.has-print-mount #root {
     display: none !important;
   }
+
   body.has-print-mount #erp-isolated-print-mount {
     display: block !important;
     visibility: visible !important;
@@ -842,19 +889,42 @@ input.no-spinners {
     background-color: #ffffff !important;
     background: #ffffff !important;
     color: #000000 !important;
+    color-scheme: light !important;
     box-shadow: none !important;
     border: none !important;
     outline: none !important;
     overflow: visible !important;
   }
 
+  body.has-print-mount #erp-isolated-print-mount,
   body.has-print-mount #erp-isolated-print-mount * {
-    color: #000000 !important;
-    border-color: #000000 !important;
     box-shadow: none !important;
     text-shadow: none !important;
   }
 
+  body.has-print-mount #erp-isolated-print-mount * {
+    color: #000000 !important;
+    border-color: #000000 !important;
+  }
+
+  body.has-print-mount #erp-isolated-print-mount div,
+  body.has-print-mount #erp-isolated-print-mount table,
+  body.has-print-mount #erp-isolated-print-mount tbody,
+  body.has-print-mount #erp-isolated-print-mount tbody tr,
+  body.has-print-mount #erp-isolated-print-mount tbody td,
+  body.has-print-mount #erp-isolated-print-mount p,
+  body.has-print-mount #erp-isolated-print-mount span,
+  body.has-print-mount #erp-isolated-print-mount h1,
+  body.has-print-mount #erp-isolated-print-mount h2,
+  body.has-print-mount #erp-isolated-print-mount h3,
+  body.has-print-mount #erp-isolated-print-mount h4 {
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  body.has-print-mount #erp-isolated-print-mount thead,
+  body.has-print-mount #erp-isolated-print-mount thead tr,
   body.has-print-mount #erp-isolated-print-mount thead th {
     background-color: #f1f5f9 !important;
     background: #f1f5f9 !important;
@@ -864,6 +934,8 @@ input.no-spinners {
     print-color-adjust: exact !important;
   }
 
+  body.has-print-mount #erp-isolated-print-mount tfoot,
+  body.has-print-mount #erp-isolated-print-mount tfoot tr,
   body.has-print-mount #erp-isolated-print-mount tfoot td {
     background-color: #f8fafc !important;
     background: #f8fafc !important;
@@ -873,8 +945,7 @@ input.no-spinners {
     print-color-adjust: exact !important;
   }
 
-  /* Hide all non-printable application shell elements:
-     Navigation bars, headers, sidebars, buttons, toolbars, search modals, format modals, Excel export bars */
+  /* Hide all non-printable application shell elements */
   nav,
   header,
   aside,
@@ -891,7 +962,7 @@ input.no-spinners {
     display: none !important;
   }
 
-  /* Unconstrain active print preview modals so they flow naturally without scroll clipping or collapsed heights */
+  /* Unconstrain active print preview modals so they flow naturally */
   .fixed.inset-0:not(.no-print):not(.print\:hidden) {
     position: static !important;
     background: transparent !important;
@@ -922,7 +993,6 @@ input.no-spinners {
     display: block !important;
   }
 
-  /* Unconstrain all inner modal wrappers, flex containers, and scroll areas */
   .fixed.inset-0:not(.no-print):not(.print\:hidden) [class*="overflow-"],
   .fixed.inset-0:not(.no-print):not(.print\:hidden) .flex-1,
   .fixed.inset-0:not(.no-print):not(.print\:hidden) .min-h-0 {
@@ -963,10 +1033,11 @@ input.no-spinners {
     display: none !important;
   }
 
-  /* Single-page bill canvases: centered, visible, no margins or scroll pushes */
+  /* Single-page bill canvases: centered, visible, white background, no margins or scroll pushes */
   #mandi-print-area,
   #receipt-print-area,
-  #sale-proceeds-print-area {
+  #sale-proceeds-print-area,
+  #sale-proceeds-short-print-area {
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
@@ -978,6 +1049,7 @@ input.no-spinners {
     background-color: #ffffff !important;
     background: #ffffff !important;
     color: #000000 !important;
+    color-scheme: light !important;
     box-shadow: none !important;
     border: none !important;
     outline: none !important;
@@ -1000,11 +1072,15 @@ input.no-spinners {
 
   /* Multi-page statements, ledgers, summaries, and reports */
   #ledger-print-area,
+  #customer-ledger-short-print-area,
+  #sale-proceeds-print-area,
+  #sale-proceeds-short-print-area,
   #group-sale-print-summary,
   #crate-statement-print-area,
   #report-print-area,
   .erp-print-area,
-  .print-bill-canvas {
+  .print-bill-canvas,
+  [data-theme-isolated="true"] {
     position: relative !important;
     left: 0 !important;
     top: 0 !important;
@@ -1015,6 +1091,7 @@ input.no-spinners {
     background-color: #ffffff !important;
     background: #ffffff !important;
     color: #000000 !important;
+    color-scheme: light !important;
     box-shadow: none !important;
     border: none !important;
     outline: none !important;
@@ -1026,51 +1103,74 @@ input.no-spinners {
 
   /* Multi-page table support: repeat headers and keep rows together */
   #ledger-print-area table,
-  #group-sale-print-summary table,
+  #customer-ledger-short-print-area table,
   #sale-proceeds-print-area table,
+  #sale-proceeds-short-print-area table,
+  #group-sale-print-summary table,
   #crate-statement-print-area table,
   #report-print-area table,
   .erp-print-area table,
-  .print-bill-canvas table {
+  .print-bill-canvas table,
+  [data-theme-isolated="true"] table {
     page-break-inside: auto !important;
     break-inside: auto !important;
     border-collapse: collapse !important;
     width: 100% !important;
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+    color: #000000 !important;
   }
+
   #ledger-print-area thead,
-  #group-sale-print-summary thead,
+  #customer-ledger-short-print-area thead,
   #sale-proceeds-print-area thead,
+  #sale-proceeds-short-print-area thead,
+  #group-sale-print-summary thead,
   #crate-statement-print-area thead,
   #report-print-area thead,
   .erp-print-area thead,
-  .print-bill-canvas thead {
+  .print-bill-canvas thead,
+  [data-theme-isolated="true"] thead {
     display: table-header-group !important;
   }
+
   #ledger-print-area tfoot,
-  #group-sale-print-summary tfoot,
+  #customer-ledger-short-print-area tfoot,
   #sale-proceeds-print-area tfoot,
+  #sale-proceeds-short-print-area tfoot,
+  #group-sale-print-summary tfoot,
   #crate-statement-print-area tfoot,
   #report-print-area tfoot,
   .erp-print-area tfoot,
-  .print-bill-canvas tfoot {
+  .print-bill-canvas tfoot,
+  [data-theme-isolated="true"] tfoot {
     display: table-footer-group !important;
   }
+
   #ledger-print-area tr,
-  #group-sale-print-summary tr,
+  #customer-ledger-short-print-area tr,
   #sale-proceeds-print-area tr,
+  #sale-proceeds-short-print-area tr,
+  #group-sale-print-summary tr,
   #crate-statement-print-area tr,
   #report-print-area tr,
   .erp-print-area tr,
-  .print-bill-canvas tr {
+  .print-bill-canvas tr,
+  [data-theme-isolated="true"] tr {
     page-break-inside: avoid !important;
     break-inside: avoid !important;
   }
+
   #ledger-print-area td,
   #ledger-print-area th,
-  #group-sale-print-summary td,
-  #group-sale-print-summary th,
+  #customer-ledger-short-print-area td,
+  #customer-ledger-short-print-area th,
   #sale-proceeds-print-area td,
   #sale-proceeds-print-area th,
+  #sale-proceeds-short-print-area td,
+  #sale-proceeds-short-print-area th,
+  #group-sale-print-summary td,
+  #group-sale-print-summary th,
   #crate-statement-print-area td,
   #crate-statement-print-area th,
   #report-print-area td,
@@ -1078,21 +1178,26 @@ input.no-spinners {
   .erp-print-area td,
   .erp-print-area th,
   .print-bill-canvas td,
-  .print-bill-canvas th {
+  .print-bill-canvas th,
+  [data-theme-isolated="true"] td,
+  [data-theme-isolated="true"] th {
     page-break-inside: avoid !important;
     break-inside: avoid !important;
   }
 
-  /* Force pure black text, crisp borders, and white backgrounds during print regardless of theme */
+  /* Force pure black text, crisp borders, and clean backgrounds during print regardless of theme */
   #mandi-print-area *,
   #receipt-print-area *,
   #ledger-print-area *,
-  #group-sale-print-summary *,
+  #customer-ledger-short-print-area *,
   #sale-proceeds-print-area *,
+  #sale-proceeds-short-print-area *,
+  #group-sale-print-summary *,
   #crate-statement-print-area *,
   #report-print-area *,
   .erp-print-area *,
-  .print-bill-canvas * {
+  .print-bill-canvas *,
+  [data-theme-isolated="true"] * {
     color: #000000 !important;
     border-color: #000000 !important;
     box-shadow: none !important;
@@ -1103,97 +1208,147 @@ input.no-spinners {
   #mandi-print-area div,
   #receipt-print-area div,
   #ledger-print-area div,
-  #group-sale-print-summary div,
+  #customer-ledger-short-print-area div,
   #sale-proceeds-print-area div,
+  #sale-proceeds-short-print-area div,
+  #group-sale-print-summary div,
   #crate-statement-print-area div,
   #report-print-area div,
   .erp-print-area div,
   .print-bill-canvas div,
+  [data-theme-isolated="true"] div,
   #mandi-print-area table,
   #receipt-print-area table,
   #ledger-print-area table,
-  #group-sale-print-summary table,
+  #customer-ledger-short-print-area table,
   #sale-proceeds-print-area table,
+  #sale-proceeds-short-print-area table,
+  #group-sale-print-summary table,
   #crate-statement-print-area table,
   #report-print-area table,
   .erp-print-area table,
   .print-bill-canvas table,
+  [data-theme-isolated="true"] table,
   #mandi-print-area tbody tr,
   #receipt-print-area tbody tr,
   #ledger-print-area tbody tr,
-  #group-sale-print-summary tbody tr,
+  #customer-ledger-short-print-area tbody tr,
   #sale-proceeds-print-area tbody tr,
+  #sale-proceeds-short-print-area tbody tr,
+  #group-sale-print-summary tbody tr,
   #crate-statement-print-area tbody tr,
   #report-print-area tbody tr,
   .erp-print-area tbody tr,
   .print-bill-canvas tbody tr,
+  [data-theme-isolated="true"] tbody tr,
   #mandi-print-area tbody td,
   #receipt-print-area tbody td,
   #ledger-print-area tbody td,
-  #group-sale-print-summary tbody td,
+  #customer-ledger-short-print-area tbody td,
   #sale-proceeds-print-area tbody td,
+  #sale-proceeds-short-print-area tbody td,
+  #group-sale-print-summary tbody td,
   #crate-statement-print-area tbody td,
   #report-print-area tbody td,
   .erp-print-area tbody td,
-  .print-bill-canvas tbody td {
+  .print-bill-canvas tbody td,
+  [data-theme-isolated="true"] tbody td {
     background-color: #ffffff !important;
     background: #ffffff !important;
     color: #000000 !important;
-    border-color: #000000 !important;
+    border-color: #cbd5e1 !important;
   }
 
-  /* Preserve intentional light gray backgrounds for headers */
+  /* Preserve clean light gray backgrounds for headers */
   #mandi-print-area thead tr,
   #receipt-print-area thead tr,
   #ledger-print-area thead tr,
-  #group-sale-print-summary thead tr,
+  #customer-ledger-short-print-area thead tr,
   #sale-proceeds-print-area thead tr,
+  #sale-proceeds-short-print-area thead tr,
+  #group-sale-print-summary thead tr,
   #crate-statement-print-area thead tr,
   #report-print-area thead tr,
   .erp-print-area thead tr,
   .print-bill-canvas thead tr,
+  [data-theme-isolated="true"] thead tr,
   #mandi-print-area thead th,
   #receipt-print-area thead th,
   #ledger-print-area thead th,
-  #group-sale-print-summary thead th,
+  #customer-ledger-short-print-area thead th,
   #sale-proceeds-print-area thead th,
+  #sale-proceeds-short-print-area thead th,
+  #group-sale-print-summary thead th,
   #crate-statement-print-area thead th,
   #report-print-area thead th,
   .erp-print-area thead th,
-  .print-bill-canvas thead th {
+  .print-bill-canvas thead th,
+  [data-theme-isolated="true"] thead th {
     background-color: #f1f5f9 !important;
     background: #f1f5f9 !important;
     color: #000000 !important;
     border-color: #000000 !important;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 
-  /* Table footers */
+  /* Table footers with subtle clean light gray */
   #mandi-print-area tfoot tr,
   #receipt-print-area tfoot tr,
   #ledger-print-area tfoot tr,
-  #group-sale-print-summary tfoot tr,
+  #customer-ledger-short-print-area tfoot tr,
   #sale-proceeds-print-area tfoot tr,
+  #sale-proceeds-short-print-area tfoot tr,
+  #group-sale-print-summary tfoot tr,
   #crate-statement-print-area tfoot tr,
   #report-print-area tfoot tr,
   .erp-print-area tfoot tr,
   .print-bill-canvas tfoot tr,
+  [data-theme-isolated="true"] tfoot tr,
   #mandi-print-area tfoot td,
   #receipt-print-area tfoot td,
   #ledger-print-area tfoot td,
-  #group-sale-print-summary tfoot td,
+  #customer-ledger-short-print-area tfoot td,
   #sale-proceeds-print-area tfoot td,
+  #sale-proceeds-short-print-area tfoot td,
+  #group-sale-print-summary tfoot td,
   #crate-statement-print-area tfoot td,
   #report-print-area tfoot td,
   .erp-print-area tfoot td,
-  .print-bill-canvas tfoot td {
+  .print-bill-canvas tfoot td,
+  [data-theme-isolated="true"] tfoot td {
     background-color: #f8fafc !important;
     background: #f8fafc !important;
     color: #000000 !important;
     border-color: #000000 !important;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Ensure logos, symbols, and company branding remain visible */
+  img,
+  svg,
+  #mandi-print-area img,
+  #mandi-print-area svg,
+  #receipt-print-area img,
+  #receipt-print-area svg,
+  #ledger-print-area img,
+  #ledger-print-area svg,
+  #customer-ledger-short-print-area img,
+  #customer-ledger-short-print-area svg,
+  #sale-proceeds-print-area img,
+  #sale-proceeds-print-area svg,
+  #sale-proceeds-short-print-area img,
+  #sale-proceeds-short-print-area svg,
+  .print-bill-canvas img,
+  .print-bill-canvas svg,
+  #erp-isolated-print-mount img,
+  #erp-isolated-print-mount svg {
+    display: inline-block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 
   /* Ensure unslashed normal zeros and crisp Devanagari font rendering in print output */
