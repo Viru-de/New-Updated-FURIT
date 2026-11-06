@@ -158,9 +158,6 @@ export const WholesaleDirectoryView: React.FC = () => {
           <h2 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
             Wholesale Directory (Vendors & Growers)
           </h2>
-          <p className="text-xs text-slate-500">
-            Consignors, farmers, valley suppliers and commission partners
-          </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">

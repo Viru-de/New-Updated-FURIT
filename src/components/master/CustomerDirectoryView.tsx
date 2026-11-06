@@ -181,9 +181,6 @@ export const CustomerDirectoryView: React.FC<CustomerDirectoryViewProps> = ({
           <h2 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
             Customer Directory
           </h2>
-          <p className="text-xs text-slate-500">
-            Wholesale buyers, mandi commission clients, ledger balances and crate accounts
-          </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">

@@ -306,9 +306,6 @@ export const CreateBillView: React.FC<CreateBillViewProps> = ({
             <FileText className="h-5 w-5 text-emerald-600" />
             {editBill ? `Edit Bill: ${editBill.billNo}` : 'Create Wholesale Mandi Bill'}
           </h2>
-          <p className="text-xs text-slate-500">
-            Generate tax invoices with custom company profiles, letterheads and terms
-          </p>
         </div>
 
         <div className="flex items-center gap-2">

@@ -910,9 +910,6 @@ export const GroupSaleView: React.FC<GroupSaleViewProps> = ({
               Multi-Customer Ledger Posting
             </span>
           </div>
-          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-            Fast bulk entry for Mandi auction customer bills. Automatically calculates item amounts and updates each individual customer ledger.
-          </p>
         </div>
 
         {/* Date Selector & Actions */}

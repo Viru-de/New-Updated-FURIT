@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { db } from '../../services/db';
-import { getSaleProceedsLedger } from '../../services/accounting';
+import { getSaleProceedsLedger, getCustomerCrateStatement } from '../../services/accounting';
 import { formatCurrency, formatDate, toIsoDate, getTodayIso, formatCompanySignature } from '../../utils/formatters';
 import { DatePickerInput } from '../common/DatePickerInput';
 import { Customer, LedgerEntry, SaleProceeds, SaleProceedsOpeningBalance } from '../../types';
@@ -48,6 +48,119 @@ export const SaleProceedsLedgerView: React.FC = () => {
     endDate: filterEndDate ? toIsoDate(filterEndDate) : undefined,
     customerId: selectedCustomerId || undefined,
   });
+
+  const allSaleProceeds = useMemo(() => db.getSaleProceeds(), [refreshKey]);
+  const saleProceedsMap = useMemo(() => {
+    const map = new Map<string, SaleProceeds>();
+    for (const sp of allSaleProceeds) {
+      map.set(sp.id, sp);
+      if (sp.proceedsNo) {
+        map.set(sp.proceedsNo.trim().toLowerCase(), sp);
+      }
+    }
+    return map;
+  }, [allSaleProceeds]);
+
+  const getSaleProceedsDetails = (entry: LedgerEntry) => {
+    let sp: SaleProceeds | undefined;
+    if (entry.referenceId) sp = saleProceedsMap.get(entry.referenceId);
+    if (!sp && entry.id) sp = saleProceedsMap.get(entry.id);
+    if (!sp && entry.referenceNo) sp = saleProceedsMap.get(entry.referenceNo.trim().toLowerCase());
+    if (!sp && entry.particulars) sp = saleProceedsMap.get(entry.particulars.trim().toLowerCase());
+
+    const qty =
+      sp?.items && sp.items.length > 0
+        ? Math.round(sp.items.reduce((sum, it) => sum + (Number(it.quantity) || 0), 0) * 1000) / 1000
+        : (sp?.quantity ?? entry.subDetails?.qty ?? 0);
+
+    const weight =
+      sp?.items && sp.items.length > 0
+        ? Math.round(sp.items.reduce((sum, it) => sum + (Number(it.weight ?? it.kg) || 0), 0) * 1000) / 1000
+        : (sp?.weight ?? sp?.kg ?? 0);
+
+    const total =
+      sp?.netAmount !== undefined
+        ? sp.netAmount
+        : (entry.credit !== null ? entry.credit : (entry.debit !== null ? entry.debit : (sp?.amount ?? 0)));
+
+    return { qty, weight, total };
+  };
+
+  const crateSummary = useMemo(() => {
+    const crateTypes = db.getCrateTypes();
+    const formatName = (name: string) => name.replace(/\s+Crate$/i, '').trim() || name;
+
+    if (selectedCustomerId) {
+      const stmt = getCustomerCrateStatement(selectedCustomerId);
+      const activeTypes = stmt.typeBalances
+        .filter((tb) => tb.issued > 0 || tb.returned > 0 || tb.balance !== 0)
+        .map((tb) => ({
+          crateName: formatName(tb.crateName),
+          issued: tb.issued,
+          returned: tb.returned,
+          balance: tb.balance,
+        }));
+
+      return {
+        balanceCrate: stmt.closingCrates,
+        typeBalances:
+          activeTypes.length > 0
+            ? activeTypes
+            : [
+                {
+                  crateName: formatName(crateTypes[0]?.name || '20kg'),
+                  issued: 0,
+                  returned: 0,
+                  balance: 0,
+                },
+              ],
+      };
+    }
+
+    // Consolidated across all customers
+    const customers = db.getCustomers();
+    let totalBal = 0;
+    const typeMap = new Map<string, { crateName: string; issued: number; returned: number; balance: number }>();
+
+    for (const c of customers) {
+      const stmt = getCustomerCrateStatement(c.id);
+      totalBal += stmt.closingCrates;
+      for (const tb of stmt.typeBalances) {
+        const cleanName = formatName(tb.crateName);
+        if (!typeMap.has(tb.crateTypeId)) {
+          typeMap.set(tb.crateTypeId, {
+            crateName: cleanName,
+            issued: 0,
+            returned: 0,
+            balance: 0,
+          });
+        }
+        const curr = typeMap.get(tb.crateTypeId)!;
+        curr.issued += tb.issued;
+        curr.returned += tb.returned;
+        curr.balance += tb.balance;
+      }
+    }
+
+    const activeTypes = Array.from(typeMap.values()).filter(
+      (tb) => tb.issued > 0 || tb.returned > 0 || tb.balance !== 0
+    );
+
+    return {
+      balanceCrate: totalBal,
+      typeBalances:
+        activeTypes.length > 0
+          ? activeTypes
+          : [
+              {
+                crateName: formatName(crateTypes[0]?.name || '20kg'),
+                issued: 0,
+                returned: 0,
+                balance: 0,
+              },
+            ],
+    };
+  }, [selectedCustomerId, refreshKey]);
 
   const handleEditEntry = (entry: LedgerEntry) => {
     if (entry.referenceType === 'Opening Balance') {
@@ -120,9 +233,6 @@ export const SaleProceedsLedgerView: React.FC = () => {
           <h2 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
             Sale Proceeds Ledger
           </h2>
-          <p className="text-xs text-slate-500">
-            Account: Hari Kripa · Mandi Sale Consignment Ledger Account
-          </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2 no-print">
@@ -295,8 +405,16 @@ export const SaleProceedsLedgerView: React.FC = () => {
             </button>
           )}
 
-          <div className="ml-auto text-xs text-slate-500 pb-2">
-            Credit increases balance · Debit decreases balance
+          {/* Crate Balance Quick Summary on screen */}
+          <div className="sm:ml-auto rounded-lg border border-slate-200 bg-slate-50/80 px-3 py-1.5 text-xs dark:border-slate-800 dark:bg-slate-800/60">
+            <div className="font-bold text-slate-900 dark:text-slate-100">
+              Balance Crate: {crateSummary.balanceCrate}
+            </div>
+            {crateSummary.typeBalances.map((tb, idx) => (
+              <div key={idx} className="font-bold text-slate-700 dark:text-slate-300">
+                {tb.crateName}: {tb.issued} Out ({tb.balance} Bal)
+              </div>
+            ))}
           </div>
         </div>
       </div>
@@ -337,6 +455,17 @@ export const SaleProceedsLedgerView: React.FC = () => {
                 </div>
               )}
               <div className="text-[11px]">Entity: {currentProfile.name}</div>
+              {/* Crate Balance Information */}
+              <div className="mt-2 text-xs">
+                <div className="font-bold text-slate-900 print:text-black">
+                  Balance Crate: {crateSummary.balanceCrate}
+                </div>
+                {crateSummary.typeBalances.map((tb, idx) => (
+                  <div key={idx} className="font-bold text-slate-900 print:text-black">
+                    {tb.crateName}: {tb.issued} Out ({tb.balance} Bal)
+                  </div>
+                ))}
+              </div>
             </div>
             <div className="text-right">
               <div>DATE: <strong>{formatDate(getTodayIso())}</strong></div>
@@ -376,6 +505,7 @@ export const SaleProceedsLedgerView: React.FC = () => {
               ) : (
                 ledger.entries.map((entry) => {
                   const isOb = entry.referenceType === 'Opening Balance';
+                  const details = getSaleProceedsDetails(entry);
                   return (
                     <tr
                       key={entry.id}
@@ -390,14 +520,13 @@ export const SaleProceedsLedgerView: React.FC = () => {
                         <div className={`font-semibold text-xs sm:text-sm ${isOb ? 'text-amber-900 dark:text-amber-200 font-bold' : 'text-slate-900 dark:text-slate-100'}`}>
                           {entry.particulars}
                         </div>
-                        {entry.subDetails?.qty && (
-                          <div className={`text-[11px] ${isOb ? 'text-amber-700 dark:text-amber-300' : 'text-slate-500 dark:text-slate-400'}`}>
-                            Qty: {entry.subDetails.qty}
-                            {entry.subDetails.expenses && entry.subDetails.expenses.length > 0 && (
-                              <span className="ml-2">
-                                (Expenses: {entry.subDetails.expenses.map(e => `${e.name}: ₹${e.amount}`).join(', ')})
-                              </span>
-                            )}
+                        {!isOb && (
+                          <div className="text-[11px] font-semibold text-slate-700 dark:text-slate-300 print:text-black mt-0.5 whitespace-nowrap">
+                            <span>Qty: {details.qty}</span>
+                            <span className="mx-1.5 opacity-60">|</span>
+                            <span>Weight: {details.weight > 0 ? `${details.weight} Kg` : '0 Kg'}</span>
+                            <span className="mx-1.5 opacity-60">|</span>
+                            <span>Total: {formatCurrency(details.total)}</span>
                           </div>
                         )}
                       </td>
@@ -451,14 +580,27 @@ export const SaleProceedsLedgerView: React.FC = () => {
 
         {/* Bottom Closing Balance Banner */}
         <div className="flex flex-col sm:flex-row items-center justify-between border-t border-slate-200 bg-emerald-50/70 px-6 py-4 dark:border-slate-800 dark:bg-emerald-950/40">
-          <div className="text-xs text-emerald-900 dark:text-emerald-200">
-            {selectedCustomer ? (
-              <span>Sale Proceeds Ledger Balance for <strong className="text-emerald-950 dark:text-emerald-100">{selectedCustomer.name}</strong></span>
-            ) : (
-              <span>Current Account Balance for <strong className="text-emerald-950 dark:text-emerald-100">Hari Kripa</strong></span>
-            )}
+          <div>
+            <div className="text-xs text-emerald-900 dark:text-emerald-200">
+              {selectedCustomer ? (
+                <span>Sale Proceeds Ledger Balance for <strong className="text-emerald-950 dark:text-emerald-100">{selectedCustomer.name}</strong></span>
+              ) : (
+                <span>Current Account Balance for <strong className="text-emerald-950 dark:text-emerald-100">Hari Kripa</strong></span>
+              )}
+            </div>
+            {/* Crate Balance Information */}
+            <div className="mt-2 text-xs">
+              <div className="font-bold text-slate-900 dark:text-slate-100 print:text-black">
+                Balance Crate: {crateSummary.balanceCrate}
+              </div>
+              {crateSummary.typeBalances.map((tb, idx) => (
+                <div key={idx} className="font-bold text-slate-800 dark:text-slate-200 print:text-black">
+                  {tb.crateName}: {tb.issued} Out ({tb.balance} Bal)
+                </div>
+              ))}
+            </div>
           </div>
-          <div className="flex items-center gap-3 mt-2 sm:mt-0">
+          <div className="flex items-center gap-3 mt-3 sm:mt-0">
             <span className="text-xs font-bold uppercase tracking-wider text-emerald-900 dark:text-emerald-200">
               Closing Balance:
             </span>
@@ -516,10 +658,20 @@ export const SaleProceedsLedgerView: React.FC = () => {
                 </>
               ) : (
                 <>
-                  <div className="font-bold text-sm">Account: Hari Kripa</div>
-                  <div className="text-[11px]">Mandi Sale Consignment Ledger Account</div>
+                  <div className="font-bold text-sm">Account: Mandi Sale Consignment Proceeds</div>
                 </>
               )}
+              {/* Crate Balance Information */}
+              <div className="mt-2 text-xs">
+                <div className="font-bold text-slate-950 print:text-black">
+                  Balance Crate: {crateSummary.balanceCrate}
+                </div>
+                {crateSummary.typeBalances.map((tb, idx) => (
+                  <div key={idx} className="font-bold text-slate-950 print:text-black">
+                    {tb.crateName}: {tb.issued} Out ({tb.balance} Bal)
+                  </div>
+                ))}
+              </div>
             </div>
             <div className="text-right">
               <div>DATE: <strong>{formatDate(getTodayIso())}</strong></div>
@@ -537,7 +689,7 @@ export const SaleProceedsLedgerView: React.FC = () => {
           </div>
         </div>
 
-        {/* Short Table: ONLY Sale Proceeds & Document Number, NO Qty, NO Expenses breakdown */}
+        {/* Short Table: ONLY Sale Proceeds & Document Number, with single line Qty, Weight and Total */}
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm border-collapse bg-white">
             <thead>
@@ -562,6 +714,7 @@ export const SaleProceedsLedgerView: React.FC = () => {
                   const rawNo = entry.referenceNo || entry.particulars || '';
                   const numMatch = rawNo.match(/\d+/);
                   const formattedNo = numMatch ? numMatch[0].padStart(3, '0') : '001';
+                  const details = getSaleProceedsDetails(entry);
 
                   return (
                     <tr key={`short-${entry.id}`} className={isOb ? 'bg-amber-50/30 font-medium' : ''}>
@@ -572,9 +725,18 @@ export const SaleProceedsLedgerView: React.FC = () => {
                         {isOb ? (
                           <div className="font-bold text-sm">Opening Balance</div>
                         ) : (
-                          <div className="space-y-0.5">
-                            <div className="font-bold text-sm text-slate-950">Sale Proceeds</div>
-                            <div className="font-bold text-sm text-slate-950">No. {formattedNo}</div>
+                          <div>
+                            <div className="space-y-0.5">
+                              <div className="font-bold text-sm text-slate-950">Sale Proceeds</div>
+                              <div className="font-bold text-sm text-slate-950">No. {formattedNo}</div>
+                            </div>
+                            <div className="text-[11px] font-semibold text-slate-800 print:text-black whitespace-nowrap mt-0.5">
+                              <span>Qty: {details.qty}</span>
+                              <span className="mx-1.5 opacity-60">|</span>
+                              <span>Weight: {details.weight > 0 ? `${details.weight} Kg` : '0 Kg'}</span>
+                              <span className="mx-1.5 opacity-60">|</span>
+                              <span>Total: {formatCurrency(details.total)}</span>
+                            </div>
                           </div>
                         )}
                       </td>
@@ -609,6 +771,28 @@ export const SaleProceedsLedgerView: React.FC = () => {
               </tr>
             </tfoot>
           </table>
+        </div>
+
+        {/* Short Print Bottom Crate & Balance Banner */}
+        <div className="flex items-center justify-between border-t border-black bg-slate-50 px-6 py-3">
+          <div className="text-xs">
+            <div className="font-bold text-slate-950 print:text-black">
+              Balance Crate: {crateSummary.balanceCrate}
+            </div>
+            {crateSummary.typeBalances.map((tb, idx) => (
+              <div key={idx} className="font-bold text-slate-950 print:text-black">
+                {tb.crateName}: {tb.issued} Out ({tb.balance} Bal)
+              </div>
+            ))}
+          </div>
+          <div className="text-right">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-800">
+              Closing Balance:
+            </span>{' '}
+            <span className="font-mono text-base font-black text-slate-950">
+              {formatCurrency(ledger.closingBalance)}
+            </span>
+          </div>
         </div>
 
         {/* Software attribution & Signatory */}

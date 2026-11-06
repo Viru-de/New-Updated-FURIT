@@ -168,9 +168,6 @@ export const CrateStatementView: React.FC<CrateStatementViewProps> = ({
           <h2 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
             <Box className="h-5 w-5 text-sky-600" /> Crate Ledger & Statement
           </h2>
-          <p className="text-xs text-slate-500">
-            Independent quantity ledger: tracking empty and loaded crate movements in units & KG
-          </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2 no-print">

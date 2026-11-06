@@ -124,9 +124,6 @@ export const SaleProceedsListView: React.FC<SaleProceedsListViewProps> = ({
           <h2 className="text-xl font-bold tracking-tight text-slate-900">
             Sale Proceeds Transactions
           </h2>
-          <p className="text-xs text-slate-500">
-            Consignment arrivals, mandi auctions, manual amounts & expense deductions
-          </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">

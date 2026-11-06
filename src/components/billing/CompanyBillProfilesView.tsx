@@ -20,11 +20,14 @@ import {
   Eye,
   EyeOff,
   AlertCircle,
+  Sparkles,
 } from 'lucide-react';
+import { HfcLogoExportModal } from '../modals/HfcLogoExportModal';
 
 export const CompanyBillProfilesView: React.FC = () => {
   const [profiles, setProfiles] = useState<CompanyProfile[]>(db.getCompanyProfiles());
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isHfcLogoModalOpen, setIsHfcLogoModalOpen] = useState(false);
   const [editingProfile, setEditingProfile] = useState<CompanyProfile | null>(null);
 
   // Form states
@@ -215,12 +218,18 @@ export const CompanyBillProfilesView: React.FC = () => {
           <h2 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
             <Building2 className="h-5 w-5 text-emerald-600" /> Company Bill Profiles
           </h2>
-          <p className="text-xs text-slate-500">
-            Billing entities, letterheads, bank accounts, Aadhaar Card No. & terms printed on customer bills
-          </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setIsHfcLogoModalOpen(true)}
+            className="flex items-center gap-1.5 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-xs font-bold text-amber-900 hover:bg-amber-100 dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-200 cursor-pointer shadow-2xs transition-colors"
+            title="View, export and download official HFC logo in high-resolution"
+          >
+            <Sparkles className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
+            <span>Official HFC Logo</span>
+          </button>
           <button
             type="button"
             onClick={exportCompanyProfiles}
@@ -799,6 +808,13 @@ export const CompanyBillProfilesView: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Official HFC Logo Modal */}
+      <HfcLogoExportModal
+        isOpen={isHfcLogoModalOpen}
+        onClose={() => setIsHfcLogoModalOpen(false)}
+        onLogoUpdated={refreshList}
+      />
     </div>
   );
 };

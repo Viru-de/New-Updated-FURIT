@@ -122,9 +122,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
               </span>
             )}
           </div>
-          <p className="text-xs text-slate-500 dark:text-slate-400">
-            Business: Hari Kripa · Real-time financial balances, crate holdings & daily sales
-          </p>
         </div>
 
         {/* Date Filter Segmented Controls & Action Buttons */}

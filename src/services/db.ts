@@ -135,6 +135,7 @@ const INITIAL_PROFILES: CompanyProfile[] = [
     footerText: 'Thank you for your business with Hari Kripa!',
     signatureTitle: 'FOR, HARI KRIPA',
     softwareDevelopedBy: 'Klyia Technology',
+    logo: '/assets/hfc_full_logo.png',
     isDefault: true,
     createdAt: '2026-10-01T00:00:00.000Z',
   },
@@ -970,13 +971,17 @@ export const db = {
   getCompanyProfiles(): CompanyProfile[] {
     const profiles = getItem<CompanyProfile[]>(STORAGE_KEYS.COMPANY_PROFILES, INITIAL_PROFILES);
     return profiles.map((p) => {
+      let updated = { ...p };
       if (p.hindiName === undefined) {
         const init = INITIAL_PROFILES.find((ip) => ip.id === p.id);
         if (init?.hindiName) {
-          return { ...p, hindiName: init.hindiName };
+          updated.hindiName = init.hindiName;
         }
       }
-      return p;
+      if (!updated.logo && (p.isDefault || p.id === 'cp1')) {
+        updated.logo = '/assets/hfc_full_logo.png';
+      }
+      return updated;
     });
   },
   getDefaultProfile(): CompanyProfile {

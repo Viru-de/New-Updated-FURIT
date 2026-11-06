@@ -141,9 +141,6 @@ export const TrashView: React.FC<TrashViewProps> = () => {
             <Trash2 className="h-6 w-6 text-rose-600" />
             Trash / Recycle Bin
           </h2>
-          <p className="text-xs text-slate-500">
-            Protected archive for deleted customers, invoices, fruits, receipts & business data. Restore anytime.
-          </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">

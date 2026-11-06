@@ -160,9 +160,6 @@ export const FruitMasterView: React.FC = () => {
           <h2 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
             Fruit / Item Master
           </h2>
-          <p className="text-xs text-slate-500">
-            Wholesale item catalog, standard units, crate sizes & default item prices
-          </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">

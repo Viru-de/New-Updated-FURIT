@@ -170,9 +170,6 @@ export const CustomerLedgerView: React.FC<CustomerLedgerViewProps> = ({
           <h2 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
             Customer Ledger Statement
           </h2>
-          <p className="text-xs text-slate-500">
-            Debits increase outstanding · Credits reduce outstanding
-          </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2 no-print">

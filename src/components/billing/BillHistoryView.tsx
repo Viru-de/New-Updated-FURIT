@@ -117,9 +117,6 @@ export const BillHistoryView: React.FC<BillHistoryViewProps> = ({
           <h2 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
             <FileText className="h-5 w-5 text-emerald-600" /> Bill History
           </h2>
-          <p className="text-xs text-slate-500">
-            All generated mandi invoices, billing company profiles and payment statuses
-          </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">

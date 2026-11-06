@@ -115,9 +115,6 @@ export const ReceiptListView: React.FC<ReceiptListViewProps> = ({
           <h2 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
             Receipts / Cash A/C
           </h2>
-          <p className="text-xs text-slate-500">
-            Cash, UPI & Bank collections credited directly to customer ledger
-          </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">

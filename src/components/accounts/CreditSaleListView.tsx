@@ -107,9 +107,6 @@ export const CreditSaleListView: React.FC<CreditSaleListViewProps> = ({
           <h2 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
             Wholesale Credit Sales
           </h2>
-          <p className="text-xs text-slate-500">
-            Posts Debit directly to Customer Ledger and updates Crate Statement
-          </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">

@@ -109,9 +109,6 @@ export const CashSaleListView: React.FC<CashSaleListViewProps> = ({
           <h2 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
             <Banknote className="h-6 w-6 text-emerald-600" /> Wholesale Cash Sales
           </h2>
-          <p className="text-xs text-slate-500">
-            Immediate cash settlements with exact Qty/KG and Balance Crate tracking
-          </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">

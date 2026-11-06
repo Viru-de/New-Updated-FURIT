@@ -19,7 +19,10 @@ import {
   Trash2,
   CheckCircle,
   AlertTriangle,
+  Sparkles,
+  Eye,
 } from 'lucide-react';
+import { HfcLogoExportModal } from '../modals/HfcLogoExportModal';
 
 interface SettingsViewProps {
   initialTab?: 'general' | 'profiles' | 'units' | 'crates' | 'backup';
@@ -36,6 +39,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ initialTab = 'genera
   const [settings, setSettings] = useState<GeneralSettings>(db.getSettings());
   const [units, setUnits] = useState<Unit[]>(db.getUnits());
   const [crateTypes, setCrateTypes] = useState<CrateType[]>(db.getCrateTypes());
+  const [isLogoModalOpen, setIsLogoModalOpen] = useState(false);
 
   // Unit modal
   const [newUnitName, setNewUnitName] = useState('');
@@ -164,9 +168,6 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ initialTab = 'genera
         <h2 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
           <Settings className="h-5 w-5 text-emerald-600" /> Settings & Master Configuration
         </h2>
-        <p className="text-xs text-slate-500">
-          Billing profiles, measurement units, smart crate conversions and data backup
-        </p>
       </div>
 
       {/* Tabs */}
@@ -317,6 +318,20 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ initialTab = 'genera
                 }}
                 previewShape="rounded"
               />
+            </div>
+
+            <div className="pt-2 flex items-center justify-between border-t border-slate-200 dark:border-slate-800">
+              <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                Official HFC Emblem with Company Name & Slogan
+              </span>
+              <button
+                type="button"
+                onClick={() => setIsLogoModalOpen(true)}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs font-bold text-amber-900 hover:bg-amber-100 dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-200 cursor-pointer shadow-2xs transition-colors"
+              >
+                <Sparkles className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
+                <span>View & Export Official HFC Logo</span>
+              </button>
             </div>
           </div>
 
@@ -646,6 +661,13 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ initialTab = 'genera
           </div>
         </div>
       )}
+
+      {/* Official HFC Logo Modal */}
+      <HfcLogoExportModal
+        isOpen={isLogoModalOpen}
+        onClose={() => setIsLogoModalOpen(false)}
+        onLogoUpdated={() => setSettings({ ...db.getSettings() })}
+      />
     </div>
   );
 };
