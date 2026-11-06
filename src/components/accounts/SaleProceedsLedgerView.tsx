@@ -426,9 +426,9 @@ export const SaleProceedsLedgerView: React.FC = () => {
       >
         {/* Printable Traditional Mandi Statement Header */}
         <div className="hidden print:block p-4 border-b border-black text-center mb-1">
-          {currentProfile.shortCode && (
-            <div className="font-bold text-xs tracking-widest uppercase text-slate-700 print:text-black">
-              {currentProfile.shortCode}
+          {(currentProfile.shortName || currentProfile.shortCode) && (
+            <div className="font-black text-sm tracking-[0.2em] uppercase text-slate-950 print:text-black pb-0.5">
+              {currentProfile.shortName || currentProfile.shortCode}
             </div>
           )}
           <h1 className="text-lg sm:text-xl font-black uppercase tracking-wider">{currentProfile.name}</h1>
@@ -484,13 +484,13 @@ export const SaleProceedsLedgerView: React.FC = () => {
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm border-collapse bg-white dark:bg-slate-900">
             <thead>
-              <tr className="border-b border-slate-200 bg-slate-100 text-[11px] font-bold uppercase tracking-wider text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">
-                <th className="px-5 py-3.5 w-32">Date</th>
-                <th className="px-5 py-3.5">Particulars</th>
-                <th className="px-5 py-3.5 text-right w-36">Debit (Dr)</th>
-                <th className="px-5 py-3.5 text-right w-36">Credit (Cr)</th>
-                <th className="px-5 py-3.5 text-right w-44">Balance (₹)</th>
-                <th className="px-4 py-3.5 text-center w-24 no-print">Actions</th>
+              <tr className="border-b border-slate-200 bg-slate-100 text-[11px] font-bold uppercase tracking-wider text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
+                <th className="px-5 py-3.5 w-32 text-slate-800 dark:text-slate-100 font-bold">Date</th>
+                <th className="px-5 py-3.5 text-slate-800 dark:text-slate-100 font-bold">Particulars</th>
+                <th className="px-5 py-3.5 text-right w-36 text-slate-800 dark:text-slate-100 font-bold">Debit (Dr)</th>
+                <th className="px-5 py-3.5 text-right w-36 text-slate-800 dark:text-slate-100 font-bold">Credit (Cr)</th>
+                <th className="px-5 py-3.5 text-right w-44 text-slate-800 dark:text-slate-100 font-bold">Balance (₹)</th>
+                <th className="px-4 py-3.5 text-center w-24 text-slate-800 dark:text-slate-100 font-bold no-print">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800 bg-white dark:bg-slate-900">
@@ -517,7 +517,7 @@ export const SaleProceedsLedgerView: React.FC = () => {
                         {formatDate(entry.date)}
                       </td>
                       <td className="px-5 py-3 text-slate-900 dark:text-slate-100">
-                        <div className={`font-semibold text-xs sm:text-sm ${isOb ? 'text-amber-900 dark:text-amber-200 font-bold' : 'text-slate-900 dark:text-slate-100'}`}>
+                        <div className={`font-semibold text-xs sm:text-sm ${isOb ? 'text-amber-900 dark:text-amber-300 font-bold' : 'text-slate-900 dark:text-slate-100'}`}>
                           {entry.particulars}
                         </div>
                         {!isOb && (
@@ -581,7 +581,7 @@ export const SaleProceedsLedgerView: React.FC = () => {
         {/* Bottom Closing Balance Banner */}
         <div className="flex flex-col sm:flex-row items-center justify-between border-t border-slate-200 bg-emerald-50/70 px-6 py-4 dark:border-slate-800 dark:bg-emerald-950/40">
           <div>
-            <div className="text-xs text-emerald-900 dark:text-emerald-200">
+            <div className="text-xs font-medium text-emerald-950 dark:text-emerald-200">
               {selectedCustomer ? (
                 <span>Sale Proceeds Ledger Balance for <strong className="text-emerald-950 dark:text-emerald-100">{selectedCustomer.name}</strong></span>
               ) : (
@@ -601,7 +601,7 @@ export const SaleProceedsLedgerView: React.FC = () => {
             </div>
           </div>
           <div className="flex items-center gap-3 mt-3 sm:mt-0">
-            <span className="text-xs font-bold uppercase tracking-wider text-emerald-900 dark:text-emerald-200">
+            <span className="text-xs font-extrabold uppercase tracking-wider text-emerald-950 dark:text-emerald-300">
               Closing Balance:
             </span>
             <span className="font-mono-numbers text-lg font-extrabold text-emerald-700 dark:text-emerald-300">
@@ -628,9 +628,9 @@ export const SaleProceedsLedgerView: React.FC = () => {
       >
         {/* Printable Traditional Mandi Statement Header */}
         <div className="p-4 border-b border-black text-center mb-1">
-          {currentProfile.shortCode && (
-            <div className="font-bold text-xs tracking-widest uppercase text-slate-700 print:text-black">
-              {currentProfile.shortCode}
+          {(currentProfile.shortName || currentProfile.shortCode) && (
+            <div className="font-black text-sm tracking-[0.2em] uppercase text-slate-950 print:text-black pb-0.5">
+              {currentProfile.shortName || currentProfile.shortCode}
             </div>
           )}
           <h1 className="text-lg sm:text-xl font-black uppercase tracking-wider">{currentProfile.name}</h1>

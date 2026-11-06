@@ -1536,9 +1536,9 @@ export const GroupSaleView: React.FC<GroupSaleViewProps> = ({
       {/* Clean Printable Daily Summary for window.print() */}
       <div className="hidden print:block font-sans text-black p-6 bg-white" id="group-sale-print-summary" style={{ fontFamily: "'Plus Jakarta Sans', 'Noto Sans Devanagari', Arial, sans-serif" }}>
         <div className="text-center border-b-2 border-black pb-4 mb-4">
-          {currentProfile.shortCode && (
-            <div className="font-bold text-xs tracking-widest uppercase text-slate-700 print:text-black">
-              {currentProfile.shortCode}
+          {(currentProfile.shortName || currentProfile.shortCode) && (
+            <div className="font-black text-base tracking-[0.2em] uppercase text-slate-950 print:text-black pb-0.5">
+              {currentProfile.shortName || currentProfile.shortCode}
             </div>
           )}
           <h1 className="text-xl font-black uppercase tracking-wider">{currentProfile.name}</h1>

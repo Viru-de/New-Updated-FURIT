@@ -339,7 +339,7 @@ export const BillHistoryView: React.FC<BillHistoryViewProps> = ({
                   const fallbackProf = selectedBillForPreview.companyProfileId
                     ? db.getCompanyProfiles().find((p) => p.id === selectedBillForPreview.companyProfileId)
                     : db.getDefaultProfile();
-                  const shortCode = snap?.shortCode || fallbackProf?.shortCode;
+                  const shortName = snap?.shortName || snap?.shortCode || fallbackProf?.shortName || fallbackProf?.shortCode;
                   const name = snap?.name || fallbackProf?.name;
                   const hindiName = snap?.hindiName || fallbackProf?.hindiName;
                   const address = snap?.address || fallbackProf?.address;
@@ -348,9 +348,9 @@ export const BillHistoryView: React.FC<BillHistoryViewProps> = ({
 
                   return (
                     <div className={`text-center mb-1 ${pageSize === 'b7' ? 'pb-1' : 'pb-1.5'}`}>
-                      {shortCode && (
-                        <div className={`font-bold tracking-widest uppercase text-slate-900 dark:text-slate-900 print:text-black ${pageSize === 'b7' ? 'text-[10px]' : 'text-sm'}`}>
-                          {shortCode}
+                      {shortName && (
+                        <div className={`font-black tracking-[0.2em] uppercase text-slate-950 dark:text-slate-950 print:text-black ${pageSize === 'b7' ? 'text-xs' : pageSize === 'b6' ? 'text-sm' : 'text-base sm:text-lg'} pb-0.5`}>
+                          {shortName}
                         </div>
                       )}
                       <h1 className={`font-black tracking-wider uppercase mt-0.5 text-slate-950 dark:text-slate-950 print:text-black ${pageSize === 'b7' ? 'text-sm sm:text-base' : pageSize === 'b6' ? 'text-base sm:text-lg' : 'text-lg sm:text-xl'}`}>

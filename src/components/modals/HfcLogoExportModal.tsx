@@ -13,20 +13,21 @@ export const HfcLogoExportModal: React.FC<HfcLogoExportModalProps> = ({
   onClose,
   onLogoUpdated,
 }) => {
-  const [selectedBg, setSelectedBg] = useState<'cream' | 'white' | 'transparent'>('cream');
+  const [selectedBg, setSelectedBg] = useState<'white' | 'transparent' | 'cream' | 'circle'>('white');
   const [copiedStatus, setCopiedStatus] = useState(false);
 
   if (!isOpen) return null;
 
   const logoMap = {
-    cream: '/assets/hfc_full_logo.png',
     white: '/assets/hfc_full_logo_white.png',
     transparent: '/assets/hfc_full_logo_transparent.png',
+    cream: '/assets/hfc_full_logo.png',
+    circle: '/assets/hfc_circle_logo.png',
   };
 
   const currentLogoSrc = logoMap[selectedBg];
 
-  const handleDownload = (type: 'cream' | 'white' | 'transparent') => {
+  const handleDownload = (type: 'white' | 'transparent' | 'cream' | 'circle') => {
     const link = document.createElement('a');
     link.href = logoMap[type];
     link.download = `HFC_Hari_Kripa_Fruit_Company_Logo_${type}.png`;
@@ -35,7 +36,7 @@ export const HfcLogoExportModal: React.FC<HfcLogoExportModalProps> = ({
     document.body.removeChild(link);
   };
 
-  const handleApplyToErp = (type: 'cream' | 'white' | 'transparent') => {
+  const handleApplyToErp = (type: 'white' | 'transparent' | 'cream' | 'circle') => {
     const defaultProfile = db.getDefaultProfile();
     if (defaultProfile) {
       db.saveCompanyProfile({
@@ -86,17 +87,6 @@ export const HfcLogoExportModal: React.FC<HfcLogoExportModalProps> = ({
               <div className="inline-flex rounded-lg border border-slate-200 p-0.5 bg-slate-100 dark:border-slate-700 dark:bg-slate-800">
                 <button
                   type="button"
-                  onClick={() => setSelectedBg('cream')}
-                  className={`rounded-md px-3 py-1 text-xs font-bold transition-all cursor-pointer ${
-                    selectedBg === 'cream'
-                      ? 'bg-amber-100 text-amber-950 shadow-xs border border-amber-300'
-                      : 'text-slate-600 hover:text-slate-900 dark:text-slate-300'
-                  }`}
-                >
-                  Original Cream (#FDE9C8)
-                </button>
-                <button
-                  type="button"
                   onClick={() => setSelectedBg('white')}
                   className={`rounded-md px-3 py-1 text-xs font-bold transition-all cursor-pointer ${
                     selectedBg === 'white'
@@ -115,7 +105,29 @@ export const HfcLogoExportModal: React.FC<HfcLogoExportModalProps> = ({
                       : 'text-slate-600 hover:text-slate-900 dark:text-slate-300'
                   }`}
                 >
-                  Transparent (Web & Dark Mode)
+                  Transparent (Web & Alpha)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedBg('cream')}
+                  className={`rounded-md px-3 py-1 text-xs font-bold transition-all cursor-pointer ${
+                    selectedBg === 'cream'
+                      ? 'bg-amber-100 text-amber-950 shadow-xs border border-amber-300'
+                      : 'text-slate-600 hover:text-slate-900 dark:text-slate-300'
+                  }`}
+                >
+                  Original Cream (#FDE9C8)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedBg('circle')}
+                  className={`rounded-md px-3 py-1 text-xs font-bold transition-all cursor-pointer ${
+                    selectedBg === 'circle'
+                      ? 'bg-amber-600 text-white shadow-xs'
+                      : 'text-slate-600 hover:text-slate-900 dark:text-slate-300'
+                  }`}
+                >
+                  Circle Emblem Only
                 </button>
               </div>
             </div>
@@ -150,32 +162,8 @@ export const HfcLogoExportModal: React.FC<HfcLogoExportModalProps> = ({
           </div>
 
           {/* Export Options Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {/* 1. Cream PNG */}
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-3.5 dark:border-slate-800 dark:bg-slate-800/50 flex flex-col justify-between">
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <span className="font-bold text-xs text-slate-900 dark:text-white">
-                    Original Cream PNG
-                  </span>
-                  <span className="text-[10px] font-mono text-amber-700 bg-amber-100 dark:bg-amber-950/60 dark:text-amber-300 px-1.5 py-0.5 rounded">
-                    1254 × 1600
-                  </span>
-                </div>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                  Full original champagne background with gold accents and branding.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => handleDownload('cream')}
-                className="mt-3 flex items-center justify-center gap-1.5 rounded-lg border border-slate-300 bg-white py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 cursor-pointer shadow-2xs"
-              >
-                <Download className="h-3.5 w-3.5 text-emerald-600" /> Download
-              </button>
-            </div>
-
-            {/* 2. White Print PNG */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            {/* 1. White Print PNG */}
             <div className="rounded-xl border border-slate-200 bg-slate-50 p-3.5 dark:border-slate-800 dark:bg-slate-800/50 flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between mb-1">
@@ -184,7 +172,7 @@ export const HfcLogoExportModal: React.FC<HfcLogoExportModalProps> = ({
                     <span>Print & Bill PNG</span>
                   </span>
                   <span className="text-[10px] font-mono text-blue-700 bg-blue-100 dark:bg-blue-950/60 dark:text-blue-300 px-1.5 py-0.5 rounded">
-                    White BG
+                    300 DPI
                   </span>
                 </div>
                 <p className="text-[11px] text-slate-500 dark:text-slate-400">
@@ -200,7 +188,7 @@ export const HfcLogoExportModal: React.FC<HfcLogoExportModalProps> = ({
               </button>
             </div>
 
-            {/* 3. Transparent PNG */}
+            {/* 2. Transparent PNG */}
             <div className="rounded-xl border border-slate-200 bg-slate-50 p-3.5 dark:border-slate-800 dark:bg-slate-800/50 flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between mb-1">
@@ -213,7 +201,7 @@ export const HfcLogoExportModal: React.FC<HfcLogoExportModalProps> = ({
                   </span>
                 </div>
                 <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                  Cutout circular emblem and typography with transparent backdrop.
+                  Cutout circular emblem and typography with transparent backdrop for web & dark mode.
                 </p>
               </div>
               <button
@@ -222,6 +210,54 @@ export const HfcLogoExportModal: React.FC<HfcLogoExportModalProps> = ({
                 className="mt-3 flex items-center justify-center gap-1.5 rounded-lg border border-slate-300 bg-white py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 cursor-pointer shadow-2xs"
               >
                 <Download className="h-3.5 w-3.5 text-purple-600" /> Download
+              </button>
+            </div>
+
+            {/* 3. Cream PNG */}
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-3.5 dark:border-slate-800 dark:bg-slate-800/50 flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <span className="font-bold text-xs text-slate-900 dark:text-white">
+                    Original Cream PNG
+                  </span>
+                  <span className="text-[10px] font-mono text-amber-700 bg-amber-100 dark:bg-amber-950/60 dark:text-amber-300 px-1.5 py-0.5 rounded">
+                    1200 × 1350
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                  Full champagne background with gold accents and branding.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => handleDownload('cream')}
+                className="mt-3 flex items-center justify-center gap-1.5 rounded-lg border border-slate-300 bg-white py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 cursor-pointer shadow-2xs"
+              >
+                <Download className="h-3.5 w-3.5 text-emerald-600" /> Download
+              </button>
+            </div>
+
+            {/* 4. Circle Emblem Only */}
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-3.5 dark:border-slate-800 dark:bg-slate-800/50 flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <span className="font-bold text-xs text-slate-900 dark:text-white">
+                    Circular Emblem
+                  </span>
+                  <span className="text-[10px] font-mono text-emerald-700 bg-emerald-100 dark:bg-emerald-950/60 dark:text-emerald-300 px-1.5 py-0.5 rounded">
+                    500 × 500
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                  Original HFC circular badge without text additions for avatars, app icons, and stamps.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => handleDownload('circle')}
+                className="mt-3 flex items-center justify-center gap-1.5 rounded-lg border border-slate-300 bg-white py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 cursor-pointer shadow-2xs"
+              >
+                <Download className="h-3.5 w-3.5 text-amber-600" /> Download
               </button>
             </div>
           </div>

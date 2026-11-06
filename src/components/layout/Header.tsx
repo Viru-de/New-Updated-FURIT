@@ -71,34 +71,29 @@ export const Header: React.FC<HeaderProps> = ({
           </button>
 
           <div className="flex items-center gap-2.5">
-            {(() => {
-              const defaultProfile = db.getCompanyProfiles().find((p) => p.isDefault) || db.getCompanyProfiles()[0];
-              const customLogo = defaultProfile?.logo;
-              return customLogo ? (
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white p-0.5 shadow-xs shrink-0">
-                  <img
-                    src={customLogo}
-                    alt="Company Logo"
-                    className="h-full w-full object-contain"
-                  />
-                </div>
-              ) : null;
-            })()}
-            <div className="flex items-center gap-2">
-              <h1 className="text-base sm:text-lg font-extrabold tracking-tight text-slate-900 dark:text-white">
-                Hari Kripa Fruit ERP
-              </h1>
-              {(() => {
-                const defaultProfile = db.getCompanyProfiles().find((p) => p.isDefault) || db.getCompanyProfiles()[0];
-                return defaultProfile?.hindiName ? (
-                  <span className="hidden md:inline-block text-xs font-semibold text-emerald-600 dark:text-emerald-400 font-devanagari">
-                    ({defaultProfile.hindiName})
-                  </span>
-                ) : null;
-              })()}
-              <span className="hidden sm:inline-block text-slate-300 dark:text-slate-700">|</span>
-              <span className="hidden sm:inline-block text-xs font-semibold text-slate-500 dark:text-slate-400">
-                Mandi Accounting
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white p-0.5 shadow-xs shrink-0">
+              <img
+                src="/assets/hfc_circle_logo.png"
+                alt="Hari Kripa Fruit Company"
+                className="h-full w-full object-contain"
+              />
+            </div>
+            <div className="flex flex-col justify-center">
+              <div className="flex items-center gap-2">
+                <h1 className="font-serif font-black text-sm sm:text-base tracking-tight text-red-950 dark:text-amber-100 uppercase leading-none font-sans">
+                  Hari Kripa Fruit Company
+                </h1>
+                {(() => {
+                  const defaultProfile = db.getCompanyProfiles().find((p) => p.isDefault) || db.getCompanyProfiles()[0];
+                  return defaultProfile?.hindiName ? (
+                    <span className="hidden md:inline-block text-xs font-semibold text-emerald-600 dark:text-emerald-400 font-devanagari">
+                      ({defaultProfile.hindiName})
+                    </span>
+                  ) : null;
+                })()}
+              </div>
+              <span className="font-serif italic text-[10px] font-semibold text-emerald-700 dark:text-emerald-400 mt-0.5">
+                Freshness. Quality. Trust.
               </span>
             </div>
           </div>

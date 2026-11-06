@@ -356,9 +356,9 @@ export const CrateStatementView: React.FC<CrateStatementViewProps> = ({
       >
         {/* Printable Traditional Mandi Statement Header */}
         <div className="hidden print:block p-4 border-b border-black text-center mb-1">
-          {currentProfile.shortCode && (
-            <div className="font-bold text-xs tracking-widest uppercase text-slate-700 print:text-black">
-              {currentProfile.shortCode}
+          {(currentProfile.shortName || currentProfile.shortCode) && (
+            <div className="font-black text-sm tracking-[0.2em] uppercase text-slate-950 print:text-black pb-0.5">
+              {currentProfile.shortName || currentProfile.shortCode}
             </div>
           )}
           <h1 className="text-lg sm:text-xl font-black uppercase tracking-wider">{currentProfile.name}</h1>

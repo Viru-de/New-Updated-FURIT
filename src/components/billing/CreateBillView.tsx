@@ -304,7 +304,7 @@ export const CreateBillView: React.FC<CreateBillViewProps> = ({
         <div>
           <h2 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
             <FileText className="h-5 w-5 text-emerald-600" />
-            {editBill ? `Edit Bill: ${editBill.billNo}` : 'Create Wholesale Mandi Bill'}
+            {editBill ? `Edit Bill: ${editBill.billNo}` : 'Create Wholesale Bill'}
           </h2>
         </div>
 
@@ -713,9 +713,9 @@ export const CreateBillView: React.FC<CreateBillViewProps> = ({
               >
                 {/* Header: Company Initials & Bilingual Names */}
                 <div className={`text-center mb-1 ${pageSize === 'b7' ? 'pb-1' : 'pb-1.5'}`}>
-                  {activeProfile?.shortCode && (
-                    <div className={`font-bold tracking-widest uppercase text-slate-900 dark:text-slate-900 print:text-black ${pageSize === 'b7' ? 'text-[10px]' : 'text-sm'}`}>
-                      {activeProfile.shortCode}
+                  {(activeProfile?.shortName || activeProfile?.shortCode) && (
+                    <div className={`font-black tracking-[0.2em] uppercase text-slate-950 dark:text-slate-950 print:text-black ${pageSize === 'b7' ? 'text-xs' : pageSize === 'b6' ? 'text-sm' : 'text-base sm:text-lg'} pb-0.5`}>
+                      {activeProfile.shortName || activeProfile.shortCode}
                     </div>
                   )}
                   <h1 className={`font-black tracking-wider uppercase mt-0.5 text-slate-950 dark:text-slate-950 print:text-black ${pageSize === 'b7' ? 'text-sm sm:text-base' : pageSize === 'b6' ? 'text-base sm:text-lg' : 'text-lg sm:text-xl'}`}>

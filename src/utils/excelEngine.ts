@@ -948,7 +948,7 @@ export function exportCompanyProfiles() {
     sanitizeCellValue(p.name),
     sanitizeCellValue(p.tradeName || ''),
     sanitizeCellValue(p.hindiName || ''),
-    sanitizeCellValue(p.shortCode || ''),
+    sanitizeCellValue(p.shortName || p.shortCode || ''),
     sanitizeCellValue(p.address || ''),
     sanitizeCellValue(p.city || ''),
     sanitizeCellValue(p.state || ''),

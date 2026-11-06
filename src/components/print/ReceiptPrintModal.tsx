@@ -70,7 +70,7 @@ export const ReceiptPrintModal: React.FC<ReceiptPrintModalProps> = ({
               >
                 {profiles.map((p) => (
                   <option key={p.id} value={p.id}>
-                    {p.name} {p.shortCode ? `(${p.shortCode})` : ''}
+                    {p.name} {p.shortName || p.shortCode ? `(${p.shortName || p.shortCode})` : ''}
                   </option>
                 ))}
               </select>
@@ -140,9 +140,9 @@ export const ReceiptPrintModal: React.FC<ReceiptPrintModalProps> = ({
           >
             {/* Header: Company Details (English + Hindi Bilingual) */}
             <div className={`text-center border-b border-slate-200 print:border-black ${pageSize === 'b7' ? 'pb-1' : pageSize === 'b6' ? 'pb-2' : 'pb-3'}`}>
-              {currentProfile.shortCode && (
-                <div className={`font-bold tracking-widest uppercase text-slate-900 dark:text-slate-900 print:text-black ${pageSize === 'b7' ? 'text-[10px]' : 'text-xs'}`}>
-                  {currentProfile.shortCode}
+              {(currentProfile.shortName || currentProfile.shortCode) && (
+                <div className={`font-black tracking-[0.2em] uppercase text-slate-950 dark:text-slate-950 print:text-black ${pageSize === 'b7' ? 'text-xs' : pageSize === 'b6' ? 'text-sm' : 'text-base sm:text-lg'} pb-0.5`}>
+                  {currentProfile.shortName || currentProfile.shortCode}
                 </div>
               )}
               <h1 className={`font-black tracking-wider uppercase text-slate-950 dark:text-slate-950 print:text-black ${pageSize === 'b7' ? 'text-sm sm:text-base' : pageSize === 'b6' ? 'text-base' : 'text-base sm:text-lg'}`}>

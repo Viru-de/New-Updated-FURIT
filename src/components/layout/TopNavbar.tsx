@@ -174,26 +174,19 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
             <button
               type="button"
               onClick={() => handleSelectPage('dashboard')}
-              className="flex items-center gap-3 text-left group transition-transform active:scale-98"
+              className="flex items-center gap-2.5 sm:gap-3 text-left group transition-transform active:scale-98"
             >
-              {customLogo && (
-                <img
-                  src={customLogo}
-                  alt="Business Logo"
-                  className="h-10 sm:h-11 w-auto max-w-[140px] sm:max-w-[160px] object-contain select-none shrink-0"
-                />
-              )}
-              <div className="hidden sm:block">
-                <div className="flex items-center gap-1.5">
-                  <span className="font-black text-sm tracking-tight text-slate-900 uppercase leading-none font-sans">
-                    Hari Kripa
-                  </span>
-                  <span className="font-extrabold text-xs text-emerald-600 uppercase leading-none">
-                    Fruit ERP
-                  </span>
-                </div>
-                <span className="text-[10px] text-slate-500 font-medium tracking-wide">
-                  Wholesale Mandi Accounting
+              <img
+                src={customLogo || '/assets/hfc_circle_logo.png'}
+                alt="Hari Kripa Fruit Company"
+                className="h-10 sm:h-11 w-10 sm:w-11 object-contain select-none shrink-0 rounded-full"
+              />
+              <div className="hidden sm:flex flex-col justify-center">
+                <span className="font-serif font-black text-xs sm:text-sm tracking-wider text-red-950 dark:text-amber-100 uppercase leading-tight font-sans">
+                  Hari Kripa Fruit Company
+                </span>
+                <span className="font-serif italic text-[10px] sm:text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 tracking-wide mt-0.5">
+                  Freshness. Quality. Trust.
                 </span>
               </div>
             </button>
@@ -797,24 +790,24 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
             {/* Drawer Header */}
             <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 px-4 py-3 bg-white dark:bg-slate-900">
               <div className="flex items-center gap-2.5">
-                {customLogo && (
-                  <img
-                    src={customLogo}
-                    alt="Business Logo"
-                    className="h-10 w-auto object-contain select-none shrink-0"
-                  />
-                )}
-                <div>
-                  <h2 className="text-sm font-bold text-slate-900 leading-none">
-                    HARI KRIPA
+                <img
+                  src={customLogo || '/assets/hfc_circle_logo.png'}
+                  alt="Hari Kripa Fruit Company"
+                  className="h-10 w-10 object-contain select-none shrink-0 rounded-full"
+                />
+                <div className="flex flex-col justify-center">
+                  <h2 className="font-serif font-black text-xs sm:text-sm text-red-950 dark:text-amber-100 uppercase leading-tight font-sans">
+                    Hari Kripa Fruit Company
                   </h2>
-                  <span className="text-[10px] text-emerald-600 font-semibold">Fruit ERP</span>
+                  <span className="font-serif italic text-[10px] font-semibold text-emerald-700 dark:text-emerald-400 mt-0.5">
+                    Freshness. Quality. Trust.
+                  </span>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => setMobileMenuOpen(false)}
-                className="neu-btn p-1.5 text-slate-600 hover:text-slate-900"
+                className="neu-btn p-1.5 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
               >
                 <X className="h-5 w-5" />
               </button>

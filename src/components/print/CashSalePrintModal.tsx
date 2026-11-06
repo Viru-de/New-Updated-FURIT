@@ -67,7 +67,7 @@ export const CashSalePrintModal: React.FC<CashSalePrintModalProps> = ({
               >
                 {profiles.map((p) => (
                   <option key={p.id} value={p.id}>
-                    {p.name} {p.shortCode ? `(${p.shortCode})` : ''}
+                    {p.name} {p.shortName || p.shortCode ? `(${p.shortName || p.shortCode})` : ''}
                   </option>
                 ))}
               </select>

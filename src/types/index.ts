@@ -11,6 +11,7 @@ export interface CompanyProfile {
   name: string;
   tradeName?: string;
   shortCode?: string;
+  shortName?: string; // Company Short Name (e.g. HFC)
   hindiName?: string;
   address: string;
   city: string;

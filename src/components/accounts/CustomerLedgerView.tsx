@@ -597,9 +597,9 @@ export const CustomerLedgerView: React.FC<CustomerLedgerViewProps> = ({
       >
         {/* Printable Traditional Mandi Statement Header (matches on-screen layout & company profile) */}
         <div className="hidden print:block p-4 border-b border-black text-center mb-1">
-          {currentProfile.shortCode && (
-            <div className="font-bold text-xs tracking-widest uppercase text-slate-700 print:text-black">
-              {currentProfile.shortCode}
+          {(currentProfile.shortName || currentProfile.shortCode) && (
+            <div className="font-black text-sm tracking-[0.2em] uppercase text-slate-950 print:text-black pb-0.5">
+              {currentProfile.shortName || currentProfile.shortCode}
             </div>
           )}
           <h1 className="text-lg sm:text-xl font-black uppercase tracking-wider">{currentProfile.name}</h1>
@@ -645,13 +645,13 @@ export const CustomerLedgerView: React.FC<CustomerLedgerViewProps> = ({
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm border-collapse bg-white dark:bg-slate-900">
             <thead>
-              <tr className="border-b border-slate-200 bg-slate-100 text-[11px] font-bold uppercase tracking-wider text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">
-                <th className="px-5 py-3.5 w-32">Date</th>
-                <th className="px-5 py-3.5">Particulars / Transaction</th>
-                <th className="px-5 py-3.5 text-right w-36">Debit (Dr)</th>
-                <th className="px-5 py-3.5 text-right w-36">Credit (Cr)</th>
-                <th className="px-5 py-3.5 text-right w-44">Balance (₹)</th>
-                <th className="px-4 py-3.5 text-center w-24 no-print">Actions</th>
+              <tr className="border-b border-slate-200 bg-slate-100 text-[11px] font-bold uppercase tracking-wider text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
+                <th className="px-5 py-3.5 w-32 text-slate-800 dark:text-slate-100 font-bold">Date</th>
+                <th className="px-5 py-3.5 text-slate-800 dark:text-slate-100 font-bold">Particulars / Transaction</th>
+                <th className="px-5 py-3.5 text-right w-36 text-slate-800 dark:text-slate-100 font-bold">Debit (Dr)</th>
+                <th className="px-5 py-3.5 text-right w-36 text-slate-800 dark:text-slate-100 font-bold">Credit (Cr)</th>
+                <th className="px-5 py-3.5 text-right w-44 text-slate-800 dark:text-slate-100 font-bold">Balance (₹)</th>
+                <th className="px-4 py-3.5 text-center w-24 text-slate-800 dark:text-slate-100 font-bold no-print">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800 bg-white dark:bg-slate-900">
@@ -797,9 +797,9 @@ export const CustomerLedgerView: React.FC<CustomerLedgerViewProps> = ({
       >
         {/* Printable Traditional Mandi Statement Header */}
         <div className="p-4 border-b border-black text-center mb-1">
-          {currentProfile.shortCode && (
-            <div className="font-bold text-xs tracking-widest uppercase text-slate-700 print:text-black">
-              {currentProfile.shortCode}
+          {(currentProfile.shortName || currentProfile.shortCode) && (
+            <div className="font-black text-sm tracking-[0.2em] uppercase text-slate-950 print:text-black pb-0.5">
+              {currentProfile.shortName || currentProfile.shortCode}
             </div>
           )}
           <h1 className="text-lg sm:text-xl font-black uppercase tracking-wider">{currentProfile.name}</h1>

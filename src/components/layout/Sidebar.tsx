@@ -139,26 +139,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
       >
         {/* Top Brand Banner */}
         <div className="flex h-16 items-center justify-between border-b border-slate-200 px-5 dark:border-slate-800 shrink-0">
-          <div className="flex items-center gap-3">
-            {(() => {
-              const defaultProfile = db.getCompanyProfiles().find((p) => p.isDefault) || db.getCompanyProfiles()[0];
-              const customLogo = defaultProfile?.logo;
-              return customLogo ? (
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white p-0.5 shadow-xs shrink-0">
-                  <img
-                    src={customLogo}
-                    alt="Company Logo"
-                    className="h-full w-full object-contain"
-                  />
-                </div>
-              ) : null;
-            })()}
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white p-0.5 shadow-xs shrink-0">
+              <img
+                src="/assets/hfc_circle_logo.png"
+                alt="Hari Kripa Fruit Company"
+                className="h-full w-full object-contain"
+              />
+            </div>
             <div>
-              <div className="text-sm font-black tracking-tight text-slate-900 dark:text-white uppercase leading-none">
-                Hari Kripa
+              <div className="font-serif font-black text-xs tracking-tight text-red-950 dark:text-amber-100 uppercase leading-none font-sans">
+                Hari Kripa Fruit Company
               </div>
-              <div className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 mt-0.5 tracking-wider">
-                Fruit ERP
+              <div className="font-serif italic text-[10px] font-semibold text-emerald-700 dark:text-emerald-400 mt-1">
+                Freshness. Quality. Trust.
               </div>
             </div>
           </div>

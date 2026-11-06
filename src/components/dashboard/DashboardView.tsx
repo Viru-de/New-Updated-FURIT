@@ -111,16 +111,21 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
       {/* Top Banner & Date Filter Bar */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2.5">
-            <h2 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
-              Wholesale Mandi Accounting Dashboard
-            </h2>
-            {isLocked && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-300 dark:border-amber-700/60">
-                <Lock className="h-3 w-3" />
-                Locked
-              </span>
-            )}
+          <div>
+            <div className="flex items-center gap-2.5">
+              <h2 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
+                Hari Kripa Fruit Company Dashboard
+              </h2>
+              {isLocked && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-300 dark:border-amber-700/60">
+                  <Lock className="h-3 w-3" />
+                  Locked
+                </span>
+              )}
+            </div>
+            <p className="font-serif italic text-xs font-semibold text-emerald-700 dark:text-emerald-400 mt-0.5">
+              Freshness. Quality. Trust.
+            </p>
           </div>
         </div>
 

@@ -50,22 +50,20 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
 
       <div className="w-full max-w-md space-y-6 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#131d31] p-8 shadow-sm">
         {/* Brand Header */}
-        <div className="text-center space-y-2">
-          {customLogo ? (
-            <div className="flex justify-center pb-2">
-              <img
-                src={customLogo}
-                alt="Business Logo"
-                className="h-20 w-auto max-w-[200px] object-contain select-none"
-              />
-            </div>
-          ) : null}
+        <div className="text-center space-y-3">
+          <div className="flex justify-center pb-1">
+            <img
+              src="/assets/hfc_circle_logo.png"
+              alt="Hari Kripa Fruit Company"
+              className="h-24 w-24 sm:h-28 sm:w-28 object-contain select-none"
+            />
+          </div>
           <div>
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900">
-              Hari Kripa <span className="text-emerald-600">Fruit ERP</span>
+            <h1 className="font-serif font-black text-xl sm:text-2xl tracking-wide text-red-950 dark:text-amber-100 uppercase leading-snug">
+              Hari Kripa Fruit Company
             </h1>
-            <p className="text-xs text-slate-500 font-medium mt-1">
-              Wholesale Mandi Commission & Accounts System
+            <p className="font-serif italic text-xs sm:text-sm font-semibold text-emerald-700 dark:text-emerald-400 tracking-wider mt-1">
+              Freshness. Quality. Trust.
             </p>
           </div>
         </div>

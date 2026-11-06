@@ -112,7 +112,8 @@ const INITIAL_PROFILES: CompanyProfile[] = [
     id: 'cp1',
     name: 'Hari Kripa',
     tradeName: 'Hari Kripa Wholesale Fruits',
-    shortCode: 'HK',
+    shortCode: 'HFC',
+    shortName: 'HFC',
     hindiName: 'श्री हरि कृपा',
     address: 'Shop No. 14, APMC Fruit Market, Sector 19',
     city: 'Navi Mumbai',
@@ -144,6 +145,7 @@ const INITIAL_PROFILES: CompanyProfile[] = [
     name: 'JAIRAM DHIRUMAL',
     tradeName: 'Jairam Dhirumal Fruit Commission Agent',
     shortCode: 'JD',
+    shortName: 'JD',
     hindiName: 'जय राम घीशूमल',
     address: 'A-6, Vijay Complex, Camp-2',
     city: 'Bhilai',
@@ -163,6 +165,7 @@ const INITIAL_PROFILES: CompanyProfile[] = [
     name: 'Hari Kripa Fruits',
     tradeName: 'Hari Kripa Fruits Trading Co.',
     shortCode: 'HKF',
+    shortName: 'HKF',
     hindiName: 'हरि कृपा फ्रूट्स',
     address: 'Gala 22, B-Block, Fruit Yard',
     city: 'Navi Mumbai',
@@ -977,6 +980,13 @@ export const db = {
         if (init?.hindiName) {
           updated.hindiName = init.hindiName;
         }
+      }
+      if (updated.shortName === undefined) {
+        const init = INITIAL_PROFILES.find((ip) => ip.id === p.id);
+        updated.shortName = p.shortCode || init?.shortName || (p.id === 'cp1' ? 'HFC' : undefined);
+      }
+      if (!updated.shortCode && updated.shortName) {
+        updated.shortCode = updated.shortName;
       }
       if (!updated.logo && (p.isDefault || p.id === 'cp1')) {
         updated.logo = '/assets/hfc_full_logo.png';

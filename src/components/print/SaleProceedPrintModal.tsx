@@ -139,7 +139,7 @@ export const SaleProceedPrintModal: React.FC<SaleProceedPrintModalProps> = ({
               >
                 {profiles.map((p) => (
                   <option key={p.id} value={p.id}>
-                    {p.name} {p.shortCode ? `(${p.shortCode})` : ''}
+                    {p.name} {p.shortName || p.shortCode ? `(${p.shortName || p.shortCode})` : ''}
                   </option>
                 ))}
               </select>
@@ -209,9 +209,9 @@ export const SaleProceedPrintModal: React.FC<SaleProceedPrintModalProps> = ({
           >
             {/* Header: Company Initials & Bilingual Names */}
             <div className={`text-center mb-1 ${isB7 ? 'pb-1' : 'pb-1.5'}`}>
-              {currentProfile.shortCode && (
-                <div className={`font-bold tracking-widest uppercase text-slate-900 dark:text-slate-900 print:text-black ${isB7 ? 'text-[10px]' : 'text-sm'}`}>
-                  {currentProfile.shortCode}
+              {(currentProfile.shortName || currentProfile.shortCode) && (
+                <div className={`font-black tracking-[0.2em] uppercase text-slate-950 dark:text-slate-950 print:text-black ${isB7 ? 'text-xs' : isB6 ? 'text-sm' : 'text-base sm:text-lg'} pb-0.5`}>
+                  {currentProfile.shortName || currentProfile.shortCode}
                 </div>
               )}
               <h1 className={`font-black tracking-wider uppercase mt-0.5 text-slate-950 dark:text-slate-950 print:text-black ${isB7 ? 'text-sm sm:text-base' : isB6 ? 'text-base sm:text-lg' : 'text-lg sm:text-xl'}`}>
