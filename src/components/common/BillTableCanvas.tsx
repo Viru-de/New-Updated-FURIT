@@ -129,24 +129,24 @@ export const BillTableCanvas: React.FC<BillTableCanvasProps> = ({
   // Responsive column widths and spacing per format
   const colWidths = isB7
     ? {
-        no: 'w-[22px]',
+        no: 'w-[20px]',
         qty: 'w-[36px]',
-        kg: 'w-[28px]',
-        rate: 'w-[44px]',
-        amount: 'w-[54px]',
+        kg: 'w-[42px]',
+        rate: 'w-[40px]',
+        amount: 'w-[50px]',
       }
     : isB6
     ? {
-        no: 'w-[26px]',
-        qty: 'w-[46px]',
-        kg: 'w-[38px]',
-        rate: 'w-[56px]',
-        amount: 'w-[70px]',
+        no: 'w-[24px]',
+        qty: 'w-[44px]',
+        kg: 'w-[52px]',
+        rate: 'w-[52px]',
+        amount: 'w-[64px]',
       }
     : {
         no: 'w-8',
         qty: 'w-16',
-        kg: 'w-16',
+        kg: 'w-20',
         rate: 'w-18',
         amount: 'w-22',
       };
@@ -185,7 +185,7 @@ export const BillTableCanvas: React.FC<BillTableCanvasProps> = ({
     <div
       id={isLivePreview ? 'mandi-live-preview-canvas' : 'mandi-print-area'}
       data-theme-isolated="true"
-      className={`bg-white text-slate-900 font-sans leading-tight border border-slate-300 print:border-none print:shadow-none print:p-0 print:m-0 shadow-sm mx-auto print-bill-canvas ${sizeClasses}`}
+      className={`bg-white text-slate-900 font-sans leading-tight border border-slate-300 print:border-none print:shadow-none print:p-2 sm:print:p-3 print:m-0 box-border shadow-sm mx-auto print-bill-canvas ${sizeClasses}`}
       style={{ fontFamily: "'Plus Jakarta Sans', 'Noto Sans Devanagari', Arial, sans-serif" }}
     >
       {/* Header: Company Details (English + Hindi Bilingual) */}
@@ -311,17 +311,20 @@ export const BillTableCanvas: React.FC<BillTableCanvasProps> = ({
 
           {/* Total Qty & Total Weight Row: immediately below the item rows */}
           <tr className="border-b-2 border-t border-slate-300 print:border-black font-bold bg-slate-50/50 print:bg-transparent text-slate-900 print:text-black">
-            <td colSpan={2} className={`border-r border-slate-300 print:border-black ${tablePad} text-right font-bold text-slate-900 print:text-black`}>
-              Total Qty:
+            <td colSpan={2} className={`border-r border-slate-300 print:border-black ${tablePad} text-right font-bold uppercase text-slate-900 print:text-black`}>
+              Total:
             </td>
             <td className={`border-r border-slate-300 print:border-black ${tablePad} text-right font-mono font-bold text-slate-900 print:text-black`}>
               {totalQty}
             </td>
-            <td colSpan={3} className={`${tablePad} text-right font-bold text-slate-900 print:text-black`}>
-              <div className="flex items-center justify-end gap-1.5 font-bold">
-                <span>Total Weight:</span>
-                <span className="font-mono">{totalWeight} Kg</span>
-              </div>
+            <td className={`border-r border-slate-300 print:border-black ${tablePad} text-right font-mono font-bold text-slate-900 print:text-black whitespace-nowrap`}>
+              {totalWeight > 0 ? `${totalWeight} KG` : '0 KG'}
+            </td>
+            <td className={`border-r border-slate-300 print:border-black ${tablePad} text-right font-mono`}>
+              &nbsp;
+            </td>
+            <td className={`${tablePad} text-right font-mono font-bold`}>
+              &nbsp;
             </td>
           </tr>
 

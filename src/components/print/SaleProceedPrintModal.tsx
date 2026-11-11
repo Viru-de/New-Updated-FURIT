@@ -84,24 +84,24 @@ export const SaleProceedPrintModal: React.FC<SaleProceedPrintModalProps> = ({
 
   const colWidths = isB7
     ? {
-        no: 'w-[22px]',
-        qty: 'w-[32px]',
-        weight: 'w-[32px]',
-        price: 'w-[44px]',
-        amount: 'w-[54px]',
+        no: 'w-[20px]',
+        qty: 'w-[36px]',
+        weight: 'w-[42px]',
+        price: 'w-[40px]',
+        amount: 'w-[50px]',
       }
     : isB6
     ? {
-        no: 'w-[26px]',
-        qty: 'w-[42px]',
-        weight: 'w-[42px]',
-        price: 'w-[56px]',
-        amount: 'w-[70px]',
+        no: 'w-[24px]',
+        qty: 'w-[44px]',
+        weight: 'w-[52px]',
+        price: 'w-[52px]',
+        amount: 'w-[64px]',
       }
     : {
         no: 'w-8',
-        qty: 'w-14',
-        weight: 'w-16',
+        qty: 'w-16',
+        weight: 'w-20',
         price: 'w-18',
         amount: 'w-22',
       };
@@ -194,7 +194,7 @@ export const SaleProceedPrintModal: React.FC<SaleProceedPrintModalProps> = ({
           <div
             id="mandi-print-area"
             data-theme-isolated="true"
-            className={`bg-white text-slate-900 font-sans leading-tight border border-slate-300 print:border-none print:shadow-none print:p-0 print:m-0 shadow-md print-bill-canvas ${
+            className={`bg-white text-slate-900 font-sans leading-tight border border-slate-300 print:border-none print:shadow-none print:p-2 sm:print:p-3 print:m-0 box-border shadow-md print-bill-canvas ${
               pageSize === 'a4'
                 ? 'max-w-[730px] w-full text-[12px] p-5 sm:p-6'
                 : pageSize === 'a5'
@@ -317,17 +317,20 @@ export const SaleProceedPrintModal: React.FC<SaleProceedPrintModalProps> = ({
 
                 {/* Total Qty & Total Weight Row: immediately below the item rows */}
                 <tr className="border-b-2 border-t border-black font-bold bg-slate-50/50 print:bg-transparent text-slate-900 print:text-black">
-                  <td colSpan={2} className={`border-r border-black ${tablePad} text-right font-bold text-slate-900 print:text-black`}>
-                    Total Qty:
+                  <td colSpan={2} className={`border-r border-black ${tablePad} text-right font-bold uppercase text-slate-900 print:text-black`}>
+                    Total:
                   </td>
                   <td className={`border-r border-black ${tablePad} text-right font-mono font-bold text-slate-900 print:text-black`}>
                     {totalQty}
                   </td>
-                  <td colSpan={3} className={`${tablePad} text-right font-bold text-slate-900 print:text-black`}>
-                    <div className="flex items-center justify-end gap-1.5 font-bold">
-                      <span>Total Weight:</span>
-                      <span className="font-mono">{totalWeight} Kg</span>
-                    </div>
+                  <td className={`border-r border-black ${tablePad} text-right font-mono font-bold text-slate-900 print:text-black whitespace-nowrap`}>
+                    {totalWeight > 0 ? `${totalWeight} KG` : '0 KG'}
+                  </td>
+                  <td className={`border-r border-black ${tablePad} text-right font-mono`}>
+                    &nbsp;
+                  </td>
+                  <td className={`${tablePad} text-right font-mono font-bold`}>
+                    &nbsp;
                   </td>
                 </tr>
 

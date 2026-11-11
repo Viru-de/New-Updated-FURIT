@@ -101,7 +101,14 @@ export function applyPrintPageSize(size: BillPaperSize = 'compact', targetElemen
     document.head.appendChild(styleEl);
   }
 
-  const margin = size === 'b7' ? '3mm' : size === 'b6' ? '4mm' : size === 'a5' ? '4mm' : size === 'compact' ? '4mm' : '6mm';
+  const margins: Record<BillPaperSize, string> = {
+    b7: '4mm 4mm 4mm 4mm',
+    b6: '5mm 5mm 5mm 5mm',
+    a5: '6mm 6mm 6mm 6mm',
+    compact: '6mm 5mm 6mm 5mm',
+    a4: '8mm 7mm 8mm 7mm',
+  };
+  const margin = margins[size] || margins.compact;
 
   styleEl.textContent = `
     @media print {
@@ -217,17 +224,23 @@ export async function triggerPrint(
   clone.style.display = 'block';
   clone.style.visibility = 'visible';
   clone.style.position = 'static';
+  clone.style.boxSizing = 'border-box';
   clone.style.width = '100%';
   clone.style.maxWidth = '100%';
   clone.style.height = 'auto';
   clone.style.minHeight = '0';
   clone.style.maxHeight = 'none';
   clone.style.margin = '0 auto';
+  // Provide print-safe internal padding so content never cuts at physical sheet boundaries
+  const safePad = chosenSize === 'b7' ? '1.5mm 2mm' : chosenSize === 'b6' ? '2mm 3mm' : chosenSize === 'compact' ? '2.5mm 3.5mm' : '3mm 4mm';
+  clone.style.padding = safePad;
   clone.style.overflow = 'visible';
   clone.style.backgroundColor = '#ffffff';
   clone.style.color = '#000000';
   clone.style.boxShadow = 'none';
   clone.style.border = 'none';
+  clone.style.pageBreakAfter = 'avoid';
+  (clone.style as any).breakAfter = 'avoid';
 
   // Strip non-printable UI elements (action buttons, tabs, pagination bars)
   const noPrints = clone.querySelectorAll('.no-print, [class*="no-print"], button:not(.keep-in-print)');

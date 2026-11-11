@@ -701,7 +701,7 @@ input.no-spinners {
     display: none !important;
   }
 
-  /* Single-page bill canvases: centered, visible, white background, no margins or scroll pushes */
+  /* Single-page bill canvases: centered, visible, white background, print-safe margins and padding */
   #mandi-print-area,
   #receipt-print-area,
   #sale-proceeds-print-area,
@@ -712,8 +712,9 @@ input.no-spinners {
     position: relative !important;
     left: 0 !important;
     top: 0 !important;
+    box-sizing: border-box !important;
     margin: 0 auto !important;
-    padding: 0 !important;
+    padding: 2mm 3mm !important;
     background-color: #ffffff !important;
     background: #ffffff !important;
     color: #000000 !important;
@@ -752,10 +753,11 @@ input.no-spinners {
     position: relative !important;
     left: 0 !important;
     top: 0 !important;
+    box-sizing: border-box !important;
     width: 100% !important;
     max-width: 100% !important;
     margin: 0 auto !important;
-    padding: 0 !important;
+    padding: 2mm 3mm !important;
     background-color: #ffffff !important;
     background: #ffffff !important;
     color: #000000 !important;

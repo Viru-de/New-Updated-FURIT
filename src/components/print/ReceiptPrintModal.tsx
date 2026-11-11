@@ -125,7 +125,7 @@ export const ReceiptPrintModal: React.FC<ReceiptPrintModalProps> = ({
           <div
             id="receipt-print-area"
             data-theme-isolated="true"
-            className={`bg-white text-slate-900 border border-slate-300 print:border-none print:shadow-none print:p-0 print:m-0 shadow-sm print-bill-canvas ${
+            className={`bg-white text-slate-900 border border-slate-300 print:border-none print:shadow-none print:p-2 sm:print:p-3 print:m-0 box-border shadow-sm print-bill-canvas ${
               pageSize === 'a4'
                 ? 'max-w-[730px] w-full text-[12px] p-5 sm:p-6'
                 : pageSize === 'a5'

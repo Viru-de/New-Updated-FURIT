@@ -1602,18 +1602,21 @@ export const GroupSaleView: React.FC<GroupSaleViewProps> = ({
 
             {/* Total Qty & Total Weight Row: immediately below the item rows */}
             <tr className="border-b-2 border-t border-black font-bold bg-slate-50/50 print:bg-transparent text-slate-900 print:text-black">
-              <td colSpan={4} className="border border-black p-1 text-right font-bold">
-                Total Qty:
+              <td colSpan={4} className="border border-black p-1 text-right font-bold uppercase">
+                Total:
               </td>
               <td className="border border-black p-1 text-right font-mono font-bold">
                 {formatQuantity(summary.totalQuantity)}
               </td>
-              <td colSpan={5} className="border border-black p-1 text-right font-bold">
-                <div className="flex items-center justify-end gap-1.5 font-bold">
-                  <span>Total Weight:</span>
-                  <span className="font-mono">{summary.totalWeight} Kg</span>
-                </div>
+              <td className="border border-black p-1">&nbsp;</td>
+              <td className="border border-black p-1 text-right font-mono font-bold whitespace-nowrap">
+                {summary.totalWeight > 0 ? `${summary.totalWeight} KG` : '0 KG'}
               </td>
+              <td className="border border-black p-1 text-right font-mono">&nbsp;</td>
+              <td className="border border-black p-1 text-center font-mono font-bold">
+                {summary.totalCrates > 0 ? summary.totalCrates : ''}
+              </td>
+              <td className="border border-black p-1 text-right font-mono font-bold">&nbsp;</td>
             </tr>
           </tbody>
           <tfoot>
