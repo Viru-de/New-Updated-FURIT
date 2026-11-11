@@ -579,7 +579,7 @@ export const SaleProceedsLedgerView: React.FC = () => {
               <div className="text-xl sm:text-2xl font-black text-black uppercase tracking-tight leading-tight">
                 {selectedCustomer ? (
                   <>
-                    <span className="text-xs sm:text-sm font-bold text-slate-600 block mb-0.5">M/s.</span>
+                    <span className="text-xs sm:text-sm font-bold text-black block mb-0.5">M/s.</span>
                     {selectedCustomer.name}
                   </>
                 ) : (
@@ -587,22 +587,22 @@ export const SaleProceedsLedgerView: React.FC = () => {
                 )}
               </div>
               {selectedCustomer?.city && (
-                <div className="text-xs sm:text-sm font-semibold text-slate-800 mt-1 uppercase tracking-wide">
+                <div className="text-xs sm:text-sm font-semibold text-black mt-1 uppercase tracking-wide">
                   {selectedCustomer.city}{selectedCustomer.state ? `, ${selectedCustomer.state}` : ''}
                 </div>
               )}
               {selectedCustomer?.address && !selectedCustomer?.city && (
-                <div className="text-xs sm:text-sm font-medium text-slate-700 mt-0.5">
+                <div className="text-xs sm:text-sm font-medium text-black mt-0.5">
                   {selectedCustomer.address}
                 </div>
               )}
               {selectedCustomer?.mobile && (
-                <div className="text-xs font-mono text-slate-700 mt-0.5">
+                <div className="text-xs font-mono text-black mt-0.5">
                   Contact: {selectedCustomer.mobile}
                 </div>
               )}
               {!selectedCustomer && (
-                <div className="text-xs text-slate-600 mt-0.5">
+                <div className="text-xs text-black mt-0.5">
                   {currentProfile.name}{currentProfile.city ? ` · ${currentProfile.city}` : ''}
                 </div>
               )}
@@ -613,19 +613,19 @@ export const SaleProceedsLedgerView: React.FC = () => {
               <div className="text-xl sm:text-2xl font-black uppercase tracking-wider text-black">
                 Account Detail
               </div>
-              <div className="text-xs sm:text-sm font-semibold text-slate-800 mt-1">
+              <div className="text-xs sm:text-sm font-semibold text-black mt-1">
                 {filterStartDate && filterEndDate ? (
-                  <span>{formatDate(filterStartDate)} to {formatDate(filterEndDate)}</span>
+                  <span>{formatDate(filterStartDate)} To {formatDate(filterEndDate)}</span>
                 ) : filterStartDate ? (
-                  <span>From {formatDate(filterStartDate)} to Today</span>
+                  <span>From {formatDate(filterStartDate)} To Today</span>
                 ) : filterEndDate ? (
                   <span>Up to {formatDate(filterEndDate)}</span>
                 ) : (
-                  <span>Date: Up to {formatDate(getTodayIso())}</span>
+                  <span>01-04-2026 To {formatDate(getTodayIso())}</span>
                 )}
               </div>
-              <div className="text-[10px] text-slate-500 font-mono mt-0.5">
-                Report Date: {formatDate(getTodayIso())}
+              <div className="text-[10px] text-black font-mono mt-0.5">
+                Page 1 of 1
               </div>
             </div>
           </div>
@@ -635,7 +635,7 @@ export const SaleProceedsLedgerView: React.FC = () => {
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse bg-white">
             <thead>
-              <tr className="border-b-2 border-black bg-slate-50 text-[11px] font-bold uppercase tracking-wider text-black">
+              <tr className="border-b-2 border-black bg-white text-[11px] font-bold uppercase tracking-wider text-black">
                 <th className="py-2 px-3 w-24 text-left border-b border-black">DATE</th>
                 <th className="py-2 px-3 text-left border-b border-black">PARTICULARS</th>
                 <th className="py-2 px-3 text-right w-28 sm:w-32 border-b border-black">DEBIT</th>
@@ -643,10 +643,10 @@ export const SaleProceedsLedgerView: React.FC = () => {
                 <th className="py-2 px-3 text-right w-32 sm:w-36 border-b border-black">BALANCE</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-200 bg-white">
+            <tbody className="divide-y divide-black bg-white">
               {ledger.entries.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="py-6 text-center text-xs text-slate-500">
+                  <td colSpan={5} className="py-6 text-center text-xs text-black">
                     No transactions found in this period.
                   </td>
                 </tr>
@@ -659,13 +659,9 @@ export const SaleProceedsLedgerView: React.FC = () => {
                   const formattedNo = numMatch ? numMatch[0].padStart(3, '0') : '001';
                   const details = getSaleProceedsDetails(entry);
 
-                  // Extract item and crate summary for compact 1-line representation
                   const items = (sp?.items && sp.items.length > 0 ? sp.items : (entry.subDetails?.items || [])) as any[];
                   const firstItem = items[0];
-                  const crateTypesInEntry = Array.from(new Set(items.map((it: any) => it.crateName).filter(Boolean)));
-                  const crateTypeLabel = crateTypesInEntry.length > 0 ? crateTypesInEntry.join(', ') : '';
 
-                  // Build compact 1-line description
                   let compactParticulars: React.ReactNode;
                   if (isOb) {
                     compactParticulars = (
@@ -677,47 +673,36 @@ export const SaleProceedsLedgerView: React.FC = () => {
                     const itemName = firstItem ? (firstItem.fruitName || firstItem.name || '') : '';
                     const itemUnit = firstItem ? (firstItem.unit || 'Box') : 'Box';
                     compactParticulars = (
-                      <div className="flex flex-wrap items-center gap-x-1.5 text-xs leading-tight">
+                      <div className="flex flex-wrap items-center gap-x-1.5 text-xs leading-tight text-black">
                         <span className="font-bold text-black whitespace-nowrap">
                           Sale Proceed No. {formattedNo}
                         </span>
                         {itemName && (
-                          <span className="font-semibold text-slate-900 uppercase">
+                          <span className="font-semibold text-black uppercase">
                             · {itemName}
                             {items.length > 1 ? ` (+${items.length - 1})` : ''}
                           </span>
                         )}
                         {details.qty > 0 && (
-                          <span className="font-mono text-slate-800">
+                          <span className="font-mono text-black">
                             · Qty: {details.qty} {itemUnit}
                           </span>
                         )}
                         {details.weight > 0 && (
-                          <span className="font-mono text-slate-800">
+                          <span className="font-mono text-black">
                             ({details.weight} KG)
-                          </span>
-                        )}
-                        {crateTypeLabel && (
-                          <span className="text-slate-700">
-                            · [{crateTypeLabel}]
-                          </span>
-                        )}
-                        {sp?.billNumber && (
-                          <span className="text-[10.5px] font-mono text-slate-500">
-                            · Bill: {sp.billNumber}
                           </span>
                         )}
                       </div>
                     );
                   } else {
-                    // Other entries (e.g. Crate Receipt or payment adjustments)
                     compactParticulars = (
-                      <div className="flex flex-wrap items-center gap-x-1.5 text-xs leading-tight">
+                      <div className="flex flex-wrap items-center gap-x-1.5 text-xs leading-tight text-black">
                         <span className="font-bold text-black">
                           {entry.particulars}
                         </span>
                         {entry.subDetails?.qty && (
-                          <span className="font-mono text-slate-800">
+                          <span className="font-mono text-black">
                             · Qty: {entry.subDetails.qty}
                           </span>
                         )}
@@ -725,38 +710,26 @@ export const SaleProceedsLedgerView: React.FC = () => {
                     );
                   }
 
+                  const debitVal = entry.debit !== null && entry.debit !== undefined && entry.debit > 0 ? Number(entry.debit).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '';
+                  const creditVal = entry.credit !== null && entry.credit !== undefined && entry.credit > 0 ? Number(entry.credit).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '';
+                  const balanceVal = entry.balance < 0 ? `(${Math.abs(entry.balance).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})` : Number(entry.balance).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
                   return (
-                    <tr key={`short-acc-${entry.id}`} className="border-b border-slate-300">
-                      {/* DATE */}
+                    <tr key={`short-acc-${entry.id}`} className="border-b border-black">
                       <td className="py-1.5 px-3 font-mono text-xs text-black align-middle whitespace-nowrap">
                         {formatDate(entry.date)}
                       </td>
-
-                      {/* PARTICULARS (One compact line) */}
                       <td className="py-1.5 px-3 text-black align-middle">
                         {compactParticulars}
                       </td>
-
-                      {/* DEBIT */}
                       <td className="py-1.5 px-3 text-right font-mono text-xs sm:text-sm text-black align-middle whitespace-nowrap">
-                        {entry.debit !== null && entry.debit !== undefined && entry.debit > 0
-                          ? formatCurrency(entry.debit)
-                          : ''}
+                        {debitVal}
                       </td>
-
-                      {/* CREDIT */}
                       <td className="py-1.5 px-3 text-right font-mono text-xs sm:text-sm text-black font-medium align-middle whitespace-nowrap">
-                        {entry.credit !== null && entry.credit !== undefined && entry.credit > 0
-                          ? formatCurrency(entry.credit)
-                          : ''}
+                        {creditVal}
                       </td>
-
-                      {/* BALANCE */}
                       <td className="py-1.5 px-3 text-right font-mono text-xs sm:text-sm font-bold text-black align-middle whitespace-nowrap">
-                        {formatCurrency(Math.abs(entry.balance))}{' '}
-                        <span className="text-[10px] font-semibold text-slate-600">
-                          {entry.balance > 0 ? 'Cr' : entry.balance < 0 ? 'Dr' : ''}
-                        </span>
+                        {balanceVal}
                       </td>
                     </tr>
                   );
@@ -764,70 +737,46 @@ export const SaleProceedsLedgerView: React.FC = () => {
               )}
             </tbody>
             <tfoot>
-              {/* Total Row aligned under respective columns */}
-              <tr className="border-t-2 border-b-2 border-black font-bold text-xs uppercase bg-slate-50">
+              <tr className="border-t-2 border-b-2 border-black font-bold text-xs uppercase bg-white">
                 <td colSpan={2} className="py-2 px-3 text-right font-bold text-black">
                   Total:
                 </td>
                 <td className="py-2 px-3 text-right font-mono text-xs sm:text-sm font-bold text-black whitespace-nowrap">
-                  {ledger.totalDebit > 0 ? formatCurrency(ledger.totalDebit) : ''}
+                  {ledger.totalDebit > 0 ? Number(ledger.totalDebit).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : ''}
                 </td>
                 <td className="py-2 px-3 text-right font-mono text-xs sm:text-sm font-bold text-black whitespace-nowrap">
-                  {ledger.totalCredit > 0 ? formatCurrency(ledger.totalCredit) : ''}
+                  {ledger.totalCredit > 0 ? Number(ledger.totalCredit).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : ''}
                 </td>
                 <td className="py-2 px-3 text-right font-mono text-xs sm:text-sm font-extrabold text-black whitespace-nowrap">
-                  {formatCurrency(Math.abs(ledger.closingBalance))}{' '}
-                  <span className="text-[10px] font-bold">
-                    {ledger.closingBalance > 0 ? 'Cr' : ledger.closingBalance < 0 ? 'Dr' : ''}
-                  </span>
+                  {ledger.closingBalance < 0 ? `(${Math.abs(ledger.closingBalance).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})` : Number(ledger.closingBalance).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </td>
               </tr>
             </tfoot>
           </table>
         </div>
 
-        {/* Bottom Summary: Crate Balance on Left, Prominent Closing Balance toward Right */}
-        <div className="p-4 border-t-2 border-black flex flex-wrap justify-between items-start gap-4 bg-slate-50/50">
-          {/* Crate Balance Information on the bottom-left */}
-          <div className="text-xs space-y-1">
-            <div className="font-bold text-sm text-black">
-              Balance Crate: <span className="font-mono">{crateSummary.balanceCrate}</span>
+        {/* Bottom Summary: Crate Balance on Left, Closing Balance on Right */}
+        <div className="p-4 border-t-2 border-black flex flex-wrap justify-between items-start gap-4 bg-white">
+          <div className="text-xs space-y-0.5 text-black">
+            <div className="font-bold text-black">
+              Crate Balance: {crateSummary.balanceCrate}
             </div>
-            {crateSummary.typeBalances.map((tb, idx) => (
-              <div key={idx} className="font-medium text-slate-800">
-                <span className="font-semibold">{tb.crateName}:</span> {tb.issued} Out ({tb.balance} Bal)
-              </div>
-            ))}
+            <div className="font-bold text-black">
+              = {crateSummary.balanceCrate}
+            </div>
           </div>
 
-          {/* CLOSING BALANCE prominently displayed toward the bottom-right */}
           <div className="text-right">
-            <div className="text-xs uppercase font-bold tracking-wider text-slate-600">
-              Closing Balance
-            </div>
-            <div className="text-xl sm:text-2xl font-black font-mono text-black mt-0.5">
-              {formatCurrency(Math.abs(ledger.closingBalance))}{' '}
-              <span className="text-sm font-bold">
-                {ledger.closingBalance > 0 ? 'Cr' : ledger.closingBalance < 0 ? 'Dr' : ''}
-              </span>
-            </div>
-            <div className="text-[11px] text-slate-600 font-medium mt-0.5">
-              {ledger.closingBalance > 0
-                ? 'Net Payable (Credit)'
-                : ledger.closingBalance < 0
-                ? 'Net Receivable (Debit)'
-                : 'Account Cleared'}
+            <div className="text-sm sm:text-base font-black font-mono text-black">
+              CLOSING BALANCE : {Math.abs(ledger.closingBalance).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {ledger.closingBalance < 0 ? 'Dr' : ledger.closingBalance > 0 ? 'Cr' : ''}
             </div>
           </div>
         </div>
 
-        {/* Software attribution & Signatory */}
-        <div className="px-4 pb-4 pt-6 flex justify-between items-end text-xs border-t border-dashed border-slate-300">
-          <div className="text-[9px] text-slate-500 font-mono">
-            Software Developed by: {defaultProfile.softwareDevelopedBy || 'Klyia Technology'}
-          </div>
-          <div className="text-right font-bold uppercase text-[11px] text-black">
-            {formatCompanySignature(defaultProfile)}
+        {/* Software attribution */}
+        <div className="px-4 pb-4 pt-4 flex justify-between items-end text-xs border-t border-black bg-white">
+          <div className="text-[9px] text-black font-mono">
+            Software Developed By: {defaultProfile.softwareDevelopedBy || 'Dayanand 9229433828'}
           </div>
         </div>
       </div>
@@ -847,7 +796,7 @@ export const SaleProceedsLedgerView: React.FC = () => {
               <div className="text-xl sm:text-2xl font-black text-black uppercase tracking-tight leading-tight">
                 {selectedCustomer ? (
                   <>
-                    <span className="text-xs sm:text-sm font-bold text-slate-600 block mb-0.5">M/s.</span>
+                    <span className="text-xs sm:text-sm font-bold text-black block mb-0.5">M/s.</span>
                     {selectedCustomer.name}
                   </>
                 ) : (
@@ -855,22 +804,22 @@ export const SaleProceedsLedgerView: React.FC = () => {
                 )}
               </div>
               {selectedCustomer?.city && (
-                <div className="text-xs sm:text-sm font-semibold text-slate-800 mt-1 uppercase tracking-wide">
+                <div className="text-xs sm:text-sm font-semibold text-black mt-1 uppercase tracking-wide">
                   {selectedCustomer.city}{selectedCustomer.state ? `, ${selectedCustomer.state}` : ''}
                 </div>
               )}
               {selectedCustomer?.address && !selectedCustomer?.city && (
-                <div className="text-xs sm:text-sm font-medium text-slate-700 mt-0.5">
+                <div className="text-xs sm:text-sm font-medium text-black mt-0.5">
                   {selectedCustomer.address}
                 </div>
               )}
               {selectedCustomer?.mobile && (
-                <div className="text-xs font-mono text-slate-700 mt-0.5">
+                <div className="text-xs font-mono text-black mt-0.5">
                   Contact: {selectedCustomer.mobile}
                 </div>
               )}
               {!selectedCustomer && (
-                <div className="text-xs text-slate-600 mt-0.5">
+                <div className="text-xs text-black mt-0.5">
                   {currentProfile.name}{currentProfile.city ? ` · ${currentProfile.city}` : ''}
                 </div>
               )}
@@ -881,19 +830,19 @@ export const SaleProceedsLedgerView: React.FC = () => {
               <div className="text-xl sm:text-2xl font-black uppercase tracking-wider text-black">
                 Account Detail
               </div>
-              <div className="text-xs sm:text-sm font-semibold text-slate-800 mt-1">
+              <div className="text-xs sm:text-sm font-semibold text-black mt-1">
                 {filterStartDate && filterEndDate ? (
-                  <span>{formatDate(filterStartDate)} to {formatDate(filterEndDate)}</span>
+                  <span>{formatDate(filterStartDate)} To {formatDate(filterEndDate)}</span>
                 ) : filterStartDate ? (
-                  <span>From {formatDate(filterStartDate)} to Today</span>
+                  <span>From {formatDate(filterStartDate)} To Today</span>
                 ) : filterEndDate ? (
                   <span>Up to {formatDate(filterEndDate)}</span>
                 ) : (
-                  <span>Date: Up to {formatDate(getTodayIso())}</span>
+                  <span>01-04-2026 To {formatDate(getTodayIso())}</span>
                 )}
               </div>
-              <div className="text-[10px] text-slate-500 font-mono mt-0.5">
-                Report Date: {formatDate(getTodayIso())}
+              <div className="text-[10px] text-black font-mono mt-0.5">
+                Page 1 of 1
               </div>
             </div>
           </div>
@@ -903,7 +852,7 @@ export const SaleProceedsLedgerView: React.FC = () => {
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse bg-white">
             <thead>
-              <tr className="border-b-2 border-black bg-slate-50 text-[11px] font-bold uppercase tracking-wider text-black">
+              <tr className="border-b-2 border-black bg-white text-[11px] font-bold uppercase tracking-wider text-black">
                 <th className="py-2.5 px-3 w-24 text-left border-b border-black">DATE</th>
                 <th className="py-2.5 px-3 text-left border-b border-black">PARTICULARS</th>
                 <th className="py-2.5 px-3 text-right w-28 sm:w-32 border-b border-black">DEBIT</th>
@@ -911,10 +860,10 @@ export const SaleProceedsLedgerView: React.FC = () => {
                 <th className="py-2.5 px-3 text-right w-32 sm:w-36 border-b border-black">BALANCE</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-200 bg-white">
+            <tbody className="divide-y divide-black bg-white">
               {ledger.entries.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="py-8 text-center text-xs text-slate-500">
+                  <td colSpan={5} className="py-8 text-center text-xs text-black">
                     No transactions found in this period.
                   </td>
                 </tr>
@@ -936,8 +885,12 @@ export const SaleProceedsLedgerView: React.FC = () => {
 
                   const topWeight = sp?.weight !== undefined && sp.weight !== null ? sp.weight : sp?.kg;
 
+                  const debitVal = entry.debit !== null && entry.debit !== undefined && entry.debit > 0 ? Number(entry.debit).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '';
+                  const creditVal = entry.credit !== null && entry.credit !== undefined && entry.credit > 0 ? Number(entry.credit).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '';
+                  const balanceVal = entry.balance < 0 ? `(${Math.abs(entry.balance).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})` : Number(entry.balance).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
                   return (
-                    <tr key={`print-full-${entry.id}`} className="border-b border-slate-300">
+                    <tr key={`print-full-${entry.id}`} className="border-b border-black">
                       {/* DATE */}
                       <td className="py-2.5 px-3 font-mono text-xs text-black align-top whitespace-nowrap">
                         {formatDate(entry.date)}
@@ -957,12 +910,12 @@ export const SaleProceedsLedgerView: React.FC = () => {
                                 Sale Proceed No. {formattedNo}
                               </span>
                               {sp?.billNumber && (
-                                <span className="text-[11px] font-mono text-slate-700">
+                                <span className="text-[11px] font-mono text-black">
                                   (Bill: {sp.billNumber})
                                 </span>
                               )}
                               {sp?.challanDate && sp.challanDate !== sp.date && (
-                                <span className="text-[11px] text-slate-600">
+                                <span className="text-[11px] text-black">
                                   Challan Dt: {formatDate(sp.challanDate)}
                                 </span>
                               )}
@@ -970,7 +923,7 @@ export const SaleProceedsLedgerView: React.FC = () => {
 
                             {/* Item details: Fruit name, Qty, Unit, Weight KG, Crate, Rate, Amount */}
                             {items.length > 0 ? (
-                              <div className="text-xs space-y-0.5 text-slate-800">
+                              <div className="text-xs space-y-0.5 text-black">
                                 {items.map((it: any, iIdx: number) => {
                                   const itQty = it.quantity ?? it.qty ?? 0;
                                   const itUnit = it.unit || 'Box';
@@ -979,7 +932,7 @@ export const SaleProceedsLedgerView: React.FC = () => {
                                   const itAmount = it.amount ?? (itQty * itRate);
 
                                   return (
-                                    <div key={iIdx} className="flex flex-wrap items-center gap-x-2 text-[11.5px] leading-snug">
+                                    <div key={iIdx} className="flex flex-wrap items-center gap-x-2 text-[11.5px] leading-snug text-black">
                                       <span className="font-semibold text-black uppercase">
                                         {it.fruitName || it.name || 'Item'}
                                       </span>
@@ -996,18 +949,18 @@ export const SaleProceedsLedgerView: React.FC = () => {
                                       {it.crateName && (
                                         <>
                                           <span>·</span>
-                                          <span className="text-slate-600">[{it.crateName}]</span>
+                                          <span className="text-black">[{it.crateName}]</span>
                                         </>
                                       )}
                                       <span>·</span>
                                       <span className="font-mono">
-                                        @ ₹{Number(itRate).toLocaleString('en-IN')}
+                                        @ {Number(itRate).toLocaleString('en-IN')}
                                       </span>
                                       {itAmount > 0 && (
                                         <>
                                           <span>=</span>
                                           <span className="font-mono font-semibold">
-                                            ₹{Number(itAmount).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                                            {Number(itAmount).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                                           </span>
                                         </>
                                       )}
@@ -1016,25 +969,25 @@ export const SaleProceedsLedgerView: React.FC = () => {
                                 })}
                               </div>
                             ) : (
-                              <div className="text-xs text-slate-700 font-mono">
+                              <div className="text-xs text-black font-mono">
                                 Qty: {sp?.quantity ?? entry.subDetails?.qty ?? 0}
                                 {topWeight ? ` · ${topWeight} KG` : ''}
-                                {sp?.rate ? ` @ ₹${sp.rate}` : ''}
+                                {sp?.rate ? ` @ ${sp.rate}` : ''}
                               </div>
                             )}
 
                             {/* Expenses Breakdown */}
                             {expenses.length > 0 && (
-                              <div className="text-[11px] text-slate-700 mt-0.5 pt-0.5 border-t border-dashed border-slate-300">
+                              <div className="text-[11px] text-black mt-0.5 pt-0.5 border-t border-dashed border-black">
                                 <span className="font-semibold text-black">Expenses:</span>{' '}
-                                {expenses.map((e: any) => `${e.name} ₹${Number(e.amount).toLocaleString('en-IN')}`).join(' + ')}
-                                {sp?.totalExpense ? ` = ₹${Number(sp.totalExpense).toLocaleString('en-IN')}` : ''}
+                                {expenses.map((e: any) => `${e.name} ${Number(e.amount).toLocaleString('en-IN')}`).join(' + ')}
+                                {sp?.totalExpense ? ` = ${Number(sp.totalExpense).toLocaleString('en-IN')}` : ''}
                               </div>
                             )}
 
                             {/* Optional Notes */}
                             {entry.notes && (
-                              <div className="text-[10.5px] text-slate-600 italic">
+                              <div className="text-[10.5px] text-black italic">
                                 Note: {entry.notes}
                               </div>
                             )}
@@ -1044,24 +997,17 @@ export const SaleProceedsLedgerView: React.FC = () => {
 
                       {/* DEBIT */}
                       <td className="py-2.5 px-3 text-right font-mono text-xs sm:text-sm text-black align-top whitespace-nowrap">
-                        {entry.debit !== null && entry.debit !== undefined && entry.debit > 0
-                          ? formatCurrency(entry.debit)
-                          : ''}
+                        {debitVal}
                       </td>
 
                       {/* CREDIT */}
                       <td className="py-2.5 px-3 text-right font-mono text-xs sm:text-sm text-black font-medium align-top whitespace-nowrap">
-                        {entry.credit !== null && entry.credit !== undefined && entry.credit > 0
-                          ? formatCurrency(entry.credit)
-                          : ''}
+                        {creditVal}
                       </td>
 
                       {/* BALANCE */}
                       <td className="py-2.5 px-3 text-right font-mono text-xs sm:text-sm font-bold text-black align-top whitespace-nowrap">
-                        {formatCurrency(Math.abs(entry.balance))}{' '}
-                        <span className="text-[10px] font-semibold text-slate-600">
-                          {entry.balance > 0 ? 'Cr' : entry.balance < 0 ? 'Dr' : ''}
-                        </span>
+                        {balanceVal}
                       </td>
                     </tr>
                   );
@@ -1070,69 +1016,48 @@ export const SaleProceedsLedgerView: React.FC = () => {
             </tbody>
             <tfoot>
               {/* Total Row */}
-              <tr className="border-t-2 border-b-2 border-black font-bold text-xs uppercase bg-slate-50">
+              <tr className="border-t-2 border-b-2 border-black font-bold text-xs uppercase bg-white">
                 <td colSpan={2} className="py-2.5 px-3 text-right font-bold text-black">
                   Total:
                 </td>
                 <td className="py-2.5 px-3 text-right font-mono text-xs sm:text-sm font-bold text-black whitespace-nowrap">
-                  {ledger.totalDebit > 0 ? formatCurrency(ledger.totalDebit) : ''}
+                  {ledger.totalDebit > 0 ? Number(ledger.totalDebit).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : ''}
                 </td>
                 <td className="py-2.5 px-3 text-right font-mono text-xs sm:text-sm font-bold text-black whitespace-nowrap">
-                  {ledger.totalCredit > 0 ? formatCurrency(ledger.totalCredit) : ''}
+                  {ledger.totalCredit > 0 ? Number(ledger.totalCredit).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : ''}
                 </td>
                 <td className="py-2.5 px-3 text-right font-mono text-xs sm:text-sm font-extrabold text-black whitespace-nowrap">
-                  {formatCurrency(Math.abs(ledger.closingBalance))}{' '}
-                  <span className="text-[10px] font-bold">
-                    {ledger.closingBalance > 0 ? 'Cr' : ledger.closingBalance < 0 ? 'Dr' : ''}
-                  </span>
+                  {ledger.closingBalance < 0 ? `(${Math.abs(ledger.closingBalance).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})` : Number(ledger.closingBalance).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </td>
               </tr>
             </tfoot>
           </table>
         </div>
 
-        {/* Bottom Summary: Crate Balance on Left, Prominent Closing Balance on Right */}
-        <div className="p-4 border-t-2 border-black flex flex-wrap justify-between items-start gap-4 bg-slate-50/50">
+        {/* Bottom Summary: Crate Balance on Left, Closing Balance on Right */}
+        <div className="p-4 border-t-2 border-black flex flex-wrap justify-between items-start gap-4 bg-white">
           {/* Crate Balance Information */}
-          <div className="text-xs space-y-1">
-            <div className="font-bold text-sm text-black">
-              Balance Crate: <span className="font-mono">{crateSummary.balanceCrate}</span>
+          <div className="text-xs space-y-0.5 text-black">
+            <div className="font-bold text-black">
+              Crate Balance: {crateSummary.balanceCrate}
             </div>
-            {crateSummary.typeBalances.map((tb, idx) => (
-              <div key={idx} className="font-medium text-slate-800">
-                <span className="font-semibold">{tb.crateName}:</span> {tb.issued} Out ({tb.balance} Bal)
-              </div>
-            ))}
+            <div className="font-bold text-black">
+              = {crateSummary.balanceCrate}
+            </div>
           </div>
 
-          {/* Prominent Closing Balance with Dr/Cr */}
+          {/* Closing Balance */}
           <div className="text-right">
-            <div className="text-xs uppercase font-bold tracking-wider text-slate-600">
-              Closing Balance
-            </div>
-            <div className="text-xl sm:text-2xl font-black font-mono text-black mt-0.5">
-              {formatCurrency(Math.abs(ledger.closingBalance))}{' '}
-              <span className="text-sm font-bold">
-                {ledger.closingBalance > 0 ? 'Cr' : ledger.closingBalance < 0 ? 'Dr' : ''}
-              </span>
-            </div>
-            <div className="text-[11px] text-slate-600 font-medium mt-0.5">
-              {ledger.closingBalance > 0
-                ? 'Net Payable (Credit)'
-                : ledger.closingBalance < 0
-                ? 'Net Receivable (Debit)'
-                : 'Account Cleared'}
+            <div className="text-sm sm:text-base font-black font-mono text-black">
+              CLOSING BALANCE : {Math.abs(ledger.closingBalance).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {ledger.closingBalance < 0 ? 'Dr' : ledger.closingBalance > 0 ? 'Cr' : ''}
             </div>
           </div>
         </div>
 
-        {/* Signatory & Software Developed By */}
-        <div className="px-4 pb-4 pt-6 flex justify-between items-end text-xs border-t border-dashed border-slate-300">
-          <div className="text-[9px] text-slate-500 font-mono">
-            Software Developed by: {defaultProfile.softwareDevelopedBy || 'Klyia Technology'}
-          </div>
-          <div className="text-right font-bold uppercase text-[11px] text-black">
-            {formatCompanySignature(defaultProfile)}
+        {/* Software Developed By */}
+        <div className="px-4 pb-4 pt-4 flex justify-between items-end text-xs border-t border-black bg-white">
+          <div className="text-[9px] text-black font-mono">
+            Software Developed By: {defaultProfile.softwareDevelopedBy || 'Dayanand 9229433828'}
           </div>
         </div>
       </div>
