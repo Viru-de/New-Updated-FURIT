@@ -86,6 +86,15 @@ export const SaleProceedsLedgerView: React.FC = () => {
     return { qty, weight, total };
   };
 
+  const totalQty = useMemo(() => {
+    return Math.round(
+      ledger.entries.reduce((sum, entry) => {
+        if (entry.referenceType === 'Opening Balance') return sum;
+        return sum + (Number(getSaleProceedsDetails(entry).qty) || 0);
+      }, 0) * 1000
+    ) / 1000;
+  }, [ledger.entries, saleProceedsMap]);
+
   const crateSummary = useMemo(() => {
     const crateTypes = db.getCrateTypes();
     const formatName = (name: string) => name.replace(/\s+Crate$/i, '').trim() || name;
@@ -780,19 +789,21 @@ export const SaleProceedsLedgerView: React.FC = () => {
           </table>
         </div>
 
-        {/* Bottom Summary: Crate Balance on Left, Closing Balance on Right */}
-        <div className="p-4 border-t-2 border-black flex flex-wrap justify-between items-start gap-4 bg-white">
-          <div className="text-xs space-y-0.5 text-black">
-            <div className="font-bold text-black">
-              Crate Balance: {crateSummary.balanceCrate}
+        {/* Bottom Summary: Crate Balance & Total Qty on Left, Closing Balance on Right */}
+        <div className="px-4 py-3.5 border-t-2 border-black flex flex-wrap justify-between items-center gap-x-8 gap-y-2 bg-white text-black">
+          <div className="flex flex-wrap items-center gap-x-10 gap-y-1.5 text-xs text-black">
+            <div className="inline-flex items-baseline gap-1.5 whitespace-nowrap">
+              <span className="font-bold text-black">Crate Balance:</span>
+              <span className="font-mono font-extrabold text-black">{crateSummary.balanceCrate}</span>
             </div>
-            <div className="font-bold text-black">
-              = {crateSummary.balanceCrate}
+            <div className="inline-flex items-baseline gap-1.5 whitespace-nowrap">
+              <span className="font-bold text-black">Total Qty:</span>
+              <span className="font-mono font-extrabold text-black">{totalQty}</span>
             </div>
           </div>
 
-          <div className="text-right">
-            <div className="text-sm sm:text-base font-black font-mono text-black">
+          <div className="text-right shrink-0 ml-auto">
+            <div className="text-sm sm:text-base font-black font-mono text-black whitespace-nowrap">
               CLOSING BALANCE : {Math.abs(ledger.closingBalance).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {ledger.closingBalance < 0 ? 'Dr' : ledger.closingBalance > 0 ? 'Cr' : ''}
             </div>
           </div>

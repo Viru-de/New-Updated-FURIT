@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { db } from '../../services/db';
-import { getCustomerLedger } from '../../services/accounting';
+import { getCustomerLedger, getCustomerCrateStatement } from '../../services/accounting';
 import { formatCurrency, formatDate, toIsoDate, getTodayIso, formatCompanySignature } from '../../utils/formatters';
 import { DatePickerInput } from '../common/DatePickerInput';
 import { CreditSaleModal } from './CreditSaleModal';
@@ -79,6 +79,25 @@ export const CustomerLedgerView: React.FC<CustomerLedgerViewProps> = ({
         endDate: filterEndDate ? toIsoDate(filterEndDate) : undefined,
       })
     : { customer: undefined, entries: [], closingBalance: 0, totalDebit: 0, totalCredit: 0 };
+
+  const crateBalance = activeCustomer
+    ? getCustomerCrateStatement(activeCustomer.id, {
+        startDate: filterStartDate ? toIsoDate(filterStartDate) : undefined,
+        endDate: filterEndDate ? toIsoDate(filterEndDate) : undefined,
+      }).closingCrates
+    : 0;
+
+  const totalQty = useMemo(() => {
+    return Math.round(
+      ledger.entries.reduce((sum, entry) => {
+        if (entry.referenceType === 'Opening Balance' || entry.referenceType === 'Receipt') return sum;
+        if (entry.subDetails?.items && entry.subDetails.items.length > 0) {
+          return sum + entry.subDetails.items.reduce((s, it) => s + (Number(it.qty) || 0), 0);
+        }
+        return sum + (Number(entry.subDetails?.qty) || 0);
+      }, 0) * 1000
+    ) / 1000;
+  }, [ledger.entries]);
 
   const handleEditEntry = (entry: LedgerEntry) => {
     if (entry.referenceType === 'Opening Balance') {
@@ -829,8 +848,8 @@ export const CustomerLedgerView: React.FC<CustomerLedgerViewProps> = ({
           <div className="my-1.5 text-xs font-bold uppercase tracking-widest border-b border-t border-black py-0.5 inline-block">
             CUSTOMER LEDGER STATEMENT (SHORT FORMAT)
           </div>
-          <div className="flex justify-between items-start text-xs mt-2 text-left border-t border-slate-300 pt-1.5">
-            <div>
+          <div className="flex justify-between items-start gap-4 text-xs mt-2 text-left border-t border-slate-300 pt-1.5">
+            <div className="min-w-0">
               <div className="font-bold text-sm">M/s. {activeCustomer?.name || 'Customer'}</div>
               {activeCustomer?.address && <div className="text-[11px]">{activeCustomer.address}</div>}
               {activeCustomer?.city && <div className="text-[11px]">{activeCustomer.city}</div>}
@@ -840,7 +859,7 @@ export const CustomerLedgerView: React.FC<CustomerLedgerViewProps> = ({
                 </div>
               )}
             </div>
-            <div className="text-right">
+            <div className="text-right shrink-0">
               <div>DATE: <strong>{formatDate(getTodayIso())}</strong></div>
               {(filterStartDate || filterEndDate) ? (
                 <div className="text-[11px]">
@@ -921,6 +940,26 @@ export const CustomerLedgerView: React.FC<CustomerLedgerViewProps> = ({
               </tr>
             </tfoot>
           </table>
+        </div>
+
+        {/* Bottom Summary: Crate Balance & Total Qty on Left, Closing Balance on Right */}
+        <div className="px-5 py-3.5 border-t-2 border-black flex flex-wrap justify-between items-center gap-x-8 gap-y-2 bg-white text-black">
+          <div className="flex flex-wrap items-center gap-x-10 gap-y-1.5 text-xs text-black">
+            <div className="inline-flex items-baseline gap-1.5 whitespace-nowrap">
+              <span className="font-bold text-black">Crate Balance:</span>
+              <span className="font-mono font-extrabold text-black">{crateBalance}</span>
+            </div>
+            <div className="inline-flex items-baseline gap-1.5 whitespace-nowrap">
+              <span className="font-bold text-black">Total Qty:</span>
+              <span className="font-mono font-extrabold text-black">{totalQty}</span>
+            </div>
+          </div>
+
+          <div className="text-right shrink-0 ml-auto">
+            <div className="text-sm sm:text-base font-black font-mono text-black whitespace-nowrap">
+              CLOSING BALANCE : {formatCurrency(ledger.closingBalance)}
+            </div>
+          </div>
         </div>
 
         {/* Software attribution & Signatory */}
