@@ -78,12 +78,15 @@ export const CompanyContactsHeader: React.FC<CompanyContactsHeaderProps> = ({
       {entries.map((entry, idx) => (
         <React.Fragment key={entry.id}>
           {idx > 0 && (
-            <span className="text-slate-400 print:text-black font-normal select-none" aria-hidden="true">
+            <span
+              className={`${itemClassName ? 'text-slate-800 font-semibold' : 'text-slate-400 font-normal'} print:text-black select-none`}
+              aria-hidden="true"
+            >
               |
             </span>
           )}
           <span
-            className={`text-[10px] sm:text-[11px] font-medium text-slate-800 dark:text-slate-800 print:text-black whitespace-nowrap ${itemClassName}`}
+            className={`${itemClassName || 'text-[10px] sm:text-[11px] font-medium text-slate-800 dark:text-slate-800'} print:text-black whitespace-nowrap`}
           >
             {entry.text}
           </span>

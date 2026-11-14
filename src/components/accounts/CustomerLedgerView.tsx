@@ -596,24 +596,30 @@ export const CustomerLedgerView: React.FC<CustomerLedgerViewProps> = ({
         className="rounded-xl border border-slate-200 bg-white shadow-2xs dark:border-slate-800 dark:bg-slate-900 overflow-hidden"
       >
         {/* Printable Traditional Mandi Statement Header (matches on-screen layout & company profile) */}
-        <div className="hidden print:block p-4 border-b border-black text-center mb-1">
+        <div className="hidden print:block px-4 py-3 border-b border-black text-center mb-1">
           {(currentProfile.shortName || currentProfile.shortCode) && (
-            <div className="font-black text-sm tracking-[0.2em] uppercase text-slate-950 print:text-black pb-0.5">
+            <div className="font-black text-[22px] sm:text-[24px] tracking-[0.18em] uppercase text-black leading-none pb-0.5">
               {currentProfile.shortName || currentProfile.shortCode}
             </div>
           )}
-          <h1 className="text-lg sm:text-xl font-black uppercase tracking-wider">{currentProfile.name}</h1>
+          <h1 className="text-[19px] sm:text-[21px] font-extrabold uppercase tracking-wider text-black leading-tight mt-0.5">
+            {currentProfile.name}
+          </h1>
           {currentProfile.hindiName && (
-            <div className="text-base sm:text-lg font-bold tracking-wide mt-0.5 font-devanagari text-slate-900 print:text-black">
+            <div className="text-[16px] sm:text-[18px] font-bold tracking-wide mt-0.5 font-devanagari text-black leading-tight">
               {currentProfile.hindiName}
             </div>
           )}
-          <div className="text-[11px] text-slate-700 leading-snug mt-1">
+          <div className="text-[12.5px] sm:text-[13px] font-semibold text-slate-900 print:text-black leading-snug mt-0.5">
             {currentProfile.address}
             {currentProfile.city ? `, ${currentProfile.city}` : ''}
             {currentProfile.state ? `, ${currentProfile.state}` : ''}
           </div>
-          <CompanyContactsHeader profile={currentProfile} className="mt-0.5" />
+          <CompanyContactsHeader
+            profile={currentProfile}
+            className="mt-0.5"
+            itemClassName="text-[12.5px] sm:text-[13px] font-semibold text-slate-900 dark:text-slate-900"
+          />
           <div className="my-1.5 text-xs font-bold uppercase tracking-widest border-b border-t border-black py-0.5 inline-block">
             CUSTOMER LEDGER STATEMENT
           </div>
@@ -796,24 +802,30 @@ export const CustomerLedgerView: React.FC<CustomerLedgerViewProps> = ({
         className="hidden rounded-xl border border-slate-200 bg-white shadow-2xs dark:border-slate-800 dark:bg-slate-900 overflow-hidden"
       >
         {/* Printable Traditional Mandi Statement Header */}
-        <div className="p-4 border-b border-black text-center mb-1">
+        <div className="px-4 py-3 border-b border-black text-center mb-1">
           {(currentProfile.shortName || currentProfile.shortCode) && (
-            <div className="font-black text-sm tracking-[0.2em] uppercase text-slate-950 print:text-black pb-0.5">
+            <div className="font-black text-[22px] sm:text-[24px] tracking-[0.18em] uppercase text-black leading-none pb-0.5">
               {currentProfile.shortName || currentProfile.shortCode}
             </div>
           )}
-          <h1 className="text-lg sm:text-xl font-black uppercase tracking-wider">{currentProfile.name}</h1>
+          <h1 className="text-[19px] sm:text-[21px] font-extrabold uppercase tracking-wider text-black leading-tight mt-0.5">
+            {currentProfile.name}
+          </h1>
           {currentProfile.hindiName && (
-            <div className="text-base sm:text-lg font-bold tracking-wide mt-0.5 font-devanagari text-slate-900 print:text-black">
+            <div className="text-[16px] sm:text-[18px] font-bold tracking-wide mt-0.5 font-devanagari text-black leading-tight">
               {currentProfile.hindiName}
             </div>
           )}
-          <div className="text-[11px] text-slate-700 leading-snug mt-1">
+          <div className="text-[12.5px] sm:text-[13px] font-semibold text-slate-900 print:text-black leading-snug mt-0.5">
             {currentProfile.address}
             {currentProfile.city ? `, ${currentProfile.city}` : ''}
             {currentProfile.state ? `, ${currentProfile.state}` : ''}
           </div>
-          <CompanyContactsHeader profile={currentProfile} className="mt-0.5" />
+          <CompanyContactsHeader
+            profile={currentProfile}
+            className="mt-0.5"
+            itemClassName="text-[12.5px] sm:text-[13px] font-semibold text-slate-900 dark:text-slate-900"
+          />
           <div className="my-1.5 text-xs font-bold uppercase tracking-widest border-b border-t border-black py-0.5 inline-block">
             CUSTOMER LEDGER STATEMENT (SHORT FORMAT)
           </div>

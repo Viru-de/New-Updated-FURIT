@@ -571,8 +571,33 @@ export const SaleProceedsLedgerView: React.FC = () => {
         className="hidden rounded-xl border border-black bg-white text-black print-bill-canvas max-w-[760px] w-full mx-auto"
         style={{ fontFamily: "'Plus Jakarta Sans', 'Noto Sans Devanagari', Arial, sans-serif" }}
       >
-        {/* Header Layout: Customer on Left, Account Detail on Right */}
-        <div className="p-4 sm:p-5 border-b-2 border-black">
+        {/* Header Layout: Company Header + Customer on Left, Account Detail on Right */}
+        <div className="px-4 py-3 sm:px-5 border-b-2 border-black">
+          <div className="text-center pb-2 mb-2 border-b border-black">
+            {(currentProfile.shortName || currentProfile.shortCode) && (
+              <div className="font-black text-[22px] sm:text-[24px] tracking-[0.18em] uppercase text-black leading-none pb-0.5">
+                {currentProfile.shortName || currentProfile.shortCode}
+              </div>
+            )}
+            <h1 className="text-[19px] sm:text-[21px] font-extrabold uppercase tracking-wider text-black leading-tight mt-0.5">
+              {currentProfile.name}
+            </h1>
+            {currentProfile.hindiName && (
+              <div className="text-[16px] sm:text-[18px] font-bold tracking-wide mt-0.5 font-devanagari text-black leading-tight">
+                {currentProfile.hindiName}
+              </div>
+            )}
+            <div className="text-[12.5px] sm:text-[13px] font-semibold text-slate-900 print:text-black leading-snug mt-0.5">
+              {currentProfile.address}
+              {currentProfile.city ? `, ${currentProfile.city}` : ''}
+              {currentProfile.state ? `, ${currentProfile.state}` : ''}
+            </div>
+            <CompanyContactsHeader
+              profile={currentProfile}
+              className="mt-0.5"
+              itemClassName="text-[12.5px] sm:text-[13px] font-semibold text-slate-900 dark:text-slate-900"
+            />
+          </div>
           <div className="flex justify-between items-start gap-4">
             {/* Top-Left: Prominent Customer Name & Location */}
             <div className="max-w-[65%]">
@@ -788,8 +813,33 @@ export const SaleProceedsLedgerView: React.FC = () => {
         className="hidden rounded-xl border border-black bg-white text-black print-bill-canvas max-w-[760px] w-full mx-auto"
         style={{ fontFamily: "'Plus Jakarta Sans', 'Noto Sans Devanagari', Arial, sans-serif" }}
       >
-        {/* Header Layout: Customer on Left, Account Detail on Right */}
-        <div className="p-4 sm:p-5 border-b-2 border-black">
+        {/* Header Layout: Company Header + Customer on Left, Account Detail on Right */}
+        <div className="px-4 py-3 sm:px-5 border-b-2 border-black">
+          <div className="text-center pb-2 mb-2 border-b border-black">
+            {(currentProfile.shortName || currentProfile.shortCode) && (
+              <div className="font-black text-[22px] sm:text-[24px] tracking-[0.18em] uppercase text-black leading-none pb-0.5">
+                {currentProfile.shortName || currentProfile.shortCode}
+              </div>
+            )}
+            <h1 className="text-[19px] sm:text-[21px] font-extrabold uppercase tracking-wider text-black leading-tight mt-0.5">
+              {currentProfile.name}
+            </h1>
+            {currentProfile.hindiName && (
+              <div className="text-[16px] sm:text-[18px] font-bold tracking-wide mt-0.5 font-devanagari text-black leading-tight">
+                {currentProfile.hindiName}
+              </div>
+            )}
+            <div className="text-[12.5px] sm:text-[13px] font-semibold text-slate-900 print:text-black leading-snug mt-0.5">
+              {currentProfile.address}
+              {currentProfile.city ? `, ${currentProfile.city}` : ''}
+              {currentProfile.state ? `, ${currentProfile.state}` : ''}
+            </div>
+            <CompanyContactsHeader
+              profile={currentProfile}
+              className="mt-0.5"
+              itemClassName="text-[12.5px] sm:text-[13px] font-semibold text-slate-900 dark:text-slate-900"
+            />
+          </div>
           <div className="flex justify-between items-start gap-4">
             {/* Top-Left: Prominent Customer Name & Location */}
             <div className="max-w-[65%]">
@@ -954,7 +1004,7 @@ export const SaleProceedsLedgerView: React.FC = () => {
                                       )}
                                       <span>·</span>
                                       <span className="font-mono">
-                                        @ {Number(itRate).toLocaleString('en-IN')}
+                                        / {Number(itRate).toLocaleString('en-IN')}
                                       </span>
                                       {itAmount > 0 && (
                                         <>
@@ -972,7 +1022,7 @@ export const SaleProceedsLedgerView: React.FC = () => {
                               <div className="text-xs text-black font-mono">
                                 Qty: {sp?.quantity ?? entry.subDetails?.qty ?? 0}
                                 {topWeight ? ` · ${topWeight} KG` : ''}
-                                {sp?.rate ? ` @ ${sp.rate}` : ''}
+                                {sp?.rate ? ` / ${sp.rate}` : ''}
                               </div>
                             )}
 
