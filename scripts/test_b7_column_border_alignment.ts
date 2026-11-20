@@ -73,8 +73,8 @@ async function run() {
 
     const b7Cols = extractColWidths(b7Html);
     check(
-      JSON.stringify(b7Cols) === JSON.stringify(['9%', '26%', '20%', '16%', '13%', '16%']),
-      `BillTableCanvas ${saleType} B7 colgroup uses exact widths [9%, 26%, 20%, 16%, 13%, 16%]`,
+      JSON.stringify(b7Cols) === JSON.stringify(['9%', '28%', '18%', '16%', '13%', '16%']),
+      `BillTableCanvas ${saleType} B7 colgroup uses exact widths [9%, 28%, 18%, 16%, 13%, 16%]`,
       JSON.stringify(b7Cols)
     );
     check(
@@ -179,12 +179,12 @@ async function run() {
 
   check(
     spSrc.includes("no: '9%'") &&
-      spSrc.includes("item: '26%'") &&
-      spSrc.includes("qty: '20%'") &&
+      spSrc.includes("item: '28%'") &&
+      spSrc.includes("qty: '18%'") &&
       spSrc.includes("weight: '16%'") &&
       spSrc.includes("price: '13%'") &&
       spSrc.includes("amount: '16%'"),
-    'SaleProceedPrintModal defines B7 colWidths [9%, 26%, 20%, 16%, 13%, 16%]'
+    'SaleProceedPrintModal defines B7 colWidths [9%, 28%, 18%, 16%, 13%, 16%]'
   );
   check(
     spSrc.includes("${isB7 ? 'b7-bill-table' : ''}") &&
@@ -209,12 +209,12 @@ async function run() {
     check(
       src.includes("isB7 ? 'max-w-full table-fixed box-border b7-bill-table'") &&
         src.includes("<col style={{ width: '9%' }} />") &&
-        src.includes("<col style={{ width: '26%' }} />") &&
-        src.includes("<col style={{ width: '20%' }} />") &&
+        src.includes("<col style={{ width: '28%' }} />") &&
+        src.includes("<col style={{ width: '18%' }} />") &&
         src.includes("<col style={{ width: '16%' }} />") &&
         src.includes("<col style={{ width: '13%' }} />") &&
         src.includes("<col style={{ width: '16%' }} />"),
-      `${fileRel}: applies B7 table-fixed + b7-bill-table + exact 9/26/20/16/13/16 colgroup`
+      `${fileRel}: applies B7 table-fixed + b7-bill-table + exact 9/28/18/16/13/16 colgroup`
     );
     check(
       src.includes("isB7 ? 'box-border tracking-tight whitespace-nowrap' : colWidths.no") &&

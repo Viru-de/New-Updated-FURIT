@@ -4,6 +4,7 @@ import { db } from '../../services/db';
 import { formatCurrency, formatDate, formatBillAmount, numberToWordsIndian, formatCompanySignature } from '../../utils/formatters';
 import { ExcelActionBar } from '../common/ExcelActionBar';
 import { exportBillHistory } from '../../utils/excelEngine';
+import { getBillItemNameCellClass } from '../../utils/billingCalculations';
 import {
   FileText,
   Search,
@@ -202,7 +203,7 @@ export const BillHistoryView: React.FC<BillHistoryViewProps> = ({
                     </td>
                     <td className="px-5 py-3.5 text-xs text-slate-600 dark:text-slate-400">
                       <span className="flex items-center gap-1 font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded dark:bg-emerald-950/40 dark:text-emerald-300 w-fit">
-                        <Building2 className="h-3 w-3" /> {b.companyProfileSnapshot?.name || 'Hari Kripa'}
+                        <Building2 className="h-3 w-3" /> {b.companyProfileSnapshot?.name || 'HariKripa Fruit Company'}
                       </span>
                     </td>
                     <td className="px-5 py-3.5 text-right font-mono-numbers font-bold text-sm text-slate-900 dark:text-white">
@@ -418,8 +419,8 @@ export const BillHistoryView: React.FC<BillHistoryViewProps> = ({
                       {isB7 && (
                         <colgroup>
                           <col style={{ width: '9%' }} />
-                          <col style={{ width: '26%' }} />
-                          <col style={{ width: '20%' }} />
+                          <col style={{ width: '28%' }} />
+                          <col style={{ width: '18%' }} />
                           <col style={{ width: '16%' }} />
                           <col style={{ width: '13%' }} />
                           <col style={{ width: '16%' }} />
@@ -439,7 +440,7 @@ export const BillHistoryView: React.FC<BillHistoryViewProps> = ({
                         {selectedBillForPreview.items.map((it, idx) => (
                           <tr key={it.id || idx} className="border-b border-black/40 print:text-black">
                             <td className={`border-r border-black ${tablePad} ${isB7 ? 'box-border whitespace-nowrap tabular-nums' : ''} text-center font-mono print:font-semibold print:text-black`}>{idx + 1}</td>
-                            <td className={`border-r border-black ${tablePad} font-semibold print:font-bold uppercase print:text-black`}>{it.fruitName}</td>
+                            <td className={`border-r border-black ${tablePad} ${isB7 ? `box-border align-middle overflow-hidden ${getBillItemNameCellClass(it.fruitName, 'b7')}` : ''} font-semibold print:font-bold uppercase print:text-black`}>{it.fruitName}</td>
                             <td className={`border-r border-black ${tablePad} text-right font-mono print:font-semibold print:text-black`}>{it.quantity}</td>
                             <td className={`border-r border-black ${tablePad} ${isB7 ? 'box-border whitespace-nowrap tabular-nums' : ''} text-right font-mono print:font-semibold print:text-black`}>
                               {it.unit === 'KG' ? `${it.quantity} KG` : ''}

@@ -61,10 +61,10 @@ export function getBillItemNameCellClass(
 ): string {
   const len = (itemName || '').trim().length;
   if (pageSize === 'b7') {
-    if (len <= 14) return 'text-[7.5px] print:text-[8.5px] whitespace-nowrap';
-    if (len <= 22) return 'text-[6.5px] print:text-[7.5px] tracking-tight whitespace-nowrap';
-    if (len <= 30) return 'text-[6px] print:text-[6.5px] tracking-tighter whitespace-nowrap';
-    return 'text-[6px] print:text-[6.5px] tracking-tight leading-tight break-words';
+    if (len <= 10) return 'text-[7.5px] print:text-[8.5px] leading-[1.15] whitespace-normal break-words [overflow-wrap:anywhere]';
+    if (len <= 20) return 'text-[7px] print:text-[7.5px] tracking-tight leading-[1.15] whitespace-normal break-words [overflow-wrap:anywhere]';
+    if (len <= 32) return 'text-[6.5px] print:text-[7px] tracking-tight leading-[1.15] whitespace-normal break-words [overflow-wrap:anywhere]';
+    return 'text-[6px] print:text-[6.5px] tracking-tight leading-[1.1] whitespace-normal break-words [overflow-wrap:anywhere]';
   }
   if (pageSize === 'b6') {
     if (len <= 18) return 'text-[9.5px] print:text-[10.5px] whitespace-nowrap';

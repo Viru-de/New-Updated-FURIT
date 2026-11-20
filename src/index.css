@@ -497,6 +497,13 @@ input.no-spinners {
   box-sizing: border-box !important;
   overflow: hidden !important;
 }
+.print-bill-canvas table.b7-bill-table tbody td:nth-child(2),
+[data-pdf-export="true"] table.b7-bill-table tbody td:nth-child(2) {
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+  word-break: break-word !important;
+  line-height: 1.15 !important;
+}
 
 /* Remove horizontal row border/underline directly below item & blank rows in bill/item print previews & PDF exports,
    keeping column separators, thead header borders, Total rows (.border-b-2), and nested tfoot summary tables intact */
@@ -1343,6 +1350,14 @@ input.no-spinners {
   #erp-isolated-print-mount table.b7-bill-table td {
     box-sizing: border-box !important;
     overflow: hidden !important;
+  }
+  table.b7-bill-table tbody td:nth-child(2),
+  #mandi-print-area table.b7-bill-table tbody td:nth-child(2),
+  #erp-isolated-print-mount table.b7-bill-table tbody td:nth-child(2) {
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+    word-break: break-word !important;
+    line-height: 1.15 !important;
   }
 
   /* Removed boxed-border overrides for Short Print so minimal accounting layout stays clean */

@@ -3,7 +3,7 @@ import { Bill, BillItem, CompanyProfile, Customer, ExpenseItem, Fruit, SaleProce
 import { db } from '../../services/db';
 import { formatCurrency, formatSequence, getTodayIso, formatDate, formatBillAmount, numberToWordsIndian, formatCompanySignature } from '../../utils/formatters';
 import { getFruitEffectivePrice } from '../../utils/fruitUtils';
-import { calculateWholesaleItemAmount } from '../../utils/billingCalculations';
+import { calculateWholesaleItemAmount, getBillItemNameCellClass } from '../../utils/billingCalculations';
 import { maskAadhaar } from '../../utils/aadhaarUtils';
 import { DatePickerInput } from '../common/DatePickerInput';
 import { AddFruitModal } from '../modals/AddFruitModal';
@@ -772,8 +772,8 @@ export const CreateBillView: React.FC<CreateBillViewProps> = ({
                       {isB7 && (
                         <colgroup>
                           <col style={{ width: '9%' }} />
-                          <col style={{ width: '26%' }} />
-                          <col style={{ width: '20%' }} />
+                          <col style={{ width: '28%' }} />
+                          <col style={{ width: '18%' }} />
                           <col style={{ width: '16%' }} />
                           <col style={{ width: '13%' }} />
                           <col style={{ width: '16%' }} />
@@ -793,7 +793,7 @@ export const CreateBillView: React.FC<CreateBillViewProps> = ({
                         {items.map((it, idx) => (
                           <tr key={it.id || idx} className="border-b border-black/40 print:text-black">
                             <td className={`border-r border-black ${tablePad} ${isB7 ? 'box-border whitespace-nowrap tabular-nums' : ''} text-center font-mono print:font-semibold print:text-black`}>{idx + 1}</td>
-                            <td className={`border-r border-black ${tablePad} font-semibold print:font-bold uppercase print:text-black`}>{it.fruitName}</td>
+                            <td className={`border-r border-black ${tablePad} ${isB7 ? `box-border align-middle overflow-hidden ${getBillItemNameCellClass(it.fruitName, 'b7')}` : ''} font-semibold print:font-bold uppercase print:text-black`}>{it.fruitName}</td>
                             <td className={`border-r border-black ${tablePad} text-right font-mono print:font-semibold print:text-black`}>{it.quantity}</td>
                             <td className={`border-r border-black ${tablePad} ${isB7 ? 'box-border whitespace-nowrap tabular-nums' : ''} text-right font-mono print:font-semibold print:text-black`}>
                               {it.unit === 'KG' ? `${it.quantity} KG` : ''}

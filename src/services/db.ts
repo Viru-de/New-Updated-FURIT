@@ -213,20 +213,22 @@ const INITIAL_CRATE_TYPES: CrateType[] = [
 const INITIAL_PROFILES: CompanyProfile[] = [
   {
     id: 'cp1',
-    name: 'Hari Kripa',
-    tradeName: 'Hari Kripa Wholesale Fruits',
+    name: 'HariKripa Fruit Company',
+    tradeName: 'HariKripa Fruit Company',
     shortCode: 'HFC',
     shortName: 'HFC',
     hindiName: 'श्री हरि कृपा',
-    address: 'Shop No. 14, APMC Fruit Market, Sector 19',
-    city: 'Navi Mumbai',
-    state: 'Maharashtra',
-    pincode: '400703',
-    mobile: '9820012345',
-    primaryContactName: 'Rajesh',
-    alternate1ContactName: 'Suresh',
-    alternate1Mobile: '9820054321',
-    alternateMobile: '9820054321',
+    address: 'Shop-A/6 Wholesale Fruit Market, Camp 2, Power House',
+    city: 'Bhilai (C.G.)',
+    state: '',
+    pincode: '',
+    mobile: '7566996333',
+    primaryContactName: 'Vishal',
+    alternate1ContactName: 'Ranjeet',
+    alternate1Mobile: '9329599950',
+    alternateMobile: '9329599950',
+    alternate2ContactName: 'Dhirumal',
+    alternate2Mobile: '9300910015',
     email: 'accounts@harikripafruits.com',
     aadhaarNo: '2345 6789 0123',
     gstin: '27AABCH1234F1Z5',
@@ -236,8 +238,8 @@ const INITIAL_PROFILES: CompanyProfile[] = [
     ifsc: 'HDFC0000123',
     branch: 'APMC Vashi Branch',
     termsAndConditions: '1. Goods once sold will not be taken back.\n2. Crate return due within 15 days.\n3. Subject to local mandi jurisdiction.',
-    footerText: 'Thank you for your business with Hari Kripa!',
-    signatureTitle: 'FOR, HARI KRIPA',
+    footerText: 'Thank you for your business with HariKripa Fruit Company!',
+    signatureTitle: 'FOR, HariKripa Fruit Company',
     softwareDevelopedBy: 'Klyia Technology',
     logo: '/assets/hfc_circle_logo.png',
     isDefault: true,
@@ -788,9 +790,9 @@ const INITIAL_RECEIPTS: Receipt[] = [
 ];
 
 const INITIAL_SETTINGS: GeneralSettings = {
-  businessName: 'Hari Kripa Fruit ERP',
+  businessName: 'HariKripa Fruit Company',
   businessNameHindi: 'श्री हरि कृपा फ्रूट ईआरपी',
-  mainAccountName: 'Hari Kripa',
+  mainAccountName: 'HariKripa Fruit Company',
   financialYear: '2026-2027',
   currencySymbol: '₹',
   defaultCrateWeightKg: 20,
@@ -1123,6 +1125,41 @@ export const db = {
       }
       if (!updated.shortCode && updated.shortName) {
         updated.shortCode = updated.shortName;
+      }
+      if (p.id === 'cp1') {
+        const legacyNames = new Set([
+          'Hari Kripa',
+          'Hari Kripa Fruit Company',
+          'HARI KRIPA FRUIT COMPANY',
+          'Hari Kripa Wholesale Fruits',
+        ]);
+        if (!updated.name || legacyNames.has(updated.name.trim())) {
+          updated.name = 'HariKripa Fruit Company';
+        }
+        if (!updated.tradeName || legacyNames.has(updated.tradeName.trim())) {
+          updated.tradeName = 'HariKripa Fruit Company';
+        }
+        if (!updated.signatureTitle || updated.signatureTitle === 'FOR, HARI KRIPA') {
+          updated.signatureTitle = 'FOR, HariKripa Fruit Company';
+        }
+        if (!updated.footerText || updated.footerText === 'Thank you for your business with Hari Kripa!') {
+          updated.footerText = 'Thank you for your business with HariKripa Fruit Company!';
+        }
+        if (!updated.address || updated.address === 'Shop No. 14, APMC Fruit Market, Sector 19') {
+          updated.address = 'Shop-A/6 Wholesale Fruit Market, Camp 2, Power House';
+          updated.city = 'Bhilai (C.G.)';
+          updated.state = '';
+          updated.pincode = '';
+        }
+        if (!updated.mobile || updated.mobile === '9820012345') {
+          updated.primaryContactName = 'Vishal';
+          updated.mobile = '7566996333';
+          updated.alternate1ContactName = 'Ranjeet';
+          updated.alternate1Mobile = '9329599950';
+          updated.alternateMobile = '9329599950';
+          updated.alternate2ContactName = 'Dhirumal';
+          updated.alternate2Mobile = '9300910015';
+        }
       }
       if (updated.logo === IDB_LOGO_PLACEHOLDER) {
         updated.logo = undefined;

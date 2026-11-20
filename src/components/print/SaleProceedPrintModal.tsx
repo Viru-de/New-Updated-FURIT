@@ -92,8 +92,8 @@ export const SaleProceedPrintModal: React.FC<SaleProceedPrintModalProps> = ({
   const colWidths = isB7
     ? {
         no: '9%',
-        item: '26%',
-        qty: '20%',
+        item: '28%',
+        qty: '18%',
         weight: '16%',
         price: '13%',
         amount: '16%',
@@ -320,7 +320,7 @@ export const SaleProceedPrintModal: React.FC<SaleProceedPrintModalProps> = ({
                   <tr key={it.id || idx} className={`border-b border-black/40 text-slate-950 dark:text-slate-950 print:text-black ${rowHeight}`}>
                     <td className={`border-r border-black ${tablePad} ${isB7 ? 'box-border whitespace-nowrap tabular-nums' : ''} text-center font-mono print:font-semibold align-middle`}>{idx + 1}</td>
                     <td
-                      className={`border-r border-black ${tablePad} font-semibold print:font-bold uppercase align-middle overflow-hidden ${getBillItemNameCellClass(it.fruitName, pageSize)}`}
+                      className={`border-r border-black ${tablePad} ${isB7 ? 'box-border' : ''} font-semibold print:font-bold uppercase align-middle overflow-hidden ${getBillItemNameCellClass(it.fruitName, pageSize)}`}
                     >
                       {it.fruitName}
                     </td>

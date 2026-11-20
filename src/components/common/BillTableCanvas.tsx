@@ -133,8 +133,8 @@ export const BillTableCanvas: React.FC<BillTableCanvasProps> = ({
   const colWidths = isB7
     ? {
         no: '9%',
-        item: '26%',
-        qty: '20%',
+        item: '28%',
+        qty: '18%',
         kg: '16%',
         rate: '13%',
         amount: '16%',
@@ -305,7 +305,7 @@ export const BillTableCanvas: React.FC<BillTableCanvasProps> = ({
                   {idx + 1}
                 </td>
                 <td
-                  className={`border-r border-black ${tablePad} font-semibold print:font-bold uppercase print:text-black align-middle overflow-hidden ${getBillItemNameCellClass(it.fruitName, pageSize)}`}
+                  className={`border-r border-black ${tablePad} ${isB7 ? 'box-border' : ''} font-semibold print:font-bold uppercase print:text-black align-middle overflow-hidden ${getBillItemNameCellClass(it.fruitName, pageSize)}`}
                 >
                   {it.fruitName || 'ITEM'}
                 </td>

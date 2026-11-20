@@ -28,15 +28,14 @@ async function run() {
   const hariKripa = profiles.find((p) => p.id === 'cp1') || profiles[0];
   const jairam = profiles.find((p) => p.id === 'cp_jd');
 
-  // 1. Verify company data untouched
-  check(Boolean(hariKripa && hariKripa.name === 'Hari Kripa'), 'Hari Kripa company name preserved');
+  // 1. Verify company data matches updated HariKripa Fruit Company profile
+  check(Boolean(hariKripa && hariKripa.name === 'HariKripa Fruit Company'), 'HariKripa company name updated');
   check(hariKripa?.shortName === 'HFC' || hariKripa?.shortCode === 'HFC', 'HFC short branding preserved');
-  check(hariKripa?.hindiName === 'श्री हरि कृपा', 'Hari Kripa Hindi name preserved');
+  check(hariKripa?.hindiName === 'श्री हरि कृपा', 'HariKripa Hindi name preserved');
   check(
-    hariKripa?.address === 'Shop No. 14, APMC Fruit Market, Sector 19' &&
-      hariKripa?.city === 'Navi Mumbai' &&
-      hariKripa?.state === 'Maharashtra',
-    'Hari Kripa complete address preserved'
+    hariKripa?.address === 'Shop-A/6 Wholesale Fruit Market, Camp 2, Power House' &&
+      hariKripa?.city === 'Bhilai (C.G.)',
+    'HariKripa complete Bhilai address updated'
   );
   check(hariKripa?.logo === '/assets/hfc_circle_logo.png', 'HFC logo path preserved');
 

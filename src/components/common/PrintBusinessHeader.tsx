@@ -33,10 +33,17 @@ export const PrintBusinessHeader: React.FC<PrintBusinessHeaderProps> = ({
   const shortLabel = (profile.shortName || profile.shortCode || '').trim();
   const englishName = (profile.name || profile.tradeName || '').trim();
   const hindiName = (profile.hindiName || '').trim();
-  const addressLine = [profile.address, profile.city, profile.state]
+  const rawAddressParts = [profile.address, profile.city, profile.state]
     .map((part) => (part || '').trim())
-    .filter(Boolean)
-    .join(', ');
+    .filter(Boolean);
+  const dedupedAddressParts: string[] = [];
+  for (const part of rawAddressParts) {
+    const lowerPart = part.toLowerCase();
+    if (!dedupedAddressParts.some((existing) => existing.toLowerCase().includes(lowerPart))) {
+      dedupedAddressParts.push(part);
+    }
+  }
+  const addressLine = dedupedAddressParts.join(', ');
 
   const showShortLabel =
     Boolean(shortLabel) && shortLabel.toUpperCase() !== englishName.toUpperCase();
@@ -100,7 +107,7 @@ export const PrintBusinessHeader: React.FC<PrintBusinessHeaderProps> = ({
   const contactClass = !isBill
     ? 'text-[10.5px] sm:text-[11.5px] print:text-[11px] font-semibold text-black'
     : isB7
-    ? 'text-[7.5px] print:text-[7.5px] font-medium text-slate-800 dark:text-slate-800 print:text-black'
+    ? 'text-[6.5px] print:text-[7px] tracking-tight font-medium text-slate-800 dark:text-slate-800 print:text-black'
     : isB6
     ? 'text-[8.5px] print:text-[9px] font-medium text-slate-800 dark:text-slate-800 print:text-black'
     : isA5Bill
@@ -122,7 +129,7 @@ export const PrintBusinessHeader: React.FC<PrintBusinessHeaderProps> = ({
 
         {englishName && (
           <h1
-            className={`font-black uppercase tracking-wider text-slate-950 dark:text-slate-950 print:text-black leading-[1.1] m-0 p-0 break-words ${
+            className={`font-black tracking-wide text-slate-950 dark:text-slate-950 print:text-black leading-[1.1] m-0 p-0 break-words ${
               showShortLabel ? 'mt-0.5' : 'mt-0'
             } ${englishClass}`}
           >
@@ -178,7 +185,7 @@ export const PrintBusinessHeader: React.FC<PrintBusinessHeaderProps> = ({
 
           {englishName && (
             <h1
-              className={`font-black uppercase tracking-wide text-black leading-[1.15] m-0 p-0 break-words ${
+              className={`font-black tracking-wide text-black leading-[1.15] m-0 p-0 break-words ${
                 showShortLabel ? 'mt-0.5' : 'mt-0'
               } ${englishClass}`}
             >

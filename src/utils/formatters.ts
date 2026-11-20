@@ -162,7 +162,7 @@ export function formatBillAmount(amount: number | null | undefined): string {
  */
 export function formatCompanySignature(
   profile?: { name?: string; signatureTitle?: string } | null,
-  fallbackName: string = 'Hari Kripa'
+  fallbackName: string = 'HariKripa Fruit Company'
 ): string {
   // Use the full company name exactly as saved in the existing Company Profile / Company Settings
   let rawName = profile?.name ? profile.name.trim() : '';

@@ -328,7 +328,10 @@ export const CompanyBillProfilesView: React.FC = () => {
             </div>
 
             <div className="text-xs text-slate-600 dark:text-slate-400 space-y-1.5 mb-4">
-              <p>{profile.address}, {profile.city}, {profile.state} - {profile.pincode}</p>
+              <p>
+                {[profile.address, profile.city, profile.state].filter(Boolean).join(', ')}
+                {profile.pincode ? ` - ${profile.pincode}` : ''}
+              </p>
               <div className="space-y-1 text-slate-600 dark:text-slate-400 pt-0.5">
                 <div className="flex flex-wrap items-center gap-3">
                   <span className="flex items-center gap-1 font-medium text-slate-800 dark:text-slate-200">
@@ -429,7 +432,7 @@ export const CompanyBillProfilesView: React.FC = () => {
                   <input
                     type="text"
                     required
-                    placeholder="e.g. Hari Kripa Fruits"
+                    placeholder="e.g. HariKripa Fruit Company"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white font-sans"
@@ -523,7 +526,6 @@ export const CompanyBillProfilesView: React.FC = () => {
                   </label>
                   <input
                     type="text"
-                    required
                     value={state}
                     onChange={(e) => setState(e.target.value)}
                     className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
@@ -556,7 +558,7 @@ export const CompanyBillProfilesView: React.FC = () => {
                     </label>
                     <input
                       type="text"
-                      placeholder="e.g. Rajesh"
+                      placeholder="e.g. Vishal"
                       value={primaryContactName}
                       onChange={(e) => setPrimaryContactName(e.target.value)}
                       className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
@@ -569,7 +571,7 @@ export const CompanyBillProfilesView: React.FC = () => {
                     <input
                       type="tel"
                       required
-                      placeholder="e.g. 9820012345"
+                      placeholder="e.g. 7566996333"
                       value={mobile}
                       onChange={(e) => setMobile(e.target.value)}
                       className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
@@ -585,7 +587,7 @@ export const CompanyBillProfilesView: React.FC = () => {
                     </label>
                     <input
                       type="text"
-                      placeholder="e.g. Suresh"
+                      placeholder="e.g. Ranjeet"
                       value={alternate1ContactName}
                       onChange={(e) => setAlternate1ContactName(e.target.value)}
                       className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
@@ -597,7 +599,7 @@ export const CompanyBillProfilesView: React.FC = () => {
                     </label>
                     <input
                       type="tel"
-                      placeholder="e.g. 9876543210"
+                      placeholder="e.g. 9329599950"
                       value={alternate1Mobile}
                       onChange={(e) => setAlternate1Mobile(e.target.value)}
                       className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
@@ -613,7 +615,7 @@ export const CompanyBillProfilesView: React.FC = () => {
                     </label>
                     <input
                       type="text"
-                      placeholder="e.g. Mahesh"
+                      placeholder="e.g. Dhirumal"
                       value={alternate2ContactName}
                       onChange={(e) => setAlternate2ContactName(e.target.value)}
                       className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
@@ -625,7 +627,7 @@ export const CompanyBillProfilesView: React.FC = () => {
                     </label>
                     <input
                       type="tel"
-                      placeholder="e.g. 9811122233"
+                      placeholder="e.g. 9300910015"
                       value={alternate2Mobile}
                       onChange={(e) => setAlternate2Mobile(e.target.value)}
                       className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
