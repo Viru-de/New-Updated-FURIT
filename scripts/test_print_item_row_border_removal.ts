@@ -132,7 +132,8 @@ for (const size of sizes) {
         html.includes('10000.00') &&
         html.includes('8000.00') &&
         html.includes('Net Total') &&
-        html.includes(saleType === 'CREDIT SALE' ? 'Total:' : 'Total Qty:'),
+        html.includes('>15<') &&
+        html.includes('>300<'),
       `BillTableCanvas (${saleType} / ${size.toUpperCase()}): renders all item names, amounts, and totals intact`
     );
     check(

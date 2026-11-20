@@ -12,11 +12,14 @@ interface PrintBusinessHeaderProps {
 
 /**
  * Shared traditional wholesale fruit-market business header used across all
- * Bill (Sale Proceed, Cash Sale, Credit Sale, Receipt) and Ledger (Detailed & Short) print views.
+ * Bill (Sale Proceed, Cash Sale, Credit Sale, Receipt, Tax Invoice) and
+ * Ledger (Detailed & Short) print views.
  *
- * Two-Column Layout:
- * - LEFT SIDE: Logo (if present), Short Code (e.g. HFC / JD), Bold English Name, Hindi Name
- * - RIGHT SIDE: Complete Business Address, Configured Contact Number(s)
+ * - Bill (`variant="bill"`): Classic centered single vertical sequence:
+ *   Logo (if present) -> Short Code (e.g. HFC / JD) -> English Name -> Hindi Name -> Address -> Contacts
+ * - Ledger (`variant="ledger"`): Two-column layout:
+ *   LEFT SIDE: Logo (if present), Short Code, Bold English Name, Hindi Name
+ *   RIGHT SIDE: Complete Business Address, Configured Contact Number(s)
  */
 export const PrintBusinessHeader: React.FC<PrintBusinessHeaderProps> = ({
   profile,
@@ -49,9 +52,9 @@ export const PrintBusinessHeader: React.FC<PrintBusinessHeaderProps> = ({
     : isB7
     ? 'w-6 h-6 print:w-6 print:h-6'
     : isB6
-    ? 'w-8 h-8 print:w-8 print:h-8'
+    ? 'w-7 h-7 print:w-7 print:h-7'
     : isA5Bill
-    ? 'w-9 h-9 print:w-9 print:h-9'
+    ? 'w-8 h-8 print:w-8 print:h-8'
     : isA4Bill
     ? 'w-11 h-11 sm:w-12 sm:h-12 print:w-11 print:h-11'
     : 'w-9 h-9 sm:w-10 sm:h-10 print:w-9 print:h-9';
@@ -63,77 +66,130 @@ export const PrintBusinessHeader: React.FC<PrintBusinessHeaderProps> = ({
     : isB6
     ? 'text-[10px] print:text-[10.5px] tracking-[0.16em]'
     : isA5Bill
-    ? 'text-[11px] sm:text-[12px] print:text-[12px] tracking-[0.16em]'
+    ? 'text-xs print:text-[12px] tracking-widest'
     : isA4Bill
-    ? 'text-[13px] sm:text-[14px] print:text-[14px] tracking-[0.18em]'
-    : 'text-[11.5px] sm:text-[12.5px] print:text-[12px] tracking-[0.16em]';
+    ? 'text-xs sm:text-sm print:text-[13px] tracking-widest'
+    : 'text-xs print:text-[12px] tracking-widest';
 
   const englishClass = !isBill
     ? 'text-[19px] sm:text-[21px] print:text-[20px]'
     : isB7
-    ? 'text-[10.5px] print:text-[11px]'
+    ? 'text-[11px] print:text-[11.5px]'
     : isB6
-    ? 'text-[13px] print:text-[13.5px]'
+    ? 'text-[13.5px] print:text-[14px]'
     : isA5Bill
-    ? 'text-[15px] sm:text-[16px] print:text-[16px]'
+    ? 'text-base sm:text-[17px] print:text-[16.5px]'
     : isA4Bill
-    ? 'text-[19px] sm:text-[21px] print:text-[20px]'
-    : 'text-[15.5px] sm:text-[17px] print:text-[16.5px]';
+    ? 'text-lg sm:text-xl print:text-[20px]'
+    : 'text-base sm:text-lg print:text-[17px]';
 
   const hindiClass = !isBill
     ? 'text-[14.5px] sm:text-[16px] print:text-[15.5px]'
     : isB7
-    ? 'text-[8.5px] print:text-[9px]'
+    ? 'text-[9px] print:text-[9.5px]'
     : isB6
-    ? 'text-[10.5px] print:text-[11px]'
+    ? 'text-[11px] print:text-[11.5px]'
     : isA5Bill
-    ? 'text-[12px] sm:text-[13px] print:text-[12.5px]'
+    ? 'text-[13px] sm:text-[14px] print:text-[13.5px]'
     : isA4Bill
-    ? 'text-[14.5px] sm:text-[16px] print:text-[15.5px]'
-    : 'text-[12.5px] sm:text-[13.5px] print:text-[13px]';
+    ? 'text-base sm:text-lg print:text-[16px]'
+    : 'text-sm sm:text-base print:text-[14px]';
 
   const addressClass = !isBill
     ? 'text-[11px] sm:text-[12px] print:text-[11.5px]'
     : isB7
-    ? 'text-[7px] print:text-[7.5px]'
+    ? 'text-[7.5px] print:text-[8px]'
     : isB6
-    ? 'text-[8.5px] print:text-[9px]'
+    ? 'text-[9px] print:text-[9.5px]'
     : isA5Bill
-    ? 'text-[9.5px] sm:text-[10px] print:text-[9.5px]'
+    ? 'text-[10px] sm:text-[10.5px] print:text-[10px]'
     : isA4Bill
     ? 'text-[11px] sm:text-[12px] print:text-[11.5px]'
-    : 'text-[10px] sm:text-[10.5px] print:text-[10px]';
+    : 'text-[10.5px] sm:text-[11px] print:text-[10.5px]';
 
   const contactClass = !isBill
     ? 'text-[10.5px] sm:text-[11.5px] print:text-[11px] font-semibold text-black'
     : isB7
-    ? 'text-[7px] print:text-[7px] font-semibold text-black'
+    ? 'text-[7.5px] print:text-[7.5px] font-medium text-slate-800 dark:text-slate-800 print:text-black'
     : isB6
-    ? 'text-[8px] print:text-[8.5px] font-semibold text-black'
+    ? 'text-[8.5px] print:text-[9px] font-medium text-slate-800 dark:text-slate-800 print:text-black'
     : isA5Bill
-    ? 'text-[9px] sm:text-[9.5px] print:text-[9px] font-semibold text-black'
+    ? 'text-[9.5px] sm:text-[10px] print:text-[9.5px] font-medium text-slate-800 dark:text-slate-800 print:text-black'
     : isA4Bill
-    ? 'text-[10.5px] sm:text-[11.5px] print:text-[11px] font-semibold text-black'
-    : 'text-[9.5px] sm:text-[10px] print:text-[9.5px] font-semibold text-black';
+    ? 'text-[10.5px] sm:text-[11px] print:text-[11px] font-medium text-slate-800 dark:text-slate-800 print:text-black'
+    : 'text-[10px] sm:text-[10.5px] print:text-[10px] font-medium text-slate-800 dark:text-slate-800 print:text-black';
+
+  if (isBill) {
+    return (
+      <div
+        className={`print-business-header print-business-header--bill text-center border-b border-black mt-0 pt-0 ${
+          isB7
+            ? 'pb-1 mb-0.5'
+            : isB6
+            ? 'pb-1 mb-0.5'
+            : isA5Bill
+            ? 'pb-1 mb-0.5'
+            : 'pb-1.5 mb-1'
+        } ${className}`}
+      >
+        {logoSrc && (
+          <img
+            src={logoSrc}
+            alt={shortLabel || englishName || 'Company Logo'}
+            className={`mx-auto block object-contain rounded-full mb-0.5 ${logoSizeClass}`}
+          />
+        )}
+
+        {showShortLabel && (
+          <div className={`font-bold uppercase text-slate-900 dark:text-slate-900 print:text-black leading-tight m-0 p-0 ${shortClass}`}>
+            {shortLabel}
+          </div>
+        )}
+
+        {englishName && (
+          <h1
+            className={`font-black uppercase tracking-wider text-slate-950 dark:text-slate-950 print:text-black leading-[1.15] m-0 p-0 break-words ${
+              showShortLabel || logoSrc ? 'mt-0.5' : 'mt-0'
+            } ${englishClass}`}
+          >
+            {englishName}
+          </h1>
+        )}
+
+        {hindiName && (
+          <div
+            className={`font-bold tracking-wide font-devanagari text-slate-900 dark:text-slate-900 print:text-black leading-tight m-0 p-0 mt-0.5 break-words ${hindiClass}`}
+          >
+            {hindiName}
+          </div>
+        )}
+
+        {addressLine && (
+          <div
+            className={`font-medium text-slate-800 dark:text-slate-800 print:text-black leading-snug break-words m-0 p-0 ${
+              isB7 ? 'mt-0.5' : 'mt-1'
+            } ${addressClass}`}
+          >
+            {addressLine}
+          </div>
+        )}
+
+        <CompanyContactsHeader
+          profile={profile}
+          align="center"
+          className="mt-0.5 w-full"
+          itemClassName={contactClass}
+        />
+      </div>
+    );
+  }
 
   return (
     <div
-      className={`print-business-header flex items-center justify-between border-b border-black mt-0 pt-0 ${
-        isB7
-          ? 'gap-2 pb-1 mb-0.5'
-          : isB6
-          ? 'gap-2.5 pb-1 mb-0.5'
-          : isA5Bill
-          ? 'gap-3 pb-1 mb-0.5'
-          : 'gap-4 sm:gap-5 pb-1.5 mb-1'
-      } ${className}`}
+      className={`print-business-header print-business-header--ledger flex items-center justify-between border-b border-black mt-0 pt-0 gap-4 sm:gap-5 pb-1.5 mb-1 ${className}`}
     >
       {/* LEFT SIDE: Logo (if present) + Short Code + English Name + Hindi Name */}
-      <div
-        className={`print-business-header-left flex items-center min-w-0 flex-1 text-left m-0 p-0 ${
-          isB7 ? 'gap-1.5' : isA5Bill ? 'gap-2' : 'gap-2.5 sm:gap-3'
-        }`}
-      >
+      <div className="print-business-header-left flex items-center min-w-0 flex-1 text-left m-0 p-0 gap-2.5 sm:gap-3">
         {logoSrc && (
           <img
             src={logoSrc}
@@ -169,11 +225,7 @@ export const PrintBusinessHeader: React.FC<PrintBusinessHeaderProps> = ({
       </div>
 
       {/* RIGHT SIDE: Complete Address + Contact Details */}
-      <div
-        className={`print-business-header-right shrink-0 text-right flex flex-col items-end justify-center min-w-0 m-0 p-0 ${
-          isB7 ? 'max-w-[46%]' : isB6 ? 'max-w-[47%]' : 'max-w-[48%]'
-        }`}
-      >
+      <div className="print-business-header-right shrink-0 text-right flex flex-col items-end justify-center min-w-0 m-0 p-0 max-w-[48%]">
         {addressLine && (
           <div className={`font-semibold text-black leading-snug text-right break-words m-0 p-0 w-full ${addressClass}`}>
             {addressLine}
@@ -190,3 +242,4 @@ export const PrintBusinessHeader: React.FC<PrintBusinessHeaderProps> = ({
     </div>
   );
 };
+

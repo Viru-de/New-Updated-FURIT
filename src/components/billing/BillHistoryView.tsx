@@ -446,13 +446,13 @@ export const BillHistoryView: React.FC<BillHistoryViewProps> = ({
                         {/* Total Qty & Total Weight Row: immediately below the item rows */}
                         <tr className="border-b-2 border-t border-black font-bold bg-slate-50/50 print:bg-transparent text-slate-900 print:text-black">
                           <td colSpan={2} className={`border-r border-black ${tablePad} text-right font-bold uppercase text-slate-900 print:text-black`}>
-                            Total:
+                            &nbsp;
                           </td>
                           <td className={`border-r border-black ${tablePad} text-right font-mono font-bold text-slate-900 print:text-black`}>
                             {totalQty}
                           </td>
                           <td className={`border-r border-black ${tablePad} text-right font-mono font-bold text-slate-900 print:text-black whitespace-nowrap`}>
-                            {totalWeight > 0 ? `${totalWeight} KG` : '0 KG'}
+                            {totalWeight > 0 ? totalWeight : 0}
                           </td>
                           <td className={`border-r border-black ${tablePad} text-right font-mono`}>
                             &nbsp;

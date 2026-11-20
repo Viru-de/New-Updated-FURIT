@@ -762,7 +762,7 @@ input.no-spinners {
     visibility: visible !important;
   }
 
-  /* Preserve two-column left/right alignment and zero top spacing of shared PrintBusinessHeader in all print contexts */
+  /* Preserve centered vertical bill header and two-column left/right ledger header with zero top spacing in all print contexts */
   #ledger-print-area > div:first-child,
   #crate-statement-print-area > div:first-child,
   #report-print-area > div:first-child,
@@ -775,9 +775,40 @@ input.no-spinners {
     margin-top: 0 !important;
     padding-top: 0 !important;
   }
-  .print-business-header,
-  .fixed.inset-0:not(.no-print):not(.print\:hidden) .print-business-header,
-  #erp-isolated-print-mount .print-business-header {
+  .print-business-header--bill,
+  .fixed.inset-0:not(.no-print):not(.print\:hidden) .print-business-header--bill,
+  #erp-isolated-print-mount .print-business-header--bill {
+    display: block !important;
+    width: 100% !important;
+    text-align: center !important;
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+  }
+  .print-business-header--bill img,
+  #erp-isolated-print-mount .print-business-header--bill img {
+    display: block !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    margin-top: 0 !important;
+  }
+  .print-business-header--bill h1,
+  #erp-isolated-print-mount .print-business-header--bill h1 {
+    margin-bottom: 0 !important;
+    padding: 0 !important;
+  }
+  .print-business-header--bill .print-business-header-contacts,
+  .fixed.inset-0:not(.no-print):not(.print\:hidden) .print-business-header--bill .print-business-header-contacts,
+  #erp-isolated-print-mount .print-business-header--bill .print-business-header-contacts {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    width: 100% !important;
+  }
+  .print-business-header--ledger,
+  .fixed.inset-0:not(.no-print):not(.print\:hidden) .print-business-header--ledger,
+  #erp-isolated-print-mount .print-business-header--ledger {
     display: flex !important;
     align-items: center !important;
     justify-content: space-between !important;
@@ -786,9 +817,9 @@ input.no-spinners {
     padding-top: 0 !important;
     gap: 12px !important;
   }
-  .print-business-header .print-business-header-left,
-  .fixed.inset-0:not(.no-print):not(.print\:hidden) .print-business-header .print-business-header-left,
-  #erp-isolated-print-mount .print-business-header .print-business-header-left {
+  .print-business-header--ledger .print-business-header-left,
+  .fixed.inset-0:not(.no-print):not(.print\:hidden) .print-business-header--ledger .print-business-header-left,
+  #erp-isolated-print-mount .print-business-header--ledger .print-business-header-left {
     display: flex !important;
     align-items: center !important;
     flex: 1 1 52% !important;
@@ -797,15 +828,15 @@ input.no-spinners {
     margin-top: 0 !important;
     padding-top: 0 !important;
   }
-  .print-business-header .print-business-header-left img,
-  #erp-isolated-print-mount .print-business-header .print-business-header-left img {
+  .print-business-header--ledger .print-business-header-left img,
+  #erp-isolated-print-mount .print-business-header--ledger .print-business-header-left img {
     display: block !important;
     flex-shrink: 0 !important;
     margin: 0 !important;
   }
-  .print-business-header .print-business-header-text,
-  .fixed.inset-0:not(.no-print):not(.print\:hidden) .print-business-header .print-business-header-text,
-  #erp-isolated-print-mount .print-business-header .print-business-header-text {
+  .print-business-header--ledger .print-business-header-text,
+  .fixed.inset-0:not(.no-print):not(.print\:hidden) .print-business-header--ledger .print-business-header-text,
+  #erp-isolated-print-mount .print-business-header--ledger .print-business-header-text {
     display: block !important;
     flex: 1 1 0% !important;
     min-width: 0 !important;
@@ -813,18 +844,18 @@ input.no-spinners {
     margin-top: 0 !important;
     padding-top: 0 !important;
   }
-  .print-business-header .print-business-header-text > :first-child,
-  #erp-isolated-print-mount .print-business-header .print-business-header-text > :first-child {
+  .print-business-header--ledger .print-business-header-text > :first-child,
+  #erp-isolated-print-mount .print-business-header--ledger .print-business-header-text > :first-child {
     margin-top: 0 !important;
   }
-  .print-business-header .print-business-header-text h1,
-  #erp-isolated-print-mount .print-business-header .print-business-header-text h1 {
+  .print-business-header--ledger .print-business-header-text h1,
+  #erp-isolated-print-mount .print-business-header--ledger .print-business-header-text h1 {
     margin-bottom: 0 !important;
     padding: 0 !important;
   }
-  .print-business-header .print-business-header-right,
-  .fixed.inset-0:not(.no-print):not(.print\:hidden) .print-business-header .print-business-header-right,
-  #erp-isolated-print-mount .print-business-header .print-business-header-right {
+  .print-business-header--ledger .print-business-header-right,
+  .fixed.inset-0:not(.no-print):not(.print\:hidden) .print-business-header--ledger .print-business-header-right,
+  #erp-isolated-print-mount .print-business-header--ledger .print-business-header-right {
     display: flex !important;
     flex-direction: column !important;
     align-items: flex-end !important;
@@ -836,9 +867,9 @@ input.no-spinners {
     margin-top: 0 !important;
     padding-top: 0 !important;
   }
-  .print-business-header .print-business-header-contacts,
-  .fixed.inset-0:not(.no-print):not(.print\:hidden) .print-business-header .print-business-header-contacts,
-  #erp-isolated-print-mount .print-business-header .print-business-header-contacts {
+  .print-business-header--ledger .print-business-header-contacts,
+  .fixed.inset-0:not(.no-print):not(.print\:hidden) .print-business-header--ledger .print-business-header-contacts,
+  #erp-isolated-print-mount .print-business-header--ledger .print-business-header-contacts {
     display: flex !important;
     flex-wrap: wrap !important;
     align-items: center !important;

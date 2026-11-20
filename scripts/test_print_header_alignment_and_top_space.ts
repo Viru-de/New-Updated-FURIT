@@ -40,7 +40,7 @@ async function run() {
   );
   check(hariKripa?.logo === '/assets/hfc_circle_logo.png', 'HFC logo path preserved');
 
-  // 2. Render PrintBusinessHeader in A4, A5, and Ledger variants
+  // 2. Render PrintBusinessHeader in Bill (A4/A5 centered vertical) and Ledger (two-column left/right) variants
   for (const caseSpec of [
     { label: 'Hari Kripa A4 Bill', profile: hariKripa, variant: 'bill' as const, paperSize: 'a4' as const },
     { label: 'Hari Kripa A5 Bill', profile: hariKripa, variant: 'bill' as const, paperSize: 'a5' as const },
@@ -60,35 +60,52 @@ async function run() {
       })
     );
 
-    const leftIdx = html.indexOf('print-business-header-left');
-    const rightIdx = html.indexOf('print-business-header-right');
-
-    check(leftIdx !== -1 && rightIdx !== -1 && leftIdx < rightIdx, `${caseSpec.label}: two-column left/right structure present in order`);
     check(html.includes('mt-0 pt-0'), `${caseSpec.label}: header starts with zero top margin/padding`);
 
-    const leftSection = html.slice(leftIdx, rightIdx);
-    const rightSection = html.slice(rightIdx);
-
-    if (caseSpec.profile.logo) {
-      check(leftSection.includes('<img') && leftSection.includes(caseSpec.profile.logo), `${caseSpec.label}: logo grouped in LEFT section`);
-    } else {
-      check(!leftSection.includes('<img'), `${caseSpec.label}: no broken img when logo absent`);
-    }
-    check(leftSection.includes(caseSpec.profile.name), `${caseSpec.label}: English name in LEFT section`);
-    if (caseSpec.profile.hindiName) {
-      check(leftSection.includes(caseSpec.profile.hindiName), `${caseSpec.label}: Hindi name in LEFT section`);
-    }
-    if (caseSpec.profile.shortName || caseSpec.profile.shortCode) {
+    if (caseSpec.variant === 'bill') {
       check(
-        leftSection.includes(caseSpec.profile.shortName || caseSpec.profile.shortCode || ''),
-        `${caseSpec.label}: short branding in LEFT section`
+        html.includes('print-business-header--bill') &&
+          html.includes('text-center') &&
+          !html.includes('print-business-header-left') &&
+          !html.includes('print-business-header-right'),
+        `${caseSpec.label}: uses centered single-vertical bill header without two-column split`
       );
-    }
+      check(html.includes(caseSpec.profile.name), `${caseSpec.label}: English name rendered`);
+      if (caseSpec.profile.hindiName) {
+        check(html.includes(caseSpec.profile.hindiName), `${caseSpec.label}: Hindi name rendered`);
+      }
+      check(html.includes(caseSpec.profile.address), `${caseSpec.label}: address rendered`);
+      check(html.includes(caseSpec.profile.mobile), `${caseSpec.label}: phone number rendered`);
+    } else {
+      const leftIdx = html.indexOf('print-business-header-left');
+      const rightIdx = html.indexOf('print-business-header-right');
 
-    check(!rightSection.includes(caseSpec.profile.name), `${caseSpec.label}: company name NOT leaked into RIGHT section`);
-    check(rightSection.includes(caseSpec.profile.address), `${caseSpec.label}: address aligned in RIGHT section`);
-    check(rightSection.includes(caseSpec.profile.mobile), `${caseSpec.label}: phone number aligned in RIGHT section`);
-    check(rightSection.includes('text-right') && rightSection.includes('items-end'), `${caseSpec.label}: right section neatly right-aligned`);
+      check(leftIdx !== -1 && rightIdx !== -1 && leftIdx < rightIdx, `${caseSpec.label}: two-column left/right structure present in order`);
+
+      const leftSection = html.slice(leftIdx, rightIdx);
+      const rightSection = html.slice(rightIdx);
+
+      if (caseSpec.profile.logo) {
+        check(leftSection.includes('<img') && leftSection.includes(caseSpec.profile.logo), `${caseSpec.label}: logo grouped in LEFT section`);
+      } else {
+        check(!leftSection.includes('<img'), `${caseSpec.label}: no broken img when logo absent`);
+      }
+      check(leftSection.includes(caseSpec.profile.name), `${caseSpec.label}: English name in LEFT section`);
+      if (caseSpec.profile.hindiName) {
+        check(leftSection.includes(caseSpec.profile.hindiName), `${caseSpec.label}: Hindi name in LEFT section`);
+      }
+      if (caseSpec.profile.shortName || caseSpec.profile.shortCode) {
+        check(
+          leftSection.includes(caseSpec.profile.shortName || caseSpec.profile.shortCode || ''),
+          `${caseSpec.label}: short branding in LEFT section`
+        );
+      }
+
+      check(!rightSection.includes(caseSpec.profile.name), `${caseSpec.label}: company name NOT leaked into RIGHT section`);
+      check(rightSection.includes(caseSpec.profile.address), `${caseSpec.label}: address aligned in RIGHT section`);
+      check(rightSection.includes(caseSpec.profile.mobile), `${caseSpec.label}: phone number aligned in RIGHT section`);
+      check(rightSection.includes('text-right') && rightSection.includes('items-end'), `${caseSpec.label}: right section neatly right-aligned`);
+    }
   }
 
   // 3. Render BillTableCanvas in A4 and A5

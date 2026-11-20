@@ -365,12 +365,12 @@ export const BillTableCanvas: React.FC<BillTableCanvasProps> = ({
               <td
                 className={`border-r border-slate-300 print:border-black ${tablePad} text-right font-mono font-bold leading-tight break-words ${totalQtyRowFont} text-slate-950 dark:text-slate-950 print:text-black`}
               >
-                Total: {totalQty}
+                {totalQty}
               </td>
               <td
                 className={`border-r border-slate-300 print:border-black ${tablePad} text-right font-mono font-bold leading-tight break-words ${totalQtyRowFont} text-slate-950 dark:text-slate-950 print:text-black`}
               >
-                Total: {totalWeight > 0 ? totalWeight : 0} KG
+                {totalWeight > 0 ? totalWeight : 0}
               </td>
               <td
                 className={`border-r border-slate-300 print:border-black ${tablePad}`}
@@ -392,12 +392,12 @@ export const BillTableCanvas: React.FC<BillTableCanvasProps> = ({
               <td
                 className={`border-r border-slate-300 print:border-black ${tablePad} text-right font-bold leading-tight break-words ${totalQtyRowFont} text-slate-950 dark:text-slate-950 print:text-black`}
               >
-                Total Qty: <span className="font-mono font-black">{totalQty}</span>
+                <span className="font-mono font-black">{totalQty}</span>
               </td>
               <td
                 className={`border-r border-slate-300 print:border-black ${tablePad} text-right font-bold leading-tight break-words ${totalQtyRowFont} text-slate-950 dark:text-slate-950 print:text-black`}
               >
-                Total Weight: <span className="font-mono font-black">{totalWeight > 0 ? `${totalWeight} KG` : '0 KG'}</span>
+                <span className="font-mono font-black">{totalWeight > 0 ? totalWeight : 0}</span>
               </td>
               <td
                 className={`border-r border-slate-300 print:border-black ${tablePad}`}

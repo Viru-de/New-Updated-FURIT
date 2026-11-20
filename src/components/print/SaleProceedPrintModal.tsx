@@ -387,12 +387,12 @@ export const SaleProceedPrintModal: React.FC<SaleProceedPrintModalProps> = ({
                   <td
                     className={`border-r border-black ${tablePad} text-right font-bold leading-tight ${totalQtyRowFont} text-slate-950 dark:text-slate-950 print:text-black break-words`}
                   >
-                    Total Qty: <span className="font-mono font-black tabular-nums">{totalQty}</span>
+                    <span className="font-mono font-black tabular-nums">{totalQty}</span>
                   </td>
                   <td
                     className={`border-r border-black ${tablePad} text-right font-bold leading-tight ${totalQtyRowFont} text-slate-950 dark:text-slate-950 print:text-black break-words`}
                   >
-                    Total Weight: <span className="font-mono font-black tabular-nums">{totalWeight > 0 ? `${totalWeight} KG` : '0 KG'}</span>
+                    <span className="font-mono font-black tabular-nums">{totalWeight > 0 ? totalWeight : 0}</span>
                   </td>
                   <td className={`border-r border-black ${tablePad}`}>
                     &nbsp;
