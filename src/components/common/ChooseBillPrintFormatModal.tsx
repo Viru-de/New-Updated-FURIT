@@ -34,7 +34,7 @@ export const ChooseBillPrintFormatModal: React.FC<ChooseBillPrintFormatModalProp
   documentTitle,
   elementId,
   filename,
-  defaultSize = 'compact',
+  defaultSize = 'a5',
   initialAction = 'print',
   onPaperSizeChange,
 }) => {
@@ -193,9 +193,9 @@ export const ChooseBillPrintFormatModal: React.FC<ChooseBillPrintFormatModalProp
                         <span className="rounded bg-slate-100 dark:bg-slate-800 px-2 py-0.5 text-[11px] font-mono text-slate-600 dark:text-slate-300">
                           {spec.dimensionsMm}
                         </span>
-                        {key === 'compact' && (
+                        {key === 'a5' && (
                           <span className="rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 text-[10px] font-bold px-2 py-0.5">
-                            Mandi Default
+                            Bill Default
                           </span>
                         )}
                         {key === 'a4' && (

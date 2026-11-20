@@ -37,6 +37,7 @@ import {
   Moon,
   Banknote,
   Trash2,
+  KeyRound,
 } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 
@@ -82,6 +83,12 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
   const currentUser = db.getActiveUser();
   const defaultProfile = db.getCompanyProfiles().find((p) => p.isDefault) || db.getCompanyProfiles()[0];
   const customLogo = defaultProfile?.logo;
+  const navbarLogo =
+    customLogo &&
+    !customLogo.includes('hfc_full_logo') &&
+    !customLogo.includes('hari-kripa-logo')
+      ? customLogo
+      : '/assets/hfc_circle_logo.png';
   const recentProceeds = db.getSaleProceeds().slice(-2).reverse();
   const recentCreditSales = db.getCreditSales().slice(-2).reverse();
   const recentReceipts = db.getReceipts().slice(-2).reverse();
@@ -177,15 +184,15 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
               className="flex items-center gap-2.5 sm:gap-3 text-left group transition-transform active:scale-98"
             >
               <img
-                src={customLogo || '/assets/hfc_circle_logo.png'}
+                src={navbarLogo}
                 alt="Hari Kripa Fruit Company"
-                className="h-10 sm:h-11 w-10 sm:w-11 object-contain select-none shrink-0 rounded-full"
+                className="h-10 sm:h-11 w-10 sm:w-11 object-contain select-none shrink-0"
               />
               <div className="hidden sm:flex flex-col justify-center">
-                <span className="font-serif font-black text-xs sm:text-sm tracking-wider text-red-950 dark:text-amber-100 uppercase leading-tight font-sans">
+                <span className="font-black text-xs sm:text-sm tracking-wider text-red-950 dark:text-amber-100 uppercase leading-tight">
                   Hari Kripa Fruit Company
                 </span>
-                <span className="font-serif italic text-[10px] sm:text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 tracking-wide mt-0.5">
+                <span className="text-[10px] sm:text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 tracking-wide mt-0.5">
                   Freshness. Quality. Trust.
                 </span>
               </div>
@@ -344,8 +351,8 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                   <span className="block text-xs font-bold text-slate-800 leading-none">
                     {currentUser?.name || 'Mandi Admin'}
                   </span>
-                  <span className="text-[10px] text-emerald-600 font-semibold">
-                    Accountant
+                  <span className="text-[10px] font-semibold text-emerald-600">
+                    {currentUser?.role === 'admin' ? 'Admin / Owner' : 'Counter Staff'}
                   </span>
                 </div>
               </button>
@@ -361,20 +368,35 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                         {currentUser?.name || 'Mandi Admin'}
                       </div>
                       <div className="text-[11px] text-slate-500">
-                        User: <strong>admin</strong>
+                        User: <strong>{currentUser?.username || 'admin'}</strong>
                       </div>
                     </div>
                   </div>
 
                   <div className="space-y-1.5 text-xs text-slate-600 mb-4">
-                    <div className="flex items-center gap-1.5 text-emerald-600 font-medium">
+                    <div className="flex items-center gap-1.5 font-medium text-emerald-600">
                       <ShieldCheck className="h-4 w-4" /> Full ERP Accounting Access
                     </div>
                     <div>
                       Firm: <strong>Hari Kripa</strong>
                     </div>
-                    <div>Role: Master Mandi Accountant</div>
+                    <div>
+                      Role: {currentUser?.role === 'admin' ? 'Admin / Owner' : 'Counter Staff / Accountant'}
+                    </div>
                   </div>
+
+                  {currentUser?.role === 'admin' && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsProfileOpen(false);
+                        handleSelectPage('settings', 'users');
+                      }}
+                      className="mb-2 flex w-full items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 py-2 text-xs font-semibold text-emerald-700 hover:bg-emerald-100 cursor-pointer"
+                    >
+                      <KeyRound className="h-3.5 w-3.5" /> User & Password Management
+                    </button>
+                  )}
 
                   <button
                     type="button"
@@ -739,6 +761,16 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                         label: 'General Settings',
                         icon: Sliders,
                       },
+                      ...(currentUser?.role === 'admin'
+                        ? [
+                            {
+                              view: 'settings',
+                              subParam: 'users',
+                              label: 'User & Password Management',
+                              icon: KeyRound,
+                            },
+                          ]
+                        : []),
                     ].map((item) => {
                       const isActive =
                         item.view === 'companyProfiles'
@@ -791,15 +823,15 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
             <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 px-4 py-3 bg-white dark:bg-slate-900">
               <div className="flex items-center gap-2.5">
                 <img
-                  src={customLogo || '/assets/hfc_circle_logo.png'}
+                  src={navbarLogo}
                   alt="Hari Kripa Fruit Company"
-                  className="h-10 w-10 object-contain select-none shrink-0 rounded-full"
+                  className="h-10 w-10 object-contain select-none shrink-0"
                 />
                 <div className="flex flex-col justify-center">
-                  <h2 className="font-serif font-black text-xs sm:text-sm text-red-950 dark:text-amber-100 uppercase leading-tight font-sans">
+                  <h2 className="font-black text-xs sm:text-sm text-red-950 dark:text-amber-100 uppercase leading-tight">
                     Hari Kripa Fruit Company
                   </h2>
-                  <span className="font-serif italic text-[10px] font-semibold text-emerald-700 dark:text-emerald-400 mt-0.5">
+                  <span className="text-[10px] font-semibold text-emerald-700 dark:text-emerald-400 mt-0.5">
                     Freshness. Quality. Trust.
                   </span>
                 </div>
@@ -1100,6 +1132,16 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                         label: 'General Settings',
                         icon: Sliders,
                       },
+                      ...(currentUser?.role === 'admin'
+                        ? [
+                            {
+                              view: 'settings',
+                              subParam: 'users',
+                              label: 'User & Password Management',
+                              icon: KeyRound,
+                            },
+                          ]
+                        : []),
                     ].map((item) => {
                       const isActive =
                         item.view === 'companyProfiles'
@@ -1138,7 +1180,9 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                     <div className="text-xs font-bold text-slate-900 leading-none">
                       {currentUser?.name || 'Mandi Admin'}
                     </div>
-                    <div className="text-[10px] text-slate-500">Master Accountant</div>
+                    <div className="text-[10px] text-slate-500">
+                      {currentUser?.role === 'admin' ? 'Admin / Owner' : 'Counter Staff'}
+                    </div>
                   </div>
                 </div>
 

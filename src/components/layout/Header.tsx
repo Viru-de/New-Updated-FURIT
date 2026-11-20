@@ -80,7 +80,7 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
             <div className="flex flex-col justify-center">
               <div className="flex items-center gap-2">
-                <h1 className="font-serif font-black text-sm sm:text-base tracking-tight text-red-950 dark:text-amber-100 uppercase leading-none font-sans">
+                <h1 className="font-black text-sm sm:text-base tracking-tight text-red-950 dark:text-amber-100 uppercase leading-none">
                   Hari Kripa Fruit Company
                 </h1>
                 {(() => {
@@ -92,7 +92,7 @@ export const Header: React.FC<HeaderProps> = ({
                   ) : null;
                 })()}
               </div>
-              <span className="font-serif italic text-[10px] font-semibold text-emerald-700 dark:text-emerald-400 mt-0.5">
+              <span className="text-[10px] font-semibold text-emerald-700 dark:text-emerald-400 mt-0.5">
                 Freshness. Quality. Trust.
               </span>
             </div>
@@ -223,14 +223,14 @@ export const Header: React.FC<HeaderProps> = ({
               title="User Profile"
             >
               <div className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-600 text-white font-bold text-xs shadow-2xs">
-                A
+                {currentUser?.name?.charAt(0) || 'A'}
               </div>
               <div className="hidden sm:block text-left">
                 <span className="block text-xs font-bold text-slate-800 dark:text-slate-200 leading-none">
                   {currentUser?.name || 'Mandi Admin'}
                 </span>
-                <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">
-                  Accountant
+                <span className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
+                  {currentUser?.role === 'admin' ? 'Admin / Owner' : 'Counter Staff'}
                 </span>
               </div>
             </button>
@@ -240,24 +240,24 @@ export const Header: React.FC<HeaderProps> = ({
               <div className="absolute right-0 mt-2 w-64 rounded-xl border border-slate-200 bg-white p-4 shadow-xl dark:border-slate-800 dark:bg-slate-900 z-50">
                 <div className="flex items-center gap-3 border-b border-slate-100 pb-3 mb-3 dark:border-slate-800">
                   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-600 text-white font-bold text-sm">
-                    A
+                    {currentUser?.name?.charAt(0) || 'A'}
                   </div>
                   <div>
                     <div className="text-xs font-bold text-slate-900 dark:text-white">
                       {currentUser?.name || 'Mandi Admin'}
                     </div>
                     <div className="text-[11px] text-slate-500">
-                      User: <strong>admin</strong>
+                      User: <strong>{currentUser?.username || 'admin'}</strong>
                     </div>
                   </div>
                 </div>
 
                 <div className="space-y-1.5 text-xs text-slate-600 dark:text-slate-400 mb-3">
-                  <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-medium">
+                  <div className="flex items-center gap-1.5 font-medium text-emerald-600 dark:text-emerald-400">
                     <ShieldCheck className="h-4 w-4" /> Full ERP Accounting Access
                   </div>
                   <div>Firm: <strong>Hari Kripa</strong></div>
-                  <div>Role: Master Mandi Accountant</div>
+                  <div>Role: {currentUser?.role === 'admin' ? 'Admin / Owner' : 'Counter Staff / Accountant'}</div>
                 </div>
 
                 <button

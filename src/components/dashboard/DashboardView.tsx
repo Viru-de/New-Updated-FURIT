@@ -123,7 +123,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
                 </span>
               )}
             </div>
-            <p className="font-serif italic text-xs font-semibold text-emerald-700 dark:text-emerald-400 mt-0.5">
+            <p className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 mt-0.5">
               Freshness. Quality. Trust.
             </p>
           </div>

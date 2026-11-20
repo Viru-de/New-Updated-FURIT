@@ -27,7 +27,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
 
     try {
       setError(null);
-      const dataUri = await processAndCompressImage(file, { maxWidth: 512, maxHeight: 512 });
+      const dataUri = await processAndCompressImage(file, { maxWidth: 320, maxHeight: 320, quality: 0.78 });
       onChange(dataUri);
     } catch (err: any) {
       setError(err.message || 'Error processing image');

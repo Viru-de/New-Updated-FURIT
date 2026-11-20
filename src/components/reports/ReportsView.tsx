@@ -23,7 +23,7 @@ import {
 import * as XLSX from 'xlsx';
 import { BillShareButtons } from '../common/BillShareButtons';
 import { triggerPrint } from '../../utils/pdfAndShareEngine';
-import { CompanyContactsHeader } from '../common/CompanyContactsHeader';
+import { PrintBusinessHeader } from '../common/PrintBusinessHeader';
 import {
   exportExpenses,
   exportCustomerLedger,
@@ -491,25 +491,9 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
       {/* Report Printable Area */}
       <div id="report-print-area" className="erp-print-area space-y-4">
         {/* Printable Traditional Mandi Report Header */}
-        <div className="hidden print:block p-4 border-b border-black text-center mb-1">
-          {(currentProfile.shortName || currentProfile.shortCode) && (
-            <div className="font-black text-sm tracking-[0.2em] uppercase text-slate-950 print:text-black pb-0.5">
-              {currentProfile.shortName || currentProfile.shortCode}
-            </div>
-          )}
-          <h1 className="text-lg sm:text-xl font-black uppercase tracking-wider">{currentProfile.name}</h1>
-          {currentProfile.hindiName && (
-            <div className="text-base sm:text-lg font-bold tracking-wide mt-0.5 font-devanagari text-slate-900 print:text-black">
-              {currentProfile.hindiName}
-            </div>
-          )}
-          <div className="text-[11px] text-slate-700 leading-snug mt-1">
-            {currentProfile.address}
-            {currentProfile.city ? `, ${currentProfile.city}` : ''}
-            {currentProfile.state ? `, ${currentProfile.state}` : ''}
-          </div>
-          <CompanyContactsHeader profile={currentProfile} className="mt-0.5" />
-          <div className="my-1.5 text-xs font-bold uppercase tracking-widest border-b border-t border-black py-0.5 inline-block">
+        <div className="hidden print:block pt-0 px-3 pb-2 border-b border-black text-center mb-1">
+          <PrintBusinessHeader profile={currentProfile} variant="ledger" className="mb-1" />
+          <div className="my-1 text-xs font-bold uppercase tracking-widest border-b border-t border-black py-0.5 inline-block">
             {tabTitles[activeTab] || 'BUSINESS REPORT'}
           </div>
           <div className="flex justify-between items-start text-xs mt-2 text-left border-t border-slate-300 pt-1.5">

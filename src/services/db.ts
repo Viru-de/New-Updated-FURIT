@@ -51,20 +51,123 @@ function notifyListeners() {
 }
 
 const memStorage = new Map<string, string>();
+const storageFallbackKeys = new Set<string>();
+const IDB_DB_NAME = 'hk_erp_durable_store';
+const IDB_STORE_NAME = 'kv';
+const IDB_PROFILES_KEY = 'company_profiles_full';
+const IDB_LOGO_PLACEHOLDER = '__idb_logo__';
+
+function isIndexedDbAvailable(): boolean {
+  try {
+    return typeof indexedDB !== 'undefined' && indexedDB !== null;
+  } catch {
+    return false;
+  }
+}
+
+function openDurableDb(): Promise<IDBDatabase> {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(IDB_DB_NAME, 1);
+    req.onupgradeneeded = () => {
+      const database = req.result;
+      if (!database.objectStoreNames.contains(IDB_STORE_NAME)) {
+        database.createObjectStore(IDB_STORE_NAME);
+      }
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function writeProfilesToIndexedDb(profiles: CompanyProfile[]): Promise<void> {
+  if (!isIndexedDbAvailable()) return;
+  try {
+    const database = await openDurableDb();
+    await new Promise<void>((resolve, reject) => {
+      const tx = database.transaction(IDB_STORE_NAME, 'readwrite');
+      tx.objectStore(IDB_STORE_NAME).put(profiles, IDB_PROFILES_KEY);
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+    database.close();
+  } catch {
+    // Best-effort durable mirror
+  }
+}
+
+async function readProfilesFromIndexedDb(): Promise<CompanyProfile[] | null> {
+  if (!isIndexedDbAvailable()) return null;
+  try {
+    const database = await openDurableDb();
+    const result = await new Promise<CompanyProfile[] | null>((resolve, reject) => {
+      const tx = database.transaction(IDB_STORE_NAME, 'readonly');
+      const req = tx.objectStore(IDB_STORE_NAME).get(IDB_PROFILES_KEY);
+      req.onsuccess = () => resolve((req.result as CompanyProfile[]) || null);
+      req.onerror = () => reject(req.error);
+    });
+    database.close();
+    return Array.isArray(result) ? result : null;
+  } catch {
+    return null;
+  }
+}
+
 const storage = {
   getItem: (key: string): string | null => {
+    if (storageFallbackKeys.has(key)) {
+      return memStorage.get(key) ?? null;
+    }
     try {
       if (typeof localStorage !== 'undefined') return localStorage.getItem(key);
     } catch {}
-    return memStorage.get(key) || null;
+    return memStorage.get(key) ?? null;
   },
-  setItem: (key: string, val: string): void => {
-    try {
-      if (typeof localStorage !== 'undefined') localStorage.setItem(key, val);
-    } catch {}
+  setItem: (key: string, val: string): boolean => {
     memStorage.set(key, val);
+    try {
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem(key, val);
+        storageFallbackKeys.delete(key);
+        return true;
+      }
+    } catch {
+      storageFallbackKeys.add(key);
+      return false;
+    }
+    return true;
   },
 };
+
+function persistCompanyProfilesSafely(list: CompanyProfile[]): void {
+  const fullJson = JSON.stringify(list);
+  memStorage.set(STORAGE_KEYS.COMPANY_PROFILES, fullJson);
+  void writeProfilesToIndexedDb(list);
+
+  try {
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem(STORAGE_KEYS.COMPANY_PROFILES, fullJson);
+      storageFallbackKeys.delete(STORAGE_KEYS.COMPANY_PROFILES);
+      return;
+    }
+  } catch {
+    // localStorage quota hit (e.g. many large base64 logos). Keep full profiles in memStorage + IndexedDB,
+    // and store lightweight profile metadata (offloading heavy inline logos) in localStorage so all companies
+    // remain synchronously available on refresh while IndexedDB restores logos right after load.
+    storageFallbackKeys.add(STORAGE_KEYS.COMPANY_PROFILES);
+    try {
+      if (typeof localStorage !== 'undefined') {
+        const slimList = list.map((p) =>
+          p.logo && p.logo.startsWith('data:') && p.logo.length > 2048
+            ? { ...p, logo: IDB_LOGO_PLACEHOLDER }
+            : p
+        );
+        localStorage.setItem(STORAGE_KEYS.COMPANY_PROFILES, JSON.stringify(slimList));
+      }
+    } catch {
+      // IndexedDB + memStorage still holds the complete list
+    }
+  }
+}
 
 function getItem<T>(key: string, defaultValue: T): T {
   try {
@@ -136,7 +239,7 @@ const INITIAL_PROFILES: CompanyProfile[] = [
     footerText: 'Thank you for your business with Hari Kripa!',
     signatureTitle: 'FOR, HARI KRIPA',
     softwareDevelopedBy: 'Klyia Technology',
-    logo: '/assets/hfc_full_logo.png',
+    logo: '/assets/hfc_circle_logo.png',
     isDefault: true,
     createdAt: '2026-10-01T00:00:00.000Z',
   },
@@ -708,7 +811,7 @@ export function initDb(forceReset: boolean = false): void {
   if (forceReset || !storage.getItem(STORAGE_KEYS.SETTINGS)) {
     storage.setItem(STORAGE_KEYS.UNITS, JSON.stringify(INITIAL_UNITS));
     storage.setItem(STORAGE_KEYS.CRATE_TYPES, JSON.stringify(INITIAL_CRATE_TYPES));
-    storage.setItem(STORAGE_KEYS.COMPANY_PROFILES, JSON.stringify(INITIAL_PROFILES));
+    persistCompanyProfilesSafely(INITIAL_PROFILES);
     storage.setItem(STORAGE_KEYS.FRUITS, JSON.stringify(INITIAL_FRUITS));
     storage.setItem(STORAGE_KEYS.CUSTOMERS, JSON.stringify(INITIAL_CUSTOMERS));
     storage.setItem(STORAGE_KEYS.VENDORS, JSON.stringify(INITIAL_VENDORS));
@@ -720,13 +823,46 @@ export function initDb(forceReset: boolean = false): void {
     storage.setItem(STORAGE_KEYS.BILLS, JSON.stringify([]));
     storage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(INITIAL_SETTINGS));
     storage.setItem(STORAGE_KEYS.USERS, JSON.stringify([INITIAL_USER]));
-    storage.setItem(STORAGE_KEYS.ACTIVE_USER, JSON.stringify(INITIAL_USER));
+    notifyListeners();
+  }
+}
+
+// Hydrate any quota-offloaded profiles/logos from IndexedDB on boot
+async function hydrateCompanyProfilesFromDurableStore(): Promise<void> {
+  const idbProfiles = await readProfilesFromIndexedDb();
+  if (!idbProfiles || idbProfiles.length === 0) return;
+
+  const currentProfiles = getItem<CompanyProfile[]>(STORAGE_KEYS.COMPANY_PROFILES, []);
+  if (currentProfiles.length === 0) {
+    memStorage.set(STORAGE_KEYS.COMPANY_PROFILES, JSON.stringify(idbProfiles));
+    storageFallbackKeys.add(STORAGE_KEYS.COMPANY_PROFILES);
+    notifyListeners();
+    return;
+  }
+
+  let changed = false;
+  const idbById = new Map(idbProfiles.map((p) => [p.id, p]));
+  const merged = currentProfiles.map((p) => {
+    if (p.logo === IDB_LOGO_PLACEHOLDER) {
+      const fromIdb = idbById.get(p.id);
+      if (fromIdb?.logo && fromIdb.logo !== IDB_LOGO_PLACEHOLDER) {
+        changed = true;
+        return { ...p, logo: fromIdb.logo };
+      }
+    }
+    return p;
+  });
+
+  if (changed) {
+    memStorage.set(STORAGE_KEYS.COMPANY_PROFILES, JSON.stringify(merged));
+    storageFallbackKeys.add(STORAGE_KEYS.COMPANY_PROFILES);
     notifyListeners();
   }
 }
 
 // Auto-run init
 initDb();
+void hydrateCompanyProfilesFromDurableStore();
 
 export const db = {
   subscribe(listener: Listener): () => void {
@@ -736,7 +872,7 @@ export const db = {
 
   // Auth & Session
   getActiveUser(): User | null {
-    return getItem<User | null>(STORAGE_KEYS.ACTIVE_USER, INITIAL_USER);
+    return getItem<User | null>(STORAGE_KEYS.ACTIVE_USER, null);
   },
   setActiveUser(user: User | null): void {
     setItem(STORAGE_KEYS.ACTIVE_USER, user);
@@ -974,7 +1110,7 @@ export const db = {
   getCompanyProfiles(): CompanyProfile[] {
     const profiles = getItem<CompanyProfile[]>(STORAGE_KEYS.COMPANY_PROFILES, INITIAL_PROFILES);
     return profiles.map((p) => {
-      let updated = { ...p };
+      const updated = { ...p };
       if (p.hindiName === undefined) {
         const init = INITIAL_PROFILES.find((ip) => ip.id === p.id);
         if (init?.hindiName) {
@@ -988,8 +1124,12 @@ export const db = {
       if (!updated.shortCode && updated.shortName) {
         updated.shortCode = updated.shortName;
       }
-      if (!updated.logo && (p.isDefault || p.id === 'cp1')) {
-        updated.logo = '/assets/hfc_full_logo.png';
+      if (updated.logo === IDB_LOGO_PLACEHOLDER) {
+        updated.logo = undefined;
+      } else if (updated.logo?.startsWith('/assets/hfc_full_logo')) {
+        updated.logo = '/assets/hfc_circle_logo.png';
+      } else if (!updated.logo && p.id === 'cp1') {
+        updated.logo = '/assets/hfc_circle_logo.png';
       }
       return updated;
     });
@@ -1000,23 +1140,29 @@ export const db = {
   },
   saveCompanyProfile(profile: CompanyProfile): void {
     let list = this.getCompanyProfiles();
-    if (profile.isDefault) {
-      list = list.map((p) => ({ ...p, isDefault: p.id === profile.id }));
+    const safeProfile: CompanyProfile = {
+      ...profile,
+      id: profile.id || `cp-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+    };
+    if (safeProfile.isDefault) {
+      list = list.map((p) => ({ ...p, isDefault: p.id === safeProfile.id }));
     }
-    const idx = list.findIndex((p) => p.id === profile.id);
+    const idx = list.findIndex((p) => p.id === safeProfile.id);
     if (idx >= 0) {
-      list[idx] = profile;
+      list[idx] = safeProfile;
     } else {
-      list.push(profile);
+      list.push(safeProfile);
     }
-    setItem(STORAGE_KEYS.COMPANY_PROFILES, list);
+    persistCompanyProfilesSafely(list);
+    notifyListeners();
   },
   deleteCompanyProfile(id: string): void {
     const list = this.getCompanyProfiles().filter((p) => p.id !== id);
     if (list.length > 0 && !list.some((p) => p.isDefault)) {
       list[0].isDefault = true;
     }
-    setItem(STORAGE_KEYS.COMPANY_PROFILES, list);
+    persistCompanyProfilesSafely(list);
+    notifyListeners();
   },
 
   // Sale Proceeds Opening Balance
@@ -1384,7 +1530,7 @@ export const db = {
       const data = JSON.parse(jsonString);
       if (data.units) setItem(STORAGE_KEYS.UNITS, data.units);
       if (data.crateTypes) setItem(STORAGE_KEYS.CRATE_TYPES, data.crateTypes);
-      if (data.companyProfiles) setItem(STORAGE_KEYS.COMPANY_PROFILES, data.companyProfiles);
+      if (data.companyProfiles) persistCompanyProfilesSafely(data.companyProfiles);
       if (data.fruits) setItem(STORAGE_KEYS.FRUITS, data.fruits);
       if (data.customers) setItem(STORAGE_KEYS.CUSTOMERS, data.customers);
       if (data.vendors) setItem(STORAGE_KEYS.VENDORS, data.vendors);

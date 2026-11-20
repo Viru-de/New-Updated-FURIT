@@ -28,7 +28,7 @@ export const BillShareButtons: React.FC<BillShareButtonsProps> = ({
   summaryText,
   className = '',
   size = 'sm',
-  defaultPaperSize = 'compact',
+  defaultPaperSize = 'a5',
   onPaperSizeChange,
   showPrintButton = false,
 }) => {

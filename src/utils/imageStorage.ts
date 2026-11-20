@@ -4,9 +4,9 @@
  * fast, and fully offline compatible.
  */
 
-const MAX_WIDTH = 400;
-const MAX_HEIGHT = 400;
-const QUALITY = 0.82;
+const MAX_WIDTH = 320;
+const MAX_HEIGHT = 320;
+const QUALITY = 0.78;
 
 export interface ProcessImageOptions {
   maxWidth?: number;

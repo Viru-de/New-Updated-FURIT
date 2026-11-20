@@ -2,7 +2,7 @@ export interface User {
   id: string;
   name: string;
   username: string;
-  role: 'admin' | 'accountant';
+  role: 'admin' | 'accountant' | 'developer';
   pin: string;
 }
 
@@ -422,3 +422,31 @@ export interface TrashItem {
   deletedAt: string;
   deletedBy: string;
 }
+
+export interface SafeUserSummary {
+  id: string;
+  name: string;
+  username: string;
+  role: 'admin' | 'accountant';
+  active: boolean;
+  recoveryMethodConfigured: boolean;
+  recoveryHint?: string;
+  createdAt: string;
+  updatedAt: string;
+  lastPasswordResetAt?: string;
+}
+
+export interface PasswordAuditEntry {
+  id: string;
+  action:
+    | 'owner_master_recovery_reset'
+    | 'admin_staff_reset'
+    | 'self_password_change'
+    | 'staff_account_created';
+  targetUserId: string;
+  targetUsername: string;
+  targetRole: 'admin' | 'accountant';
+  performedBy: string;
+  timestamp: string;
+}
+

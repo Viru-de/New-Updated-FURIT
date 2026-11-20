@@ -181,3 +181,29 @@ export function formatCompanySignature(
 
   return `FOR, ${cleanName}`;
 }
+
+/**
+ * Strips redundant document-type prefixes (e.g., "Credit Sale No.", "Cash Sale No.",
+ * "Sale Proceeds No.", "Sale Proceed No.", "Bill No.", "No.") from printed bill numbers
+ * so only the actual bill number renders after "NO.:".
+ * Example: "Credit Sale No. 004" -> "004"
+ */
+export function formatCleanBillNumber(raw?: string | null): string {
+  if (!raw) return '';
+  let cleaned = String(raw).trim();
+  let previous = '';
+
+  while (cleaned !== previous) {
+    previous = cleaned;
+    cleaned = cleaned
+      .replace(
+        /^(?:credit\s+sale|cash\s+sale|sale\s+proceeds?|bill|invoice|receipt)\s*(?:no\.?|number|#)?\s*[:\-.]?\s*/i,
+        ''
+      )
+      .replace(/^(?:no\.?|number|#)\s*[:\-.]?\s*/i, '')
+      .trim();
+  }
+
+  return cleaned || String(raw).trim();
+}
+

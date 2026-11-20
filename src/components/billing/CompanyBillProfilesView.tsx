@@ -157,7 +157,9 @@ export const CompanyBillProfilesView: React.FC = () => {
     const trimmedAlt1Mobile = alternate1Mobile.trim();
     const trimmedShortName = shortName.trim();
     const profileRecord: CompanyProfile = {
-      id: editingProfile ? editingProfile.id : `cp-${Date.now()}`,
+      id: editingProfile
+        ? editingProfile.id
+        : `cp-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
       name: name.trim(),
       shortName: trimmedShortName || undefined,
       shortCode: trimmedShortName || editingProfile?.shortCode || undefined,

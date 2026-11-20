@@ -26,9 +26,18 @@ export const CashSalePrintModal: React.FC<CashSalePrintModalProps> = ({
     defaultProfile?.id || profiles[0]?.id || ''
   );
   const [pageSize, setPageSize] = useState<BillPaperSize>(() =>
-    getLastSelectedPaperSize('compact')
+    getLastSelectedPaperSize('a5')
   );
   const [isFormatModalOpen, setIsFormatModalOpen] = useState(false);
+
+  React.useEffect(() => {
+    if (isOpen) {
+      const latestDefault = db.getDefaultProfile();
+      if (latestDefault?.id) {
+        setSelectedProfileId(latestDefault.id);
+      }
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 

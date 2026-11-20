@@ -462,6 +462,13 @@ input.no-spinners {
   color: #0f172a !important;
 }
 
+.print-bill-canvas .bill-qty-col,
+.print-bill-canvas .bill-qty-cell,
+.print-bill-canvas .bill-qty-nowrap {
+  white-space: nowrap !important;
+  word-break: keep-all !important;
+}
+
 
 /* Screen mode: hide isolated print mount completely */
 #erp-isolated-print-mount {
@@ -475,7 +482,7 @@ input.no-spinners {
    ========================================================================= */
 @media print {
   @page {
-    margin: 4mm;
+    margin: 2mm 4mm 3mm 4mm;
   }
 
   /* Universal reset for print medium: Force pure white page, black text, and light color-scheme */
@@ -701,11 +708,10 @@ input.no-spinners {
     display: none !important;
   }
 
-  /* Single-page bill canvases: centered, visible, white background, print-safe margins and padding */
+  /* Single-page & A5 bill canvases: centered, visible, white background, compact top space, no outer top border */
   #mandi-print-area,
   #receipt-print-area,
-  #sale-proceeds-print-area,
-  #sale-proceeds-short-print-area {
+  #sale-proceeds-print-area {
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
@@ -714,7 +720,7 @@ input.no-spinners {
     top: 0 !important;
     box-sizing: border-box !important;
     margin: 0 auto !important;
-    padding: 2mm 3mm !important;
+    padding: 0mm 2mm 1mm 2mm !important;
     background-color: #ffffff !important;
     background: #ffffff !important;
     color: #000000 !important;
@@ -725,8 +731,8 @@ input.no-spinners {
     overflow: visible !important;
     page-break-before: avoid !important;
     break-before: avoid !important;
-    page-break-after: avoid !important;
-    break-after: avoid !important;
+    page-break-after: auto !important;
+    break-after: auto !important;
   }
 
   /* Ensure print header blocks are always displayed */
@@ -739,8 +745,47 @@ input.no-spinners {
     visibility: visible !important;
   }
 
+  /* Preserve two-column left/right alignment of shared PrintBusinessHeader in all print contexts */
+  .print-business-header,
+  .fixed.inset-0:not(.no-print):not(.print\:hidden) .print-business-header,
+  #erp-isolated-print-mount .print-business-header {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    padding-top: 0 !important;
+  }
+  .print-business-header .print-business-header-left,
+  .fixed.inset-0:not(.no-print):not(.print\:hidden) .print-business-header .print-business-header-left,
+  #erp-isolated-print-mount .print-business-header .print-business-header-left {
+    display: flex !important;
+    align-items: center !important;
+    flex: 1 1 0% !important;
+    min-width: 0 !important;
+    text-align: left !important;
+  }
+  .print-business-header .print-business-header-text,
+  .fixed.inset-0:not(.no-print):not(.print\:hidden) .print-business-header .print-business-header-text,
+  #erp-isolated-print-mount .print-business-header .print-business-header-text {
+    display: block !important;
+    flex: 1 1 0% !important;
+    min-width: 0 !important;
+    text-align: left !important;
+  }
+  .print-business-header .print-business-header-right,
+  .fixed.inset-0:not(.no-print):not(.print\:hidden) .print-business-header .print-business-header-right,
+  #erp-isolated-print-mount .print-business-header .print-business-header-right {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-end !important;
+    justify-content: center !important;
+    flex-shrink: 0 !important;
+    text-align: right !important;
+  }
+
   /* Multi-page statements, ledgers, summaries, and reports */
   #ledger-print-area,
+  #customer-ledger-detailed-print-area,
   #customer-ledger-short-print-area,
   #sale-proceeds-print-area,
   #sale-proceeds-short-print-area,
@@ -757,7 +802,7 @@ input.no-spinners {
     width: 100% !important;
     max-width: 100% !important;
     margin: 0 auto !important;
-    padding: 2mm 3mm !important;
+    padding: 0mm 2.5mm 1.5mm 2.5mm !important;
     background-color: #ffffff !important;
     background: #ffffff !important;
     color: #000000 !important;
@@ -769,6 +814,14 @@ input.no-spinners {
     page-break-after: auto;
     page-break-before: avoid !important;
     break-before: avoid !important;
+  }
+
+  /* Bill print containers must have zero outer top line above company header */
+  #mandi-print-area.bill-outer-frame,
+  #erp-isolated-print-mount #mandi-print-area.bill-outer-frame,
+  #erp-isolated-print-mount #mandi-print-area {
+    border: none !important;
+    padding: 0mm 2mm 1mm 2mm !important;
   }
 
   /* Multi-page table support: repeat headers and keep rows together */
@@ -812,9 +865,20 @@ input.no-spinners {
   #crate-statement-print-area tfoot,
   #report-print-area tfoot,
   .erp-print-area tfoot,
-  .print-bill-canvas tfoot,
   [data-theme-isolated="true"] tfoot {
     display: table-footer-group !important;
+  }
+
+  /* Bills (#mandi-print-area / .print-bill-canvas): render tfoot cleanly at end of items without repeating on every page */
+  #mandi-print-area tfoot,
+  #erp-isolated-print-mount #mandi-print-area tfoot,
+  .print-bill-canvas tfoot {
+    display: table-row-group !important;
+  }
+  #mandi-print-area .bill-bottom-footer,
+  #erp-isolated-print-mount #mandi-print-area .bill-bottom-footer {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
   }
 
   #ledger-print-area tr,
@@ -855,10 +919,155 @@ input.no-spinners {
     break-inside: avoid !important;
   }
 
+  /* Detailed Sale Proceeds & Customer Print Ledger: keep each item line unbroken while allowing long multi-product rows to span across pages cleanly */
+  #sale-proceeds-print-area tbody tr,
+  #sale-proceeds-print-area tbody td,
+  #customer-ledger-detailed-print-area tbody tr,
+  #customer-ledger-detailed-print-area tbody td {
+    page-break-inside: auto !important;
+    break-inside: auto !important;
+  }
+  #sale-proceeds-print-area .sp-detail-line,
+  #customer-ledger-detailed-print-area .sp-detail-line {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+  #sale-proceeds-print-area .sp-qty-nowrap,
+  #customer-ledger-detailed-print-area .sp-qty-nowrap {
+    display: inline-block !important;
+    white-space: nowrap !important;
+    word-break: keep-all !important;
+    overflow-wrap: normal !important;
+  }
+  #sale-proceeds-print-area tfoot,
+  #customer-ledger-detailed-print-area tfoot {
+    display: table-row-group !important;
+  }
+  #customer-ledger-detailed-print-area {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    page-break-after: auto !important;
+    break-after: auto !important;
+  }
+
+  /* Short Print (Sale Proceed Ledger & Customer Ledger): 5-column traditional accounting ledger with multi-page flow, repeating thead, non-repeating tfoot, and subtle zebra rows */
+  #sale-proceeds-short-print-area,
+  #customer-ledger-short-print-area {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    page-break-after: auto !important;
+    break-after: auto !important;
+  }
+  #sale-proceeds-short-print-area tfoot,
+  #customer-ledger-short-print-area tfoot {
+    display: table-row-group !important;
+  }
+  #sale-proceeds-short-print-area .sp-short-keep-together,
+  #customer-ledger-short-print-area .sp-short-keep-together {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+  body.has-print-mount #erp-isolated-print-mount #sale-proceeds-short-print-area thead tr.sp-print-header-row,
+  body.has-print-mount #erp-isolated-print-mount #sale-proceeds-short-print-area thead th.sp-print-header-cell,
+  body.has-print-mount #erp-isolated-print-mount #customer-ledger-short-print-area thead tr.sp-print-header-row,
+  body.has-print-mount #erp-isolated-print-mount #customer-ledger-short-print-area thead th.sp-print-header-cell,
+  #sale-proceeds-short-print-area thead tr.sp-print-header-row,
+  #sale-proceeds-short-print-area thead th.sp-print-header-cell,
+  #customer-ledger-short-print-area thead tr.sp-print-header-row,
+  #customer-ledger-short-print-area thead th.sp-print-header-cell {
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    border: none !important;
+  }
+  body.has-print-mount #erp-isolated-print-mount #sale-proceeds-short-print-area thead tr.sp-short-col-header,
+  body.has-print-mount #erp-isolated-print-mount #sale-proceeds-short-print-area thead tr.sp-short-col-header th,
+  body.has-print-mount #erp-isolated-print-mount #customer-ledger-short-print-area thead tr.sp-short-col-header,
+  body.has-print-mount #erp-isolated-print-mount #customer-ledger-short-print-area thead tr.sp-short-col-header th,
+  #sale-proceeds-short-print-area thead tr.sp-short-col-header,
+  #sale-proceeds-short-print-area thead tr.sp-short-col-header th,
+  #customer-ledger-short-print-area thead tr.sp-short-col-header,
+  #customer-ledger-short-print-area thead tr.sp-short-col-header th {
+    background-color: #f3f4f6 !important;
+    background: #f3f4f6 !important;
+    color: #000000 !important;
+    border-top: 1px solid #000000 !important;
+    border-bottom: 1px solid #000000 !important;
+    border-left: none !important;
+    border-right: none !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  body.has-print-mount #erp-isolated-print-mount #sale-proceeds-short-print-area tbody tr.sp-zebra-odd,
+  body.has-print-mount #erp-isolated-print-mount #sale-proceeds-short-print-area tbody tr.sp-zebra-odd td,
+  body.has-print-mount #erp-isolated-print-mount #customer-ledger-short-print-area tbody tr.sp-zebra-odd,
+  body.has-print-mount #erp-isolated-print-mount #customer-ledger-short-print-area tbody tr.sp-zebra-odd td,
+  #sale-proceeds-short-print-area tbody tr.sp-zebra-odd,
+  #sale-proceeds-short-print-area tbody tr.sp-zebra-odd td,
+  #customer-ledger-short-print-area tbody tr.sp-zebra-odd,
+  #customer-ledger-short-print-area tbody tr.sp-zebra-odd td {
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    border: none !important;
+  }
+  body.has-print-mount #erp-isolated-print-mount #sale-proceeds-short-print-area tbody tr.sp-zebra-even,
+  body.has-print-mount #erp-isolated-print-mount #sale-proceeds-short-print-area tbody tr.sp-zebra-even td,
+  body.has-print-mount #erp-isolated-print-mount #customer-ledger-short-print-area tbody tr.sp-zebra-even,
+  body.has-print-mount #erp-isolated-print-mount #customer-ledger-short-print-area tbody tr.sp-zebra-even td,
+  #sale-proceeds-short-print-area tbody tr.sp-zebra-even,
+  #sale-proceeds-short-print-area tbody tr.sp-zebra-even td,
+  #customer-ledger-short-print-area tbody tr.sp-zebra-even,
+  #customer-ledger-short-print-area tbody tr.sp-zebra-even td {
+    background-color: #eaedf1 !important;
+    background: #eaedf1 !important;
+    color: #000000 !important;
+    border: none !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  body.has-print-mount #erp-isolated-print-mount #sale-proceeds-short-print-area tfoot tr,
+  body.has-print-mount #erp-isolated-print-mount #sale-proceeds-short-print-area tfoot td,
+  body.has-print-mount #erp-isolated-print-mount #customer-ledger-short-print-area tfoot tr,
+  body.has-print-mount #erp-isolated-print-mount #customer-ledger-short-print-area tfoot td,
+  #sale-proceeds-short-print-area tfoot tr,
+  #sale-proceeds-short-print-area tfoot td,
+  #customer-ledger-short-print-area tfoot tr,
+  #customer-ledger-short-print-area tfoot td {
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    border-left: none !important;
+    border-right: none !important;
+  }
+  body.has-print-mount #erp-isolated-print-mount #sale-proceeds-short-print-area tfoot tr.sp-short-total-row td,
+  body.has-print-mount #erp-isolated-print-mount #customer-ledger-short-print-area tfoot tr.sp-short-total-row td,
+  #sale-proceeds-short-print-area tfoot tr.sp-short-total-row td,
+  #customer-ledger-short-print-area tfoot tr.sp-short-total-row td {
+    border-top: 1px solid #000000 !important;
+    border-bottom: none !important;
+  }
+  body.has-print-mount #erp-isolated-print-mount #sale-proceeds-short-print-area tfoot tr.sp-short-closing-row td,
+  body.has-print-mount #erp-isolated-print-mount #customer-ledger-short-print-area tfoot tr.sp-short-closing-row td,
+  #sale-proceeds-short-print-area tfoot tr.sp-short-closing-row td,
+  #customer-ledger-short-print-area tfoot tr.sp-short-closing-row td {
+    border-top: none !important;
+    border-bottom: none !important;
+  }
+  body.has-print-mount #erp-isolated-print-mount #sale-proceeds-short-print-area tfoot tr.sp-short-closing-row td.sp-short-closing-cell,
+  body.has-print-mount #erp-isolated-print-mount #customer-ledger-short-print-area tfoot tr.sp-short-closing-row td.sp-short-closing-cell,
+  #sale-proceeds-short-print-area tfoot tr.sp-short-closing-row td.sp-short-closing-cell,
+  #customer-ledger-short-print-area tfoot tr.sp-short-closing-row td.sp-short-closing-cell {
+    border-top: 1px solid #000000 !important;
+  }
+
   /* Force pure black text, crisp borders, and clean backgrounds during print regardless of theme */
   #mandi-print-area *,
   #receipt-print-area *,
   #ledger-print-area *,
+  #customer-ledger-detailed-print-area *,
   #customer-ledger-short-print-area *,
   #sale-proceeds-print-area *,
   #sale-proceeds-short-print-area *,
@@ -878,6 +1087,7 @@ input.no-spinners {
   #mandi-print-area div,
   #receipt-print-area div,
   #ledger-print-area div,
+  #customer-ledger-detailed-print-area div,
   #customer-ledger-short-print-area div,
   #sale-proceeds-print-area div,
   #sale-proceeds-short-print-area div,
@@ -890,6 +1100,7 @@ input.no-spinners {
   #mandi-print-area table,
   #receipt-print-area table,
   #ledger-print-area table,
+  #customer-ledger-detailed-print-area table,
   #customer-ledger-short-print-area table,
   #sale-proceeds-print-area table,
   #sale-proceeds-short-print-area table,
@@ -902,6 +1113,7 @@ input.no-spinners {
   #mandi-print-area tbody tr,
   #receipt-print-area tbody tr,
   #ledger-print-area tbody tr,
+  #customer-ledger-detailed-print-area tbody tr,
   #customer-ledger-short-print-area tbody tr,
   #sale-proceeds-print-area tbody tr,
   #sale-proceeds-short-print-area tbody tr,
@@ -914,6 +1126,7 @@ input.no-spinners {
   #mandi-print-area tbody td,
   #receipt-print-area tbody td,
   #ledger-print-area tbody td,
+  #customer-ledger-detailed-print-area tbody td,
   #customer-ledger-short-print-area tbody td,
   #sale-proceeds-print-area tbody td,
   #sale-proceeds-short-print-area tbody td,
@@ -929,10 +1142,49 @@ input.no-spinners {
     border-color: #cbd5e1 !important;
   }
 
+  /* Sale Proceed Bill Print Canvas: enforce 100% printable width, box-sizing, and continuous black borders */
+  #mandi-print-area.sale-proceed-print-canvas,
+  .sale-proceed-print-canvas {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: visible !important;
+  }
+  .sale-proceed-print-canvas table {
+    width: 100% !important;
+    max-width: 100% !important;
+    table-layout: fixed !important;
+    border-collapse: collapse !important;
+    box-sizing: border-box !important;
+  }
+  .sale-proceed-print-canvas tbody td {
+    border-color: #000000 !important;
+  }
+  #mandi-print-area:not(.sale-proceed-print-canvas) tbody td {
+    border-left-color: #000000 !important;
+    border-right-color: #000000 !important;
+    border-bottom-color: #94a3b8 !important;
+  }
+
+  /* Credit Sale & Cash Sale Bill Print: keep Qty and Unit strictly on one line */
+  #mandi-print-area .bill-qty-col,
+  #mandi-print-area .bill-qty-cell,
+  #mandi-print-area .bill-qty-nowrap,
+  .print-bill-canvas .bill-qty-col,
+  .print-bill-canvas .bill-qty-cell,
+  .print-bill-canvas .bill-qty-nowrap {
+    white-space: nowrap !important;
+    word-break: keep-all !important;
+    overflow-wrap: normal !important;
+  }
+
+  /* Removed boxed-border overrides for Short Print so minimal accounting layout stays clean */
+
   /* Preserve clean light gray backgrounds for headers */
   #mandi-print-area thead tr,
   #receipt-print-area thead tr,
   #ledger-print-area thead tr,
+  #customer-ledger-detailed-print-area thead tr,
   #customer-ledger-short-print-area thead tr,
   #sale-proceeds-print-area thead tr,
   #sale-proceeds-short-print-area thead tr,
@@ -945,6 +1197,7 @@ input.no-spinners {
   #mandi-print-area thead th,
   #receipt-print-area thead th,
   #ledger-print-area thead th,
+  #customer-ledger-detailed-print-area thead th,
   #customer-ledger-short-print-area thead th,
   #sale-proceeds-print-area thead th,
   #sale-proceeds-short-print-area thead th,
@@ -966,6 +1219,7 @@ input.no-spinners {
   #mandi-print-area tfoot tr,
   #receipt-print-area tfoot tr,
   #ledger-print-area tfoot tr,
+  #customer-ledger-detailed-print-area tfoot tr,
   #customer-ledger-short-print-area tfoot tr,
   #sale-proceeds-print-area tfoot tr,
   #sale-proceeds-short-print-area tfoot tr,
@@ -978,6 +1232,7 @@ input.no-spinners {
   #mandi-print-area tfoot td,
   #receipt-print-area tfoot td,
   #ledger-print-area tfoot td,
+  #customer-ledger-detailed-print-area tfoot td,
   #customer-ledger-short-print-area tfoot td,
   #sale-proceeds-print-area tfoot td,
   #sale-proceeds-short-print-area tfoot td,
@@ -1021,12 +1276,14 @@ input.no-spinners {
     print-color-adjust: exact !important;
   }
 
-  /* Ensure unslashed normal zeros and crisp Devanagari font rendering in print output */
+  /* Ensure unslashed normal zeros, crisp high-contrast ink, and Devanagari rendering in print output */
   *,
   .font-mono,
   .font-mono-numbers {
     font-variant-numeric: tabular-nums !important;
     font-feature-settings: "tnum" 1, "zero" 0 !important;
+    -webkit-font-smoothing: antialiased !important;
+    text-rendering: geometricPrecision !important;
   }
   .font-mono,
   .font-mono-numbers {
@@ -1034,5 +1291,245 @@ input.no-spinners {
   }
   .font-devanagari {
     font-family: 'Noto Sans Devanagari', 'Plus Jakarta Sans', Arial, sans-serif !important;
+  }
+
+  /* Guarantee dark near-black ink and clear weight on printed bill items & charges across Light/Dark print previews */
+  #erp-isolated-print-mount,
+  #erp-isolated-print-mount *,
+  .print-bill-canvas,
+  .print-bill-canvas *,
+  #mandi-print-area,
+  #mandi-print-area *,
+  #receipt-print-area,
+  #receipt-print-area *,
+  #sale-proceeds-print-area,
+  #sale-proceeds-print-area *,
+  #sale-proceeds-short-print-area,
+  #sale-proceeds-short-print-area *,
+  #customer-ledger-detailed-print-area,
+  #customer-ledger-detailed-print-area *,
+  #customer-ledger-short-print-area,
+  #customer-ledger-short-print-area *,
+  #group-sale-print-summary,
+  #group-sale-print-summary * {
+    color: #000000 !important;
+    opacity: 1 !important;
+    -webkit-font-smoothing: auto !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Reference Ledger Print Format (.ledger-ref-table) across Sale Proceeds & Customer Ledger (Detailed + Short) */
+  #sale-proceeds-print-area table.ledger-ref-table,
+  #sale-proceeds-short-print-area table.ledger-ref-table,
+  #customer-ledger-detailed-print-area table.ledger-ref-table,
+  #customer-ledger-short-print-area table.ledger-ref-table,
+  #erp-isolated-print-mount table.ledger-ref-table {
+    border-collapse: collapse !important;
+    background-color: #ffffff !important;
+  }
+  #sale-proceeds-print-area table.ledger-ref-table thead tr,
+  #sale-proceeds-short-print-area table.ledger-ref-table thead tr,
+  #customer-ledger-detailed-print-area table.ledger-ref-table thead tr,
+  #customer-ledger-short-print-area table.ledger-ref-table thead tr,
+  #erp-isolated-print-mount table.ledger-ref-table thead tr,
+  #sale-proceeds-print-area table.ledger-ref-table thead th,
+  #sale-proceeds-short-print-area table.ledger-ref-table thead th,
+  #customer-ledger-detailed-print-area table.ledger-ref-table thead th,
+  #customer-ledger-short-print-area table.ledger-ref-table thead th,
+  #erp-isolated-print-mount table.ledger-ref-table thead th {
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    border-top: 1px solid #000000 !important;
+    border-bottom: 1px solid #000000 !important;
+    border-left: none !important;
+    border-right: 1px solid #94a3b8 !important;
+  }
+  #sale-proceeds-print-area table.ledger-ref-table thead th:last-child,
+  #sale-proceeds-short-print-area table.ledger-ref-table thead th:last-child,
+  #customer-ledger-detailed-print-area table.ledger-ref-table thead th:last-child,
+  #customer-ledger-short-print-area table.ledger-ref-table thead th:last-child,
+  #erp-isolated-print-mount table.ledger-ref-table thead th:last-child {
+    border-right: none !important;
+  }
+  #sale-proceeds-print-area table.ledger-ref-table tbody tr,
+  #sale-proceeds-short-print-area table.ledger-ref-table tbody tr,
+  #customer-ledger-detailed-print-area table.ledger-ref-table tbody tr,
+  #customer-ledger-short-print-area table.ledger-ref-table tbody tr,
+  #erp-isolated-print-mount table.ledger-ref-table tbody tr,
+  #sale-proceeds-print-area table.ledger-ref-table tbody td,
+  #sale-proceeds-short-print-area table.ledger-ref-table tbody td,
+  #customer-ledger-detailed-print-area table.ledger-ref-table tbody td,
+  #customer-ledger-short-print-area table.ledger-ref-table tbody td,
+  #erp-isolated-print-mount table.ledger-ref-table tbody td {
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    border-top: none !important;
+    border-left: none !important;
+    border-bottom: 1px solid #94a3b8 !important;
+    border-right: 1px solid #94a3b8 !important;
+  }
+  #sale-proceeds-print-area table.ledger-ref-table tbody td:last-child,
+  #sale-proceeds-short-print-area table.ledger-ref-table tbody td:last-child,
+  #customer-ledger-detailed-print-area table.ledger-ref-table tbody td:last-child,
+  #customer-ledger-short-print-area table.ledger-ref-table tbody td:last-child,
+  #erp-isolated-print-mount table.ledger-ref-table tbody td:last-child {
+    border-right: none !important;
+  }
+  #sale-proceeds-print-area table.ledger-ref-table tfoot tr,
+  #sale-proceeds-short-print-area table.ledger-ref-table tfoot tr,
+  #customer-ledger-detailed-print-area table.ledger-ref-table tfoot tr,
+  #customer-ledger-short-print-area table.ledger-ref-table tfoot tr,
+  #erp-isolated-print-mount table.ledger-ref-table tfoot tr,
+  #sale-proceeds-print-area table.ledger-ref-table tfoot td,
+  #sale-proceeds-short-print-area table.ledger-ref-table tfoot td,
+  #customer-ledger-detailed-print-area table.ledger-ref-table tfoot td,
+  #customer-ledger-short-print-area table.ledger-ref-table tfoot td,
+  #erp-isolated-print-mount table.ledger-ref-table tfoot td {
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    border-top: 1px solid #000000 !important;
+    border-bottom: 1px solid #000000 !important;
+    border-left: none !important;
+    border-right: 1px solid #94a3b8 !important;
+  }
+  #sale-proceeds-print-area table.ledger-ref-table tfoot td:last-child,
+  #sale-proceeds-short-print-area table.ledger-ref-table tfoot td:last-child,
+  #customer-ledger-detailed-print-area table.ledger-ref-table tfoot td:last-child,
+  #customer-ledger-short-print-area table.ledger-ref-table tfoot td:last-child,
+  #erp-isolated-print-mount table.ledger-ref-table tfoot td:last-child {
+    border-right: none !important;
+  }
+
+  /* Short Print Reference Format (.sp-short-table) across Sale Proceeds & Customer Ledger Short Print */
+  #sale-proceeds-short-print-area table.sp-short-table,
+  #customer-ledger-short-print-area table.sp-short-table,
+  #erp-isolated-print-mount table.sp-short-table {
+    border-collapse: collapse !important;
+    background-color: #ffffff !important;
+  }
+  #sale-proceeds-short-print-area table.sp-short-table thead tr.sp-short-col-header,
+  #customer-ledger-short-print-area table.sp-short-table thead tr.sp-short-col-header,
+  #erp-isolated-print-mount table.sp-short-table thead tr.sp-short-col-header,
+  #sale-proceeds-short-print-area table.sp-short-table thead tr.sp-short-col-header th,
+  #customer-ledger-short-print-area table.sp-short-table thead tr.sp-short-col-header th,
+  #erp-isolated-print-mount table.sp-short-table thead tr.sp-short-col-header th {
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    border-top: 1px solid #000000 !important;
+    border-bottom: 1px solid #000000 !important;
+    border-left: none !important;
+    border-right: none !important;
+  }
+  #sale-proceeds-short-print-area table.sp-short-table tbody tr.sp-zebra-even,
+  #customer-ledger-short-print-area table.sp-short-table tbody tr.sp-zebra-even,
+  #erp-isolated-print-mount table.sp-short-table tbody tr.sp-zebra-even,
+  #sale-proceeds-short-print-area table.sp-short-table tbody tr.sp-zebra-even td,
+  #customer-ledger-short-print-area table.sp-short-table tbody tr.sp-zebra-even td,
+  #erp-isolated-print-mount table.sp-short-table tbody tr.sp-zebra-even td {
+    background-color: #eaedf1 !important;
+    background: #eaedf1 !important;
+    color: #000000 !important;
+    border: none !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  #sale-proceeds-short-print-area table.sp-short-table tbody tr.sp-zebra-odd,
+  #customer-ledger-short-print-area table.sp-short-table tbody tr.sp-zebra-odd,
+  #erp-isolated-print-mount table.sp-short-table tbody tr.sp-zebra-odd,
+  #sale-proceeds-short-print-area table.sp-short-table tbody tr.sp-zebra-odd td,
+  #customer-ledger-short-print-area table.sp-short-table tbody tr.sp-zebra-odd td,
+  #erp-isolated-print-mount table.sp-short-table tbody tr.sp-zebra-odd td {
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    border: none !important;
+  }
+  #sale-proceeds-short-print-area table.sp-short-table tfoot tr,
+  #customer-ledger-short-print-area table.sp-short-table tfoot tr,
+  #erp-isolated-print-mount table.sp-short-table tfoot tr,
+  #sale-proceeds-short-print-area table.sp-short-table tfoot td,
+  #customer-ledger-short-print-area table.sp-short-table tfoot td,
+  #erp-isolated-print-mount table.sp-short-table tfoot td {
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    border: none !important;
+  }
+  #sale-proceeds-short-print-area table.sp-short-table tfoot tr.sp-short-total-row td,
+  #customer-ledger-short-print-area table.sp-short-table tfoot tr.sp-short-total-row td,
+  #erp-isolated-print-mount table.sp-short-table tfoot tr.sp-short-total-row td {
+    border-top: 1px solid #000000 !important;
+    border-bottom: none !important;
+  }
+  #sale-proceeds-short-print-area table.sp-short-table tfoot tr.sp-short-closing-row td.sp-short-closing-cell,
+  #customer-ledger-short-print-area table.sp-short-table tfoot tr.sp-short-closing-row td.sp-short-closing-cell,
+  #erp-isolated-print-mount table.sp-short-table tfoot tr.sp-short-closing-row td.sp-short-closing-cell {
+    border-top: 1px solid #000000 !important;
+  }
+
+  /* Sale Proceed Detailed Ledger Print: clean, thin, aligned borders on cells only (no overlapping tr borders) */
+  #sale-proceeds-print-area table.sp-detailed-ref-table,
+  #erp-isolated-print-mount #sale-proceeds-print-area table.sp-detailed-ref-table {
+    border-collapse: collapse !important;
+    table-layout: fixed !important;
+    width: 100% !important;
+    border: none !important;
+    background-color: #ffffff !important;
+  }
+  #sale-proceeds-print-area table.sp-detailed-ref-table thead tr,
+  #sale-proceeds-print-area table.sp-detailed-ref-table tbody tr,
+  #sale-proceeds-print-area table.sp-detailed-ref-table tfoot tr,
+  #erp-isolated-print-mount #sale-proceeds-print-area table.sp-detailed-ref-table thead tr,
+  #erp-isolated-print-mount #sale-proceeds-print-area table.sp-detailed-ref-table tbody tr,
+  #erp-isolated-print-mount #sale-proceeds-print-area table.sp-detailed-ref-table tfoot tr {
+    border: none !important;
+    background-color: #ffffff !important;
+  }
+  #sale-proceeds-print-area table.sp-detailed-ref-table thead th,
+  #erp-isolated-print-mount #sale-proceeds-print-area table.sp-detailed-ref-table thead th {
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    border-top: 1px solid #000000 !important;
+    border-bottom: 1px solid #000000 !important;
+    border-left: none !important;
+    border-right: 1px solid #cbd5e1 !important;
+  }
+  #sale-proceeds-print-area table.sp-detailed-ref-table thead th:last-child,
+  #erp-isolated-print-mount #sale-proceeds-print-area table.sp-detailed-ref-table thead th:last-child {
+    border-right: none !important;
+  }
+  #sale-proceeds-print-area table.sp-detailed-ref-table tbody td,
+  #erp-isolated-print-mount #sale-proceeds-print-area table.sp-detailed-ref-table tbody td {
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    border-top: none !important;
+    border-left: none !important;
+    border-bottom: 1px solid #cbd5e1 !important;
+    border-right: 1px solid #cbd5e1 !important;
+  }
+  #sale-proceeds-print-area table.sp-detailed-ref-table tbody td:last-child,
+  #erp-isolated-print-mount #sale-proceeds-print-area table.sp-detailed-ref-table tbody td:last-child {
+    border-right: none !important;
+  }
+  #sale-proceeds-print-area table.sp-detailed-ref-table tfoot td,
+  #erp-isolated-print-mount #sale-proceeds-print-area table.sp-detailed-ref-table tfoot td {
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    border-top: 1px solid #000000 !important;
+    border-bottom: 1px solid #000000 !important;
+    border-left: none !important;
+    border-right: 1px solid #cbd5e1 !important;
+  }
+  #sale-proceeds-print-area table.sp-detailed-ref-table tfoot td:last-child,
+  #erp-isolated-print-mount #sale-proceeds-print-area table.sp-detailed-ref-table tfoot td:last-child {
+    border-right: none !important;
   }
 }

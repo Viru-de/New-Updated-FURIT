@@ -24,7 +24,7 @@ import { FruitAutocomplete } from '../common/FruitAutocomplete';
 import { QuantityInput } from '../common/QuantityInput';
 import { ExcelActionBar } from '../common/ExcelActionBar';
 import { exportCreditSales } from '../../utils/excelEngine';
-import { CompanyContactsHeader } from '../common/CompanyContactsHeader';
+import { PrintBusinessHeader } from '../common/PrintBusinessHeader';
 import { CreditSalePrintModal } from '../print/CreditSalePrintModal';
 import { triggerPrint } from '../../utils/pdfAndShareEngine';
 import {
@@ -1534,23 +1534,9 @@ export const GroupSaleView: React.FC<GroupSaleViewProps> = ({
       )}
 
       {/* Clean Printable Daily Summary for window.print() */}
-      <div className="hidden print:block font-sans text-black p-6 bg-white" id="group-sale-print-summary" style={{ fontFamily: "'Plus Jakarta Sans', 'Noto Sans Devanagari', Arial, sans-serif" }}>
-        <div className="text-center border-b-2 border-black pb-4 mb-4">
-          {(currentProfile.shortName || currentProfile.shortCode) && (
-            <div className="font-black text-base tracking-[0.2em] uppercase text-slate-950 print:text-black pb-0.5">
-              {currentProfile.shortName || currentProfile.shortCode}
-            </div>
-          )}
-          <h1 className="text-xl font-black uppercase tracking-wider">{currentProfile.name}</h1>
-          {currentProfile.hindiName && (
-            <div className="text-base sm:text-lg font-bold tracking-wide mt-0.5 font-devanagari text-slate-900 print:text-black">
-              {currentProfile.hindiName}
-            </div>
-          )}
-          <div className="text-[11px] text-slate-700 leading-snug mt-1">
-            {currentProfile.address}{currentProfile.city ? `, ${currentProfile.city}` : ''}{currentProfile.state ? `, ${currentProfile.state}` : ''}
-          </div>
-          <CompanyContactsHeader profile={currentProfile} className="mt-0.5" />
+      <div className="hidden print:block font-sans text-black pt-1 px-3 pb-4 print:pt-0 bg-white" id="group-sale-print-summary" style={{ fontFamily: "'Plus Jakarta Sans', 'Noto Sans Devanagari', Arial, sans-serif" }}>
+        <div className="text-center border-b-2 border-black pb-2 mb-3">
+          <PrintBusinessHeader profile={currentProfile} variant="ledger" className="mb-1" />
           <p className="text-xs font-semibold mt-1">Daily Group Sale Summary — {formatDate(selectedDate)}</p>
         </div>
 
@@ -1569,7 +1555,7 @@ export const GroupSaleView: React.FC<GroupSaleViewProps> = ({
           </div>
         </div>
 
-        <table className="w-full border-collapse border border-black text-xs">
+        <table className="w-full border-collapse border border-black text-xs print:text-[13.5px]">
           <thead>
             <tr className="border-b border-black bg-slate-100">
               <th className="border border-black p-1 text-center">S.No.</th>
@@ -1586,11 +1572,11 @@ export const GroupSaleView: React.FC<GroupSaleViewProps> = ({
           </thead>
           <tbody>
             {rows.map((r, i) => (
-              <tr key={r.rowId} className="border-b border-black">
+              <tr key={r.rowId} className="border-b border-black print:font-semibold print:text-black">
                 <td className="border border-black p-1 text-center">{i + 1}</td>
                 <td className="border border-black p-1">{r.creditSaleNo}</td>
                 <td className="border border-black p-1 font-bold">{r.customerName}</td>
-                <td className="border border-black p-1">{r.fruitName}</td>
+                <td className="border border-black p-1 font-semibold print:font-bold">{r.fruitName}</td>
                 <td className="border border-black p-1 text-right">{r.quantity}</td>
                 <td className="border border-black p-1">{r.unit}</td>
                 <td className="border border-black p-1 text-right">{r.kg || 0}</td>

@@ -20,7 +20,7 @@ import {
 import { BillShareButtons } from '../common/BillShareButtons';
 import { AdminPasswordModal } from '../common/AdminPasswordModal';
 import { triggerPrint, BillPaperSize, getLastSelectedPaperSize } from '../../utils/pdfAndShareEngine';
-import { CompanyContactsHeader } from '../common/CompanyContactsHeader';
+import { PrintBusinessHeader } from '../common/PrintBusinessHeader';
 import { ChooseBillPrintFormatModal } from '../common/ChooseBillPrintFormatModal';
 import { getCustomerPrintContactLines, formatCustomerContactsInline } from '../../utils/customerContactUtils';
 
@@ -37,7 +37,7 @@ export const BillHistoryView: React.FC<BillHistoryViewProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedBillForPreview, setSelectedBillForPreview] = useState<Bill | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
-  const [pageSize, setPageSize] = useState<BillPaperSize>(() => getLastSelectedPaperSize('compact'));
+  const [pageSize, setPageSize] = useState<BillPaperSize>(() => getLastSelectedPaperSize('a5'));
   const [isFormatModalOpen, setIsFormatModalOpen] = useState(false);
 
   const refreshList = () => {
@@ -320,58 +320,31 @@ export const BillHistoryView: React.FC<BillHistoryViewProps> = ({
               <div
                 id="mandi-print-area"
                 data-theme-isolated="true"
-                className={`bg-white text-slate-900 font-sans leading-tight border border-slate-300 print:border-none print:shadow-none print:p-2 sm:print:p-3 print:m-0 box-border shadow-md print-bill-canvas ${
+                className={`bg-white text-slate-900 font-sans leading-tight border border-slate-300 print:border-none print:shadow-none print:p-0 print:m-0 box-border shadow-md print-bill-canvas ${
                   pageSize === 'a4'
-                    ? 'max-w-[730px] w-full text-[12px] p-5 sm:p-6'
+                    ? 'max-w-[730px] w-full text-[12px] pt-1.5 px-4 pb-4 sm:pt-2 sm:px-5 sm:pb-5'
                     : pageSize === 'a5'
-                    ? 'max-w-[510px] w-full text-[11px] p-4 sm:p-5'
+                    ? 'max-w-[550px] w-full text-[10.5px] pt-1 px-3 pb-3 sm:pt-1.5 sm:px-3.5 sm:pb-4'
                     : pageSize === 'b6'
-                    ? 'max-w-[430px] w-full text-[10px] p-2.5 sm:p-3'
+                    ? 'max-w-[430px] w-full text-[10px] pt-1 px-2.5 pb-2.5 sm:px-3'
                     : pageSize === 'b7'
-                    ? 'max-w-[300px] w-full text-[8.5px] p-2 sm:p-2.5'
-                    : 'max-w-[490px] w-full text-[11px] p-4 sm:p-5'
+                    ? 'max-w-[300px] w-full text-[8.5px] pt-1 px-2 pb-2'
+                    : 'max-w-[490px] w-full text-[11px] pt-1 px-3.5 pb-3 sm:pt-1.5 sm:px-4 sm:pb-4'
                 }`}
                 style={{ fontFamily: "'Plus Jakarta Sans', 'Noto Sans Devanagari', Arial, sans-serif" }}
               >
-                {/* Header: Company Initials & Bilingual Names (with historical snapshot preservation) */}
+                {/* Shared Two-Column Business Header (preserving historical snapshot) */}
                 {(() => {
                   const snap = selectedBillForPreview.companyProfileSnapshot;
                   const fallbackProf = selectedBillForPreview.companyProfileId
                     ? db.getCompanyProfiles().find((p) => p.id === selectedBillForPreview.companyProfileId)
                     : db.getDefaultProfile();
-                  const shortName = snap?.shortName || snap?.shortCode || fallbackProf?.shortName || fallbackProf?.shortCode;
-                  const name = snap?.name || fallbackProf?.name;
-                  const hindiName = snap?.hindiName || fallbackProf?.hindiName;
-                  const address = snap?.address || fallbackProf?.address;
-                  const city = snap?.city || fallbackProf?.city;
-                  const state = snap?.state || fallbackProf?.state;
-
                   return (
-                    <div className={`text-center mb-1 ${pageSize === 'b7' ? 'pb-1' : 'pb-1.5'}`}>
-                      {shortName && (
-                        <div className={`font-black tracking-[0.2em] uppercase text-slate-950 dark:text-slate-950 print:text-black ${pageSize === 'b7' ? 'text-xs' : pageSize === 'b6' ? 'text-sm' : 'text-base sm:text-lg'} pb-0.5`}>
-                          {shortName}
-                        </div>
-                      )}
-                      <h1 className={`font-black tracking-wider uppercase mt-0.5 text-slate-950 dark:text-slate-950 print:text-black ${pageSize === 'b7' ? 'text-sm sm:text-base' : pageSize === 'b6' ? 'text-base sm:text-lg' : 'text-lg sm:text-xl'}`}>
-                        {name}
-                      </h1>
-                      {hindiName && (
-                        <div className={`font-bold tracking-wide mt-0.5 font-devanagari text-slate-950 dark:text-slate-950 print:text-black ${pageSize === 'b7' ? 'text-xs sm:text-sm' : pageSize === 'b6' ? 'text-sm sm:text-base' : 'text-base sm:text-lg'}`}>
-                          {hindiName}
-                        </div>
-                      )}
-                      <div className={`${pageSize === 'b7' ? 'text-[8.5px]' : pageSize === 'b6' ? 'text-[9.5px]' : 'text-[11px]'} leading-snug mt-0.5 text-slate-800 dark:text-slate-800 print:text-black`}>
-                        {address}
-                        {city ? `, ${city}` : ''}
-                        {state ? `, ${state}` : ''}
-                      </div>
-                      <CompanyContactsHeader
-                        profile={snap || fallbackProf}
-                        className="mt-0.5"
-                        itemClassName={pageSize === 'b7' ? 'text-[7.5px]' : pageSize === 'b6' ? 'text-[8.5px]' : 'text-[10px] sm:text-[11px]'}
-                      />
-                    </div>
+                    <PrintBusinessHeader
+                      profile={snap || fallbackProf}
+                      variant="bill"
+                      paperSize={pageSize}
+                    />
                   );
                 })()}
 
@@ -393,23 +366,20 @@ export const BillHistoryView: React.FC<BillHistoryViewProps> = ({
                       const contactText = cust ? formatCustomerContactsInline(cust) : (selectedBillForPreview.customerMobile ? `Contact: ${selectedBillForPreview.customerMobile}` : '');
                       if (!contactText) return null;
                       return (
-                        <div className={`${pageSize === 'b7' ? 'text-[7.5px]' : pageSize === 'b6' ? 'text-[8.5px]' : 'text-[10px]'} font-medium text-slate-800 dark:text-slate-800 print:text-black leading-tight mt-0.5`}>
+                        <div className={`${pageSize === 'b7' ? 'text-[7.5px] print:text-[8.5px]' : pageSize === 'b6' ? 'text-[8.5px] print:text-[9.5px]' : 'text-[10px] print:text-[11px]'} font-medium print:font-semibold text-slate-800 dark:text-slate-800 print:text-black leading-tight mt-0.5`}>
                           {contactText}
                         </div>
                       );
                     })()}
                     {selectedBillForPreview.challanNumber && (
-                      <div className={`mt-0.5 ${pageSize === 'b7' ? 'text-[8px]' : 'text-[11px]'}`}>
+                      <div className={`mt-0.5 ${pageSize === 'b7' ? 'text-[8px] print:text-[9px]' : 'text-[11px] print:text-[12px]'}`}>
                         Challan DT: <strong>{formatDate(selectedBillForPreview.challanDate || selectedBillForPreview.date)}</strong>
                       </div>
                     )}
                   </div>
 
-                  {/* Right Side: Number & Date */}
-                  <div className={`text-right whitespace-nowrap ${pageSize === 'b7' ? 'text-[8px]' : 'text-xs'}`}>
-                    <div>
-                      NUMBER: <strong className="font-mono">{selectedBillForPreview.sequenceNumber || selectedBillForPreview.billNo.replace(/\D/g, '')}</strong>
-                    </div>
+                  {/* Right Side: Date */}
+                  <div className={`text-right whitespace-nowrap ${pageSize === 'b7' ? 'text-[8px] print:text-[9px]' : 'text-xs print:text-[12.5px]'}`}>
                     <div>
                       DATE: <strong>{formatDate(selectedBillForPreview.date)}</strong>
                     </div>
@@ -426,9 +396,9 @@ export const BillHistoryView: React.FC<BillHistoryViewProps> = ({
                     ? { no: 'w-[24px]', qty: 'w-[44px]', weight: 'w-[52px]', price: 'w-[52px]', amount: 'w-[64px]' }
                     : { no: 'w-8', qty: 'w-16', weight: 'w-20', price: 'w-18', amount: 'w-22' };
                   const tablePad = isB7 ? 'p-0.5' : 'p-1';
-                  const tableHeadFont = isB7 ? 'text-[8px]' : isB6 ? 'text-[9.5px]' : 'text-[11px]';
-                  const tableBodyFont = isB7 ? 'text-[8px]' : isB6 ? 'text-[10px]' : 'text-xs';
-                  const footerFont = isB7 ? 'text-[7.5px]' : isB6 ? 'text-[9.5px]' : 'text-xs';
+                  const tableHeadFont = isB7 ? 'text-[8px] print:text-[9px]' : isB6 ? 'text-[9.5px] print:text-[11px]' : 'text-[11px] print:text-[12px]';
+                  const tableBodyFont = isB7 ? 'text-[8px] print:text-[9.5px]' : isB6 ? 'text-[10px] print:text-[11.5px]' : 'text-xs print:text-[14px]';
+                  const footerFont = isB7 ? 'text-[7.5px] print:text-[9px]' : isB6 ? 'text-[9.5px] print:text-[11px]' : 'text-xs print:text-[13px]';
                   const totalQty = Math.round(
                     (selectedBillForPreview.items || []).reduce(
                       (sum, it) => sum + (Number(it.quantity) || 0),
@@ -457,17 +427,17 @@ export const BillHistoryView: React.FC<BillHistoryViewProps> = ({
                       </thead>
                       <tbody>
                         {selectedBillForPreview.items.map((it, idx) => (
-                          <tr key={it.id || idx} className="border-b border-black/40">
-                            <td className={`border-r border-black ${tablePad} text-center font-mono`}>{idx + 1}</td>
-                            <td className={`border-r border-black ${tablePad} font-semibold uppercase`}>{it.fruitName}</td>
-                            <td className={`border-r border-black ${tablePad} text-right font-mono`}>{it.quantity}</td>
-                            <td className={`border-r border-black ${tablePad} text-right font-mono`}>
+                          <tr key={it.id || idx} className="border-b border-black/40 print:text-black">
+                            <td className={`border-r border-black ${tablePad} text-center font-mono print:font-semibold print:text-black`}>{idx + 1}</td>
+                            <td className={`border-r border-black ${tablePad} font-semibold print:font-bold uppercase print:text-black`}>{it.fruitName}</td>
+                            <td className={`border-r border-black ${tablePad} text-right font-mono print:font-semibold print:text-black`}>{it.quantity}</td>
+                            <td className={`border-r border-black ${tablePad} text-right font-mono print:font-semibold print:text-black`}>
                               {it.unit === 'KG' ? `${it.quantity} KG` : ''}
                             </td>
-                            <td className={`border-r border-black ${tablePad} text-right font-mono`}>
+                            <td className={`border-r border-black ${tablePad} text-right font-mono print:font-semibold print:text-black`}>
                               {formatBillAmount(it.rate)}
                             </td>
-                            <td className={`${tablePad} text-right font-mono font-bold`}>
+                            <td className={`${tablePad} text-right font-mono font-bold print:text-black`}>
                               {formatBillAmount(it.amount)}
                             </td>
                           </tr>
@@ -511,14 +481,14 @@ export const BillHistoryView: React.FC<BillHistoryViewProps> = ({
                           {/* Left Bottom Section: E & O.E. + Expenses List */}
                           <td colSpan={isB7 ? 3 : 5} className={`border-r border-black ${tablePad} align-top`}>
                             <div className="flex flex-col justify-between h-full min-h-[50px]">
-                              <div className={`${isB7 ? 'text-[7.5px]' : 'text-[10px]'} font-bold text-slate-950 dark:text-slate-950 print:text-black`}>* E & O.E.</div>
+                              <div className={`${isB7 ? 'text-[7.5px] print:text-[8.5px]' : 'text-[10px] print:text-[11px]'} font-bold text-slate-950 dark:text-slate-950 print:text-black`}>* E & O.E.</div>
 
                               {/* Listed Individual Expenses (Freight, Hamali, etc.) */}
                               {selectedBillForPreview.expenses && selectedBillForPreview.expenses.length > 0 && (
-                                <div className={`self-end text-right font-mono ${isB7 ? 'text-[7.5px]' : isB6 ? 'text-[9.5px]' : 'text-[11px]'} space-y-0.5 pr-1`}>
+                                <div className={`self-end text-right font-mono ${isB7 ? 'text-[7.5px] print:text-[9px]' : isB6 ? 'text-[9.5px] print:text-[11px]' : 'text-[11px] print:text-[13px]'} space-y-0.5 pr-1`}>
                                   {selectedBillForPreview.expenses.map((exp, expIdx) => (
                                     <div key={expIdx} className="flex justify-end gap-2 sm:gap-3 text-slate-950 dark:text-slate-950 print:text-black">
-                                      <span className="font-sans font-medium text-slate-950 dark:text-slate-950 print:text-black">{exp.name}</span>
+                                      <span className="font-sans font-medium print:font-semibold text-slate-950 dark:text-slate-950 print:text-black">{exp.name}</span>
                                       <span className="font-bold text-slate-950 dark:text-slate-950 print:text-black">{formatBillAmount(exp.amount)}</span>
                                     </div>
                                   ))}
@@ -547,7 +517,7 @@ export const BillHistoryView: React.FC<BillHistoryViewProps> = ({
                                   <td className={`${tablePad} font-bold text-left border-r border-black bg-slate-100 text-slate-950 dark:text-slate-950 print:bg-transparent print:text-black`}>
                                     Net Total
                                   </td>
-                                  <td className={`${tablePad} text-right font-mono font-black ${isB7 ? 'text-[8.5px]' : isB6 ? 'text-[11px]' : 'text-sm'} bg-slate-100 text-slate-950 dark:text-slate-950 print:bg-transparent print:text-black`}>
+                                  <td className={`${tablePad} text-right font-mono font-black ${isB7 ? 'text-[8.5px] print:text-[10px]' : isB6 ? 'text-[11px] print:text-[12.5px]' : 'text-sm print:text-[15.5px]'} bg-slate-100 text-slate-950 dark:text-slate-950 print:bg-transparent print:text-black`}>
                                     {formatBillAmount(selectedBillForPreview.totalAmount)}
                                   </td>
                                 </tr>
@@ -561,7 +531,7 @@ export const BillHistoryView: React.FC<BillHistoryViewProps> = ({
                 })()}
 
                 {/* Bottom Words & Signatory Footer */}
-                <div className={`mt-2 flex justify-between items-end ${pageSize === 'b7' ? 'text-[7.5px]' : pageSize === 'b6' ? 'text-[9.5px]' : 'text-xs'} pt-1 text-slate-950 dark:text-slate-950 print:text-black`}>
+                <div className={`mt-2 flex justify-between items-end ${pageSize === 'b7' ? 'text-[7.5px] print:text-[8.5px]' : pageSize === 'b6' ? 'text-[9.5px] print:text-[10.5px]' : 'text-xs print:text-[12.5px]'} pt-1 text-slate-950 dark:text-slate-950 print:text-black`}>
                   <div className="font-bold italic max-w-[60%] leading-tight text-slate-950 dark:text-slate-950 print:text-black">
                     {numberToWordsIndian(selectedBillForPreview.totalAmount)}
                   </div>

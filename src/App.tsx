@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { ThemeProvider } from './context/ThemeContext';
 import { db } from './services/db';
+import { userAuthClient } from './services/userAuthClient';
+import { devAuthClient } from './services/devAuthClient';
 import { Bill, SaleProceeds, User } from './types';
 import { TopNavbar } from './components/layout/TopNavbar';
 import { LoginView } from './components/auth/LoginView';
@@ -31,7 +33,7 @@ function AppContent() {
     'dailySales' | 'customerOutstanding' | 'vendorOutstanding' | 'expenses' | 'profit' | 'crates'
   >('dailySales');
   const [settingsSubTab, setSettingsSubTab] = useState<
-    'general' | 'profiles' | 'units' | 'crates' | 'backup'
+    'general' | 'profiles' | 'units' | 'crates' | 'backup' | 'users'
   >('general');
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | undefined>(undefined);
   const [editingBill, setEditingBill] = useState<Bill | null>(null);
@@ -48,7 +50,29 @@ function AppContent() {
     };
   }, []);
 
+  // Verify backend session integrity on boot, view navigation, and focus so invalidated sessions log out immediately
+  useEffect(() => {
+    if (!currentUser) return;
+    let cancelled = false;
+    const verify = () => {
+      void userAuthClient.verifySession().then((res) => {
+        if (!cancelled && !res.authenticated) {
+          db.setActiveUser(null);
+          setCurrentUser(null);
+        }
+      });
+    };
+    verify();
+    window.addEventListener('focus', verify);
+    return () => {
+      cancelled = true;
+      window.removeEventListener('focus', verify);
+    };
+  }, [currentUser?.id, currentUser?.role, currentView]);
+
   const handleLogout = () => {
+    devAuthClient.clearClientToken();
+    void userAuthClient.logout();
     db.setActiveUser(null);
     setCurrentUser(null);
   };
@@ -71,8 +95,14 @@ function AppContent() {
 
     if (view === 'settings') {
       setCurrentView('settings');
-      if (subParam && ['general', 'profiles', 'units', 'crates', 'backup'].includes(subParam)) {
-        setSettingsSubTab(subParam as 'general' | 'profiles' | 'units' | 'crates' | 'backup');
+      if (subParam && ['general', 'profiles', 'units', 'crates', 'backup', 'users'].includes(subParam)) {
+        if (subParam === 'users' && currentUser?.role !== 'admin') {
+          setSettingsSubTab('general');
+        } else {
+          setSettingsSubTab(subParam as 'general' | 'profiles' | 'units' | 'crates' | 'backup' | 'users');
+        }
+      } else if (settingsSubTab === 'users' && currentUser?.role !== 'admin') {
+        setSettingsSubTab('general');
       }
       return;
     }

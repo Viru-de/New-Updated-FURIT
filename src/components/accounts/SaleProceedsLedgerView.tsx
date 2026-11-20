@@ -11,17 +11,24 @@ import { Edit2, Download, Printer, Filter, Calendar, Building2, Search, X, Users
 import { exportSaleProceedsLedger, exportSaleProceedsCustomerLedger } from '../../utils/excelEngine';
 import { BillShareButtons } from '../common/BillShareButtons';
 import { triggerPrint } from '../../utils/pdfAndShareEngine';
-import { CompanyContactsHeader } from '../common/CompanyContactsHeader';
+import { PrintBusinessHeader } from '../common/PrintBusinessHeader';
 import { QuantityInput } from '../common/QuantityInput';
+import { formatSaleProceedShortParticulars, sanitizeOpeningBalanceLabel } from '../../utils/shortPrintUtils';
 
-export const SaleProceedsLedgerView: React.FC = () => {
+interface SaleProceedsLedgerViewProps {
+  initialCustomerId?: string;
+}
+
+export const SaleProceedsLedgerView: React.FC<SaleProceedsLedgerViewProps> = ({
+  initialCustomerId,
+}) => {
   const [refreshKey, setRefreshKey] = useState(0);
   const [isEditObOpen, setIsEditObOpen] = useState(false);
   const [editingSaleProceeds, setEditingSaleProceeds] = useState<SaleProceeds | null>(null);
   const [isSaleProceedsModalOpen, setIsSaleProceedsModalOpen] = useState(false);
 
   // Customer search & filter state
-  const [selectedCustomerId, setSelectedCustomerId] = useState<string>('');
+  const [selectedCustomerId, setSelectedCustomerId] = useState<string>(initialCustomerId || '');
   const [isSearchCustomerOpen, setIsSearchCustomerOpen] = useState(false);
   const selectedCustomer = selectedCustomerId ? db.getCustomerById(selectedCustomerId) : null;
 
@@ -60,6 +67,42 @@ export const SaleProceedsLedgerView: React.FC = () => {
     }
     return map;
   }, [allSaleProceeds]);
+
+  const resolvedPrintCustomer: Partial<Customer> | null = useMemo(() => {
+    if (selectedCustomer) return selectedCustomer;
+    const customerKeys = new Set<string>();
+    let matchedId = '';
+    let matchedName = '';
+    for (const entry of ledger.entries) {
+      if (entry.referenceType === 'Opening Balance') continue;
+      let sp: SaleProceeds | undefined;
+      if (entry.referenceId) sp = saleProceedsMap.get(entry.referenceId);
+      if (!sp && entry.id) sp = saleProceedsMap.get(entry.id);
+      if (!sp && entry.referenceNo) sp = saleProceedsMap.get(entry.referenceNo.trim().toLowerCase());
+      if (!sp && entry.particulars) sp = saleProceedsMap.get(entry.particulars.trim().toLowerCase());
+      const cid = sp?.customerId || '';
+      const cname = (sp?.customerName || '').trim();
+      if (cid || cname) {
+        customerKeys.add(cid || cname.toLowerCase());
+        matchedId = cid;
+        matchedName = cname;
+      }
+    }
+    if (customerKeys.size === 1) {
+      if (matchedId) {
+        const found = db.getCustomerById(matchedId);
+        if (found) return found;
+      }
+      if (matchedName) {
+        const byName = db.getCustomers().find(
+          (c) => c.name.trim().toLowerCase() === matchedName.toLowerCase()
+        );
+        if (byName) return byName;
+        return { name: matchedName };
+      }
+    }
+    return null;
+  }, [selectedCustomer, ledger.entries, saleProceedsMap]);
 
   const getSaleProceedsDetails = (entry: LedgerEntry) => {
     let sp: SaleProceeds | undefined;
@@ -573,81 +616,36 @@ export const SaleProceedsLedgerView: React.FC = () => {
         </div>
       </div>
 
-      {/* Short Print Layout for Sale Proceeds Ledger (Cloned & printed via Short Print button) */}
+      {/* Short Print Layout for Sale Proceeds Ledger (Matches reference ledger print format) */}
       <div
         id="sale-proceeds-short-print-area"
         data-theme-isolated="true"
-        className="hidden rounded-xl border border-black bg-white text-black print-bill-canvas max-w-[760px] w-full mx-auto"
+        className="hidden bg-white text-black print-bill-canvas max-w-[760px] w-full mx-auto pt-1 print:pt-0 px-3 pb-2"
         style={{ fontFamily: "'Plus Jakarta Sans', 'Noto Sans Devanagari', Arial, sans-serif" }}
       >
-        {/* Header Layout: Company Header + Customer on Left, Account Detail on Right */}
-        <div className="px-4 py-3 sm:px-5 border-b-2 border-black">
-          <div className="text-center pb-2 mb-2 border-b border-black">
-            {(currentProfile.shortName || currentProfile.shortCode) && (
-              <div className="font-black text-[22px] sm:text-[24px] tracking-[0.18em] uppercase text-black leading-none pb-0.5">
-                {currentProfile.shortName || currentProfile.shortCode}
-              </div>
-            )}
-            <h1 className="text-[19px] sm:text-[21px] font-extrabold uppercase tracking-wider text-black leading-tight mt-0.5">
-              {currentProfile.name}
-            </h1>
-            {currentProfile.hindiName && (
-              <div className="text-[16px] sm:text-[18px] font-bold tracking-wide mt-0.5 font-devanagari text-black leading-tight">
-                {currentProfile.hindiName}
-              </div>
-            )}
-            <div className="text-[12.5px] sm:text-[13px] font-semibold text-slate-900 print:text-black leading-snug mt-0.5">
-              {currentProfile.address}
-              {currentProfile.city ? `, ${currentProfile.city}` : ''}
-              {currentProfile.state ? `, ${currentProfile.state}` : ''}
-            </div>
-            <CompanyContactsHeader
-              profile={currentProfile}
-              className="mt-0.5"
-              itemClassName="text-[12.5px] sm:text-[13px] font-semibold text-slate-900 dark:text-slate-900"
-            />
-          </div>
-          <div className="flex justify-between items-start gap-4">
-            {/* Top-Left: Prominent Customer Name & Location */}
+        {/* Header Layout: Company Header + Customer on Left, ACCOUNT DETAILS on Right */}
+        <div className="pb-1.5 mb-1">
+          <PrintBusinessHeader profile={currentProfile} variant="ledger" />
+          <div className="flex justify-between items-end gap-4 pt-1">
+            {/* Top-Left: M/s: Customer Name only */}
             <div className="max-w-[65%]">
-              <div className="text-xl sm:text-2xl font-black text-black uppercase tracking-tight leading-tight">
-                {selectedCustomer ? (
-                  <>
-                    <span className="text-xs sm:text-sm font-bold text-black block mb-0.5">M/s.</span>
-                    {selectedCustomer.name}
-                  </>
-                ) : (
-                  'All Customers / Mandi Sale Consignment Proceeds'
-                )}
-              </div>
-              {selectedCustomer?.city && (
-                <div className="text-xs sm:text-sm font-semibold text-black mt-1 uppercase tracking-wide">
-                  {selectedCustomer.city}{selectedCustomer.state ? `, ${selectedCustomer.state}` : ''}
+              {resolvedPrintCustomer ? (
+                <div className="text-base sm:text-lg font-extrabold text-black uppercase tracking-tight leading-tight">
+                  M/s: {resolvedPrintCustomer.name || 'Customer'}
                 </div>
-              )}
-              {selectedCustomer?.address && !selectedCustomer?.city && (
-                <div className="text-xs sm:text-sm font-medium text-black mt-0.5">
-                  {selectedCustomer.address}
-                </div>
-              )}
-              {selectedCustomer?.mobile && (
-                <div className="text-xs font-mono text-black mt-0.5">
-                  Contact: {selectedCustomer.mobile}
-                </div>
-              )}
-              {!selectedCustomer && (
-                <div className="text-xs text-black mt-0.5">
-                  {currentProfile.name}{currentProfile.city ? ` · ${currentProfile.city}` : ''}
+              ) : (
+                <div className="text-base sm:text-lg font-extrabold text-black uppercase tracking-tight leading-tight">
+                  ALL CUSTOMERS
                 </div>
               )}
             </div>
 
-            {/* Top-Right: Account Detail & Date Range */}
+            {/* Top-Right: ACCOUNT DETAILS, Date Range & Page */}
             <div className="text-right shrink-0">
-              <div className="text-xl sm:text-2xl font-black uppercase tracking-wider text-black">
-                Account Detail
+              <div className="text-sm sm:text-base font-black uppercase tracking-wider text-black leading-tight">
+                ACCOUNT DETAILS
               </div>
-              <div className="text-xs sm:text-sm font-semibold text-black mt-1">
+              <div className="text-xs font-semibold text-black mt-0.5">
                 {filterStartDate && filterEndDate ? (
                   <span>{formatDate(filterStartDate)} To {formatDate(filterEndDate)}</span>
                 ) : filterStartDate ? (
@@ -665,104 +663,82 @@ export const SaleProceedsLedgerView: React.FC = () => {
           </div>
         </div>
 
-        {/* Short Ledger Table: DATE | PARTICULARS | DEBIT | CREDIT | BALANCE */}
+        {/* Short Print Table: DATE | PARTICULARS | DEBIT | CREDIT | BALANCE */}
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs border-collapse bg-white">
+          <table className="sp-short-table w-full text-left text-xs border-collapse bg-white text-black">
             <thead>
-              <tr className="border-b-2 border-black bg-white text-[11px] font-bold uppercase tracking-wider text-black">
-                <th className="py-2 px-3 w-24 text-left border-b border-black">DATE</th>
-                <th className="py-2 px-3 text-left border-b border-black">PARTICULARS</th>
-                <th className="py-2 px-3 text-right w-28 sm:w-32 border-b border-black">DEBIT</th>
-                <th className="py-2 px-3 text-right w-28 sm:w-32 border-b border-black">CREDIT</th>
-                <th className="py-2 px-3 text-right w-32 sm:w-36 border-b border-black">BALANCE</th>
+              <tr className="sp-short-col-header border-t border-b border-black bg-white text-[11px] font-bold uppercase tracking-wider text-black">
+                <th className="py-1.5 px-2 w-[84px] text-left whitespace-nowrap">DATE</th>
+                <th className="py-1.5 px-2.5 text-left">PARTICULARS</th>
+                <th className="py-1.5 px-2 text-right w-[84px] whitespace-nowrap">DEBIT</th>
+                <th className="py-1.5 px-2 text-right w-[84px] whitespace-nowrap">CREDIT</th>
+                <th className="py-1.5 px-2 text-right w-[96px] whitespace-nowrap">BALANCE</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-black bg-white">
+            <tbody className="bg-white text-black">
               {ledger.entries.length === 0 ? (
-                <tr>
+                <tr className="bg-white">
                   <td colSpan={5} className="py-6 text-center text-xs text-black">
                     No transactions found in this period.
                   </td>
                 </tr>
               ) : (
-                ledger.entries.map((entry) => {
+                ledger.entries.map((entry, idx) => {
                   const isOb = entry.referenceType === 'Opening Balance';
-                  const sp = entry.referenceId ? saleProceedsMap.get(entry.referenceId) : undefined;
-                  const rawNo = entry.referenceNo || entry.particulars || '';
-                  const numMatch = rawNo.match(/\d+/);
-                  const formattedNo = numMatch ? numMatch[0].padStart(3, '0') : '001';
+                  let sp: SaleProceeds | undefined;
+                  if (entry.referenceId) sp = saleProceedsMap.get(entry.referenceId);
+                  if (!sp && entry.id) sp = saleProceedsMap.get(entry.id);
+                  if (!sp && entry.referenceNo) sp = saleProceedsMap.get(entry.referenceNo.trim().toLowerCase());
+                  if (!sp && entry.particulars) sp = saleProceedsMap.get(entry.particulars.trim().toLowerCase());
+
                   const details = getSaleProceedsDetails(entry);
+                  const shortInfo = formatSaleProceedShortParticulars(entry, sp, details.qty);
 
-                  const items = (sp?.items && sp.items.length > 0 ? sp.items : (entry.subDetails?.items || [])) as any[];
-                  const firstItem = items[0];
-
-                  let compactParticulars: React.ReactNode;
-                  if (isOb) {
-                    compactParticulars = (
-                      <span className="font-bold text-xs text-black uppercase">
-                        {entry.particulars || 'Opening Balance'}
-                      </span>
-                    );
-                  } else if (entry.referenceType === 'Sale Proceeds' || sp) {
-                    const itemName = firstItem ? (firstItem.fruitName || firstItem.name || '') : '';
-                    const itemUnit = firstItem ? (firstItem.unit || 'Box') : 'Box';
-                    compactParticulars = (
-                      <div className="flex flex-wrap items-center gap-x-1.5 text-xs leading-tight text-black">
-                        <span className="font-bold text-black whitespace-nowrap">
-                          Sale Proceed No. {formattedNo}
-                        </span>
-                        {itemName && (
-                          <span className="font-semibold text-black uppercase">
-                            · {itemName}
-                            {items.length > 1 ? ` (+${items.length - 1})` : ''}
-                          </span>
-                        )}
-                        {details.qty > 0 && (
-                          <span className="font-mono text-black">
-                            · Qty: {details.qty} {itemUnit}
-                          </span>
-                        )}
-                        {details.weight > 0 && (
-                          <span className="font-mono text-black">
-                            ({details.weight} KG)
-                          </span>
-                        )}
-                      </div>
-                    );
-                  } else {
-                    compactParticulars = (
-                      <div className="flex flex-wrap items-center gap-x-1.5 text-xs leading-tight text-black">
-                        <span className="font-bold text-black">
-                          {entry.particulars}
-                        </span>
-                        {entry.subDetails?.qty && (
-                          <span className="font-mono text-black">
-                            · Qty: {entry.subDetails.qty}
-                          </span>
-                        )}
-                      </div>
-                    );
-                  }
-
-                  const debitVal = entry.debit !== null && entry.debit !== undefined && entry.debit > 0 ? Number(entry.debit).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '';
-                  const creditVal = entry.credit !== null && entry.credit !== undefined && entry.credit > 0 ? Number(entry.credit).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '';
-                  const balanceVal = entry.balance < 0 ? `(${Math.abs(entry.balance).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})` : Number(entry.balance).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                  const debitVal = entry.debit !== null && entry.debit !== undefined && entry.debit > 0 ? Number(entry.debit).toFixed(2) : '';
+                  const creditVal = entry.credit !== null && entry.credit !== undefined && entry.credit > 0 ? Number(entry.credit).toFixed(2) : '';
+                  const balanceVal = entry.balance < 0 ? `(${Math.abs(entry.balance).toFixed(2)})` : Number(entry.balance).toFixed(2);
+                  const isShaded = idx % 2 === 0;
 
                   return (
-                    <tr key={`short-acc-${entry.id}`} className="border-b border-black">
-                      <td className="py-1.5 px-3 font-mono text-xs text-black align-middle whitespace-nowrap">
+                    <tr
+                      key={`short-acc-${entry.id}`}
+                      className={isShaded ? 'sp-zebra-even bg-[#eaedf1]' : 'sp-zebra-odd bg-white'}
+                    >
+                      <td className="py-1 px-2 font-mono text-[11px] text-black align-top whitespace-nowrap">
                         {formatDate(entry.date)}
                       </td>
-                      <td className="py-1.5 px-3 text-black align-middle">
-                        {compactParticulars}
+                      <td className="py-1 px-2.5 text-black align-top">
+                        {isOb ? (
+                          <span className="font-semibold text-[11.5px] text-black uppercase">
+                            {shortInfo.primaryRef}
+                          </span>
+                        ) : (
+                          <div className="flex items-baseline justify-between gap-3 text-[11.5px] leading-snug text-black">
+                            <span className="font-semibold text-black whitespace-nowrap">
+                              {shortInfo.primaryRef}
+                            </span>
+                            <div className="flex items-baseline gap-2.5 shrink-0 font-mono text-black">
+                              {shortInfo.accountRef && (
+                                <span className="uppercase font-medium whitespace-nowrap">
+                                  {shortInfo.accountRef}
+                                </span>
+                              )}
+                              {shortInfo.qty > 0 && (
+                                <span className="font-semibold whitespace-nowrap">
+                                  Qty:{shortInfo.qty}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        )}
                       </td>
-                      <td className="py-1.5 px-3 text-right font-mono text-xs sm:text-sm text-black align-middle whitespace-nowrap">
+                      <td className="py-1 px-2 text-right font-mono text-[11.5px] text-black align-top whitespace-nowrap">
                         {debitVal}
                       </td>
-                      <td className="py-1.5 px-3 text-right font-mono text-xs sm:text-sm text-black font-medium align-middle whitespace-nowrap">
+                      <td className="py-1 px-2 text-right font-mono text-[11.5px] text-black align-top whitespace-nowrap">
                         {creditVal}
                       </td>
-                      <td className="py-1.5 px-3 text-right font-mono text-xs sm:text-sm font-bold text-black align-middle whitespace-nowrap">
+                      <td className="py-1 px-2 text-right font-mono text-[11.5px] font-semibold text-black align-top whitespace-nowrap">
                         {balanceVal}
                       </td>
                     </tr>
@@ -771,127 +747,80 @@ export const SaleProceedsLedgerView: React.FC = () => {
               )}
             </tbody>
             <tfoot>
-              <tr className="border-t-2 border-b-2 border-black font-bold text-xs uppercase bg-white">
-                <td colSpan={2} className="py-2 px-3 text-right font-bold text-black">
-                  Total:
+              <tr className="sp-short-total-row border-t border-black text-xs bg-white text-black">
+                <td colSpan={2} className="pt-1.5 pb-0.5 px-2 text-left text-[11.5px] font-semibold text-black align-top">
+                  Crate Balance: {crateSummary.balanceCrate}
                 </td>
-                <td className="py-2 px-3 text-right font-mono text-xs sm:text-sm font-bold text-black whitespace-nowrap">
-                  {ledger.totalDebit > 0 ? Number(ledger.totalDebit).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : ''}
+                <td className="pt-1.5 pb-0.5 px-2 text-right font-mono text-[11.5px] font-semibold text-black whitespace-nowrap align-top">
+                  {ledger.totalDebit > 0 ? Number(ledger.totalDebit).toFixed(2) : ''}
                 </td>
-                <td className="py-2 px-3 text-right font-mono text-xs sm:text-sm font-bold text-black whitespace-nowrap">
-                  {ledger.totalCredit > 0 ? Number(ledger.totalCredit).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : ''}
+                <td className="pt-1.5 pb-0.5 px-2 text-right font-mono text-[11.5px] font-semibold text-black whitespace-nowrap align-top">
+                  {ledger.totalCredit > 0 ? Number(ledger.totalCredit).toFixed(2) : ''}
                 </td>
-                <td className="py-2 px-3 text-right font-mono text-xs sm:text-sm font-extrabold text-black whitespace-nowrap">
-                  {ledger.closingBalance < 0 ? `(${Math.abs(ledger.closingBalance).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})` : Number(ledger.closingBalance).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                <td className="pt-1.5 pb-0.5 px-2 text-right font-mono text-[11.5px] font-bold text-black whitespace-nowrap align-top">
+                  &nbsp;
+                </td>
+              </tr>
+              <tr className="sp-short-closing-row bg-white text-black">
+                <td colSpan={2} className="py-1 px-2 text-left text-[11.5px] font-semibold text-black align-top">
+                  <div className="flex items-center gap-4">
+                    <span>= {crateSummary.balanceCrate}</span>
+                    {totalQty > 0 && <span>Total Qty: {totalQty}</span>}
+                  </div>
+                </td>
+                <td colSpan={3} className="sp-short-closing-cell border-t border-black py-1.5 px-2 align-top">
+                  <div className="flex items-baseline justify-between gap-4">
+                    <span className="text-sm font-medium uppercase tracking-wide text-black whitespace-nowrap">
+                      CLOSING BALANCE :
+                    </span>
+                    <span className="text-sm sm:text-base font-extrabold font-mono text-black whitespace-nowrap">
+                      {Math.abs(ledger.closingBalance).toFixed(2)} {ledger.closingBalance < 0 ? 'Dr' : ledger.closingBalance > 0 ? 'Cr' : ''}
+                    </span>
+                  </div>
                 </td>
               </tr>
             </tfoot>
           </table>
         </div>
 
-        {/* Bottom Summary: Crate Balance & Total Qty on Left, Closing Balance on Right */}
-        <div className="px-4 py-3.5 border-t-2 border-black flex flex-wrap justify-between items-center gap-x-8 gap-y-2 bg-white text-black">
-          <div className="flex flex-wrap items-center gap-x-10 gap-y-1.5 text-xs text-black">
-            <div className="inline-flex items-baseline gap-1.5 whitespace-nowrap">
-              <span className="font-bold text-black">Crate Balance:</span>
-              <span className="font-mono font-extrabold text-black">{crateSummary.balanceCrate}</span>
-            </div>
-            <div className="inline-flex items-baseline gap-1.5 whitespace-nowrap">
-              <span className="font-bold text-black">Total Qty:</span>
-              <span className="font-mono font-extrabold text-black">{totalQty}</span>
-            </div>
-          </div>
-
-          <div className="text-right shrink-0 ml-auto">
-            <div className="text-sm sm:text-base font-black font-mono text-black whitespace-nowrap">
-              CLOSING BALANCE : {Math.abs(ledger.closingBalance).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {ledger.closingBalance < 0 ? 'Dr' : ledger.closingBalance > 0 ? 'Cr' : ''}
-            </div>
-          </div>
-        </div>
-
         {/* Software attribution */}
-        <div className="px-4 pb-4 pt-4 flex justify-between items-end text-xs border-t border-black bg-white">
+        <div className="px-2 pt-2 pb-1 flex justify-between items-end text-xs bg-white text-black">
           <div className="text-[9px] text-black font-mono">
-            Software Developed By: {defaultProfile.softwareDevelopedBy || 'Dayanand 9229433828'}
+            Software Developed By: {currentProfile.softwareDevelopedBy || defaultProfile.softwareDevelopedBy || 'Klyia Technology'}
           </div>
         </div>
       </div>
 
-      {/* Printable Account Detail Statement Layout for Sale Proceeds Ledger (Full Print Ledger format) */}
+      {/* Printable Account Detail Statement Layout for Sale Proceeds Ledger (Matches reference ledger print format) */}
       <div
         id="sale-proceeds-print-area"
         data-theme-isolated="true"
-        className="hidden rounded-xl border border-black bg-white text-black print-bill-canvas max-w-[760px] w-full mx-auto"
+        className="hidden bg-white text-black print-bill-canvas max-w-[760px] w-full mx-auto pt-1 print:pt-0 px-3 pb-2"
         style={{ fontFamily: "'Plus Jakarta Sans', 'Noto Sans Devanagari', Arial, sans-serif" }}
       >
-        {/* Header Layout: Company Header + Customer on Left, Account Detail on Right */}
-        <div className="px-4 py-3 sm:px-5 border-b-2 border-black">
-          <div className="text-center pb-2 mb-2 border-b border-black">
-            {(currentProfile.shortName || currentProfile.shortCode) && (
-              <div className="font-black text-[22px] sm:text-[24px] tracking-[0.18em] uppercase text-black leading-none pb-0.5">
-                {currentProfile.shortName || currentProfile.shortCode}
-              </div>
-            )}
-            <h1 className="text-[19px] sm:text-[21px] font-extrabold uppercase tracking-wider text-black leading-tight mt-0.5">
-              {currentProfile.name}
-            </h1>
-            {currentProfile.hindiName && (
-              <div className="text-[16px] sm:text-[18px] font-bold tracking-wide mt-0.5 font-devanagari text-black leading-tight">
-                {currentProfile.hindiName}
-              </div>
-            )}
-            <div className="text-[12.5px] sm:text-[13px] font-semibold text-slate-900 print:text-black leading-snug mt-0.5">
-              {currentProfile.address}
-              {currentProfile.city ? `, ${currentProfile.city}` : ''}
-              {currentProfile.state ? `, ${currentProfile.state}` : ''}
-            </div>
-            <CompanyContactsHeader
-              profile={currentProfile}
-              className="mt-0.5"
-              itemClassName="text-[12.5px] sm:text-[13px] font-semibold text-slate-900 dark:text-slate-900"
-            />
-          </div>
-          <div className="flex justify-between items-start gap-4">
-            {/* Top-Left: Prominent Customer Name & Location */}
+        {/* Header Layout: Company Header + Customer on Left, ACCOUNT DETAILS on Right */}
+        <div className="pb-1.5 mb-1">
+          <PrintBusinessHeader profile={currentProfile} variant="ledger" />
+          <div className="flex justify-between items-end gap-4 pt-1">
+            {/* Top-Left: M/s: Customer Name only */}
             <div className="max-w-[65%]">
-              <div className="text-xl sm:text-2xl font-black text-black uppercase tracking-tight leading-tight">
-                {selectedCustomer ? (
-                  <>
-                    <span className="text-xs sm:text-sm font-bold text-black block mb-0.5">M/s.</span>
-                    {selectedCustomer.name}
-                  </>
-                ) : (
-                  'All Customers / Mandi Sale Consignment Proceeds'
-                )}
-              </div>
-              {selectedCustomer?.city && (
-                <div className="text-xs sm:text-sm font-semibold text-black mt-1 uppercase tracking-wide">
-                  {selectedCustomer.city}{selectedCustomer.state ? `, ${selectedCustomer.state}` : ''}
+              {resolvedPrintCustomer ? (
+                <div className="text-base sm:text-lg font-extrabold text-black uppercase tracking-tight leading-tight">
+                  M/s: {resolvedPrintCustomer.name || 'Customer'}
                 </div>
-              )}
-              {selectedCustomer?.address && !selectedCustomer?.city && (
-                <div className="text-xs sm:text-sm font-medium text-black mt-0.5">
-                  {selectedCustomer.address}
-                </div>
-              )}
-              {selectedCustomer?.mobile && (
-                <div className="text-xs font-mono text-black mt-0.5">
-                  Contact: {selectedCustomer.mobile}
-                </div>
-              )}
-              {!selectedCustomer && (
-                <div className="text-xs text-black mt-0.5">
-                  {currentProfile.name}{currentProfile.city ? ` · ${currentProfile.city}` : ''}
+              ) : (
+                <div className="text-base sm:text-lg font-extrabold text-black uppercase tracking-tight leading-tight">
+                  ALL CUSTOMERS
                 </div>
               )}
             </div>
 
-            {/* Top-Right: Account Detail & Date Range */}
+            {/* Top-Right: ACCOUNT DETAILS, Date Range & Page */}
             <div className="text-right shrink-0">
-              <div className="text-xl sm:text-2xl font-black uppercase tracking-wider text-black">
-                Account Detail
+              <div className="text-sm sm:text-base font-black uppercase tracking-wider text-black leading-tight">
+                ACCOUNT DETAILS
               </div>
-              <div className="text-xs sm:text-sm font-semibold text-black mt-1">
+              <div className="text-xs font-semibold text-black mt-0.5">
                 {filterStartDate && filterEndDate ? (
                   <span>{formatDate(filterStartDate)} To {formatDate(filterEndDate)}</span>
                 ) : filterStartDate ? (
@@ -911,27 +840,39 @@ export const SaleProceedsLedgerView: React.FC = () => {
 
         {/* Ledger Table: DATE | PARTICULARS | DEBIT | CREDIT | BALANCE */}
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs border-collapse bg-white">
+          <table className="ledger-ref-table sp-detailed-ref-table w-full table-fixed text-left text-xs border-collapse bg-white text-black">
+            <colgroup>
+              <col style={{ width: '84px' }} />
+              <col />
+              <col style={{ width: '84px' }} />
+              <col style={{ width: '84px' }} />
+              <col style={{ width: '96px' }} />
+            </colgroup>
             <thead>
-              <tr className="border-b-2 border-black bg-white text-[11px] font-bold uppercase tracking-wider text-black">
-                <th className="py-2.5 px-3 w-24 text-left border-b border-black">DATE</th>
-                <th className="py-2.5 px-3 text-left border-b border-black">PARTICULARS</th>
-                <th className="py-2.5 px-3 text-right w-28 sm:w-32 border-b border-black">DEBIT</th>
-                <th className="py-2.5 px-3 text-right w-28 sm:w-32 border-b border-black">CREDIT</th>
-                <th className="py-2.5 px-3 text-right w-32 sm:w-36 border-b border-black">BALANCE</th>
+              <tr className="border-0 bg-white text-[11px] font-bold uppercase tracking-wider text-black">
+                <th className="py-1.5 px-2 text-left border-t border-b border-black border-r border-r-slate-300 whitespace-nowrap">DATE</th>
+                <th className="py-1.5 px-2.5 text-left border-t border-b border-black border-r border-r-slate-300">PARTICULARS</th>
+                <th className="py-1.5 px-2 text-right border-t border-b border-black border-r border-r-slate-300 whitespace-nowrap">DEBIT</th>
+                <th className="py-1.5 px-2 text-right border-t border-b border-black border-r border-r-slate-300 whitespace-nowrap">CREDIT</th>
+                <th className="py-1.5 px-2 text-right border-t border-b border-black whitespace-nowrap">BALANCE</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-black bg-white">
+            <tbody className="bg-white text-black">
               {ledger.entries.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="py-8 text-center text-xs text-black">
+                <tr className="border-0">
+                  <td colSpan={5} className="py-8 text-center text-xs text-black border-b border-slate-300">
                     No transactions found in this period.
                   </td>
                 </tr>
               ) : (
                 ledger.entries.map((entry) => {
                   const isOb = entry.referenceType === 'Opening Balance';
-                  const sp = entry.referenceId ? saleProceedsMap.get(entry.referenceId) : undefined;
+                  let sp: SaleProceeds | undefined;
+                  if (entry.referenceId) sp = saleProceedsMap.get(entry.referenceId);
+                  if (!sp && entry.id) sp = saleProceedsMap.get(entry.id);
+                  if (!sp && entry.referenceNo) sp = saleProceedsMap.get(entry.referenceNo.trim().toLowerCase());
+                  if (!sp && entry.particulars) sp = saleProceedsMap.get(entry.particulars.trim().toLowerCase());
+
                   const rawNo = entry.referenceNo || entry.particulars || '';
                   const numMatch = rawNo.match(/\d+/);
                   const formattedNo = numMatch ? numMatch[0].padStart(3, '0') : '001';
@@ -944,112 +885,101 @@ export const SaleProceedsLedgerView: React.FC = () => {
                     ? sp.expenses
                     : (entry.subDetails?.expenses || []);
 
+                  const details = getSaleProceedsDetails(entry);
                   const topWeight = sp?.weight !== undefined && sp.weight !== null ? sp.weight : sp?.kg;
 
-                  const debitVal = entry.debit !== null && entry.debit !== undefined && entry.debit > 0 ? Number(entry.debit).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '';
-                  const creditVal = entry.credit !== null && entry.credit !== undefined && entry.credit > 0 ? Number(entry.credit).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '';
-                  const balanceVal = entry.balance < 0 ? `(${Math.abs(entry.balance).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})` : Number(entry.balance).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                  const totalExpenseSum = sp?.totalExpense ?? expenses.reduce((s: number, e: any) => s + (Number(e.amount) || 0), 0);
+
+                  const debitVal = entry.debit !== null && entry.debit !== undefined && entry.debit > 0 ? Number(entry.debit).toFixed(2) : '';
+                  const creditVal = entry.credit !== null && entry.credit !== undefined && entry.credit > 0 ? Number(entry.credit).toFixed(2) : '';
+                  const balanceVal = entry.balance < 0 ? `(${Math.abs(entry.balance).toFixed(2)})` : Number(entry.balance).toFixed(2);
 
                   return (
-                    <tr key={`print-full-${entry.id}`} className="border-b border-black">
+                    <tr key={`print-full-${entry.id}`} className="border-0">
                       {/* DATE */}
-                      <td className="py-2.5 px-3 font-mono text-xs text-black align-top whitespace-nowrap">
+                      <td className="py-1.5 px-2 font-mono text-[11px] text-black align-top whitespace-nowrap border-b border-slate-300 border-r border-r-slate-300">
                         {formatDate(entry.date)}
                       </td>
 
                       {/* PARTICULARS */}
-                      <td className="py-2.5 px-3 text-black align-top">
+                      <td className="py-1.5 px-2.5 text-black align-top border-b border-slate-300 border-r border-r-slate-300">
                         {isOb ? (
-                          <div className="font-bold text-xs sm:text-sm text-black uppercase">
-                            {entry.particulars || 'Opening Balance'}
+                          <div className="font-semibold text-[11.5px] text-black uppercase">
+                            {sanitizeOpeningBalanceLabel(entry.particulars)}
                           </div>
                         ) : (
-                          <div className="space-y-1">
-                            {/* Bill number & Transaction Type */}
-                            <div className="flex flex-wrap items-center gap-2">
-                              <span className="font-bold text-xs sm:text-sm text-black">
-                                Sale Proceed No. {formattedNo}
-                              </span>
-                              {sp?.billNumber && (
-                                <span className="text-[11px] font-mono text-black">
-                                  (Bill: {sp.billNumber})
+                          <div className="space-y-0.5">
+                            {/* Line 1: Transaction number on Left, Qty on Right */}
+                            <div className="flex items-baseline justify-between gap-3 text-[11.5px] leading-snug text-black">
+                              <div className="flex flex-wrap items-baseline gap-1.5">
+                                <span className="font-semibold text-black whitespace-nowrap">
+                                  Sale Proceed No. {formattedNo}
                                 </span>
-                              )}
-                              {sp?.challanDate && sp.challanDate !== sp.date && (
-                                <span className="text-[11px] text-black">
-                                  Challan Dt: {formatDate(sp.challanDate)}
+                                {sp?.challanDate && sp.challanDate !== sp.date && (
+                                  <span className="text-[10.5px] text-black">
+                                    Challan Dt: {formatDate(sp.challanDate)}
+                                  </span>
+                                )}
+                              </div>
+                              {details.qty > 0 && (
+                                <span className="font-mono font-semibold text-black whitespace-nowrap shrink-0">
+                                  Qty:{details.qty}
                                 </span>
                               )}
                             </div>
 
-                            {/* Item details: Fruit name, Qty, Unit, Weight KG, Crate, Rate, Amount */}
+                            {/* Item details: Name on Left, Qty Unit [Weight] @ Rate = Amount on Right */}
                             {items.length > 0 ? (
-                              <div className="text-xs space-y-0.5 text-black">
+                              <div className="space-y-0.5 text-black">
                                 {items.map((it: any, iIdx: number) => {
                                   const itQty = it.quantity ?? it.qty ?? 0;
                                   const itUnit = it.unit || 'Box';
                                   const itWeight = it.weight ?? it.kg ?? (items.length === 1 && topWeight ? topWeight : undefined);
-                                  const itRate = it.rate ?? 0;
-                                  const itAmount = it.amount ?? (itQty * itRate);
+                                  const itRate = Number(it.rate ?? 0);
+                                  const itAmount = Number(it.amount ?? (itQty * itRate));
 
                                   return (
-                                    <div key={iIdx} className="flex flex-wrap items-center gap-x-2 text-[11.5px] leading-snug text-black">
-                                      <span className="font-semibold text-black uppercase">
+                                    <div key={iIdx} className="sp-detail-line flex items-baseline justify-between gap-3 text-[11.5px] leading-snug text-black">
+                                      <span className="font-medium text-black uppercase">
                                         {it.fruitName || it.name || 'Item'}
                                       </span>
-                                      <span>·</span>
-                                      <span className="font-mono">
-                                        {itQty} {itUnit}
+                                      <span className="font-mono text-black text-right shrink-0">
+                                        <span className="whitespace-nowrap sp-qty-nowrap">
+                                          {itQty} {itUnit}
+                                        </span>
+                                        {itWeight !== undefined && Number(itWeight) > 0 ? ` ${itWeight}kg` : ''}
+                                        {` @ ${Number(itRate.toFixed(2))}`}
+                                        {itAmount > 0 ? ` = ${Number(itAmount.toFixed(2))}` : ''}
                                       </span>
-                                      {itWeight !== undefined && Number(itWeight) > 0 && (
-                                        <>
-                                          <span>·</span>
-                                          <span className="font-mono">{itWeight} KG</span>
-                                        </>
-                                      )}
-                                      {it.crateName && (
-                                        <>
-                                          <span>·</span>
-                                          <span className="text-black">[{it.crateName}]</span>
-                                        </>
-                                      )}
-                                      <span>·</span>
-                                      <span className="font-mono">
-                                        / {Number(itRate).toLocaleString('en-IN')}
-                                      </span>
-                                      {itAmount > 0 && (
-                                        <>
-                                          <span>=</span>
-                                          <span className="font-mono font-semibold">
-                                            {Number(itAmount).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
-                                          </span>
-                                        </>
-                                      )}
                                     </div>
                                   );
                                 })}
                               </div>
                             ) : (
-                              <div className="text-xs text-black font-mono">
-                                Qty: {sp?.quantity ?? entry.subDetails?.qty ?? 0}
-                                {topWeight ? ` · ${topWeight} KG` : ''}
-                                {sp?.rate ? ` / ${sp.rate}` : ''}
+                              <div className="flex items-baseline justify-between gap-3 text-[11.5px] text-black font-mono">
+                                <span>&nbsp;</span>
+                                <span>
+                                  <span className="whitespace-nowrap sp-qty-nowrap">
+                                    {sp?.quantity ?? entry.subDetails?.qty ?? 0}
+                                    {sp?.unit ? ` ${sp.unit}` : ''}
+                                  </span>
+                                  {topWeight ? ` ${topWeight}kg` : ''}
+                                  {sp?.rate ? ` @ ${sp.rate}` : ''}
+                                </span>
                               </div>
                             )}
 
-                            {/* Expenses Breakdown */}
+                            {/* Expenses Breakdown: items on Left, total expense on Right */}
                             {expenses.length > 0 && (
-                              <div className="text-[11px] text-black mt-0.5 pt-0.5 border-t border-dashed border-black">
-                                <span className="font-semibold text-black">Expenses:</span>{' '}
-                                {expenses.map((e: any) => `${e.name} ${Number(e.amount).toLocaleString('en-IN')}`).join(' + ')}
-                                {sp?.totalExpense ? ` = ${Number(sp.totalExpense).toLocaleString('en-IN')}` : ''}
-                              </div>
-                            )}
-
-                            {/* Optional Notes */}
-                            {entry.notes && (
-                              <div className="text-[10.5px] text-black italic">
-                                Note: {entry.notes}
+                              <div className="flex items-baseline justify-between gap-3 text-[11px] leading-snug text-black">
+                                <span>
+                                  {expenses.map((e: any) => `${e.name} ${Number(Number(e.amount).toFixed(2))}`).join('  ')}
+                                </span>
+                                {totalExpenseSum > 0 && (
+                                  <span className="font-mono font-medium shrink-0">
+                                    {Number(totalExpenseSum.toFixed(2))}
+                                  </span>
+                                )}
                               </div>
                             )}
                           </div>
@@ -1057,17 +987,17 @@ export const SaleProceedsLedgerView: React.FC = () => {
                       </td>
 
                       {/* DEBIT */}
-                      <td className="py-2.5 px-3 text-right font-mono text-xs sm:text-sm text-black align-top whitespace-nowrap">
+                      <td className="py-1.5 px-2 text-right font-mono text-[11.5px] text-black align-top whitespace-nowrap border-b border-slate-300 border-r border-r-slate-300">
                         {debitVal}
                       </td>
 
                       {/* CREDIT */}
-                      <td className="py-2.5 px-3 text-right font-mono text-xs sm:text-sm text-black font-medium align-top whitespace-nowrap">
+                      <td className="py-1.5 px-2 text-right font-mono text-[11.5px] text-black align-top whitespace-nowrap border-b border-slate-300 border-r border-r-slate-300">
                         {creditVal}
                       </td>
 
                       {/* BALANCE */}
-                      <td className="py-2.5 px-3 text-right font-mono text-xs sm:text-sm font-bold text-black align-top whitespace-nowrap">
+                      <td className="py-1.5 px-2 text-right font-mono text-[11.5px] font-semibold text-black align-top whitespace-nowrap border-b border-slate-300">
                         {balanceVal}
                       </td>
                     </tr>
@@ -1076,49 +1006,43 @@ export const SaleProceedsLedgerView: React.FC = () => {
               )}
             </tbody>
             <tfoot>
-              {/* Total Row */}
-              <tr className="border-t-2 border-b-2 border-black font-bold text-xs uppercase bg-white">
-                <td colSpan={2} className="py-2.5 px-3 text-right font-bold text-black">
-                  Total:
+              {/* Total Row with Crate Balance on Left and Debit/Credit Totals aligned under columns */}
+              <tr className="border-0 text-xs bg-white text-black">
+                <td colSpan={2} className="py-1.5 px-2 text-left text-[11.5px] font-semibold text-black border-t border-b border-black border-r border-r-slate-300 align-top">
+                  <div>Crate Balance: {crateSummary.balanceCrate}</div>
+                  <div className="flex items-center gap-4">
+                    <span>= {crateSummary.balanceCrate}</span>
+                    {totalQty > 0 && <span>Total Qty: {totalQty}</span>}
+                  </div>
                 </td>
-                <td className="py-2.5 px-3 text-right font-mono text-xs sm:text-sm font-bold text-black whitespace-nowrap">
-                  {ledger.totalDebit > 0 ? Number(ledger.totalDebit).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : ''}
+                <td className="py-1.5 px-2 text-right font-mono text-[11.5px] font-semibold text-black whitespace-nowrap border-t border-b border-black border-r border-r-slate-300 align-top">
+                  {ledger.totalDebit > 0 ? Number(ledger.totalDebit).toFixed(2) : ''}
                 </td>
-                <td className="py-2.5 px-3 text-right font-mono text-xs sm:text-sm font-bold text-black whitespace-nowrap">
-                  {ledger.totalCredit > 0 ? Number(ledger.totalCredit).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : ''}
+                <td className="py-1.5 px-2 text-right font-mono text-[11.5px] font-semibold text-black whitespace-nowrap border-t border-b border-black border-r border-r-slate-300 align-top">
+                  {ledger.totalCredit > 0 ? Number(ledger.totalCredit).toFixed(2) : ''}
                 </td>
-                <td className="py-2.5 px-3 text-right font-mono text-xs sm:text-sm font-extrabold text-black whitespace-nowrap">
-                  {ledger.closingBalance < 0 ? `(${Math.abs(ledger.closingBalance).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})` : Number(ledger.closingBalance).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                <td className="py-1.5 px-2 text-right font-mono text-[11.5px] font-bold text-black whitespace-nowrap border-t border-b border-black align-top">
+                  &nbsp;
                 </td>
               </tr>
             </tfoot>
           </table>
         </div>
 
-        {/* Bottom Summary: Crate Balance on Left, Closing Balance on Right */}
-        <div className="p-4 border-t-2 border-black flex flex-wrap justify-between items-start gap-4 bg-white">
-          {/* Crate Balance Information */}
-          <div className="text-xs space-y-0.5 text-black">
-            <div className="font-bold text-black">
-              Crate Balance: {crateSummary.balanceCrate}
-            </div>
-            <div className="font-bold text-black">
-              = {crateSummary.balanceCrate}
-            </div>
-          </div>
-
-          {/* Closing Balance */}
-          <div className="text-right">
-            <div className="text-sm sm:text-base font-black font-mono text-black">
-              CLOSING BALANCE : {Math.abs(ledger.closingBalance).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {ledger.closingBalance < 0 ? 'Dr' : ledger.closingBalance > 0 ? 'Cr' : ''}
-            </div>
-          </div>
+        {/* Closing Balance Line matching reference image */}
+        <div className="pt-2 pb-1 px-2 flex justify-end items-baseline gap-6 bg-white text-black">
+          <span className="text-sm font-medium uppercase tracking-wide text-black">
+            CLOSING BALANCE :
+          </span>
+          <span className="text-sm sm:text-base font-extrabold font-mono text-black whitespace-nowrap">
+            {Math.abs(ledger.closingBalance).toFixed(2)} {ledger.closingBalance < 0 ? 'Dr' : ledger.closingBalance > 0 ? 'Cr' : ''}
+          </span>
         </div>
 
         {/* Software Developed By */}
-        <div className="px-4 pb-4 pt-4 flex justify-between items-end text-xs border-t border-black bg-white">
+        <div className="px-2 pt-2 pb-1 flex justify-between items-end text-xs bg-white text-black">
           <div className="text-[9px] text-black font-mono">
-            Software Developed By: {defaultProfile.softwareDevelopedBy || 'Dayanand 9229433828'}
+            Software Developed By: {currentProfile.softwareDevelopedBy || defaultProfile.softwareDevelopedBy || 'Klyia Technology'}
           </div>
         </div>
       </div>

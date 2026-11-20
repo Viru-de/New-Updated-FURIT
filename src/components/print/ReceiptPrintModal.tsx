@@ -6,7 +6,7 @@ import { formatDate, formatCurrency, formatBillAmount, numberToWordsIndian, form
 import { Printer, X, Building2, CheckCircle2 } from 'lucide-react';
 import { BillShareButtons } from '../common/BillShareButtons';
 import { ChooseBillPrintFormatModal } from '../common/ChooseBillPrintFormatModal';
-import { CompanyContactsHeader } from '../common/CompanyContactsHeader';
+import { PrintBusinessHeader } from '../common/PrintBusinessHeader';
 import { BillPaperSize, getLastSelectedPaperSize } from '../../utils/pdfAndShareEngine';
 import { getCustomerPrintContactLines, formatCustomerContactsInline } from '../../utils/customerContactUtils';
 
@@ -27,8 +27,17 @@ export const ReceiptPrintModal: React.FC<ReceiptPrintModalProps> = ({
   const [selectedProfileId, setSelectedProfileId] = useState<string>(
     defaultProfile?.id || profiles[0]?.id || ''
   );
-  const [pageSize, setPageSize] = useState<BillPaperSize>(() => getLastSelectedPaperSize('compact'));
+  const [pageSize, setPageSize] = useState<BillPaperSize>(() => getLastSelectedPaperSize('a5'));
   const [isFormatModalOpen, setIsFormatModalOpen] = useState(false);
+
+  React.useEffect(() => {
+    if (isOpen) {
+      const latestDefault = db.getDefaultProfile();
+      if (latestDefault?.id) {
+        setSelectedProfileId(latestDefault.id);
+      }
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -125,45 +134,25 @@ export const ReceiptPrintModal: React.FC<ReceiptPrintModalProps> = ({
           <div
             id="receipt-print-area"
             data-theme-isolated="true"
-            className={`bg-white text-slate-900 border border-slate-300 print:border-none print:shadow-none print:p-2 sm:print:p-3 print:m-0 box-border shadow-sm print-bill-canvas ${
+            className={`bg-white text-slate-900 border border-slate-300 print:border-none print:shadow-none print:p-0 print:m-0 box-border shadow-sm print-bill-canvas ${
               pageSize === 'a4'
-                ? 'max-w-[730px] w-full text-[12px] p-5 sm:p-6'
+                ? 'max-w-[730px] w-full text-[12px] pt-1.5 px-4 pb-4 sm:pt-2 sm:px-5 sm:pb-5'
                 : pageSize === 'a5'
-                ? 'max-w-[510px] w-full text-[11px] p-4 sm:p-5'
+                ? 'max-w-[550px] w-full text-[10.5px] pt-1 px-3 pb-3 sm:pt-1.5 sm:px-3.5 sm:pb-4'
                 : pageSize === 'b6'
-                ? 'max-w-[430px] w-full text-[10px] p-2.5 sm:p-3'
+                ? 'max-w-[430px] w-full text-[10px] pt-1 px-2.5 pb-2.5 sm:px-3'
                 : pageSize === 'b7'
-                ? 'max-w-[300px] w-full text-[8.5px] p-2 sm:p-2.5'
-                : 'max-w-[490px] w-full text-[11px] p-4 sm:p-5'
+                ? 'max-w-[300px] w-full text-[8.5px] pt-1 px-2 pb-2'
+                : 'max-w-[490px] w-full text-[11px] pt-1 px-3.5 pb-3 sm:pt-1.5 sm:px-4 sm:pb-4'
             }`}
             style={{ fontFamily: "'Plus Jakarta Sans', 'Noto Sans Devanagari', Arial, sans-serif" }}
           >
-            {/* Header: Company Details (English + Hindi Bilingual) */}
-            <div className={`text-center border-b border-slate-200 print:border-black ${pageSize === 'b7' ? 'pb-1' : pageSize === 'b6' ? 'pb-2' : 'pb-3'}`}>
-              {(currentProfile.shortName || currentProfile.shortCode) && (
-                <div className={`font-black tracking-[0.2em] uppercase text-slate-950 dark:text-slate-950 print:text-black ${pageSize === 'b7' ? 'text-xs' : pageSize === 'b6' ? 'text-sm' : 'text-base sm:text-lg'} pb-0.5`}>
-                  {currentProfile.shortName || currentProfile.shortCode}
-                </div>
-              )}
-              <h1 className={`font-black tracking-wider uppercase text-slate-950 dark:text-slate-950 print:text-black ${pageSize === 'b7' ? 'text-sm sm:text-base' : pageSize === 'b6' ? 'text-base' : 'text-base sm:text-lg'}`}>
-                {currentProfile.name}
-              </h1>
-              {currentProfile.hindiName && (
-                <div className={`font-bold tracking-wide mt-0.5 font-devanagari text-slate-950 dark:text-slate-950 print:text-black ${pageSize === 'b7' ? 'text-xs sm:text-sm' : pageSize === 'b6' ? 'text-sm' : 'text-sm sm:text-base'}`}>
-                  {currentProfile.hindiName}
-                </div>
-              )}
-              <div className={`${pageSize === 'b7' ? 'text-[8.5px]' : pageSize === 'b6' ? 'text-[9.5px]' : 'text-[11px]'} text-slate-800 dark:text-slate-800 print:text-black leading-snug mt-0.5`}>
-                {currentProfile.address}
-                {currentProfile.city ? `, ${currentProfile.city}` : ''}
-                {currentProfile.state ? `, ${currentProfile.state}` : ''}
-              </div>
-              <CompanyContactsHeader
-                profile={currentProfile}
-                className="mt-0.5"
-                itemClassName={pageSize === 'b7' ? 'text-[7.5px]' : pageSize === 'b6' ? 'text-[8.5px]' : 'text-[10px] sm:text-[11px]'}
-              />
-            </div>
+            {/* Shared Two-Column Business Header */}
+            <PrintBusinessHeader
+              profile={currentProfile}
+              variant="bill"
+              paperSize={pageSize}
+            />
 
             {/* Document Title */}
             <div className={`text-center ${pageSize === 'b7' ? 'my-1' : pageSize === 'b6' ? 'my-2' : 'my-3'}`}>
@@ -173,38 +162,38 @@ export const ReceiptPrintModal: React.FC<ReceiptPrintModalProps> = ({
             </div>
 
             {/* Receipt Meta */}
-            <div className={`flex justify-between items-start ${pageSize === 'b7' ? 'text-[8.5px] mb-1.5 pb-1' : pageSize === 'b6' ? 'text-[9.5px] mb-2 pb-1.5' : 'text-xs mb-3 pb-2'} border-b border-slate-200 print:border-black/40`}>
+            <div className={`flex justify-between items-start ${pageSize === 'b7' ? 'text-[8.5px] print:text-[9.5px] mb-1.5 pb-1' : pageSize === 'b6' ? 'text-[9.5px] print:text-[11px] mb-2 pb-1.5' : 'text-xs print:text-[13.5px] mb-3 pb-2'} border-b border-slate-200 print:border-black/40`}>
               <div>
-                <span className="text-slate-500 print:text-black">Receipt No: </span>
+                <span className="text-slate-500 print:text-black print:font-semibold">Receipt No: </span>
                 <strong className="font-mono text-slate-900 print:text-black">{receipt.receiptNo}</strong>
               </div>
               <div className="text-right">
-                <span className="text-slate-500 print:text-black">Date: </span>
-                <strong>{formatDate(receipt.date)}</strong>
+                <span className="text-slate-500 print:text-black print:font-semibold">Date: </span>
+                <strong className="print:text-black">{formatDate(receipt.date)}</strong>
               </div>
             </div>
 
             {/* Customer Details (M/s Customer Name & Inline Contact) */}
-            <div className={`bg-slate-50 print:bg-transparent rounded border border-slate-200 print:border-black/30 ${pageSize === 'b7' ? 'p-1.5 mb-1.5 text-[8.5px]' : pageSize === 'b6' ? 'p-2 mb-2 text-[9.5px]' : 'p-2.5 mb-3 text-xs'}`}>
+            <div className={`bg-slate-50 print:bg-transparent rounded border border-slate-200 print:border-black/30 ${pageSize === 'b7' ? 'p-1.5 mb-1.5 text-[8.5px] print:text-[9.5px]' : pageSize === 'b6' ? 'p-2 mb-2 text-[9.5px] print:text-[10.5px]' : 'p-2.5 mb-3 text-xs print:text-[13px]'}`}>
               <div className="flex justify-between items-center">
                 <div>
-                  <span className={`text-slate-500 print:text-black ${pageSize === 'b7' ? 'text-[8px]' : 'text-[10px]'} uppercase font-bold block`}>
+                  <span className={`text-slate-500 print:text-black ${pageSize === 'b7' ? 'text-[8px] print:text-[9px]' : 'text-[10px] print:text-[11px]'} uppercase font-bold block`}>
                     Received From (M/s)
                   </span>
-                  <div className={`font-bold text-slate-900 print:text-black uppercase ${pageSize === 'b7' ? 'text-xs' : 'text-sm'}`}>
+                  <div className={`font-bold text-slate-900 print:text-black uppercase ${pageSize === 'b7' ? 'text-xs print:text-[13px]' : 'text-sm print:text-[15px]'}`}>
                     {customerName}
                   </div>
                   {customer && formatCustomerContactsInline(customer) && (
-                    <div className={`${pageSize === 'b7' ? 'text-[7.5px]' : pageSize === 'b6' ? 'text-[8.5px]' : 'text-[10px]'} font-medium text-slate-800 dark:text-slate-800 print:text-black leading-tight mt-0.5`}>
+                    <div className={`${pageSize === 'b7' ? 'text-[7.5px] print:text-[8.5px]' : pageSize === 'b6' ? 'text-[8.5px] print:text-[9.5px]' : 'text-[10px] print:text-[11px]'} font-medium print:font-semibold text-slate-800 dark:text-slate-800 print:text-black leading-tight mt-0.5`}>
                       {formatCustomerContactsInline(customer)}
                     </div>
                   )}
                 </div>
                 <div className="text-right">
-                  <span className={`text-slate-500 print:text-black ${pageSize === 'b7' ? 'text-[8px]' : 'text-[10px]'} uppercase font-bold block`}>
+                  <span className={`text-slate-500 print:text-black ${pageSize === 'b7' ? 'text-[8px] print:text-[9px]' : 'text-[10px] print:text-[11px]'} uppercase font-bold block`}>
                     Payment Mode
                   </span>
-                  <div className={`font-bold uppercase text-emerald-700 print:text-black flex items-center justify-end gap-1 ${pageSize === 'b7' ? 'text-[9px]' : 'text-xs'}`}>
+                  <div className={`font-bold uppercase text-emerald-700 print:text-black flex items-center justify-end gap-1 ${pageSize === 'b7' ? 'text-[9px] print:text-[10px]' : 'text-xs print:text-[13px]'}`}>
                     <CheckCircle2 className="h-3 w-3 text-emerald-600 print:text-black" />
                     {receipt.paymentMode}
                   </div>
@@ -216,15 +205,15 @@ export const ReceiptPrintModal: React.FC<ReceiptPrintModalProps> = ({
             <div className={`border border-slate-300 print:border-black rounded ${pageSize === 'b7' ? 'p-1.5 mb-1.5' : pageSize === 'b6' ? 'p-2 mb-2' : 'p-3 mb-3'} bg-slate-50/50 print:bg-transparent`}>
               <div className="flex justify-between items-center">
                 <div>
-                  <span className={`${pageSize === 'b7' ? 'text-[8.5px]' : 'text-[11px]'} font-bold text-slate-600 print:text-black uppercase block`}>
+                  <span className={`${pageSize === 'b7' ? 'text-[8.5px] print:text-[9.5px]' : 'text-[11px] print:text-[12px]'} font-bold text-slate-600 print:text-black uppercase block`}>
                     Amount Received
                   </span>
-                  <div className={`${pageSize === 'b7' ? 'text-[8px]' : 'text-[11px]'} italic text-slate-700 print:text-black font-medium mt-0.5 leading-tight`}>
+                  <div className={`${pageSize === 'b7' ? 'text-[8px] print:text-[9px]' : 'text-[11px] print:text-[12px]'} italic text-slate-700 print:text-black font-medium print:font-semibold mt-0.5 leading-tight`}>
                     {words}
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className={`font-mono font-black text-slate-900 print:text-black ${pageSize === 'b7' ? 'text-base' : 'text-lg sm:text-xl'}`}>
+                  <div className={`font-mono font-black text-slate-900 print:text-black ${pageSize === 'b7' ? 'text-base print:text-[17px]' : 'text-lg sm:text-xl'}`}>
                     {formatCurrency(receipt.amount)}
                   </div>
                 </div>
@@ -232,12 +221,12 @@ export const ReceiptPrintModal: React.FC<ReceiptPrintModalProps> = ({
             </div>
 
             {/* Balance Information */}
-            <div className={`border-t border-b border-slate-200 print:border-black/40 ${pageSize === 'b7' ? 'py-1 mb-2 text-[8px] space-y-1' : pageSize === 'b6' ? 'py-1.5 mb-2.5 text-[9.5px] space-y-1' : 'py-2.5 mb-4 text-xs space-y-1.5'}`}>
+            <div className={`border-t border-b border-slate-200 print:border-black/40 ${pageSize === 'b7' ? 'py-1 mb-2 text-[8px] print:text-[9.5px] space-y-1' : pageSize === 'b6' ? 'py-1.5 mb-2.5 text-[9.5px] print:text-[11px] space-y-1' : 'py-2.5 mb-4 text-xs print:text-[13.5px] space-y-1.5'}`}>
               <div className="flex justify-between">
-                <span className="text-slate-600 print:text-black font-medium">Customer Current Balance:</span>
+                <span className="text-slate-600 print:text-black font-medium print:font-semibold">Customer Current Balance:</span>
                 <span className="font-mono font-bold text-slate-900 print:text-black">
                   {formatCurrency(closingBalance)}{' '}
-                  <span className={`${pageSize === 'b7' ? 'text-[7.5px]' : 'text-[10px]'} font-normal`}>
+                  <span className={`${pageSize === 'b7' ? 'text-[7.5px] print:text-[9px]' : 'text-[10px] print:text-[11.5px]'} font-normal print:font-semibold print:text-black`}>
                     {closingBalance > 0 ? '(Dr - Due)' : closingBalance < 0 ? '(Cr - Advance)' : '(Settled)'}
                   </span>
                 </span>
@@ -245,16 +234,16 @@ export const ReceiptPrintModal: React.FC<ReceiptPrintModalProps> = ({
             </div>
 
             {/* Signature Footer */}
-            <div className={`${pageSize === 'b7' ? 'mt-2 text-[8.5px]' : pageSize === 'b6' ? 'mt-3.5 text-[9.5px]' : 'mt-6 text-xs'} flex justify-between items-end`}>
+            <div className={`${pageSize === 'b7' ? 'mt-2 text-[8.5px] print:text-[9.5px]' : pageSize === 'b6' ? 'mt-3.5 text-[9.5px] print:text-[10.5px]' : 'mt-6 text-xs print:text-[12.5px]'} flex justify-between items-end`}>
               <div className="text-center">
                 <div className={`${pageSize === 'b7' ? 'w-20' : 'w-28'} border-b border-slate-400 print:border-black mb-1`}></div>
-                <span className={`${pageSize === 'b7' ? 'text-[8px]' : 'text-[10px]'} text-slate-500 print:text-black`}>Customer Signature</span>
+                <span className={`${pageSize === 'b7' ? 'text-[8px] print:text-[9px]' : 'text-[10px] print:text-[11px]'} text-slate-500 print:text-black print:font-semibold`}>Customer Signature</span>
               </div>
               <div className="text-right">
-                <div className={`font-bold uppercase ${pageSize === 'b7' ? 'text-[9px]' : 'text-[11px]'}`}>
+                <div className={`font-bold uppercase ${pageSize === 'b7' ? 'text-[9px] print:text-[10px]' : 'text-[11px] print:text-[12px]'}`}>
                   {formatCompanySignature(currentProfile)}
                 </div>
-                <div className={`${pageSize === 'b7' ? 'text-[8px] mt-2' : 'text-[10px] mt-4'} text-slate-500 print:text-black`}>Authorized Signatory</div>
+                <div className={`${pageSize === 'b7' ? 'text-[8px] print:text-[9px] mt-2' : 'text-[10px] print:text-[11px] mt-4'} text-slate-500 print:text-black print:font-semibold`}>Authorized Signatory</div>
               </div>
             </div>
 

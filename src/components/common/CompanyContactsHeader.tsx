@@ -61,19 +61,28 @@ interface CompanyContactsHeaderProps {
   profile?: Partial<CompanyProfile> | null;
   className?: string;
   itemClassName?: string;
+  align?: 'center' | 'right' | 'left';
 }
 
 export const CompanyContactsHeader: React.FC<CompanyContactsHeaderProps> = ({
   profile,
   className = '',
   itemClassName = '',
+  align = 'center',
 }) => {
   const entries = getCompanyContactEntries(profile);
   if (entries.length === 0) return null;
 
+  const alignClasses =
+    align === 'right'
+      ? 'justify-end text-right'
+      : align === 'left'
+      ? 'justify-start text-left'
+      : 'justify-center text-center';
+
   return (
     <div
-      className={`flex flex-wrap items-center justify-center gap-x-2 gap-y-0.5 text-center leading-snug ${className}`}
+      className={`flex flex-wrap items-center ${alignClasses} gap-x-2 gap-y-0.5 leading-snug ${className}`}
     >
       {entries.map((entry, idx) => (
         <React.Fragment key={entry.id}>

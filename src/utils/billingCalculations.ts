@@ -43,6 +43,55 @@ export function formatQtyWithUnit(quantity: number | string, unit?: string | nul
 }
 
 /**
+ * Formats bill quantity + uppercase unit together on one line (e.g. "10 CRATE", "5 PETI", "15 DABBA", "10 BOX").
+ */
+export function formatBillQtyWithUnit(quantity: number | string, unit?: string | null): string {
+  const q = typeof quantity === 'number' ? quantity : (Number(quantity) || 0);
+  const u = (unit || 'CRATE').trim().toUpperCase();
+  return `${q} ${u}`;
+}
+
+/**
+ * Returns controlled font-size and single-line wrapping classes for product names in bill tables
+ * so normal/medium product names fit on one line and extra-long names scale down cleanly.
+ */
+export function getBillItemNameCellClass(
+  itemName: string | undefined | null,
+  pageSize: 'compact' | 'a4' | 'a5' | 'b6' | 'b7' = 'compact'
+): string {
+  const len = (itemName || '').trim().length;
+  if (pageSize === 'b7') {
+    if (len <= 14) return 'text-[7.5px] print:text-[8.5px] whitespace-nowrap';
+    if (len <= 22) return 'text-[6.5px] print:text-[7.5px] tracking-tight whitespace-nowrap';
+    if (len <= 30) return 'text-[6px] print:text-[6.5px] tracking-tighter whitespace-nowrap';
+    return 'text-[6px] print:text-[6.5px] tracking-tight leading-tight break-words';
+  }
+  if (pageSize === 'b6') {
+    if (len <= 18) return 'text-[9.5px] print:text-[10.5px] whitespace-nowrap';
+    if (len <= 26) return 'text-[8px] print:text-[9px] tracking-tight whitespace-nowrap';
+    if (len <= 34) return 'text-[7px] print:text-[8px] tracking-tighter whitespace-nowrap';
+    return 'text-[7px] print:text-[7.5px] tracking-tight leading-tight break-words';
+  }
+  if (pageSize === 'a4') {
+    if (len <= 26) return 'text-[11.5px] print:text-[13px] whitespace-nowrap';
+    if (len <= 36) return 'text-[10px] print:text-[11.5px] tracking-tight whitespace-nowrap';
+    if (len <= 46) return 'text-[9px] print:text-[10px] tracking-tighter whitespace-nowrap';
+    return 'text-[8.5px] print:text-[9.5px] tracking-tight leading-tight break-words';
+  }
+  if (pageSize === 'a5') {
+    if (len <= 22) return 'text-[10px] print:text-[10px] whitespace-nowrap';
+    if (len <= 30) return 'text-[9px] print:text-[9px] tracking-tight whitespace-nowrap';
+    if (len <= 38) return 'text-[8px] print:text-[8px] tracking-tighter whitespace-nowrap';
+    return 'text-[7.5px] print:text-[7.5px] tracking-tight leading-[1.1] break-words';
+  }
+  // compact
+  if (len <= 20) return 'text-[10.5px] print:text-[11px] whitespace-nowrap';
+  if (len <= 28) return 'text-[9.5px] print:text-[10px] tracking-tight whitespace-nowrap';
+  if (len <= 36) return 'text-[8.5px] print:text-[9px] tracking-tighter whitespace-nowrap';
+  return 'text-[8px] print:text-[8.5px] tracking-tight leading-tight break-words';
+}
+
+/**
  * Calculates wholesale item amount according to Hari Kripa Fruit ERP rules:
  * In Sale Proceed, Cash Sale, Wholesale Credit Sale, Group Sale, and all Bill Items modules:
  *

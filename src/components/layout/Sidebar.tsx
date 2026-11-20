@@ -148,10 +148,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
               />
             </div>
             <div>
-              <div className="font-serif font-black text-xs tracking-tight text-red-950 dark:text-amber-100 uppercase leading-none font-sans">
+              <div className="font-black text-xs tracking-tight text-red-950 dark:text-amber-100 uppercase leading-none">
                 Hari Kripa Fruit Company
               </div>
-              <div className="font-serif italic text-[10px] font-semibold text-emerald-700 dark:text-emerald-400 mt-1">
+              <div className="text-[10px] font-semibold text-emerald-700 dark:text-emerald-400 mt-1">
                 Freshness. Quality. Trust.
               </div>
             </div>

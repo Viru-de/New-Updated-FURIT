@@ -65,7 +65,7 @@ export const PAPER_SIZE_SPECS: Record<BillPaperSize, PaperSizeSpec> = {
 
 const SESSION_STORAGE_KEY = 'hari_kripa_last_paper_size';
 
-export function getLastSelectedPaperSize(defaultSize: BillPaperSize = 'compact'): BillPaperSize {
+export function getLastSelectedPaperSize(defaultSize: BillPaperSize = 'a5'): BillPaperSize {
   if (typeof window === 'undefined') return defaultSize;
   try {
     const saved = sessionStorage.getItem(SESSION_STORAGE_KEY) as BillPaperSize | null;
@@ -91,9 +91,9 @@ export function saveLastSelectedPaperSize(size: BillPaperSize): void {
  * Dynamically injects an @page stylesheet rule before browser printing so that
  * the printer dialogue respects the selected paper dimensions and margins.
  */
-export function applyPrintPageSize(size: BillPaperSize = 'compact', targetElementId?: string): void {
+export function applyPrintPageSize(size: BillPaperSize = 'a5', targetElementId?: string): void {
   if (typeof document === 'undefined') return;
-  const spec = PAPER_SIZE_SPECS[size] || PAPER_SIZE_SPECS.compact;
+  const spec = PAPER_SIZE_SPECS[size] || PAPER_SIZE_SPECS.a5;
   let styleEl = document.getElementById('dynamic-print-page-style') as HTMLStyleElement | null;
   if (!styleEl) {
     styleEl = document.createElement('style');
@@ -102,13 +102,13 @@ export function applyPrintPageSize(size: BillPaperSize = 'compact', targetElemen
   }
 
   const margins: Record<BillPaperSize, string> = {
-    b7: '4mm 4mm 4mm 4mm',
-    b6: '5mm 5mm 5mm 5mm',
-    a5: '6mm 6mm 6mm 6mm',
-    compact: '6mm 5mm 6mm 5mm',
-    a4: '8mm 7mm 8mm 7mm',
+    b7: '1.5mm 3.5mm 2mm 3.5mm',
+    b6: '1.5mm 4mm 2.5mm 4mm',
+    a5: '1.5mm 4mm 2mm 4mm',
+    compact: '1.5mm 4mm 2.5mm 4mm',
+    a4: '2mm 5mm 4mm 5mm',
   };
-  const margin = margins[size] || margins.compact;
+  const margin = margins[size] || margins.a5;
 
   styleEl.textContent = `
     @media print {
@@ -129,13 +129,13 @@ let isPrintingActive = false;
  * overflow clipping, parent scroll containers, and dark theme bleed-through.
  */
 export async function triggerPrint(
-  paperSize: BillPaperSize = 'compact',
+  paperSize: BillPaperSize = 'a5',
   targetElementId?: string
 ): Promise<void> {
   if (typeof window === 'undefined' || typeof document === 'undefined') return;
   if (isPrintingActive) return; // Prevent duplicate concurrent triggers
 
-  const chosenSize = paperSize || getLastSelectedPaperSize('compact');
+  const chosenSize = paperSize || getLastSelectedPaperSize('a5');
   applyPrintPageSize(chosenSize, targetElementId);
   saveLastSelectedPaperSize(chosenSize);
 
@@ -150,6 +150,7 @@ export async function triggerPrint(
     const candidateIds = [
       'mandi-print-area',
       'receipt-print-area',
+      'customer-ledger-detailed-print-area',
       'ledger-print-area',
       'customer-ledger-short-print-area',
       'crate-statement-print-area',
@@ -232,15 +233,24 @@ export async function triggerPrint(
   clone.style.maxHeight = 'none';
   clone.style.margin = '0 auto';
   // Provide print-safe internal padding so content never cuts at physical sheet boundaries
-  const safePad = chosenSize === 'b7' ? '1.5mm 2mm' : chosenSize === 'b6' ? '2mm 3mm' : chosenSize === 'compact' ? '2.5mm 3.5mm' : '3mm 4mm';
+  const safePad =
+    chosenSize === 'b7'
+      ? '0mm 2mm 1mm 2mm'
+      : chosenSize === 'b6'
+      ? '0mm 2mm 1.5mm 2mm'
+      : chosenSize === 'a5'
+      ? '0mm 2mm 1mm 2mm'
+      : chosenSize === 'compact'
+      ? '0mm 2.5mm 1.5mm 2.5mm'
+      : '0mm 2.5mm 2mm 2.5mm';
   clone.style.padding = safePad;
   clone.style.overflow = 'visible';
   clone.style.backgroundColor = '#ffffff';
   clone.style.color = '#000000';
   clone.style.boxShadow = 'none';
   clone.style.border = 'none';
-  clone.style.pageBreakAfter = 'avoid';
-  (clone.style as any).breakAfter = 'avoid';
+  clone.style.pageBreakAfter = 'auto';
+  (clone.style as any).breakAfter = 'auto';
 
   // Strip non-printable UI elements (action buttons, tabs, pagination bars)
   const noPrints = clone.querySelectorAll('.no-print, [class*="no-print"], button:not(.keep-in-print)');
@@ -375,14 +385,14 @@ export interface ShareOptions {
  */
 export async function generatePdfDoc(
   elementId: string,
-  paperSize: BillPaperSize = 'compact'
+  paperSize: BillPaperSize = 'a5'
 ): Promise<{ doc: jsPDF; canvas: HTMLCanvasElement; pageCount: number }> {
   const element = document.getElementById(elementId);
   if (!element) {
     throw new Error(`Printable element #${elementId} not found in the DOM`);
   }
 
-  const spec = PAPER_SIZE_SPECS[paperSize] || PAPER_SIZE_SPECS.compact;
+  const spec = PAPER_SIZE_SPECS[paperSize] || PAPER_SIZE_SPECS.a5;
   const targetPxWidth = Math.round(spec.widthMm * 3.7795);
 
   // CRITICAL: Ensure all web fonts (especially Noto Sans Devanagari & Plus Jakarta Sans) are fully loaded
@@ -410,6 +420,10 @@ export async function generatePdfDoc(
     element.style.top = '0';
     element.style.width = `${targetPxWidth}px`;
   }
+
+  // Track unbreakable DOM element bounds (rows, tfoot, bottom signature) in CSS px relative to root
+  let unbreakableCssBounds: Array<{ top: number; bottom: number }> = [];
+  let clonedScrollHeight = 0;
 
   try {
     // Generate canvas with 2x resolution for clean text rendering
@@ -442,6 +456,8 @@ export async function generatePdfDoc(
         clonedElement.style.color = '#000000';
         clonedElement.style.border = 'none';
         clonedElement.style.boxShadow = 'none';
+        // Keep safe compact PDF top margin without excessive whitespace
+        clonedElement.style.paddingTop = paperSize === 'a4' ? '6px' : '4px';
 
         // Strip dark variant classes from all cloned elements
         const allClonedNodes = [clonedElement, ...Array.from(clonedElement.querySelectorAll('*'))];
@@ -491,6 +507,22 @@ export async function generatePdfDoc(
             el.style.fontVariantNumeric = 'tabular-nums';
           }
         });
+
+        // 4. Measure unbreakable row/block boundaries after layout overrides for clean multi-page splits
+        const rootRect = clonedElement.getBoundingClientRect();
+        clonedScrollHeight = clonedElement.scrollHeight || rootRect.height;
+        const protectedEls = clonedElement.querySelectorAll(
+          'tbody > tr, tfoot, tfoot > tr, .bill-bottom-footer'
+        );
+        unbreakableCssBounds = Array.from(protectedEls)
+          .map((el) => {
+            const r = (el as HTMLElement).getBoundingClientRect();
+            return {
+              top: r.top - rootRect.top,
+              bottom: r.bottom - rootRect.top,
+            };
+          })
+          .filter((b) => b.bottom > b.top);
       },
     });
 
@@ -517,20 +549,46 @@ export async function generatePdfDoc(
       const imgData = canvas.toDataURL('image/jpeg', 0.95);
       doc.addImage(imgData, 'JPEG', 0, 0, pageWidthMm, fitHeightMm, undefined, 'FAST');
     } else {
-      // Case 2: Multi-page document — slice canvas per page height to avoid any content overlap or cutoffs
-      const pxPerPage = Math.floor((pageHeightMm / pageWidthMm) * canvas.width);
-      const rawPageCount = Math.ceil(canvas.height / pxPerPage);
+      // Case 2: Multi-page document — slice canvas at clean row/footer boundaries to prevent mid-row or total cutoffs
+      const pxPerFullPage = Math.floor((pageHeightMm / pageWidthMm) * canvas.width);
+      const canvasScaleY =
+        clonedScrollHeight > 0 ? canvas.height / clonedScrollHeight : 2;
+      const canvasBounds = unbreakableCssBounds.map((b) => ({
+        top: b.top * canvasScaleY,
+        bottom: b.bottom * canvasScaleY,
+      }));
+      const continuationTopMarginMm = 4;
+      const continuationUsableMm = pageHeightMm - continuationTopMarginMm * 2;
+      const pxPerContinuationPage = Math.floor(
+        (continuationUsableMm / pageWidthMm) * canvas.width
+      );
+
+      let startY = 0;
       let actualPages = 0;
 
-      for (let i = 0; i < rawPageCount; i++) {
-        const startY = i * pxPerPage;
-        const slicePxHeight = Math.min(pxPerPage, canvas.height - startY);
-
-        // Avoid adding a trailing blank page for a tiny sliver (< 30px) of white padding
-        if (i > 0 && slicePxHeight < 30) {
+      while (startY < canvas.height) {
+        const remaining = canvas.height - startY;
+        if (actualPages > 0 && remaining < 30) {
           break;
         }
 
+        const maxSlice = actualPages === 0 ? pxPerFullPage : pxPerContinuationPage;
+        let endY = Math.min(canvas.height, startY + maxSlice);
+
+        if (endY < canvas.height) {
+          // Snap upward before any unbreakable block (row, tfoot, footer) straddling endY
+          for (const b of canvasBounds) {
+            if (b.top < endY && b.bottom > endY && b.top > startY + 60) {
+              endY = Math.min(endY, Math.floor(b.top) - 1);
+            }
+          }
+          // Guarantee positive forward progress
+          if (endY <= startY + 40) {
+            endY = Math.min(canvas.height, startY + maxSlice);
+          }
+        }
+
+        const slicePxHeight = Math.max(1, endY - startY);
         const pageCanvas = document.createElement('canvas');
         pageCanvas.width = canvas.width;
         pageCanvas.height = slicePxHeight;
@@ -553,12 +611,14 @@ export async function generatePdfDoc(
 
         const sliceImgData = pageCanvas.toDataURL('image/jpeg', 0.95);
         const sliceHeightMm = (slicePxHeight * pageWidthMm) / canvas.width;
+        const yOffsetMm = actualPages === 0 ? 0 : continuationTopMarginMm;
 
         if (actualPages > 0) {
           doc.addPage([pageWidthMm, pageHeightMm]);
         }
-        doc.addImage(sliceImgData, 'JPEG', 0, 0, pageWidthMm, sliceHeightMm, undefined, 'FAST');
+        doc.addImage(sliceImgData, 'JPEG', 0, yOffsetMm, pageWidthMm, sliceHeightMm, undefined, 'FAST');
         actualPages++;
+        startY = endY;
       }
       pageCount = actualPages;
     }
@@ -578,7 +638,7 @@ export async function generatePdfDoc(
 export async function downloadPdfFromElement(
   elementId: string,
   filename: string,
-  paperSize: BillPaperSize = 'compact'
+  paperSize: BillPaperSize = 'a5'
 ): Promise<{ success: boolean; pageCount: number }> {
   const cleanFilename = filename.toLowerCase().endsWith('.pdf') ? filename : `${filename}.pdf`;
   const { doc, pageCount } = await generatePdfDoc(elementId, paperSize);
@@ -609,7 +669,7 @@ export async function downloadPdfFromElement(
 export async function generatePdfFile(
   elementId: string,
   filename: string,
-  paperSize: BillPaperSize = 'compact'
+  paperSize: BillPaperSize = 'a5'
 ): Promise<File> {
   const cleanFilename = filename.toLowerCase().endsWith('.pdf') ? filename : `${filename}.pdf`;
   const { doc } = await generatePdfDoc(elementId, paperSize);

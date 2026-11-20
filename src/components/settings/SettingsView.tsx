@@ -21,21 +21,25 @@ import {
   AlertTriangle,
   Sparkles,
   Eye,
+  KeyRound,
 } from 'lucide-react';
 import { HfcLogoExportModal } from '../modals/HfcLogoExportModal';
+import { UserPasswordManagementPanel } from './UserPasswordManagementPanel';
 
 interface SettingsViewProps {
-  initialTab?: 'general' | 'profiles' | 'units' | 'crates' | 'backup';
+  initialTab?: 'general' | 'profiles' | 'units' | 'crates' | 'backup' | 'users';
 }
 
 export const SettingsView: React.FC<SettingsViewProps> = ({ initialTab = 'general' }) => {
-  const [activeTab, setActiveTab] = useState<'general' | 'profiles' | 'units' | 'crates' | 'backup'>(initialTab);
+  const isAdmin = db.getActiveUser()?.role === 'admin';
+  const safeInitialTab = initialTab === 'users' && !isAdmin ? 'general' : initialTab;
+  const [activeTab, setActiveTab] = useState<'general' | 'profiles' | 'units' | 'crates' | 'backup' | 'users'>(safeInitialTab);
 
   React.useEffect(() => {
     if (initialTab) {
-      setActiveTab(initialTab);
+      setActiveTab(initialTab === 'users' && !isAdmin ? 'general' : initialTab);
     }
-  }, [initialTab]);
+  }, [initialTab, isAdmin]);
   const [settings, setSettings] = useState<GeneralSettings>(db.getSettings());
   const [units, setUnits] = useState<Unit[]>(db.getUnits());
   const [crateTypes, setCrateTypes] = useState<CrateType[]>(db.getCrateTypes());
@@ -227,6 +231,19 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ initialTab = 'genera
         >
           <Database className="h-3.5 w-3.5" /> Data Backup & Safety
         </button>
+        {isAdmin && (
+          <button
+            type="button"
+            onClick={() => setActiveTab('users')}
+            className={`flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-lg transition-colors ${
+              activeTab === 'users'
+                ? 'bg-emerald-600 text-white'
+                : 'text-emerald-700 hover:text-emerald-900 dark:text-emerald-300'
+            }`}
+          >
+            <KeyRound className="h-3.5 w-3.5" /> User & Password Management
+          </button>
+        )}
       </div>
 
       {/* General Settings Tab */}
@@ -624,6 +641,15 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ initialTab = 'genera
             </div>
           </div>
         </div>
+      )}
+
+      {/* User & Password Management Tab (Restricted strictly to Admin/Owner accounts) */}
+      {isAdmin && activeTab === 'users' && (
+        <UserPasswordManagementPanel
+          onSessionInvalidated={() => {
+            db.setActiveUser(null);
+          }}
+        />
       )}
 
       {/* In-app Reset Confirmation Modal */}
