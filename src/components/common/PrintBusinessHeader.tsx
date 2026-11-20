@@ -15,8 +15,8 @@ interface PrintBusinessHeaderProps {
  * Bill (Sale Proceed, Cash Sale, Credit Sale, Receipt, Tax Invoice) and
  * Ledger (Detailed & Short) print views.
  *
- * - Bill (`variant="bill"`): Classic centered single vertical sequence:
- *   Logo (if present) -> Short Code (e.g. HFC / JD) -> English Name -> Hindi Name -> Address -> Contacts
+ * - Bill (`variant="bill"`): Classic centered single vertical sequence (no logo, starts from top):
+ *   Short Code (e.g. HFC / JD) -> English Name -> Hindi Name -> Address -> Contacts
  * - Ledger (`variant="ledger"`): Two-column layout:
  *   LEFT SIDE: Logo (if present), Short Code, Bold English Name, Hindi Name
  *   RIGHT SIDE: Complete Business Address, Configured Contact Number(s)
@@ -47,17 +47,7 @@ export const PrintBusinessHeader: React.FC<PrintBusinessHeaderProps> = ({
   const isA5Bill = isBill && paperSize === 'a5';
   const isA4Bill = isBill && paperSize === 'a4';
 
-  const logoSizeClass = !isBill
-    ? 'w-11 h-11 sm:w-12 sm:h-12 print:w-11 print:h-11'
-    : isB7
-    ? 'w-6 h-6 print:w-6 print:h-6'
-    : isB6
-    ? 'w-7 h-7 print:w-7 print:h-7'
-    : isA5Bill
-    ? 'w-8 h-8 print:w-8 print:h-8'
-    : isA4Bill
-    ? 'w-11 h-11 sm:w-12 sm:h-12 print:w-11 print:h-11'
-    : 'w-9 h-9 sm:w-10 sm:h-10 print:w-9 print:h-9';
+  const ledgerLogoSizeClass = 'w-11 h-11 sm:w-12 sm:h-12 print:w-11 print:h-11';
 
   const shortClass = !isBill
     ? 'text-[13px] sm:text-[14px] print:text-[14px] tracking-[0.18em]'
@@ -122,34 +112,18 @@ export const PrintBusinessHeader: React.FC<PrintBusinessHeaderProps> = ({
   if (isBill) {
     return (
       <div
-        className={`print-business-header print-business-header--bill text-center border-b border-black mt-0 pt-0 ${
-          isB7
-            ? 'pb-1 mb-0.5'
-            : isB6
-            ? 'pb-1 mb-0.5'
-            : isA5Bill
-            ? 'pb-1 mb-0.5'
-            : 'pb-1.5 mb-1'
-        } ${className}`}
+        className={`print-business-header print-business-header--bill text-center border-b border-black mt-0 pt-0 pb-1 mb-0.5 ${className}`}
       >
-        {logoSrc && (
-          <img
-            src={logoSrc}
-            alt={shortLabel || englishName || 'Company Logo'}
-            className={`mx-auto block object-contain rounded-full mb-0.5 ${logoSizeClass}`}
-          />
-        )}
-
         {showShortLabel && (
-          <div className={`font-bold uppercase text-slate-900 dark:text-slate-900 print:text-black leading-tight m-0 p-0 ${shortClass}`}>
+          <div className={`font-bold uppercase text-slate-900 dark:text-slate-900 print:text-black leading-none m-0 p-0 ${shortClass}`}>
             {shortLabel}
           </div>
         )}
 
         {englishName && (
           <h1
-            className={`font-black uppercase tracking-wider text-slate-950 dark:text-slate-950 print:text-black leading-[1.15] m-0 p-0 break-words ${
-              showShortLabel || logoSrc ? 'mt-0.5' : 'mt-0'
+            className={`font-black uppercase tracking-wider text-slate-950 dark:text-slate-950 print:text-black leading-[1.1] m-0 p-0 break-words ${
+              showShortLabel ? 'mt-0.5' : 'mt-0'
             } ${englishClass}`}
           >
             {englishName}
@@ -166,9 +140,7 @@ export const PrintBusinessHeader: React.FC<PrintBusinessHeaderProps> = ({
 
         {addressLine && (
           <div
-            className={`font-medium text-slate-800 dark:text-slate-800 print:text-black leading-snug break-words m-0 p-0 ${
-              isB7 ? 'mt-0.5' : 'mt-1'
-            } ${addressClass}`}
+            className={`font-medium text-slate-800 dark:text-slate-800 print:text-black leading-snug break-words m-0 p-0 mt-0.5 ${addressClass}`}
           >
             {addressLine}
           </div>
@@ -194,7 +166,7 @@ export const PrintBusinessHeader: React.FC<PrintBusinessHeaderProps> = ({
           <img
             src={logoSrc}
             alt={shortLabel || englishName || 'Company Logo'}
-            className={`block shrink-0 object-contain rounded-full m-0 ${logoSizeClass}`}
+            className={`block shrink-0 object-contain rounded-full m-0 ${ledgerLogoSizeClass}`}
           />
         )}
         <div className="print-business-header-text min-w-0 flex-1 text-left m-0 p-0">

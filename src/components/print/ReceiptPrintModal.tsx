@@ -136,14 +136,14 @@ export const ReceiptPrintModal: React.FC<ReceiptPrintModalProps> = ({
             data-theme-isolated="true"
             className={`bg-white text-slate-900 border border-slate-300 print:border-none print:shadow-none print:p-0 print:m-0 box-border shadow-sm print-bill-canvas ${
               pageSize === 'a4'
-                ? 'max-w-[730px] w-full text-[12px] pt-1.5 px-4 pb-4 sm:pt-2 sm:px-5 sm:pb-5'
+                ? 'max-w-[730px] w-full text-[12px] pt-1 px-4 pb-4 sm:pt-1.5 sm:px-5 sm:pb-5'
                 : pageSize === 'a5'
-                ? 'max-w-[550px] w-full text-[10.5px] pt-1 px-3 pb-3 sm:pt-1.5 sm:px-3.5 sm:pb-4'
+                ? 'max-w-[550px] w-full text-[10.5px] pt-0.5 px-3 pb-3 sm:pt-1 sm:px-3.5 sm:pb-4'
                 : pageSize === 'b6'
-                ? 'max-w-[430px] w-full text-[10px] pt-1 px-2.5 pb-2.5 sm:px-3'
+                ? 'max-w-[430px] w-full text-[10px] pt-0.5 px-2.5 pb-2.5 sm:px-3'
                 : pageSize === 'b7'
-                ? 'max-w-[300px] w-full text-[8.5px] pt-1 px-2 pb-2'
-                : 'max-w-[490px] w-full text-[11px] pt-1 px-3.5 pb-3 sm:pt-1.5 sm:px-4 sm:pb-4'
+                ? 'max-w-[300px] w-full text-[8.5px] pt-0.5 px-2 pb-2'
+                : 'max-w-[490px] w-full text-[11px] pt-0.5 px-3.5 pb-3 sm:pt-1 sm:px-4 sm:pb-4'
             }`}
             style={{ fontFamily: "'Plus Jakarta Sans', 'Noto Sans Devanagari', Arial, sans-serif" }}
           >

@@ -441,6 +441,18 @@ input.no-spinners {
   color-scheme: light;
 }
 
+.print-bill-canvas .print-business-header--bill,
+[data-pdf-export="true"] .print-bill-canvas .print-business-header--bill,
+[data-pdf-export="true"] .print-business-header--bill {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+.print-bill-canvas .print-business-header--bill img,
+[data-pdf-export="true"] .print-business-header--bill img {
+  display: none !important;
+}
+
 .print-bill-canvas table {
   background-color: #ffffff !important;
   color: #0f172a !important;
@@ -780,6 +792,8 @@ input.no-spinners {
   }
 
   /* Preserve centered vertical bill header and two-column left/right ledger header with zero top spacing in all print contexts */
+  #mandi-print-area > div:first-child,
+  #receipt-print-area > div:first-child,
   #ledger-print-area > div:first-child,
   #crate-statement-print-area > div:first-child,
   #report-print-area > div:first-child,
@@ -803,10 +817,12 @@ input.no-spinners {
   }
   .print-business-header--bill img,
   #erp-isolated-print-mount .print-business-header--bill img {
-    display: block !important;
-    margin-left: auto !important;
-    margin-right: auto !important;
+    display: none !important;
+  }
+  .print-business-header--bill > :first-child,
+  #erp-isolated-print-mount .print-business-header--bill > :first-child {
     margin-top: 0 !important;
+    padding-top: 0 !important;
   }
   .print-business-header--bill h1,
   #erp-isolated-print-mount .print-business-header--bill h1 {
