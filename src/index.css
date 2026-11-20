@@ -469,6 +469,22 @@ input.no-spinners {
   word-break: keep-all !important;
 }
 
+/* Remove horizontal row border/underline directly below item & blank rows in bill/item print previews & PDF exports,
+   keeping column separators, thead header borders, Total rows (.border-b-2), and nested tfoot summary tables intact */
+#mandi-print-area > table > tbody > tr:not(.border-b-2),
+#mandi-print-area > table > tbody > tr:not(.border-b-2) > td,
+#mandi-live-preview-canvas > table > tbody > tr:not(.border-b-2),
+#mandi-live-preview-canvas > table > tbody > tr:not(.border-b-2) > td,
+[data-pdf-export="true"]#group-sale-print-summary > table > tbody > tr:not(.border-b-2),
+[data-pdf-export="true"]#group-sale-print-summary > table > tbody > tr:not(.border-b-2) > td,
+[data-pdf-export="true"] #mandi-print-area > table > tbody > tr:not(.border-b-2),
+[data-pdf-export="true"] #mandi-print-area > table > tbody > tr:not(.border-b-2) > td {
+  border-top-width: 0 !important;
+  border-top-style: none !important;
+  border-bottom-width: 0 !important;
+  border-bottom-style: none !important;
+}
+
 
 /* Screen mode: hide isolated print mount completely */
 #erp-isolated-print-mount {
@@ -1216,6 +1232,21 @@ input.no-spinners {
     border-left-color: #000000 !important;
     border-right-color: #000000 !important;
     border-bottom-color: #94a3b8 !important;
+  }
+
+  /* Remove horizontal row border/underline directly below item & blank rows in bill and group-sale print tables */
+  #mandi-print-area > table > tbody > tr:not(.border-b-2),
+  #mandi-print-area > table > tbody > tr:not(.border-b-2) > td,
+  #erp-isolated-print-mount #mandi-print-area > table > tbody > tr:not(.border-b-2),
+  #erp-isolated-print-mount #mandi-print-area > table > tbody > tr:not(.border-b-2) > td,
+  #group-sale-print-summary > table > tbody > tr:not(.border-b-2),
+  #group-sale-print-summary > table > tbody > tr:not(.border-b-2) > td,
+  #erp-isolated-print-mount #group-sale-print-summary > table > tbody > tr:not(.border-b-2),
+  #erp-isolated-print-mount #group-sale-print-summary > table > tbody > tr:not(.border-b-2) > td {
+    border-top-width: 0 !important;
+    border-top-style: none !important;
+    border-bottom-width: 0 !important;
+    border-bottom-style: none !important;
   }
 
   /* Credit Sale & Cash Sale Bill Print: keep Qty and Unit strictly on one line */

@@ -442,6 +442,7 @@ export async function generatePdfDoc(
       windowWidth: targetPxWidth,
       onclone: (clonedDoc, clonedElement) => {
         // Ensure root element is visible in clone and matches paper size width
+        clonedElement.setAttribute('data-pdf-export', 'true');
         clonedElement.style.display = 'block';
         clonedElement.style.visibility = 'visible';
         clonedElement.style.position = 'static';
