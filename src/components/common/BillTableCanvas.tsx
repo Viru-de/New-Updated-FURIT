@@ -132,12 +132,12 @@ export const BillTableCanvas: React.FC<BillTableCanvasProps> = ({
   // Balanced percentage column widths matching Sale Proceed Bill Print
   const colWidths = isB7
     ? {
-        no: '6%',
-        item: '31%',
-        qty: '21%',
-        kg: '12%',
+        no: '9%',
+        item: '26%',
+        qty: '20%',
+        kg: '16%',
         rate: '13%',
-        amount: '17%',
+        amount: '16%',
       }
     : isB6
     ? {
@@ -269,7 +269,7 @@ export const BillTableCanvas: React.FC<BillTableCanvasProps> = ({
       )}
 
       {/* Exact Table Format: No. | Item Name | Qty | KG | Rate | Amount */}
-      <table className={`w-full max-w-full table-fixed box-border border-collapse border border-black ${tableBodyFont}`}>
+      <table className={`w-full max-w-full table-fixed box-border border-collapse border border-black ${isB7 ? 'b7-bill-table' : ''} ${tableBodyFont}`}>
         <colgroup>
           <col style={{ width: colWidths.no }} />
           <col style={{ width: colWidths.item }} />
@@ -280,12 +280,12 @@ export const BillTableCanvas: React.FC<BillTableCanvasProps> = ({
         </colgroup>
         <thead>
           <tr className={`border-b border-black font-bold uppercase ${tableHeadFont} bg-slate-50 print:bg-transparent text-slate-950 print:text-black`}>
-            <th className={`border-r border-black ${tablePad} text-center`}>No.</th>
-            <th className={`border-r border-black ${tablePad} text-left`}>ITEM NAME</th>
-            <th className={`border-r border-black ${tablePad} text-right ${!isLivePreview ? 'bill-qty-col' : 'print:whitespace-nowrap'} whitespace-nowrap`}>QTY</th>
-            <th className={`border-r border-black ${tablePad} text-right`}>KG</th>
-            <th className={`border-r border-black ${tablePad} text-right`}>RATE</th>
-            <th className={`${tablePad} text-right`}>AMOUNT</th>
+            <th className={`border-r border-black ${tablePad} box-border text-center ${isB7 ? 'tracking-tight' : ''}`}>No.</th>
+            <th className={`border-r border-black ${tablePad} box-border text-left`}>ITEM NAME</th>
+            <th className={`border-r border-black ${tablePad} box-border text-right ${!isLivePreview ? 'bill-qty-col' : 'print:whitespace-nowrap'} whitespace-nowrap`}>QTY</th>
+            <th className={`border-r border-black ${tablePad} box-border text-right ${isB7 ? 'tracking-tight' : ''}`}>KG</th>
+            <th className={`border-r border-black ${tablePad} box-border text-right`}>RATE</th>
+            <th className={`${tablePad} box-border text-right`}>AMOUNT</th>
           </tr>
         </thead>
         <tbody>
@@ -301,7 +301,7 @@ export const BillTableCanvas: React.FC<BillTableCanvasProps> = ({
                 key={it.id || idx}
                 className={`border-b border-black/40 print:text-black ${rowHeight}`}
               >
-                <td className={`border-r border-black ${tablePad} text-center font-mono print:font-semibold print:text-black align-middle`}>
+                <td className={`border-r border-black ${tablePad} ${isB7 ? 'box-border whitespace-nowrap tabular-nums' : ''} text-center font-mono print:font-semibold print:text-black align-middle`}>
                   {idx + 1}
                 </td>
                 <td
@@ -326,7 +326,7 @@ export const BillTableCanvas: React.FC<BillTableCanvasProps> = ({
                     {formatBillQtyWithUnit(it.quantity, it.unit)}
                   </span>
                 </td>
-                <td className={`border-r border-black ${tablePad} text-right font-mono print:font-semibold print:text-black align-middle`}>
+                <td className={`border-r border-black ${tablePad} ${isB7 ? 'box-border whitespace-nowrap tabular-nums' : ''} text-right font-mono print:font-semibold print:text-black align-middle`}>
                   {lineKg > 0 ? lineKg : 0}
                 </td>
                 <td className={`border-r border-black ${tablePad} text-right font-mono print:font-semibold print:text-black align-middle`}>
@@ -363,12 +363,12 @@ export const BillTableCanvas: React.FC<BillTableCanvasProps> = ({
                 &nbsp;
               </td>
               <td
-                className={`border-r border-slate-300 print:border-black ${tablePad} text-right font-mono font-bold leading-tight break-words ${totalQtyRowFont} text-slate-950 dark:text-slate-950 print:text-black`}
+                className={`border-r border-slate-300 print:border-black ${tablePad} text-right font-mono font-bold leading-tight ${isB7 ? 'whitespace-nowrap box-border' : 'break-words'} ${totalQtyRowFont} text-slate-950 dark:text-slate-950 print:text-black`}
               >
                 {totalQty}
               </td>
               <td
-                className={`border-r border-slate-300 print:border-black ${tablePad} text-right font-mono font-bold leading-tight break-words ${totalQtyRowFont} text-slate-950 dark:text-slate-950 print:text-black`}
+                className={`border-r border-slate-300 print:border-black ${tablePad} text-right font-mono font-bold leading-tight ${isB7 ? 'whitespace-nowrap box-border' : 'break-words'} ${totalQtyRowFont} text-slate-950 dark:text-slate-950 print:text-black`}
               >
                 {totalWeight > 0 ? totalWeight : 0}
               </td>
@@ -390,12 +390,12 @@ export const BillTableCanvas: React.FC<BillTableCanvasProps> = ({
                 &nbsp;
               </td>
               <td
-                className={`border-r border-slate-300 print:border-black ${tablePad} text-right font-bold leading-tight break-words ${totalQtyRowFont} text-slate-950 dark:text-slate-950 print:text-black`}
+                className={`border-r border-slate-300 print:border-black ${tablePad} text-right font-bold leading-tight ${isB7 ? 'whitespace-nowrap box-border' : 'break-words'} ${totalQtyRowFont} text-slate-950 dark:text-slate-950 print:text-black`}
               >
                 <span className="font-mono font-black">{totalQty}</span>
               </td>
               <td
-                className={`border-r border-slate-300 print:border-black ${tablePad} text-right font-bold leading-tight break-words ${totalQtyRowFont} text-slate-950 dark:text-slate-950 print:text-black`}
+                className={`border-r border-slate-300 print:border-black ${tablePad} text-right font-bold leading-tight ${isB7 ? 'whitespace-nowrap box-border' : 'break-words'} ${totalQtyRowFont} text-slate-950 dark:text-slate-950 print:text-black`}
               >
                 <span className="font-mono font-black">{totalWeight > 0 ? totalWeight : 0}</span>
               </td>
@@ -468,7 +468,11 @@ export const BillTableCanvas: React.FC<BillTableCanvasProps> = ({
 
               {/* Right Side (colSpan=3): Subtotal, Expenses, Net Total & Balances Table */}
               <td colSpan={3} className="p-0 align-top">
-                <table className="w-full text-[8px] print:text-[9.5px] border-collapse">
+                <table className="w-full max-w-full table-fixed box-border text-[8px] print:text-[9.5px] border-collapse">
+                  <colgroup>
+                    <col style={{ width: '50%' }} />
+                    <col style={{ width: '50%' }} />
+                  </colgroup>
                   <tbody>
                     <tr className="border-b border-slate-300 print:border-black">
                       <td className="p-0.5 font-semibold text-left border-r border-slate-300 print:border-black text-slate-950 dark:text-slate-950 print:text-black">

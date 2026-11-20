@@ -91,12 +91,12 @@ export const SaleProceedPrintModal: React.FC<SaleProceedPrintModalProps> = ({
 
   const colWidths = isB7
     ? {
-        no: '6%',
-        item: '31%',
-        qty: '21%',
-        weight: '12%',
+        no: '9%',
+        item: '26%',
+        qty: '20%',
+        weight: '16%',
         price: '13%',
-        amount: '17%',
+        amount: '16%',
       }
     : isB6
     ? {
@@ -296,7 +296,7 @@ export const SaleProceedPrintModal: React.FC<SaleProceedPrintModalProps> = ({
             </div>
 
             {/* Item Table matching Reference 1 */}
-            <table className={`w-full max-w-full table-fixed box-border border-collapse border border-black ${tableBodyFont}`}>
+            <table className={`w-full max-w-full table-fixed box-border border-collapse border border-black ${isB7 ? 'b7-bill-table' : ''} ${tableBodyFont}`}>
               <colgroup>
                 <col style={{ width: colWidths.no }} />
                 <col style={{ width: colWidths.item }} />
@@ -307,18 +307,18 @@ export const SaleProceedPrintModal: React.FC<SaleProceedPrintModalProps> = ({
               </colgroup>
               <thead>
                 <tr className={`border-b border-black font-bold uppercase ${tableHeadFont} bg-slate-50 print:bg-transparent text-slate-950 dark:text-slate-950 print:text-black`}>
-                  <th className={`border-r border-black ${tablePad} text-center`}>No.</th>
-                  <th className={`border-r border-black ${tablePad} text-left`}>ITEM NAME</th>
-                  <th className={`border-r border-black ${tablePad} text-right bill-qty-col whitespace-nowrap`}>QTY</th>
-                  <th className={`border-r border-black ${tablePad} text-right`}>WEIGHT</th>
-                  <th className={`border-r border-black ${tablePad} text-right`}>PRICE</th>
-                  <th className={`${tablePad} text-right`}>AMOUNT</th>
+                  <th className={`border-r border-black ${tablePad} box-border text-center ${isB7 ? 'tracking-tight' : ''}`}>No.</th>
+                  <th className={`border-r border-black ${tablePad} box-border text-left`}>ITEM NAME</th>
+                  <th className={`border-r border-black ${tablePad} box-border text-right bill-qty-col whitespace-nowrap`}>QTY</th>
+                  <th className={`border-r border-black ${tablePad} box-border text-right ${isB7 ? 'tracking-tight' : ''}`}>WEIGHT</th>
+                  <th className={`border-r border-black ${tablePad} box-border text-right`}>PRICE</th>
+                  <th className={`${tablePad} box-border text-right`}>AMOUNT</th>
                 </tr>
               </thead>
               <tbody>
                 {items.map((it, idx) => (
                   <tr key={it.id || idx} className={`border-b border-black/40 text-slate-950 dark:text-slate-950 print:text-black ${rowHeight}`}>
-                    <td className={`border-r border-black ${tablePad} text-center font-mono print:font-semibold align-middle`}>{idx + 1}</td>
+                    <td className={`border-r border-black ${tablePad} ${isB7 ? 'box-border whitespace-nowrap tabular-nums' : ''} text-center font-mono print:font-semibold align-middle`}>{idx + 1}</td>
                     <td
                       className={`border-r border-black ${tablePad} font-semibold print:font-bold uppercase align-middle overflow-hidden ${getBillItemNameCellClass(it.fruitName, pageSize)}`}
                     >
@@ -337,7 +337,7 @@ export const SaleProceedPrintModal: React.FC<SaleProceedPrintModalProps> = ({
                         {formatBillQtyWithUnit(it.quantity, it.unit || proceeds.unit)}
                       </span>
                     </td>
-                    <td className={`border-r border-black ${tablePad} text-right font-mono print:font-semibold`}>
+                    <td className={`border-r border-black ${tablePad} ${isB7 ? 'box-border whitespace-nowrap tabular-nums' : ''} text-right font-mono print:font-semibold`}>
                       {(() => {
                         const itemWeight = it.weight !== undefined && it.weight !== null
                           ? it.weight
@@ -385,12 +385,12 @@ export const SaleProceedPrintModal: React.FC<SaleProceedPrintModalProps> = ({
                     &nbsp;
                   </td>
                   <td
-                    className={`border-r border-black ${tablePad} text-right font-bold leading-tight ${totalQtyRowFont} text-slate-950 dark:text-slate-950 print:text-black break-words`}
+                    className={`border-r border-black ${tablePad} text-right font-bold leading-tight ${totalQtyRowFont} text-slate-950 dark:text-slate-950 print:text-black ${isB7 ? 'whitespace-nowrap box-border' : 'break-words'}`}
                   >
                     <span className="font-mono font-black tabular-nums">{totalQty}</span>
                   </td>
                   <td
-                    className={`border-r border-black ${tablePad} text-right font-bold leading-tight ${totalQtyRowFont} text-slate-950 dark:text-slate-950 print:text-black break-words`}
+                    className={`border-r border-black ${tablePad} text-right font-bold leading-tight ${totalQtyRowFont} text-slate-950 dark:text-slate-950 print:text-black ${isB7 ? 'whitespace-nowrap box-border' : 'break-words'}`}
                   >
                     <span className="font-mono font-black tabular-nums">{totalWeight > 0 ? totalWeight : 0}</span>
                   </td>

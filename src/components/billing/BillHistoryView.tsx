@@ -414,24 +414,34 @@ export const BillHistoryView: React.FC<BillHistoryViewProps> = ({
                   const blankRows = Math.max(0, (isB7 ? 1 : isB6 ? 3 : 6) - selectedBillForPreview.items.length - 1);
 
                   return (
-                    <table className={`w-full border-collapse border border-black ${tableBodyFont}`}>
+                    <table className={`w-full border-collapse border border-black ${isB7 ? 'max-w-full table-fixed box-border b7-bill-table' : ''} ${tableBodyFont}`}>
+                      {isB7 && (
+                        <colgroup>
+                          <col style={{ width: '9%' }} />
+                          <col style={{ width: '26%' }} />
+                          <col style={{ width: '20%' }} />
+                          <col style={{ width: '16%' }} />
+                          <col style={{ width: '13%' }} />
+                          <col style={{ width: '16%' }} />
+                        </colgroup>
+                      )}
                       <thead>
                         <tr className={`border-b border-black font-bold uppercase ${tableHeadFont} bg-slate-50 print:bg-transparent`}>
-                          <th className={`border-r border-black ${tablePad} text-center ${colWidths.no}`}>No.</th>
-                          <th className={`border-r border-black ${tablePad} text-left`}>ITEM NAME</th>
-                          <th className={`border-r border-black ${tablePad} text-right ${colWidths.qty}`}>QTY</th>
-                          <th className={`border-r border-black ${tablePad} text-right ${colWidths.weight}`}>WEIGHT</th>
-                          <th className={`border-r border-black ${tablePad} text-right ${colWidths.price}`}>PRICE</th>
-                          <th className={`${tablePad} text-right ${colWidths.amount}`}>AMOUNT</th>
+                          <th className={`border-r border-black ${tablePad} text-center ${isB7 ? 'box-border tracking-tight whitespace-nowrap' : colWidths.no}`}>No.</th>
+                          <th className={`border-r border-black ${tablePad} text-left ${isB7 ? 'box-border' : ''}`}>ITEM NAME</th>
+                          <th className={`border-r border-black ${tablePad} text-right ${isB7 ? 'box-border whitespace-nowrap' : colWidths.qty}`}>QTY</th>
+                          <th className={`border-r border-black ${tablePad} text-right ${isB7 ? 'box-border tracking-tight whitespace-nowrap' : colWidths.weight}`}>WEIGHT</th>
+                          <th className={`border-r border-black ${tablePad} text-right ${isB7 ? 'box-border whitespace-nowrap' : colWidths.price}`}>PRICE</th>
+                          <th className={`${tablePad} text-right ${isB7 ? 'box-border whitespace-nowrap' : colWidths.amount}`}>AMOUNT</th>
                         </tr>
                       </thead>
                       <tbody>
                         {selectedBillForPreview.items.map((it, idx) => (
                           <tr key={it.id || idx} className="border-b border-black/40 print:text-black">
-                            <td className={`border-r border-black ${tablePad} text-center font-mono print:font-semibold print:text-black`}>{idx + 1}</td>
+                            <td className={`border-r border-black ${tablePad} ${isB7 ? 'box-border whitespace-nowrap tabular-nums' : ''} text-center font-mono print:font-semibold print:text-black`}>{idx + 1}</td>
                             <td className={`border-r border-black ${tablePad} font-semibold print:font-bold uppercase print:text-black`}>{it.fruitName}</td>
                             <td className={`border-r border-black ${tablePad} text-right font-mono print:font-semibold print:text-black`}>{it.quantity}</td>
-                            <td className={`border-r border-black ${tablePad} text-right font-mono print:font-semibold print:text-black`}>
+                            <td className={`border-r border-black ${tablePad} ${isB7 ? 'box-border whitespace-nowrap tabular-nums' : ''} text-right font-mono print:font-semibold print:text-black`}>
                               {it.unit === 'KG' ? `${it.quantity} KG` : ''}
                             </td>
                             <td className={`border-r border-black ${tablePad} text-right font-mono print:font-semibold print:text-black`}>
