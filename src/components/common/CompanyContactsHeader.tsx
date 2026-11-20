@@ -82,10 +82,13 @@ export const CompanyContactsHeader: React.FC<CompanyContactsHeaderProps> = ({
 
   return (
     <div
-      className={`flex flex-wrap items-center ${alignClasses} gap-x-2 gap-y-0.5 leading-snug ${className}`}
+      className={`print-business-header-contacts flex flex-wrap items-center ${alignClasses} gap-x-1.5 gap-y-0.5 leading-snug ${className}`}
     >
       {entries.map((entry, idx) => (
-        <React.Fragment key={entry.id}>
+        <span
+          key={entry.id}
+          className="inline-flex items-center gap-x-1.5 max-w-full"
+        >
           {idx > 0 && (
             <span
               className={`${itemClassName ? 'text-slate-800 font-semibold' : 'text-slate-400 font-normal'} print:text-black select-none`}
@@ -99,7 +102,7 @@ export const CompanyContactsHeader: React.FC<CompanyContactsHeaderProps> = ({
           >
             {entry.text}
           </span>
-        </React.Fragment>
+        </span>
       ))}
     </div>
   );

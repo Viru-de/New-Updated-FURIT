@@ -482,7 +482,7 @@ input.no-spinners {
    ========================================================================= */
 @media print {
   @page {
-    margin: 2mm 4mm 3mm 4mm;
+    margin: 1mm 4mm 3mm 4mm;
   }
 
   /* Universal reset for print medium: Force pure white page, black text, and light color-scheme */
@@ -492,7 +492,8 @@ input.no-spinners {
   body.dark,
   .dark,
   [data-theme="dark"],
-  #root {
+  #root,
+  .min-h-screen {
     background-color: #ffffff !important;
     background: #ffffff !important;
     color: #000000 !important;
@@ -745,7 +746,19 @@ input.no-spinners {
     visibility: visible !important;
   }
 
-  /* Preserve two-column left/right alignment of shared PrintBusinessHeader in all print contexts */
+  /* Preserve two-column left/right alignment and zero top spacing of shared PrintBusinessHeader in all print contexts */
+  #ledger-print-area > div:first-child,
+  #crate-statement-print-area > div:first-child,
+  #report-print-area > div:first-child,
+  #sale-proceeds-print-area > div:first-child,
+  #sale-proceeds-short-print-area > div:first-child,
+  #customer-ledger-detailed-print-area > div:first-child,
+  #customer-ledger-short-print-area > div:first-child,
+  #group-sale-print-summary > div:first-child,
+  #erp-isolated-print-mount > * {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+  }
   .print-business-header,
   .fixed.inset-0:not(.no-print):not(.print\:hidden) .print-business-header,
   #erp-isolated-print-mount .print-business-header {
@@ -753,16 +766,26 @@ input.no-spinners {
     align-items: center !important;
     justify-content: space-between !important;
     width: 100% !important;
+    margin-top: 0 !important;
     padding-top: 0 !important;
+    gap: 12px !important;
   }
   .print-business-header .print-business-header-left,
   .fixed.inset-0:not(.no-print):not(.print\:hidden) .print-business-header .print-business-header-left,
   #erp-isolated-print-mount .print-business-header .print-business-header-left {
     display: flex !important;
     align-items: center !important;
-    flex: 1 1 0% !important;
+    flex: 1 1 52% !important;
     min-width: 0 !important;
     text-align: left !important;
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+  }
+  .print-business-header .print-business-header-left img,
+  #erp-isolated-print-mount .print-business-header .print-business-header-left img {
+    display: block !important;
+    flex-shrink: 0 !important;
+    margin: 0 !important;
   }
   .print-business-header .print-business-header-text,
   .fixed.inset-0:not(.no-print):not(.print\:hidden) .print-business-header .print-business-header-text,
@@ -771,6 +794,17 @@ input.no-spinners {
     flex: 1 1 0% !important;
     min-width: 0 !important;
     text-align: left !important;
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+  }
+  .print-business-header .print-business-header-text > :first-child,
+  #erp-isolated-print-mount .print-business-header .print-business-header-text > :first-child {
+    margin-top: 0 !important;
+  }
+  .print-business-header .print-business-header-text h1,
+  #erp-isolated-print-mount .print-business-header .print-business-header-text h1 {
+    margin-bottom: 0 !important;
+    padding: 0 !important;
   }
   .print-business-header .print-business-header-right,
   .fixed.inset-0:not(.no-print):not(.print\:hidden) .print-business-header .print-business-header-right,
@@ -779,8 +813,22 @@ input.no-spinners {
     flex-direction: column !important;
     align-items: flex-end !important;
     justify-content: center !important;
-    flex-shrink: 0 !important;
+    flex: 0 1 48% !important;
+    max-width: 48% !important;
+    min-width: 0 !important;
     text-align: right !important;
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+  }
+  .print-business-header .print-business-header-contacts,
+  .fixed.inset-0:not(.no-print):not(.print\:hidden) .print-business-header .print-business-header-contacts,
+  #erp-isolated-print-mount .print-business-header .print-business-header-contacts {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    text-align: right !important;
+    width: 100% !important;
   }
 
   /* Multi-page statements, ledgers, summaries, and reports */
@@ -816,11 +864,15 @@ input.no-spinners {
     break-before: avoid !important;
   }
 
-  /* Bill print containers must have zero outer top line above company header */
+  /* Bill print containers must have zero outer top line and minimal top padding above company header */
+  #mandi-print-area,
+  #receipt-print-area,
   #mandi-print-area.bill-outer-frame,
   #erp-isolated-print-mount #mandi-print-area.bill-outer-frame,
-  #erp-isolated-print-mount #mandi-print-area {
+  #erp-isolated-print-mount #mandi-print-area,
+  #erp-isolated-print-mount #receipt-print-area {
     border: none !important;
+    margin-top: 0 !important;
     padding: 0mm 2mm 1mm 2mm !important;
   }
 

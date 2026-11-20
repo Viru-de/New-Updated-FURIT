@@ -102,11 +102,11 @@ export function applyPrintPageSize(size: BillPaperSize = 'a5', targetElementId?:
   }
 
   const margins: Record<BillPaperSize, string> = {
-    b7: '1.5mm 3.5mm 2mm 3.5mm',
-    b6: '1.5mm 4mm 2.5mm 4mm',
-    a5: '1.5mm 4mm 2mm 4mm',
-    compact: '1.5mm 4mm 2.5mm 4mm',
-    a4: '2mm 5mm 4mm 5mm',
+    b7: '1mm 3.5mm 2mm 3.5mm',
+    b6: '1mm 4mm 2.5mm 4mm',
+    a5: '1mm 4mm 2mm 4mm',
+    compact: '1mm 4mm 2.5mm 4mm',
+    a4: '1.5mm 5mm 3.5mm 5mm',
   };
   const margin = margins[size] || margins.a5;
 
@@ -244,6 +244,12 @@ export async function triggerPrint(
       ? '0mm 2.5mm 1.5mm 2.5mm'
       : '0mm 2.5mm 2mm 2.5mm';
   clone.style.padding = safePad;
+  clone.style.paddingTop = '0mm';
+  clone.style.marginTop = '0';
+  if (clone.firstElementChild instanceof HTMLElement) {
+    clone.firstElementChild.style.marginTop = '0';
+    clone.firstElementChild.style.paddingTop = '0';
+  }
   clone.style.overflow = 'visible';
   clone.style.backgroundColor = '#ffffff';
   clone.style.color = '#000000';
@@ -456,8 +462,13 @@ export async function generatePdfDoc(
         clonedElement.style.color = '#000000';
         clonedElement.style.border = 'none';
         clonedElement.style.boxShadow = 'none';
-        // Keep safe compact PDF top margin without excessive whitespace
-        clonedElement.style.paddingTop = paperSize === 'a4' ? '6px' : '4px';
+        // Keep safe compact PDF top margin without excessive whitespace or clipping
+        clonedElement.style.marginTop = '0';
+        clonedElement.style.paddingTop = paperSize === 'a4' ? '4px' : '3px';
+        if (clonedElement.firstElementChild instanceof HTMLElement) {
+          clonedElement.firstElementChild.style.marginTop = '0';
+          clonedElement.firstElementChild.style.paddingTop = '0';
+        }
 
         // Strip dark variant classes from all cloned elements
         const allClonedNodes = [clonedElement, ...Array.from(clonedElement.querySelectorAll('*'))];
@@ -475,11 +486,15 @@ export async function generatePdfDoc(
         });
 
         // 1. Unhide any print-only headers (such as statement and report headers) so they appear in PDFs
-        const printBlocks = clonedElement.querySelectorAll('.print\\:block, [class*="print:block"], .hidden');
+        const printBlocks = clonedElement.querySelectorAll('.print\\:block, [class*="print:block"], [class*="print:flex"], .hidden');
         printBlocks.forEach((el) => {
           const htmlEl = el as HTMLElement;
           htmlEl.classList.remove('hidden');
-          htmlEl.style.display = 'block';
+          if (htmlEl.classList.contains('print:flex') || htmlEl.className.includes('print:flex')) {
+            htmlEl.style.display = 'flex';
+          } else {
+            htmlEl.style.display = 'block';
+          }
           htmlEl.style.visibility = 'visible';
         });
 

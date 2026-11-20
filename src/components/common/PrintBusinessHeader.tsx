@@ -118,33 +118,39 @@ export const PrintBusinessHeader: React.FC<PrintBusinessHeaderProps> = ({
 
   return (
     <div
-      className={`print-business-header flex items-center justify-between border-b border-black pt-0 ${
+      className={`print-business-header flex items-center justify-between border-b border-black mt-0 pt-0 ${
         isB7
-          ? 'gap-1.5 pb-1 mb-0.5'
-          : isA5Bill
+          ? 'gap-2 pb-1 mb-0.5'
+          : isB6
           ? 'gap-2.5 pb-1 mb-0.5'
-          : 'gap-3 sm:gap-4 pb-1.5 mb-1'
+          : isA5Bill
+          ? 'gap-3 pb-1 mb-0.5'
+          : 'gap-4 sm:gap-5 pb-1.5 mb-1'
       } ${className}`}
     >
-      {/* LEFT SIDE: HFC Logo (if present) + Short Code + Bold English Name + Hindi Name */}
-      <div className={`print-business-header-left flex items-center min-w-0 flex-1 text-left ${isB7 ? 'gap-1.5' : 'gap-2 sm:gap-2.5'}`}>
+      {/* LEFT SIDE: Logo (if present) + Short Code + English Name + Hindi Name */}
+      <div
+        className={`print-business-header-left flex items-center min-w-0 flex-1 text-left m-0 p-0 ${
+          isB7 ? 'gap-1.5' : isA5Bill ? 'gap-2' : 'gap-2.5 sm:gap-3'
+        }`}
+      >
         {logoSrc && (
           <img
             src={logoSrc}
             alt={shortLabel || englishName || 'Company Logo'}
-            className={`shrink-0 object-contain rounded-full ${logoSizeClass}`}
+            className={`block shrink-0 object-contain rounded-full m-0 ${logoSizeClass}`}
           />
         )}
-        <div className="print-business-header-text min-w-0 flex-1 text-left">
+        <div className="print-business-header-text min-w-0 flex-1 text-left m-0 p-0">
           {showShortLabel && (
-            <div className={`font-black uppercase text-black leading-none ${shortClass}`}>
+            <div className={`font-black uppercase text-black leading-none m-0 p-0 ${shortClass}`}>
               {shortLabel}
             </div>
           )}
 
           {englishName && (
             <h1
-              className={`font-black uppercase tracking-wide text-black leading-tight break-words ${
+              className={`font-black uppercase tracking-wide text-black leading-[1.15] m-0 p-0 break-words ${
                 showShortLabel ? 'mt-0.5' : 'mt-0'
               } ${englishClass}`}
             >
@@ -154,7 +160,7 @@ export const PrintBusinessHeader: React.FC<PrintBusinessHeaderProps> = ({
 
           {hindiName && (
             <div
-              className={`font-bold tracking-wide font-devanagari text-black leading-tight mt-0.5 break-words ${hindiClass}`}
+              className={`font-bold tracking-wide font-devanagari text-black leading-tight m-0 p-0 mt-0.5 break-words ${hindiClass}`}
             >
               {hindiName}
             </div>
@@ -164,12 +170,12 @@ export const PrintBusinessHeader: React.FC<PrintBusinessHeaderProps> = ({
 
       {/* RIGHT SIDE: Complete Address + Contact Details */}
       <div
-        className={`print-business-header-right shrink-0 text-right flex flex-col items-end justify-center ${
-          isB7 ? 'max-w-[46%]' : 'max-w-[45%]'
+        className={`print-business-header-right shrink-0 text-right flex flex-col items-end justify-center min-w-0 m-0 p-0 ${
+          isB7 ? 'max-w-[46%]' : isB6 ? 'max-w-[47%]' : 'max-w-[48%]'
         }`}
       >
         {addressLine && (
-          <div className={`font-semibold text-black leading-snug text-right break-words ${addressClass}`}>
+          <div className={`font-semibold text-black leading-snug text-right break-words m-0 p-0 w-full ${addressClass}`}>
             {addressLine}
           </div>
         )}
@@ -177,7 +183,7 @@ export const PrintBusinessHeader: React.FC<PrintBusinessHeaderProps> = ({
         <CompanyContactsHeader
           profile={profile}
           align="right"
-          className="mt-0.5"
+          className="mt-0.5 w-full"
           itemClassName={contactClass}
         />
       </div>
