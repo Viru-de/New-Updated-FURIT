@@ -133,6 +133,7 @@ export const ReceiptPrintModal: React.FC<ReceiptPrintModalProps> = ({
         <div className="flex-1 min-h-0 overflow-y-auto overflow-x-auto p-3 sm:p-6 flex justify-center items-start bg-slate-100 dark:bg-slate-950">
           <div
             id="receipt-print-area"
+            data-paper-size={pageSize}
             data-theme-isolated="true"
             className={`bg-white text-slate-900 border border-slate-300 print:border-none print:shadow-none print:p-0 print:m-0 box-border shadow-sm print-bill-canvas ${
               pageSize === 'a4'
@@ -140,9 +141,9 @@ export const ReceiptPrintModal: React.FC<ReceiptPrintModalProps> = ({
                 : pageSize === 'a5'
                 ? 'max-w-[550px] w-full text-[10.5px] pt-0.5 px-3 pb-3 sm:pt-1 sm:px-3.5 sm:pb-4'
                 : pageSize === 'b6'
-                ? 'max-w-[430px] w-full text-[10px] pt-1.5 px-2.5 pb-2.5 sm:px-3'
+                ? 'max-w-[430px] w-full text-[10px] pt-1 px-2.5 pb-1.5 sm:px-3'
                 : pageSize === 'b7'
-                ? 'max-w-[300px] w-full text-[8.5px] pt-1.5 px-2 pb-2'
+                ? 'max-w-[300px] w-full text-[8.5px] pt-0.5 px-1.5 pb-1'
                 : 'max-w-[490px] w-full text-[11px] pt-0.5 px-3.5 pb-3 sm:pt-1 sm:px-4 sm:pb-4'
             }`}
             style={{ fontFamily: "'Plus Jakarta Sans', 'Noto Sans Devanagari', Arial, sans-serif" }}
@@ -155,14 +156,14 @@ export const ReceiptPrintModal: React.FC<ReceiptPrintModalProps> = ({
             />
 
             {/* Document Title */}
-            <div className={`text-center ${pageSize === 'b7' ? 'my-1' : pageSize === 'b6' ? 'my-2' : 'my-3'}`}>
+            <div className={`text-center ${pageSize === 'b7' ? 'my-0.5' : pageSize === 'b6' ? 'my-1' : 'my-3'}`}>
               <span className={`font-bold uppercase tracking-widest border-b-2 border-slate-900 print:border-black pb-0.5 ${pageSize === 'b7' ? 'text-[9px]' : 'text-xs'}`}>
                 PAYMENT / CASH RECEIPT
               </span>
             </div>
 
             {/* Receipt Meta */}
-            <div className={`flex justify-between items-start ${pageSize === 'b7' ? 'text-[8.5px] print:text-[9.5px] mb-1.5 pb-1' : pageSize === 'b6' ? 'text-[9.5px] print:text-[11px] mb-2 pb-1.5' : 'text-xs print:text-[13.5px] mb-3 pb-2'} border-b border-slate-200 print:border-black/40`}>
+            <div className={`flex justify-between items-start ${pageSize === 'b7' ? 'text-[8.5px] print:text-[9.5px] mb-1 pb-0.5' : pageSize === 'b6' ? 'text-[9.5px] print:text-[11px] mb-1.5 pb-1' : 'text-xs print:text-[13.5px] mb-3 pb-2'} border-b border-slate-200 print:border-black/40`}>
               <div>
                 <span className="text-slate-500 print:text-black print:font-semibold">Receipt No: </span>
                 <strong className="font-mono text-slate-900 print:text-black">{receipt.receiptNo}</strong>
@@ -234,7 +235,7 @@ export const ReceiptPrintModal: React.FC<ReceiptPrintModalProps> = ({
             </div>
 
             {/* Signature Footer */}
-            <div className={`${pageSize === 'b7' ? 'mt-2 text-[8.5px] print:text-[9.5px]' : pageSize === 'b6' ? 'mt-3.5 text-[9.5px] print:text-[10.5px]' : 'mt-6 text-xs print:text-[12.5px]'} flex justify-between items-end`}>
+            <div className={`${pageSize === 'b7' ? 'mt-1.5 text-[8.5px] print:text-[9.5px]' : pageSize === 'b6' ? 'mt-2.5 text-[9.5px] print:text-[10.5px]' : 'mt-6 text-xs print:text-[12.5px]'} flex justify-between items-end`}>
               <div className="text-center">
                 <div className={`${pageSize === 'b7' ? 'w-20' : 'w-28'} border-b border-slate-400 print:border-black mb-1`}></div>
                 <span className={`${pageSize === 'b7' ? 'text-[8px] print:text-[9px]' : 'text-[10px] print:text-[11px]'} text-slate-500 print:text-black print:font-semibold`}>Customer Signature</span>
@@ -248,7 +249,7 @@ export const ReceiptPrintModal: React.FC<ReceiptPrintModalProps> = ({
             </div>
 
             {/* Software Footer */}
-            <div className={`${pageSize === 'b7' ? 'mt-1.5 pt-0.5 text-[7px]' : 'mt-4 pt-1 text-[8px] sm:text-[8.5px]'} border-t border-dotted border-slate-300 print:border-black/30 text-left text-slate-500 print:text-black font-mono`}>
+            <div className={`${pageSize === 'b7' ? 'mt-1 pt-0.5 text-[7px]' : pageSize === 'b6' ? 'mt-2 pt-0.5 text-[7.5px]' : 'mt-4 pt-1 text-[8px] sm:text-[8.5px]'} border-t border-dotted border-slate-300 print:border-black/30 text-left text-slate-500 print:text-black font-mono`}>
               Software Developed by: {currentProfile.softwareDevelopedBy || 'Klyia Technology'}
             </div>
           </div>

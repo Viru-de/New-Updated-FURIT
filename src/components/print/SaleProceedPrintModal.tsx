@@ -240,6 +240,7 @@ export const SaleProceedPrintModal: React.FC<SaleProceedPrintModalProps> = ({
         <div className="flex-1 min-h-0 overflow-y-auto overflow-x-auto p-3 sm:p-6 bg-slate-100 dark:bg-slate-950">
           <div
             id="mandi-print-area"
+            data-paper-size={pageSize}
             data-theme-isolated="true"
             className={`mx-auto bg-white text-slate-900 font-sans leading-tight border border-slate-200 print:border-none print:p-0 print:m-0 box-border shadow-md print-bill-canvas sale-proceed-print-canvas overflow-visible ${
               pageSize === 'a4'
@@ -247,9 +248,9 @@ export const SaleProceedPrintModal: React.FC<SaleProceedPrintModalProps> = ({
                 : pageSize === 'a5'
                 ? 'max-w-[550px] w-full text-[10px] pt-0.5 px-2.5 pb-1.5 sm:pt-1 sm:px-3 sm:pb-2'
                 : pageSize === 'b6'
-                ? 'max-w-[430px] w-full text-[10px] pt-1.5 px-2.5 pb-2 sm:px-3'
+                ? 'max-w-[430px] w-full text-[10px] pt-1 px-2.5 pb-1.5 sm:px-3'
                 : pageSize === 'b7'
-                ? 'max-w-[300px] w-full text-[8.5px] pt-1.5 px-2 pb-1.5'
+                ? 'max-w-[300px] w-full text-[8.5px] pt-0.5 px-1.5 pb-1'
                 : 'max-w-[490px] w-full text-[11px] pt-0.5 px-3 pb-2 sm:pt-1 sm:px-3.5 sm:pb-2.5'
             }`}
             style={{ fontFamily: "'Plus Jakarta Sans', 'Noto Sans Devanagari', Arial, sans-serif", boxSizing: 'border-box' }}
@@ -262,7 +263,7 @@ export const SaleProceedPrintModal: React.FC<SaleProceedPrintModalProps> = ({
             />
 
             {/* Document Title */}
-            <div className={`text-center ${isB7 || isA5 ? 'my-0.5' : 'my-1'}`}>
+            <div className={`text-center ${isB7 || isB6 || isA5 ? 'my-0.5' : 'my-1'}`}>
               <span className={`font-bold uppercase tracking-widest border-b border-black pb-0.5 ${isB7 ? 'text-[9px]' : isA5 ? 'text-[11px] sm:text-xs print:text-[11.5px]' : 'text-xs sm:text-sm'}`}>
                 SALE PROCEED
               </span>
@@ -291,7 +292,7 @@ export const SaleProceedPrintModal: React.FC<SaleProceedPrintModalProps> = ({
             </div>
 
             {/* Challan Date centred below */}
-            <div className={`text-center ${isB7 ? 'text-[8px] my-0.5' : isA5 ? 'text-[10px] my-0.5' : 'text-[11px] print:text-[11.5px] my-1'} font-medium text-black`}>
+            <div className={`text-center ${isB7 ? 'text-[8px] my-0.5' : isB6 || isA5 ? 'text-[10px] my-0.5' : 'text-[11px] print:text-[11.5px] my-1'} font-medium text-black`}>
               Challan DT: <strong>{formatDate(proceeds.challanDate || proceeds.date)}</strong>
             </div>
 
@@ -404,7 +405,7 @@ export const SaleProceedPrintModal: React.FC<SaleProceedPrintModalProps> = ({
                 <tr className="border-t border-black">
                   {/* Left Bottom Section: E & O.E. + Expenses List */}
                   <td colSpan={isB7 ? 3 : 4} className={`border-r border-black ${tablePad} align-top`}>
-                    <div className={`flex flex-col justify-between h-full ${isA5 ? 'min-h-[34px] gap-0.5' : 'min-h-[50px] gap-1'}`}>
+                    <div className={`flex flex-col justify-between h-full ${isB7 ? 'min-h-[28px] gap-0.5' : isB6 ? 'min-h-[34px] gap-0.5' : isA5 ? 'min-h-[34px] gap-0.5' : 'min-h-[50px] gap-1'}`}>
                       <div className={`${isB7 ? 'text-[7.5px] print:text-[8.5px]' : isA5 ? 'text-[9px] print:text-[9px]' : 'text-[10px] print:text-[11px]'} font-bold text-slate-950 dark:text-slate-950 print:text-black`}>* E & O.E.</div>
 
                       {/* Listed Individual Expenses */}
@@ -461,7 +462,7 @@ export const SaleProceedPrintModal: React.FC<SaleProceedPrintModalProps> = ({
               className="bill-bottom-footer"
               style={{ breakInside: 'avoid', pageBreakInside: 'avoid' }}
             >
-              <div className={`${isA5 ? 'mt-1 pt-0.5 text-[9.5px] print:text-[9.5px]' : `mt-1.5 pt-1 ${isB7 ? 'text-[7.5px] print:text-[8.5px]' : isB6 ? 'text-[9.5px] print:text-[10.5px]' : 'text-xs print:text-[12px]'}`} flex justify-between items-end gap-2 text-slate-950 dark:text-slate-950 print:text-black`}>
+              <div className={`${isB7 || isB6 || isA5 ? `mt-0.5 pt-0.5 ${isB7 ? 'text-[7.5px] print:text-[8.5px]' : isB6 ? 'text-[9.5px] print:text-[10.5px]' : 'text-[9.5px] print:text-[9.5px]'}` : 'mt-1.5 pt-1 text-xs print:text-[12px]'} flex justify-between items-end gap-2 text-slate-950 dark:text-slate-950 print:text-black`}>
                 {/* Amount in words */}
                 <div className="font-bold italic min-w-0 max-w-[60%] break-words leading-tight text-slate-950 dark:text-slate-950 print:text-black">
                   {words}
@@ -474,7 +475,7 @@ export const SaleProceedPrintModal: React.FC<SaleProceedPrintModalProps> = ({
               </div>
 
               {/* Software attribution */}
-              <div className={`${isA5 ? 'mt-1 pt-0.5 text-[7.5px] print:text-[8px]' : `mt-1.5 pt-0.5 ${isB7 ? 'text-[7px]' : 'text-[8px] sm:text-[8.5px]'}`} border-t border-dotted border-black/40 text-left text-slate-700 dark:text-slate-700 print:text-black font-mono break-words`}>
+              <div className={`${isB7 || isB6 || isA5 ? `mt-0.5 pt-0.5 ${isB7 ? 'text-[7px]' : 'text-[7.5px] print:text-[8px]'}` : 'mt-1.5 pt-0.5 text-[8px] sm:text-[8.5px]'} border-t border-dotted border-black/40 text-left text-slate-700 dark:text-slate-700 print:text-black font-mono break-words`}>
                 Software Developed by: {currentProfile.softwareDevelopedBy || 'Klyia Technology'}
               </div>
             </div>

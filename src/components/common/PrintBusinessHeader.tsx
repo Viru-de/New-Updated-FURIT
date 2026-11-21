@@ -64,9 +64,9 @@ export const PrintBusinessHeader: React.FC<PrintBusinessHeaderProps> = ({
     : !isBill
     ? 'text-[13px] sm:text-[14px] print:text-[13.5px] tracking-[0.18em]'
     : isB7
-    ? 'text-[12px] print:text-[12px] tracking-[0.12em]'
+    ? 'text-[12px] print:text-[12px] tracking-[0.10em]'
     : isB6
-    ? 'text-[14px] print:text-[14.5px] tracking-[0.14em]'
+    ? 'text-[14px] print:text-[14.5px] tracking-[0.12em]'
     : isA5Bill
     ? 'text-[17px] sm:text-[18px] print:text-[17.5px] tracking-[0.14em]'
     : isA4Bill
@@ -127,14 +127,12 @@ export const PrintBusinessHeader: React.FC<PrintBusinessHeaderProps> = ({
         className={`print-business-header ${
           isLedgerCentered
             ? 'print-business-header--ledger-centered pb-1.5 mb-1 pt-1'
-            : 'print-business-header--bill pb-1 mb-0.5 pt-1'
+            : `print-business-header--bill ${isB7 ? 'pb-0.5 mb-0.5' : 'pb-1 mb-0.5'} pt-0`
         } text-center border-b border-black mt-0 ${className}`}
       >
         {showShortLabel && (
           <div
-            className={`print-business-short-name font-black text-slate-950 dark:text-slate-950 uppercase print:text-black leading-snug ${
-              isLedgerCentered ? 'pt-[2px]' : 'pt-[1px]'
-            } m-0 px-0 pb-0 ${shortClass}`}
+            className={`print-business-short-name font-black text-slate-950 dark:text-slate-950 uppercase print:text-black leading-[1.22] break-words overflow-visible pt-[2px] m-0 px-0 pb-0 ${shortClass}`}
           >
             {shortLabel}
           </div>

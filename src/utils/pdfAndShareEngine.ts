@@ -102,8 +102,8 @@ export function applyPrintPageSize(size: BillPaperSize = 'a5', targetElementId?:
   }
 
   const margins: Record<BillPaperSize, string> = {
-    b7: '3mm 3.5mm 2mm 3.5mm',
-    b6: '3mm 4mm 2.5mm 4mm',
+    b7: '1.5mm 2.5mm 1.5mm 2.5mm',
+    b6: '2mm 3mm 2mm 3mm',
     a5: '2mm 4mm 2mm 4mm',
     compact: '2mm 4mm 2.5mm 4mm',
     a4: '3mm 5mm 3.5mm 5mm',
@@ -235,9 +235,9 @@ export async function triggerPrint(
   // Provide print-safe internal padding so content never cuts at physical sheet boundaries
   const safePad =
     chosenSize === 'b7'
-      ? '1.5mm 2mm 1mm 2mm'
+      ? '0.5mm 1mm 0.5mm 1mm'
       : chosenSize === 'b6'
-      ? '1.5mm 2mm 1.5mm 2mm'
+      ? '0.5mm 1.5mm 1mm 1.5mm'
       : chosenSize === 'a5'
       ? '1mm 2mm 1mm 2mm'
       : chosenSize === 'compact'
@@ -459,12 +459,19 @@ export async function generatePdfDoc(
         clonedElement.style.border = 'none';
         clonedElement.style.boxShadow = 'none';
         clonedElement.style.overflow = 'visible';
-        // Keep safe compact PDF top margin without clipping Company Short Name
+        // Keep safe compact PDF margins without clipping Company Short Name
         clonedElement.style.marginTop = '0';
         clonedElement.style.paddingTop =
-          paperSize === 'b7' || paperSize === 'b6'
-            ? '10px'
-            : '8px';
+          paperSize === 'b7' ? '4px' : paperSize === 'b6' ? '5px' : '8px';
+        if (paperSize === 'b7') {
+          clonedElement.style.paddingLeft = '5px';
+          clonedElement.style.paddingRight = '5px';
+          clonedElement.style.paddingBottom = '4px';
+        } else if (paperSize === 'b6') {
+          clonedElement.style.paddingLeft = '7px';
+          clonedElement.style.paddingRight = '7px';
+          clonedElement.style.paddingBottom = '6px';
+        }
 
         // Strip dark variant classes from all cloned elements
         const allClonedNodes = [clonedElement, ...Array.from(clonedElement.querySelectorAll('*'))];
@@ -552,9 +559,8 @@ export async function generatePdfDoc(
 
     let pageCount = 1;
 
-    // Case 1: Fits cleanly on a single page
-    // For small-format bills (B7: 88x125mm, B6: 125x176mm), allow 6% sub-pixel rounding tolerance
-    const singlePageTolerance = paperSize === 'b7' || paperSize === 'b6' ? 1.06 : 1.04;
+    // Case 1: Fits cleanly on a single page (allow minor sub-pixel tolerance without distorting layout)
+    const singlePageTolerance = paperSize === 'b7' || paperSize === 'b6' ? 1.03 : 1.04;
     if (totalContentHeightMm <= pageHeightMm * singlePageTolerance) {
       const fitHeightMm = Math.min(totalContentHeightMm, pageHeightMm);
       const imgData = canvas.toDataURL('image/jpeg', 0.95);

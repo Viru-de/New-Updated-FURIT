@@ -320,6 +320,7 @@ export const BillHistoryView: React.FC<BillHistoryViewProps> = ({
             <div className="p-4 sm:p-6 overflow-x-auto flex justify-center bg-slate-100 dark:bg-slate-950">
               <div
                 id="mandi-print-area"
+                data-paper-size={pageSize}
                 data-theme-isolated="true"
                 className={`bg-white text-slate-900 font-sans leading-tight border border-slate-300 print:border-none print:shadow-none print:p-0 print:m-0 box-border shadow-md print-bill-canvas ${
                   pageSize === 'a4'
@@ -327,9 +328,9 @@ export const BillHistoryView: React.FC<BillHistoryViewProps> = ({
                     : pageSize === 'a5'
                     ? 'max-w-[550px] w-full text-[10.5px] pt-0.5 px-3 pb-3 sm:pt-1 sm:px-3.5 sm:pb-4'
                     : pageSize === 'b6'
-                    ? 'max-w-[430px] w-full text-[10px] pt-1.5 px-2.5 pb-2.5 sm:px-3'
+                    ? 'max-w-[430px] w-full text-[10px] pt-1 px-2.5 pb-1.5 sm:px-3'
                     : pageSize === 'b7'
-                    ? 'max-w-[300px] w-full text-[8.5px] pt-1.5 px-2 pb-2'
+                    ? 'max-w-[300px] w-full text-[8.5px] pt-0.5 px-1.5 pb-1'
                     : 'max-w-[490px] w-full text-[11px] pt-0.5 px-3.5 pb-3 sm:pt-1 sm:px-4 sm:pb-4'
                 }`}
                 style={{ fontFamily: "'Plus Jakarta Sans', 'Noto Sans Devanagari', Arial, sans-serif" }}
@@ -350,18 +351,20 @@ export const BillHistoryView: React.FC<BillHistoryViewProps> = ({
                 })()}
 
                 {/* Document Title */}
-                <div className={`text-center ${pageSize === 'b7' ? 'my-1' : 'my-2'}`}>
+                <div className={`text-center ${pageSize === 'b7' || pageSize === 'b6' ? 'my-0.5' : 'my-2'}`}>
                   <span className={`font-bold uppercase tracking-widest border-b border-black pb-0.5 ${pageSize === 'b7' ? 'text-[9px]' : 'text-sm'}`}>
                     TAX INVOICE
                   </span>
                 </div>
 
                 {/* Metadata Section */}
-                <div className={`flex justify-between items-start ${pageSize === 'b7' ? 'text-[8.5px] mb-1' : 'text-xs mb-2'} pt-1 font-medium`}>
+                <div className={`flex justify-between items-start ${pageSize === 'b7' ? 'text-[8.5px] mb-0.5 pt-0.5' : pageSize === 'b6' ? 'text-xs mb-1 pt-0.5' : 'text-xs mb-2 pt-1'} font-medium`}>
                   {/* Left Side: M/s. Customer Name & Inline Contact */}
                   <div className="max-w-[65%]">
-                    <div className="font-bold text-slate-500 print:text-black">M/s.</div>
-                    <div className={`font-bold uppercase ${pageSize === 'b7' ? 'text-[9px] sm:text-[10px]' : pageSize === 'b6' ? 'text-xs' : 'text-xs sm:text-sm'}`}>{selectedBillForPreview.customerName}</div>
+                    <div className={`font-bold uppercase ${pageSize === 'b7' ? 'text-[9px] sm:text-[10px]' : pageSize === 'b6' ? 'text-xs' : 'text-xs sm:text-sm'}`}>
+                      <span className="font-bold text-slate-500 print:text-black mr-1">M/s.</span>
+                      {selectedBillForPreview.customerName}
+                    </div>
                     {(() => {
                       const cust = selectedBillForPreview.customerId ? db.getCustomerById(selectedBillForPreview.customerId) : undefined;
                       const contactText = cust ? formatCustomerContactsInline(cust) : (selectedBillForPreview.customerMobile ? `Contact: ${selectedBillForPreview.customerMobile}` : '');
@@ -501,7 +504,7 @@ export const BillHistoryView: React.FC<BillHistoryViewProps> = ({
                         <tr className="border-t-2 border-black">
                           {/* Left Bottom Section: E & O.E. + Expenses List */}
                           <td colSpan={isB7 ? 3 : 5} className={`border-r border-black ${tablePad} align-top`}>
-                            <div className="flex flex-col justify-between h-full min-h-[50px]">
+                            <div className={`flex flex-col justify-between h-full ${isB7 ? 'min-h-[28px]' : isB6 ? 'min-h-[34px]' : 'min-h-[50px]'}`}>
                               <div className={`${isB7 ? 'text-[7.5px] print:text-[8.5px]' : 'text-[10px] print:text-[11px]'} font-bold text-slate-950 dark:text-slate-950 print:text-black`}>* E & O.E.</div>
 
                               {/* Listed Individual Expenses (Freight, Hamali, etc.) */}
@@ -551,20 +554,25 @@ export const BillHistoryView: React.FC<BillHistoryViewProps> = ({
                   );
                 })()}
 
-                {/* Bottom Words & Signatory Footer */}
-                <div className={`mt-2 flex justify-between items-end ${pageSize === 'b7' ? 'text-[7.5px] print:text-[8.5px]' : pageSize === 'b6' ? 'text-[9.5px] print:text-[10.5px]' : 'text-xs print:text-[12.5px]'} pt-1 text-slate-950 dark:text-slate-950 print:text-black`}>
-                  <div className="font-bold italic max-w-[60%] leading-tight text-slate-950 dark:text-slate-950 print:text-black">
-                    {numberToWordsIndian(selectedBillForPreview.totalAmount)}
+                {/* Bottom Words & Signatory Footer kept together across page breaks */}
+                <div
+                  className="bill-bottom-footer"
+                  style={{ breakInside: 'avoid', pageBreakInside: 'avoid' }}
+                >
+                  <div className={`${pageSize === 'b7' || pageSize === 'b6' ? 'mt-1 pt-0.5' : 'mt-2 pt-1'} flex justify-between items-end ${pageSize === 'b7' ? 'text-[7.5px] print:text-[8.5px]' : pageSize === 'b6' ? 'text-[9.5px] print:text-[10.5px]' : 'text-xs print:text-[12.5px]'} text-slate-950 dark:text-slate-950 print:text-black`}>
+                    <div className="font-bold italic max-w-[60%] leading-tight text-slate-950 dark:text-slate-950 print:text-black">
+                      {numberToWordsIndian(selectedBillForPreview.totalAmount)}
+                    </div>
+
+                    <div className="text-right font-bold uppercase leading-tight text-slate-950 dark:text-slate-950 print:text-black">
+                      <div>{formatCompanySignature(selectedBillForPreview.companyProfileSnapshot)}</div>
+                    </div>
                   </div>
 
-                  <div className="text-right font-bold uppercase leading-tight text-slate-950 dark:text-slate-950 print:text-black">
-                    <div>{formatCompanySignature(selectedBillForPreview.companyProfileSnapshot)}</div>
+                  {/* Software attribution */}
+                  <div className={`${pageSize === 'b7' || pageSize === 'b6' ? `mt-0.5 pt-0.5 ${pageSize === 'b7' ? 'text-[7px]' : 'text-[7.5px]'}` : 'mt-2 pt-0.5 text-[8px] sm:text-[8.5px]'} border-t border-dotted border-black/40 text-left text-slate-700 dark:text-slate-700 print:text-black font-mono`}>
+                    Software Developed by: {selectedBillForPreview.companyProfileSnapshot?.softwareDevelopedBy || 'Klyia Technology'}
                   </div>
-                </div>
-
-                {/* Software attribution */}
-                <div className={`mt-2 pt-0.5 border-t border-dotted border-black/40 ${pageSize === 'b7' ? 'text-[7px]' : 'text-[8px] sm:text-[8.5px]'} text-left text-slate-700 dark:text-slate-700 print:text-black font-mono`}>
-                  Software Developed by: {selectedBillForPreview.companyProfileSnapshot?.softwareDevelopedBy || 'Klyia Technology'}
                 </div>
               </div>
             </div>
