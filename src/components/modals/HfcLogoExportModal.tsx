@@ -63,7 +63,7 @@ export const HfcLogoExportModal: React.FC<HfcLogoExportModalProps> = ({
                 Official HFC Logo & High-Resolution Export
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                Hari Kripa Fruit Company · Freshness. Quality. Trust.
+                HariKripa Fruit Company · Freshness. Quality. Trust.
               </p>
             </div>
           </div>
@@ -155,7 +155,7 @@ export const HfcLogoExportModal: React.FC<HfcLogoExportModalProps> = ({
             <div className="max-w-[340px] sm:max-w-[420px] transition-transform duration-200 hover:scale-[1.01]">
               <img
                 src={currentLogoSrc}
-                alt="Hari Kripa Fruit Company Official HFC Logo"
+                alt="HariKripa Fruit Company Official HFC Logo"
                 className="w-full h-auto drop-shadow-md rounded-xl select-none"
               />
             </div>

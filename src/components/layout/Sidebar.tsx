@@ -143,13 +143,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white p-0.5 shadow-xs shrink-0">
               <img
                 src="/assets/hfc_circle_logo.png"
-                alt="Hari Kripa Fruit Company"
+                alt="HariKripa Fruit Company"
                 className="h-full w-full object-contain"
               />
             </div>
             <div>
               <div className="font-black text-xs tracking-tight text-red-950 dark:text-amber-100 uppercase leading-none">
-                Hari Kripa Fruit Company
+                HariKripa Fruit Company
               </div>
               <div className="text-[10px] font-semibold text-emerald-700 dark:text-emerald-400 mt-1">
                 Freshness. Quality. Trust.

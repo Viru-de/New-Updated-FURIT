@@ -185,12 +185,12 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
             >
               <img
                 src={navbarLogo}
-                alt="Hari Kripa Fruit Company"
+                alt="HariKripa Fruit Company"
                 className="h-10 sm:h-11 w-10 sm:w-11 object-contain select-none shrink-0"
               />
               <div className="hidden sm:flex flex-col justify-center">
                 <span className="font-black text-xs sm:text-sm tracking-wider text-red-950 dark:text-amber-100 uppercase leading-tight">
-                  Hari Kripa Fruit Company
+                  HariKripa Fruit Company
                 </span>
                 <span className="text-[10px] sm:text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 tracking-wide mt-0.5">
                   Freshness. Quality. Trust.
@@ -824,12 +824,12 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
               <div className="flex items-center gap-2.5">
                 <img
                   src={navbarLogo}
-                  alt="Hari Kripa Fruit Company"
+                  alt="HariKripa Fruit Company"
                   className="h-10 w-10 object-contain select-none shrink-0"
                 />
                 <div className="flex flex-col justify-center">
                   <h2 className="font-black text-xs sm:text-sm text-red-950 dark:text-amber-100 uppercase leading-tight">
-                    Hari Kripa Fruit Company
+                    HariKripa Fruit Company
                   </h2>
                   <span className="text-[10px] font-semibold text-emerald-700 dark:text-emerald-400 mt-0.5">
                     Freshness. Quality. Trust.

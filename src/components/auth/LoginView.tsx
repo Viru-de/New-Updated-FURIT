@@ -250,13 +250,13 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
           <div className="flex justify-center pb-1">
             <img
               src="/assets/hfc_circle_logo.png"
-              alt="Hari Kripa Fruit Company"
+              alt="HariKripa Fruit Company"
               className="h-24 w-24 sm:h-28 sm:w-28 object-contain select-none"
             />
           </div>
           <div>
             <h1 className="font-black text-xl sm:text-2xl tracking-wide text-red-950 dark:text-amber-100 uppercase leading-snug">
-              Hari Kripa Fruit Company
+              HariKripa Fruit Company
             </h1>
             <p className="text-xs sm:text-sm font-semibold text-emerald-700 dark:text-emerald-400 tracking-wider mt-1">
               Freshness. Quality. Trust.

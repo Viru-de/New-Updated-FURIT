@@ -7,7 +7,6 @@ import {
   TrendingUp,
   CreditCard,
   ShoppingBag,
-  Receipt,
   Users,
   Building,
   Box,
@@ -49,6 +48,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
   }, []);
 
   const metrics = getDashboardMetrics(toIsoDate(customDate), datePreset);
+  const totalCustomersCount = db.getCustomers().length;
 
   const handleLockClick = () => {
     setIsLocked(true);
@@ -111,21 +111,16 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
       {/* Top Banner & Date Filter Bar */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div>
-          <div>
-            <div className="flex items-center gap-2.5">
-              <h2 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
-                Hari Kripa Fruit Company Dashboard
-              </h2>
-              {isLocked && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-300 dark:border-amber-700/60">
-                  <Lock className="h-3 w-3" />
-                  Locked
-                </span>
-              )}
-            </div>
-            <p className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 mt-0.5">
-              Freshness. Quality. Trust.
-            </p>
+          <div className="flex items-center gap-2.5">
+            <h2 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
+              Dashboard
+            </h2>
+            {isLocked && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-300 dark:border-amber-700/60">
+                <Lock className="h-3 w-3" />
+                Locked
+              </span>
+            )}
           </div>
         </div>
 
@@ -261,22 +256,22 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
           </div>
         </div>
 
-        {/* 4. Today's Expenses */}
+        {/* 4. Total Customers */}
         <div
-          onClick={() => onNavigate('reports', 'expenses')}
+          onClick={() => onNavigate('customerDirectory')}
           className="neu-card cursor-pointer p-4 hover:translate-y-[-2px] transition-all"
-          title="Click to view Expenses report"
+          title="Click to view Customer Directory"
         >
           <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-2">
-            <span className="text-xs font-semibold">Expenses (Freight/Hamali)</span>
-            <Receipt className="h-4 w-4 text-rose-600 dark:text-rose-400" />
+            <span className="text-xs font-semibold">Total Customers</span>
+            <Users className="h-4 w-4 text-blue-600 dark:text-blue-400" />
           </div>
-          <div className="font-mono-numbers text-xl font-bold text-rose-600 dark:text-rose-400 tracking-tight">
-            {maskAmount(metrics.totalExpenses)}
+          <div className="font-mono-numbers text-xl font-bold text-slate-900 dark:text-white tracking-tight">
+            {totalCustomersCount}
           </div>
           <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 flex items-center justify-between">
-            <span>Deductions & Charges</span>
-            <span className="text-rose-600 dark:text-rose-400 font-semibold">Audit &rarr;</span>
+            <span>Registered Parties</span>
+            <span className="text-blue-600 dark:text-blue-400 font-semibold">Directory &rarr;</span>
           </div>
         </div>
 
@@ -300,9 +295,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
 
         {/* 6. Customer Outstanding */}
         <div
-          onClick={() => onNavigate('customerDirectory')}
+          onClick={() => onNavigate('reports', 'customerOutstanding')}
           className="neu-card cursor-pointer p-4 hover:translate-y-[-2px] transition-all border border-rose-300/40 dark:border-rose-800/50"
-          title="Click to view Customer Directory"
+          title="Click to view Accounting Reports → Customer Outstanding"
         >
           <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-2">
             <span className="text-xs font-semibold">Customer Outstanding</span>
@@ -313,7 +308,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
           </div>
           <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 flex items-center justify-between">
             <span>Total Receivables</span>
-            <span className="text-slate-700 dark:text-slate-300 font-semibold">Directory &rarr;</span>
+            <span className="text-rose-600 dark:text-rose-400 font-semibold">Report &rarr;</span>
           </div>
         </div>
 

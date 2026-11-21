@@ -63,14 +63,14 @@ export const PrintBusinessHeader: React.FC<PrintBusinessHeaderProps> = ({
   const shortClass = !isBill
     ? 'text-[13px] sm:text-[14px] print:text-[13.5px] tracking-[0.18em]'
     : isB7
-    ? 'text-[8.5px] print:text-[9px] tracking-[0.14em]'
+    ? 'text-[11px] print:text-[11.5px] tracking-[0.14em]'
     : isB6
-    ? 'text-[10px] print:text-[10.5px] tracking-[0.16em]'
+    ? 'text-[13.5px] print:text-[14px] tracking-[0.16em]'
     : isA5Bill
-    ? 'text-xs print:text-[12px] tracking-widest'
+    ? 'text-[15.5px] sm:text-[16.5px] print:text-[16px] tracking-[0.14em]'
     : isA4Bill
-    ? 'text-xs sm:text-sm print:text-[13px] tracking-widest'
-    : 'text-xs print:text-[12px] tracking-widest';
+    ? 'text-[18px] sm:text-[20px] print:text-[19.5px] tracking-[0.14em]'
+    : 'text-[15.5px] sm:text-[17px] print:text-[16.5px] tracking-[0.14em]';
 
   const englishClass = !isBill
     ? 'text-[19px] sm:text-[21px] print:text-[20px]'
@@ -124,14 +124,16 @@ export const PrintBusinessHeader: React.FC<PrintBusinessHeaderProps> = ({
     return (
       <div
         className={`print-business-header ${
-          isLedgerCentered ? 'print-business-header--ledger-centered pb-1.5 mb-1 pt-0.5' : `print-business-header--bill pb-1 mb-0.5 ${isBSeries ? 'pt-1' : 'pt-0'}`
+          isLedgerCentered
+            ? 'print-business-header--ledger-centered pb-1.5 mb-1 pt-0.5'
+            : `print-business-header--bill pb-1 mb-0.5 ${isBSeries ? 'pt-1' : 'pt-0.5'}`
         } text-center border-b border-black mt-0 ${className}`}
       >
         {showShortLabel && (
           <div
-            className={`print-business-short-name font-bold uppercase text-slate-900 dark:text-slate-900 print:text-black ${
-              isBSeries || isLedgerCentered ? 'leading-snug pt-[1px]' : 'leading-tight'
-            } m-0 ${isBSeries || isLedgerCentered ? 'px-0 pb-0' : 'p-0'} ${shortClass}`}
+            className={`print-business-short-name ${
+              isBill ? 'font-black text-slate-950 dark:text-slate-950' : 'font-bold text-slate-900 dark:text-slate-900'
+            } uppercase print:text-black leading-snug pt-[1px] m-0 px-0 pb-0 ${shortClass}`}
           >
             {shortLabel}
           </div>

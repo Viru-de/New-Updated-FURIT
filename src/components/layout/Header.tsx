@@ -74,14 +74,14 @@ export const Header: React.FC<HeaderProps> = ({
             <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white p-0.5 shadow-xs shrink-0">
               <img
                 src="/assets/hfc_circle_logo.png"
-                alt="Hari Kripa Fruit Company"
+                alt="HariKripa Fruit Company"
                 className="h-full w-full object-contain"
               />
             </div>
             <div className="flex flex-col justify-center">
               <div className="flex items-center gap-2">
                 <h1 className="font-black text-sm sm:text-base tracking-tight text-red-950 dark:text-amber-100 uppercase leading-none">
-                  Hari Kripa Fruit Company
+                  HariKripa Fruit Company
                 </h1>
                 {(() => {
                   const defaultProfile = db.getCompanyProfiles().find((p) => p.isDefault) || db.getCompanyProfiles()[0];
