@@ -54,7 +54,6 @@ export const PrintBusinessHeader: React.FC<PrintBusinessHeaderProps> = ({
   const isLedgerCentered = variant === 'ledger-centered';
   const isB7 = isBill && paperSize === 'b7';
   const isB6 = isBill && paperSize === 'b6';
-  const isBSeries = isB7 || isB6;
   const isA5Bill = isBill && paperSize === 'a5';
   const isA4Bill = isBill && paperSize === 'a4';
 
@@ -63,14 +62,14 @@ export const PrintBusinessHeader: React.FC<PrintBusinessHeaderProps> = ({
   const shortClass = !isBill
     ? 'text-[13px] sm:text-[14px] print:text-[13.5px] tracking-[0.18em]'
     : isB7
-    ? 'text-[11px] print:text-[11.5px] tracking-[0.14em]'
+    ? 'text-[12px] print:text-[12px] tracking-[0.12em]'
     : isB6
-    ? 'text-[13.5px] print:text-[14px] tracking-[0.16em]'
+    ? 'text-[14px] print:text-[14.5px] tracking-[0.14em]'
     : isA5Bill
-    ? 'text-[15.5px] sm:text-[16.5px] print:text-[16px] tracking-[0.14em]'
+    ? 'text-[17px] sm:text-[18px] print:text-[17.5px] tracking-[0.14em]'
     : isA4Bill
-    ? 'text-[18px] sm:text-[20px] print:text-[19.5px] tracking-[0.14em]'
-    : 'text-[15.5px] sm:text-[17px] print:text-[16.5px] tracking-[0.14em]';
+    ? 'text-[19px] sm:text-[21px] print:text-[21px] tracking-[0.14em]'
+    : 'text-[17px] sm:text-[18.5px] print:text-[18px] tracking-[0.14em]';
 
   const englishClass = !isBill
     ? 'text-[19px] sm:text-[21px] print:text-[20px]'
@@ -126,7 +125,7 @@ export const PrintBusinessHeader: React.FC<PrintBusinessHeaderProps> = ({
         className={`print-business-header ${
           isLedgerCentered
             ? 'print-business-header--ledger-centered pb-1.5 mb-1 pt-0.5'
-            : `print-business-header--bill pb-1 mb-0.5 ${isBSeries ? 'pt-1' : 'pt-0.5'}`
+            : 'print-business-header--bill pb-1 mb-0.5 pt-1'
         } text-center border-b border-black mt-0 ${className}`}
       >
         {showShortLabel && (

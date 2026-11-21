@@ -36,11 +36,13 @@ import {
 interface ReportsViewProps {
   initialTab?: 'dailySales' | 'customerOutstanding' | 'vendorOutstanding' | 'expenses' | 'profit' | 'crates';
   onTabChange?: (tab: 'dailySales' | 'customerOutstanding' | 'vendorOutstanding' | 'expenses' | 'profit' | 'crates') => void;
+  onNavigateToCustomerLedger?: (customerId: string) => void;
 }
 
 export const ReportsView: React.FC<ReportsViewProps> = ({
   initialTab = 'dailySales',
   onTabChange,
+  onNavigateToCustomerLedger,
 }) => {
   const [activeTab, setActiveTab] = useState<
     'dailySales' | 'customerOutstanding' | 'vendorOutstanding' | 'expenses' | 'profit' | 'crates'
@@ -582,10 +584,24 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
                 {customerOutstandings.map((o) => (
                   <tr key={o.customer.id} className="hover:bg-slate-50/60 dark:hover:bg-slate-800/40">
                     <td className="px-5 py-3.5 font-bold text-xs text-slate-900 dark:text-white">
-                      {o.customer.name}
-                      {o.customer.city && (
-                        <span className="text-[11px] font-normal text-slate-400 ml-1.5">({o.customer.city})</span>
-                      )}
+                      <span
+                        role="button"
+                        tabIndex={0}
+                        onClick={() => onNavigateToCustomerLedger?.(o.customer.id)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            onNavigateToCustomerLedger?.(o.customer.id);
+                          }
+                        }}
+                        className="inline-flex items-center flex-wrap gap-1.5 font-bold text-xs text-slate-900 hover:text-emerald-600 hover:underline dark:text-white dark:hover:text-emerald-400 cursor-pointer transition-colors"
+                        title={`Open ${o.customer.name} Ledger`}
+                      >
+                        <span>{o.customer.name}</span>
+                        {o.customer.city && (
+                          <span className="text-[11px] font-normal text-slate-400">({o.customer.city})</span>
+                        )}
+                      </span>
                     </td>
                     <td className="px-5 py-3.5 text-right font-mono-numbers text-xs text-slate-600 dark:text-slate-400">
                       {formatCurrency(o.openingBalance)}
@@ -750,7 +766,24 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
                 {customerOutstandings.map((o) => (
                   <tr key={o.customer.id} className="hover:bg-slate-50/60 dark:hover:bg-slate-800/40">
                     <td className="px-5 py-3.5 font-bold text-xs text-slate-900 dark:text-white">
-                      {o.customer.name}
+                      <span
+                        role="button"
+                        tabIndex={0}
+                        onClick={() => onNavigateToCustomerLedger?.(o.customer.id)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            onNavigateToCustomerLedger?.(o.customer.id);
+                          }
+                        }}
+                        className="inline-flex items-center flex-wrap gap-1.5 font-bold text-xs text-slate-900 hover:text-emerald-600 hover:underline dark:text-white dark:hover:text-emerald-400 cursor-pointer transition-colors"
+                        title={`Open ${o.customer.name} Ledger`}
+                      >
+                        <span>{o.customer.name}</span>
+                        {o.customer.city && (
+                          <span className="text-[11px] font-normal text-slate-400">({o.customer.city})</span>
+                        )}
+                      </span>
                     </td>
                     <td className="px-5 py-3.5 text-center font-mono-numbers text-xs text-slate-500">
                       {o.customer.openingCrateBalance} Crates

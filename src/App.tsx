@@ -36,6 +36,8 @@ function AppContent() {
     'general' | 'profiles' | 'units' | 'crates' | 'backup' | 'users'
   >('general');
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | undefined>(undefined);
+  const [ledgerReturnToReports, setLedgerReturnToReports] = useState<boolean>(false);
+  const [dashboardVisitKey, setDashboardVisitKey] = useState<number>(0);
   const [editingBill, setEditingBill] = useState<Bill | null>(null);
   const [sourceProceedsForBill, setSourceProceedsForBill] = useState<SaleProceeds | null>(null);
 
@@ -74,10 +76,20 @@ function AppContent() {
     devAuthClient.clearClientToken();
     void userAuthClient.logout();
     db.setActiveUser(null);
+    setLedgerReturnToReports(false);
+    setDashboardVisitKey((k) => k + 1);
+    setCurrentView('dashboard');
     setCurrentUser(null);
   };
 
   const handleNavigate = (view: string, subParam?: string) => {
+    setLedgerReturnToReports(false);
+    if (view === 'dashboard') {
+      setDashboardVisitKey((k) => k + 1);
+      setCurrentView('dashboard');
+      return;
+    }
+
     if (view === 'reports') {
       setCurrentView('reports');
       if (
@@ -129,6 +141,8 @@ function AppContent() {
     return (
       <LoginView
         onLoginSuccess={(user) => {
+          setLedgerReturnToReports(false);
+          setDashboardVisitKey((k) => k + 1);
           setCurrentUser(user);
           setCurrentView('dashboard');
         }}
@@ -139,7 +153,7 @@ function AppContent() {
   const renderView = () => {
     switch (currentView) {
       case 'dashboard':
-        return <DashboardView onNavigate={handleNavigate} />;
+        return <DashboardView key={dashboardVisitKey} onNavigate={handleNavigate} />;
       case 'saleProceeds':
         return (
           <SaleProceedsListView
@@ -150,6 +164,7 @@ function AppContent() {
             }}
             onNavigateToCustomerLedger={(cId) => {
               setSelectedCustomerId(cId);
+              setLedgerReturnToReports(false);
               setCurrentView('customerLedger');
             }}
           />
@@ -159,6 +174,7 @@ function AppContent() {
           <CashSaleListView
             onNavigateToCustomerLedger={(cId) => {
               setSelectedCustomerId(cId);
+              setLedgerReturnToReports(false);
               setCurrentView('customerLedger');
             }}
           />
@@ -168,6 +184,7 @@ function AppContent() {
           <CreditSaleListView
             onNavigateToCustomerLedger={(cId) => {
               setSelectedCustomerId(cId);
+              setLedgerReturnToReports(false);
               setCurrentView('customerLedger');
             }}
           />
@@ -177,6 +194,7 @@ function AppContent() {
           <ReceiptListView
             onNavigateToCustomerLedger={(cId) => {
               setSelectedCustomerId(cId);
+              setLedgerReturnToReports(false);
               setCurrentView('customerLedger');
             }}
           />
@@ -191,6 +209,14 @@ function AppContent() {
               setSelectedCustomerId(cId);
               setCurrentView('crateStatement');
             }}
+            onBackToReports={
+              ledgerReturnToReports
+                ? () => {
+                    setLedgerReturnToReports(false);
+                    setCurrentView('reports');
+                  }
+                : undefined
+            }
           />
         );
       case 'crateStatement':
@@ -200,6 +226,7 @@ function AppContent() {
           <CustomerDirectoryView
             onNavigateToLedger={(cId) => {
               setSelectedCustomerId(cId);
+              setLedgerReturnToReports(false);
               setCurrentView('customerLedger');
             }}
             onNavigateToCrate={(cId) => {
@@ -225,6 +252,7 @@ function AppContent() {
           <TrashView
             onNavigateToCustomerLedger={(cId) => {
               setSelectedCustomerId(cId);
+              setLedgerReturnToReports(false);
               setCurrentView('customerLedger');
             }}
           />
@@ -268,12 +296,17 @@ function AppContent() {
           <ReportsView
             initialTab={reportSubTab}
             onTabChange={(tab) => setReportSubTab(tab)}
+            onNavigateToCustomerLedger={(cId) => {
+              setSelectedCustomerId(cId);
+              setLedgerReturnToReports(true);
+              setCurrentView('customerLedger');
+            }}
           />
         );
       case 'settings':
         return <SettingsView initialTab={settingsSubTab} />;
       default:
-        return <DashboardView onNavigate={handleNavigate} />;
+        return <DashboardView key={dashboardVisitKey} onNavigate={handleNavigate} />;
     }
   };
 

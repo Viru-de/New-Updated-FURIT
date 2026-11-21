@@ -239,9 +239,9 @@ export async function triggerPrint(
       : chosenSize === 'b6'
       ? '1.5mm 2mm 1.5mm 2mm'
       : chosenSize === 'a5'
-      ? '0.5mm 2mm 1mm 2mm'
+      ? '1mm 2mm 1mm 2mm'
       : chosenSize === 'compact'
-      ? '0.5mm 2.5mm 1.5mm 2.5mm'
+      ? '1mm 2.5mm 1.5mm 2.5mm'
       : '1mm 2.5mm 2mm 2.5mm';
   clone.style.padding = safePad;
   clone.style.marginTop = '0';
@@ -464,9 +464,7 @@ export async function generatePdfDoc(
         clonedElement.style.paddingTop =
           paperSize === 'b7' || paperSize === 'b6'
             ? '10px'
-            : paperSize === 'a4'
-            ? '8px'
-            : '5px';
+            : '8px';
 
         // Strip dark variant classes from all cloned elements
         const allClonedNodes = [clonedElement, ...Array.from(clonedElement.querySelectorAll('*'))];

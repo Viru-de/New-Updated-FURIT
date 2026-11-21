@@ -7,7 +7,7 @@ import { CreditSaleModal } from './CreditSaleModal';
 import { ReceiptModal } from './ReceiptModal';
 import { SaleProceedsModal } from './SaleProceedsModal';
 import { CreditSale, Customer, LedgerEntry, Receipt, SaleProceeds } from '../../types';
-import { Download, Printer, Plus, Phone, MapPin, CreditCard, ShoppingBag, Edit2, Building2, Box, User } from 'lucide-react';
+import { Download, Printer, Plus, Phone, MapPin, CreditCard, ShoppingBag, Edit2, Building2, Box, User, ArrowLeft } from 'lucide-react';
 import { CustomerAvatar, getCustomerInitials } from '../common/CustomerAvatar';
 import { CustomerAutocomplete } from '../common/CustomerAutocomplete';
 import { exportCustomerLedger } from '../../utils/excelEngine';
@@ -20,11 +20,13 @@ import { formatCustomerLedgerShortParticulars } from '../../utils/shortPrintUtil
 interface CustomerLedgerViewProps {
   initialCustomerId?: string;
   onNavigateToCrate?: (customerId: string) => void;
+  onBackToReports?: () => void;
 }
 
 export const CustomerLedgerView: React.FC<CustomerLedgerViewProps> = ({
   initialCustomerId,
   onNavigateToCrate,
+  onBackToReports,
 }) => {
   const [refreshKey, setRefreshKey] = useState(0);
   const customers = db.getCustomers();
@@ -218,7 +220,17 @@ export const CustomerLedgerView: React.FC<CustomerLedgerViewProps> = ({
     <div className="space-y-6">
       {/* Header and Controls */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 no-print">
-        <div>
+        <div className="flex flex-wrap items-center gap-3">
+          {onBackToReports && (
+            <button
+              type="button"
+              onClick={onBackToReports}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+            >
+              <ArrowLeft className="h-3.5 w-3.5" />
+              <span>Back to Accounting Reports</span>
+            </button>
+          )}
           <h2 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
             Customer Ledger Statement
           </h2>

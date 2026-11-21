@@ -27,14 +27,14 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
   const [datePreset, setDatePreset] = useState<'today' | 'yesterday' | 'week' | 'month' | 'all'>('today');
   const [customDate, setCustomDate] = useState(getTodayIso());
 
-  // Dashboard Lock state (persisted in localStorage)
-  const [isLocked, setIsLocked] = useState<boolean>(() => {
+  // Dashboard Lock state: always starts locked on login and every Dashboard visit
+  const [isLocked, setIsLocked] = useState<boolean>(true);
+
+  React.useEffect(() => {
     try {
-      return localStorage.getItem('hk_dashboard_locked') === 'true';
-    } catch {
-      return false;
-    }
-  });
+      localStorage.removeItem('hk_dashboard_locked');
+    } catch {}
+  }, []);
 
   // Password Unlock Modal State
   const [isUnlockModalOpen, setIsUnlockModalOpen] = useState(false);
@@ -52,9 +52,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
 
   const handleLockClick = () => {
     setIsLocked(true);
-    try {
-      localStorage.setItem('hk_dashboard_locked', 'true');
-    } catch {}
   };
 
   const handleUnlockClick = () => {
@@ -76,9 +73,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
       return;
     }
     setIsLocked(false);
-    try {
-      localStorage.setItem('hk_dashboard_locked', 'false');
-    } catch {}
     setUnlockPassword('');
     setUnlockError(null);
     setIsUnlockModalOpen(false);
@@ -90,6 +84,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
       return '₹ ••••••';
     }
     return formatCurrency(val);
+  };
+
+  const maskCount = (count: number) => {
+    if (isLocked) {
+      return '••••••';
+    }
+    return String(count);
   };
 
   const maskCrates = (crates: number) => {
@@ -267,7 +268,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
             <Users className="h-4 w-4 text-blue-600 dark:text-blue-400" />
           </div>
           <div className="font-mono-numbers text-xl font-bold text-slate-900 dark:text-white tracking-tight">
-            {totalCustomersCount}
+            {maskCount(totalCustomersCount)}
           </div>
           <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 flex items-center justify-between">
             <span>Registered Parties</span>
