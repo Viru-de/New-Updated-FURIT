@@ -5,7 +5,7 @@ import { Printer, X, Building2 } from 'lucide-react';
 import { BillTableCanvas } from '../common/BillTableCanvas';
 import { BillShareButtons } from '../common/BillShareButtons';
 import { ChooseBillPrintFormatModal } from '../common/ChooseBillPrintFormatModal';
-import { BillPaperSize, getLastSelectedPaperSize } from '../../utils/pdfAndShareEngine';
+import { BillPaperSize, getLastSelectedPaperSize, saveLastSelectedPaperSize } from '../../utils/pdfAndShareEngine';
 import { getCustomerPrintContactLines } from '../../utils/customerContactUtils';
 
 interface CreditSalePrintModalProps {
@@ -54,8 +54,10 @@ export const CreditSalePrintModal: React.FC<CreditSalePrintModalProps> = ({
     customer?.address ||
     (customer?.city ? `${customer.city}${customer.state ? `, ${customer.state}` : ''}` : '');
   const customerMobile = customer?.mobile || '';
+  const safeCreditSaleNo = creditSale.creditSaleNo || 'Credit Sale';
+  const safeFilename = `Credit-Sale-${safeCreditSaleNo.replace(/\s+/g, '-')}`;
 
-  const summaryText = `Bill No: ${creditSale.creditSaleNo}\nDate: ${creditSale.date}\nCustomer: ${customerName}\nDebit Amount: ₹${creditSale.finalAmount.toLocaleString('en-IN')}\nStatus: Added to Customer Ledger`;
+  const summaryText = `Bill No: ${safeCreditSaleNo}\nDate: ${creditSale.date}\nCustomer: ${customerName}\nDebit Amount: ₹${(Number(creditSale.finalAmount) || 0).toLocaleString('en-IN')}\nStatus: Added to Customer Ledger`;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/70 p-2 sm:p-4 md:p-6 backdrop-blur-xs overflow-hidden">
@@ -85,7 +87,10 @@ export const CreditSalePrintModal: React.FC<CreditSalePrintModalProps> = ({
                 <button
                   key={sizeKey}
                   type="button"
-                  onClick={() => setPageSize(sizeKey)}
+                  onClick={() => {
+                    setPageSize(sizeKey);
+                    saveLastSelectedPaperSize(sizeKey);
+                  }}
                   className={`px-2 py-0.5 sm:px-2.5 sm:py-1 rounded text-[11px] sm:text-xs font-semibold cursor-pointer transition-all ${
                     pageSize === sizeKey
                       ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 shadow-2xs font-bold'
@@ -101,9 +106,9 @@ export const CreditSalePrintModal: React.FC<CreditSalePrintModalProps> = ({
           <div className="flex flex-wrap items-center gap-2">
             <BillShareButtons
               elementId="mandi-print-area"
-              filename={`Credit-Sale-${creditSale.creditSaleNo.replace(/\s+/g, '-')}`}
+              filename={safeFilename}
               customerMobile={customerMobile}
-              title={`Credit Sale Bill ${creditSale.creditSaleNo}`}
+              title={`Credit Sale Bill ${safeCreditSaleNo}`}
               summaryText={summaryText}
               defaultPaperSize={pageSize}
               onPaperSizeChange={setPageSize}
@@ -159,9 +164,9 @@ export const CreditSalePrintModal: React.FC<CreditSalePrintModalProps> = ({
       <ChooseBillPrintFormatModal
         isOpen={isFormatModalOpen}
         onClose={() => setIsFormatModalOpen(false)}
-        documentTitle={`Credit Sale Bill ${creditSale.creditSaleNo}`}
+        documentTitle={`Credit Sale Bill ${safeCreditSaleNo}`}
         elementId="mandi-print-area"
-        filename={`Credit-Sale-${creditSale.creditSaleNo.replace(/\s+/g, '-')}`}
+        filename={safeFilename}
         defaultSize={pageSize}
         initialAction="print"
         onPaperSizeChange={setPageSize}

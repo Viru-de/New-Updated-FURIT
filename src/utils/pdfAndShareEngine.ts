@@ -120,8 +120,9 @@ export function applyPrintPageSize(size: BillPaperSize = 'a5', targetElementId?:
   `;
 }
 
-// Concurrent print guard
-let isPrintingActive = false;
+// Track active print session cleanup so repeat print clicks are never deadlocked if afterprint fails to fire
+let isPreparingPrint = false;
+let activePrintCleanup: (() => void) | null = null;
 
 /**
  * Safely trigger browser print using an isolated print mount outside #root.
@@ -133,7 +134,13 @@ export async function triggerPrint(
   targetElementId?: string
 ): Promise<void> {
   if (typeof window === 'undefined' || typeof document === 'undefined') return;
-  if (isPrintingActive) return; // Prevent duplicate concurrent triggers
+  if (isPreparingPrint) return; // Ignore rapid double-clicks during preparation
+
+  // If a prior print session never fired afterprint (e.g. embedded iframe or browser quirk),
+  // clean it up first instead of blocking subsequent Print clicks for 45 seconds.
+  if (activePrintCleanup) {
+    activePrintCleanup();
+  }
 
   const chosenSize = paperSize || getLastSelectedPaperSize('a5');
   applyPrintPageSize(chosenSize, targetElementId);
@@ -182,7 +189,7 @@ export async function triggerPrint(
     return;
   }
 
-  isPrintingActive = true;
+  isPreparingPrint = true;
 
   // 2. Track existing dark mode state to ensure clean restoration after print dialog dismisses
   const wasDark =
@@ -312,19 +319,8 @@ export async function triggerPrint(
     document.body.setAttribute('data-print-target', targetElementId || targetEl.id);
   }
 
-  // 6. Ensure web fonts loaded before opening print dialog
-  if (document.fonts) {
-    try {
-      await document.fonts.ready;
-    } catch {
-      // Proceed even if fonts.ready fails
-    }
-  }
-
-  // Allow browser layout engine to paint DOM changes before opening print dialog
-  await new Promise((resolve) => setTimeout(resolve, 80));
-
   let cleanedUp = false;
+  let fallbackTimer: ReturnType<typeof setTimeout> | null = null;
   const mql = typeof window !== 'undefined' && window.matchMedia ? window.matchMedia('print') : null;
   const mqlListener = (e: MediaQueryListEvent) => {
     if (!e.matches) cleanup();
@@ -333,7 +329,14 @@ export async function triggerPrint(
   const cleanup = () => {
     if (cleanedUp) return;
     cleanedUp = true;
-    isPrintingActive = false;
+    isPreparingPrint = false;
+    if (activePrintCleanup === cleanup) {
+      activePrintCleanup = null;
+    }
+    if (fallbackTimer !== null) {
+      clearTimeout(fallbackTimer);
+      fallbackTimer = null;
+    }
     document.body.classList.remove('has-print-mount');
     document.body.removeAttribute('data-print-target');
     if (mountEl) {
@@ -359,16 +362,46 @@ export async function triggerPrint(
     }
   };
 
-  // Only run cleanup after the browser print dialog has actually finished / dismissed
-  window.addEventListener('afterprint', cleanup, { once: true });
-  if (mql && mql.addEventListener) {
-    mql.addEventListener('change', mqlListener);
+  activePrintCleanup = cleanup;
+
+  try {
+    // 6. Ensure web fonts loaded without blocking if already ready (preserves Safari/Firefox user gesture)
+    if (document.fonts && document.fonts.status !== 'loaded') {
+      try {
+        await Promise.race([
+          document.fonts.ready,
+          new Promise((resolve) => setTimeout(resolve, 40)),
+        ]);
+      } catch {
+        // Proceed even if fonts.ready fails
+      }
+    }
+
+    // Allow browser layout engine one animation frame to paint DOM changes before opening print dialog
+    await new Promise<void>((resolve) => {
+      if (typeof window.requestAnimationFrame === 'function') {
+        window.requestAnimationFrame(() => resolve());
+      } else {
+        setTimeout(resolve, 16);
+      }
+    });
+
+    isPreparingPrint = false;
+
+    // Only run cleanup after the browser print dialog has actually finished / dismissed
+    window.addEventListener('afterprint', cleanup, { once: true });
+    if (mql && mql.addEventListener) {
+      mql.addEventListener('change', mqlListener);
+    }
+
+    window.print();
+
+    // Safety fallback in case afterprint does not fire in an embedded iframe
+    fallbackTimer = setTimeout(cleanup, 15000);
+  } catch (err) {
+    cleanup();
+    throw err;
   }
-
-  window.print();
-
-  // Safety fallback in case afterprint does not fire in an embedded iframe
-  setTimeout(cleanup, 45000);
 }
 
 export interface ShareOptions {

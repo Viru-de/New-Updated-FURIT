@@ -150,9 +150,11 @@ export function numberToWordsIndian(amount: number): string {
 /**
  * Format plain 2-decimal accounting numbers for traditional mandi bills (e.g. 4186.00, -116.00)
  */
-export function formatBillAmount(amount: number | null | undefined): string {
-  if (amount === null || amount === undefined || isNaN(amount)) return '0.00';
-  return amount.toFixed(2);
+export function formatBillAmount(amount: number | string | null | undefined): string {
+  if (amount === null || amount === undefined || amount === '') return '0.00';
+  const num = typeof amount === 'number' ? amount : Number(amount);
+  if (isNaN(num)) return '0.00';
+  return num.toFixed(2);
 }
 
 /**

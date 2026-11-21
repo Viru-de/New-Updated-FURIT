@@ -61,11 +61,14 @@ export const CreditSaleModal: React.FC<CreditSaleModalProps> = ({
   const [isAddCustomerOpen, setIsAddCustomerOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
+  const [savedSaleForPrint, setSavedSaleForPrint] = useState<CreditSale | null>(null);
 
   // Initialize or reset form
   useEffect(() => {
     if (!isOpen) return;
     setCustomerError(false);
+    setSavedSaleForPrint(null);
+    setIsPrintModalOpen(false);
 
     if (editItem) {
       setCustomerId(editItem.customerId);
@@ -466,10 +469,18 @@ export const CreditSaleModal: React.FC<CreditSaleModalProps> = ({
       customerId,
       customerName: cust ? cust.name : (selectedCustomer?.name || 'Customer'),
       date,
-      items: items.map((it) => ({
-        ...it,
-        amount: calculateWholesaleItemAmount(it.quantity, it.unit, it.kg, it.rate),
-      })),
+      items: items.map((it) => {
+        const qNum = Number(it.quantity) || 0;
+        const kNum = Number(it.kg) || 0;
+        const rNum = Number(it.rate) || 0;
+        return {
+          ...it,
+          quantity: qNum,
+          kg: kNum,
+          rate: rNum,
+          amount: calculateWholesaleItemAmount(qNum, it.unit, kNum, rNum),
+        };
+      }),
       crateTypeId: firstCt?.id,
       crateName: firstCt?.name,
       crateIn: 0,
@@ -550,10 +561,18 @@ export const CreditSaleModal: React.FC<CreditSaleModalProps> = ({
       customerId,
       customerName: cust ? cust.name : 'Customer',
       date,
-      items: items.map((it) => ({
-        ...it,
-        amount: calculateWholesaleItemAmount(it.quantity, it.unit, it.kg, it.rate),
-      })),
+      items: items.map((it) => {
+        const qNum = Number(it.quantity) || 0;
+        const kNum = Number(it.kg) || 0;
+        const rNum = Number(it.rate) || 0;
+        return {
+          ...it,
+          quantity: qNum,
+          kg: kNum,
+          rate: rNum,
+          amount: calculateWholesaleItemAmount(qNum, it.unit, kNum, rNum),
+        };
+      }),
       crateTypeId: firstCt?.id,
       crateName: firstCt?.name,
       crateIn: 0,
@@ -599,17 +618,19 @@ export const CreditSaleModal: React.FC<CreditSaleModalProps> = ({
       // Remove any previously recorded cash receipt if updated to 0
       db.deleteReceipt(linkedReceiptId);
     }
-    onSaved(saleRecord);
     if (andPrint) {
       if (onSaveAndPrint) {
+        onSaved(saleRecord);
         onSaveAndPrint(saleRecord);
         setIsSubmitting(false);
         onClose();
       } else {
+        setSavedSaleForPrint(saleRecord);
         setIsPrintModalOpen(true);
         setIsSubmitting(false);
       }
     } else {
+      onSaved(saleRecord);
       setIsSubmitting(false);
       onClose();
     }
@@ -1082,8 +1103,16 @@ export const CreditSaleModal: React.FC<CreditSaleModalProps> = ({
       {isPrintModalOpen && (
         <CreditSalePrintModal
           isOpen={isPrintModalOpen}
-          onClose={() => setIsPrintModalOpen(false)}
-          creditSale={currentSaleRecord}
+          onClose={() => {
+            setIsPrintModalOpen(false);
+            if (savedSaleForPrint) {
+              const saved = savedSaleForPrint;
+              setSavedSaleForPrint(null);
+              onSaved(saved);
+              onClose();
+            }
+          }}
+          creditSale={savedSaleForPrint || currentSaleRecord}
         />
       )}
     </>

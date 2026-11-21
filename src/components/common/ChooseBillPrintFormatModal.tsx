@@ -76,8 +76,14 @@ export const ChooseBillPrintFormatModal: React.FC<ChooseBillPrintFormatModalProp
       // and CANNOT be printed or cause any blank page
       onClose();
 
-      // Give React a small tick to unmount the modal from DOM
-      await new Promise((resolve) => setTimeout(resolve, 80));
+      // Yield a single animation frame for React to unmount the modal while preserving user activation
+      await new Promise<void>((resolve) => {
+        if (typeof window !== 'undefined' && typeof window.requestAnimationFrame === 'function') {
+          window.requestAnimationFrame(() => resolve());
+        } else {
+          setTimeout(resolve, 16);
+        }
+      });
 
       // Now invoke print on the target bill element with the selected paper size
       await triggerPrint(selectedSize, elementId);
