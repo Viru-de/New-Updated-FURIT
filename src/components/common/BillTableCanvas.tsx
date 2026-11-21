@@ -124,9 +124,9 @@ export const BillTableCanvas: React.FC<BillTableCanvasProps> = ({
       : pageSize === 'a5'
       ? 'max-w-[550px] w-full text-[10px] pt-0.5 px-2.5 pb-1.5 sm:pt-1 sm:px-3 sm:pb-2'
       : pageSize === 'b6'
-      ? 'max-w-[430px] w-full text-[10px] pt-0.5 px-2.5 pb-2 sm:px-3'
+      ? 'max-w-[430px] w-full text-[10px] pt-1.5 px-2.5 pb-2 sm:px-3'
       : pageSize === 'b7'
-      ? 'max-w-[300px] w-full text-[8.5px] pt-0.5 px-2 pb-1.5'
+      ? 'max-w-[300px] w-full text-[8.5px] pt-1.5 px-2 pb-1.5'
       : 'max-w-[490px] w-full text-[11px] pt-0.5 px-3 pb-2 sm:pt-1 sm:px-3.5 sm:pb-2.5';
 
   // Balanced percentage column widths matching Sale Proceed Bill Print

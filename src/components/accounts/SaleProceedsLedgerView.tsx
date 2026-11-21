@@ -620,12 +620,12 @@ export const SaleProceedsLedgerView: React.FC<SaleProceedsLedgerViewProps> = ({
       <div
         id="sale-proceeds-short-print-area"
         data-theme-isolated="true"
-        className="hidden bg-white text-black print-bill-canvas max-w-[760px] w-full mx-auto pt-1 print:pt-0 px-3 pb-2"
+        className="hidden bg-white text-black print-bill-canvas max-w-[760px] w-full mx-auto pt-1.5 print:pt-1 px-3 pb-2"
         style={{ fontFamily: "'Plus Jakarta Sans', 'Noto Sans Devanagari', Arial, sans-serif" }}
       >
-        {/* Header Layout: Company Header + Customer on Left, ACCOUNT DETAILS on Right */}
+        {/* Header Layout: Centered Company Header, then Customer on Left & ACCOUNT DETAILS on Right */}
         <div className="pb-1.5 mb-1">
-          <PrintBusinessHeader profile={currentProfile} variant="ledger" />
+          <PrintBusinessHeader profile={currentProfile} variant="ledger-centered" />
           <div className="flex justify-between items-end gap-4 pt-1">
             {/* Top-Left: M/s: Customer Name only */}
             <div className="max-w-[65%]">
@@ -795,12 +795,12 @@ export const SaleProceedsLedgerView: React.FC<SaleProceedsLedgerViewProps> = ({
       <div
         id="sale-proceeds-print-area"
         data-theme-isolated="true"
-        className="hidden bg-white text-black print-bill-canvas max-w-[760px] w-full mx-auto pt-1 print:pt-0 px-3 pb-2"
+        className="hidden bg-white text-black print-bill-canvas max-w-[760px] w-full mx-auto pt-1.5 print:pt-1 px-3 pb-2"
         style={{ fontFamily: "'Plus Jakarta Sans', 'Noto Sans Devanagari', Arial, sans-serif" }}
       >
-        {/* Header Layout: Company Header + Customer on Left, ACCOUNT DETAILS on Right */}
+        {/* Header Layout: Centered Company Header, then Customer on Left & ACCOUNT DETAILS on Right */}
         <div className="pb-1.5 mb-1">
-          <PrintBusinessHeader profile={currentProfile} variant="ledger" />
+          <PrintBusinessHeader profile={currentProfile} variant="ledger-centered" />
           <div className="flex justify-between items-end gap-4 pt-1">
             {/* Top-Left: M/s: Customer Name only */}
             <div className="max-w-[65%]">

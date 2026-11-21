@@ -5,7 +5,7 @@ import { CompanyContactsHeader } from './CompanyContactsHeader';
 
 interface PrintBusinessHeaderProps {
   profile?: Partial<CompanyProfile> | null;
-  variant?: 'bill' | 'ledger';
+  variant?: 'bill' | 'ledger' | 'ledger-centered';
   paperSize?: BillPaperSize;
   className?: string;
 }
@@ -15,9 +15,11 @@ interface PrintBusinessHeaderProps {
  * Bill (Sale Proceed, Cash Sale, Credit Sale, Receipt, Tax Invoice) and
  * Ledger (Detailed & Short) print views.
  *
- * - Bill (`variant="bill"`): Classic centered single vertical sequence (no logo, starts from top):
+ * - Bill (`variant="bill"`): Classic centered single vertical sequence (no logo, starts near top):
  *   Short Code (e.g. HFC / JD) -> English Name -> Hindi Name -> Address -> Contacts
- * - Ledger (`variant="ledger"`): Two-column layout:
+ * - Customer / Sale Proceed Ledger (`variant="ledger-centered"`): Centered vertical sequence:
+ *   Short Code -> English Name -> Hindi Name -> Complete Address -> Contacts
+ * - Other Reports / Statements (`variant="ledger"`): Two-column layout:
  *   LEFT SIDE: Logo (if present), Short Code, Bold English Name, Hindi Name
  *   RIGHT SIDE: Complete Business Address, Configured Contact Number(s)
  */
@@ -49,15 +51,17 @@ export const PrintBusinessHeader: React.FC<PrintBusinessHeaderProps> = ({
     Boolean(shortLabel) && shortLabel.toUpperCase() !== englishName.toUpperCase();
 
   const isBill = variant === 'bill';
+  const isLedgerCentered = variant === 'ledger-centered';
   const isB7 = isBill && paperSize === 'b7';
   const isB6 = isBill && paperSize === 'b6';
+  const isBSeries = isB7 || isB6;
   const isA5Bill = isBill && paperSize === 'a5';
   const isA4Bill = isBill && paperSize === 'a4';
 
   const ledgerLogoSizeClass = 'w-11 h-11 sm:w-12 sm:h-12 print:w-11 print:h-11';
 
   const shortClass = !isBill
-    ? 'text-[13px] sm:text-[14px] print:text-[14px] tracking-[0.18em]'
+    ? 'text-[13px] sm:text-[14px] print:text-[13.5px] tracking-[0.18em]'
     : isB7
     ? 'text-[8.5px] print:text-[9px] tracking-[0.14em]'
     : isB6
@@ -116,20 +120,26 @@ export const PrintBusinessHeader: React.FC<PrintBusinessHeaderProps> = ({
     ? 'text-[10.5px] sm:text-[11px] print:text-[11px] font-medium text-slate-800 dark:text-slate-800 print:text-black'
     : 'text-[10px] sm:text-[10.5px] print:text-[10px] font-medium text-slate-800 dark:text-slate-800 print:text-black';
 
-  if (isBill) {
+  if (isBill || isLedgerCentered) {
     return (
       <div
-        className={`print-business-header print-business-header--bill text-center border-b border-black mt-0 pt-0 pb-1 mb-0.5 ${className}`}
+        className={`print-business-header ${
+          isLedgerCentered ? 'print-business-header--ledger-centered pb-1.5 mb-1 pt-0.5' : `print-business-header--bill pb-1 mb-0.5 ${isBSeries ? 'pt-1' : 'pt-0'}`
+        } text-center border-b border-black mt-0 ${className}`}
       >
         {showShortLabel && (
-          <div className={`font-bold uppercase text-slate-900 dark:text-slate-900 print:text-black leading-none m-0 p-0 ${shortClass}`}>
+          <div
+            className={`print-business-short-name font-bold uppercase text-slate-900 dark:text-slate-900 print:text-black ${
+              isBSeries || isLedgerCentered ? 'leading-snug pt-[1px]' : 'leading-tight'
+            } m-0 ${isBSeries || isLedgerCentered ? 'px-0 pb-0' : 'p-0'} ${shortClass}`}
+          >
             {shortLabel}
           </div>
         )}
 
         {englishName && (
           <h1
-            className={`font-black tracking-wide text-slate-950 dark:text-slate-950 print:text-black leading-[1.1] m-0 p-0 break-words ${
+            className={`font-black tracking-wide text-slate-950 dark:text-slate-950 print:text-black leading-[1.12] m-0 p-0 break-words ${
               showShortLabel ? 'mt-0.5' : 'mt-0'
             } ${englishClass}`}
           >
@@ -147,7 +157,7 @@ export const PrintBusinessHeader: React.FC<PrintBusinessHeaderProps> = ({
 
         {addressLine && (
           <div
-            className={`font-medium text-slate-800 dark:text-slate-800 print:text-black leading-snug break-words m-0 p-0 mt-0.5 ${addressClass}`}
+            className={`${isLedgerCentered ? 'font-semibold text-black' : 'font-medium text-slate-800 dark:text-slate-800 print:text-black'} leading-snug break-words m-0 p-0 mt-0.5 ${addressClass}`}
           >
             {addressLine}
           </div>

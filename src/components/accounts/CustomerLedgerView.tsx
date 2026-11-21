@@ -649,8 +649,8 @@ export const CustomerLedgerView: React.FC<CustomerLedgerViewProps> = ({
         className="rounded-xl border border-slate-200 bg-white shadow-2xs dark:border-slate-800 dark:bg-slate-900 overflow-hidden"
       >
         {/* Printable Traditional Mandi Statement Header (matches company profile) */}
-        <div className="hidden print:block px-3 pt-0 pb-1.5 text-center mb-1">
-          <PrintBusinessHeader profile={currentProfile} variant="ledger" />
+        <div className="hidden print:block px-3 pt-1 pb-1.5 text-center mb-1">
+          <PrintBusinessHeader profile={currentProfile} variant="ledger-centered" />
           <div className="my-1 text-xs font-bold uppercase tracking-widest border-b border-t border-black py-0.5 inline-block">
             CUSTOMER LEDGER STATEMENT
           </div>
@@ -830,12 +830,12 @@ export const CustomerLedgerView: React.FC<CustomerLedgerViewProps> = ({
       <div
         id="customer-ledger-detailed-print-area"
         data-theme-isolated="true"
-        className="hidden bg-white text-black print-bill-canvas max-w-[760px] w-full mx-auto pt-1 print:pt-0 px-3 pb-2"
+        className="hidden bg-white text-black print-bill-canvas max-w-[760px] w-full mx-auto pt-1.5 print:pt-1 px-3 pb-2"
         style={{ fontFamily: "'Plus Jakarta Sans', 'Noto Sans Devanagari', Arial, sans-serif" }}
       >
-        {/* Header Layout: Company Header + Customer on Left, ACCOUNT DETAILS on Right */}
+        {/* Header Layout: Centered Company Header, then Customer on Left & ACCOUNT DETAILS on Right */}
         <div className="pb-1.5 mb-1">
-          <PrintBusinessHeader profile={currentProfile} variant="ledger" />
+          <PrintBusinessHeader profile={currentProfile} variant="ledger-centered" />
           <div className="flex justify-between items-end gap-4 pt-1">
             {/* Top-Left: M/s: Customer Name only */}
             <div className="max-w-[65%]">
@@ -1211,12 +1211,12 @@ export const CustomerLedgerView: React.FC<CustomerLedgerViewProps> = ({
       <div
         id="customer-ledger-short-print-area"
         data-theme-isolated="true"
-        className="hidden bg-white text-black print-bill-canvas max-w-[760px] w-full mx-auto pt-1 print:pt-0 px-3 pb-2"
+        className="hidden bg-white text-black print-bill-canvas max-w-[760px] w-full mx-auto pt-1.5 print:pt-1 px-3 pb-2"
         style={{ fontFamily: "'Plus Jakarta Sans', 'Noto Sans Devanagari', Arial, sans-serif" }}
       >
-        {/* Header Layout: Company Header + Customer on Left, ACCOUNT DETAILS on Right */}
+        {/* Header Layout: Centered Company Header, then Customer on Left & ACCOUNT DETAILS on Right */}
         <div className="pb-1.5 mb-1">
-          <PrintBusinessHeader profile={currentProfile} variant="ledger" />
+          <PrintBusinessHeader profile={currentProfile} variant="ledger-centered" />
           <div className="flex justify-between items-end gap-4 pt-1">
             {/* Top-Left: M/s: Customer Name only */}
             <div className="max-w-[65%]">

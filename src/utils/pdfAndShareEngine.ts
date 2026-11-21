@@ -102,11 +102,11 @@ export function applyPrintPageSize(size: BillPaperSize = 'a5', targetElementId?:
   }
 
   const margins: Record<BillPaperSize, string> = {
-    b7: '1mm 3.5mm 2mm 3.5mm',
-    b6: '1mm 4mm 2.5mm 4mm',
-    a5: '1mm 4mm 2mm 4mm',
-    compact: '1mm 4mm 2.5mm 4mm',
-    a4: '1.5mm 5mm 3.5mm 5mm',
+    b7: '3mm 3.5mm 2mm 3.5mm',
+    b6: '3mm 4mm 2.5mm 4mm',
+    a5: '2mm 4mm 2mm 4mm',
+    compact: '2mm 4mm 2.5mm 4mm',
+    a4: '3mm 5mm 3.5mm 5mm',
   };
   const margin = margins[size] || margins.a5;
 
@@ -235,21 +235,16 @@ export async function triggerPrint(
   // Provide print-safe internal padding so content never cuts at physical sheet boundaries
   const safePad =
     chosenSize === 'b7'
-      ? '0mm 2mm 1mm 2mm'
+      ? '1.5mm 2mm 1mm 2mm'
       : chosenSize === 'b6'
-      ? '0mm 2mm 1.5mm 2mm'
+      ? '1.5mm 2mm 1.5mm 2mm'
       : chosenSize === 'a5'
-      ? '0mm 2mm 1mm 2mm'
+      ? '0.5mm 2mm 1mm 2mm'
       : chosenSize === 'compact'
-      ? '0mm 2.5mm 1.5mm 2.5mm'
-      : '0mm 2.5mm 2mm 2.5mm';
+      ? '0.5mm 2.5mm 1.5mm 2.5mm'
+      : '1mm 2.5mm 2mm 2.5mm';
   clone.style.padding = safePad;
-  clone.style.paddingTop = '0mm';
   clone.style.marginTop = '0';
-  if (clone.firstElementChild instanceof HTMLElement) {
-    clone.firstElementChild.style.marginTop = '0';
-    clone.firstElementChild.style.paddingTop = '0';
-  }
   clone.style.overflow = 'visible';
   clone.style.backgroundColor = '#ffffff';
   clone.style.color = '#000000';
@@ -463,13 +458,15 @@ export async function generatePdfDoc(
         clonedElement.style.color = '#000000';
         clonedElement.style.border = 'none';
         clonedElement.style.boxShadow = 'none';
-        // Keep safe compact PDF top margin without excessive whitespace or clipping
+        clonedElement.style.overflow = 'visible';
+        // Keep safe compact PDF top margin without clipping Company Short Name
         clonedElement.style.marginTop = '0';
-        clonedElement.style.paddingTop = paperSize === 'a4' ? '4px' : '3px';
-        if (clonedElement.firstElementChild instanceof HTMLElement) {
-          clonedElement.firstElementChild.style.marginTop = '0';
-          clonedElement.firstElementChild.style.paddingTop = '0';
-        }
+        clonedElement.style.paddingTop =
+          paperSize === 'b7' || paperSize === 'b6'
+            ? '10px'
+            : paperSize === 'a4'
+            ? '8px'
+            : '5px';
 
         // Strip dark variant classes from all cloned elements
         const allClonedNodes = [clonedElement, ...Array.from(clonedElement.querySelectorAll('*'))];

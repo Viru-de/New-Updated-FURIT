@@ -327,9 +327,9 @@ export const BillHistoryView: React.FC<BillHistoryViewProps> = ({
                     : pageSize === 'a5'
                     ? 'max-w-[550px] w-full text-[10.5px] pt-0.5 px-3 pb-3 sm:pt-1 sm:px-3.5 sm:pb-4'
                     : pageSize === 'b6'
-                    ? 'max-w-[430px] w-full text-[10px] pt-0.5 px-2.5 pb-2.5 sm:px-3'
+                    ? 'max-w-[430px] w-full text-[10px] pt-1.5 px-2.5 pb-2.5 sm:px-3'
                     : pageSize === 'b7'
-                    ? 'max-w-[300px] w-full text-[8.5px] pt-0.5 px-2 pb-2'
+                    ? 'max-w-[300px] w-full text-[8.5px] pt-1.5 px-2 pb-2'
                     : 'max-w-[490px] w-full text-[11px] pt-0.5 px-3.5 pb-3 sm:pt-1 sm:px-4 sm:pb-4'
                 }`}
                 style={{ fontFamily: "'Plus Jakarta Sans', 'Noto Sans Devanagari', Arial, sans-serif" }}

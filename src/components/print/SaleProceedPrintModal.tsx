@@ -241,15 +241,15 @@ export const SaleProceedPrintModal: React.FC<SaleProceedPrintModalProps> = ({
           <div
             id="mandi-print-area"
             data-theme-isolated="true"
-            className={`mx-auto bg-white text-slate-900 font-sans leading-tight border border-slate-200 print:border-none print:p-0 print:m-0 box-border shadow-md print-bill-canvas sale-proceed-print-canvas overflow-hidden print:overflow-visible ${
+            className={`mx-auto bg-white text-slate-900 font-sans leading-tight border border-slate-200 print:border-none print:p-0 print:m-0 box-border shadow-md print-bill-canvas sale-proceed-print-canvas overflow-visible ${
               pageSize === 'a4'
                 ? 'max-w-[730px] w-full text-[12px] pt-1 px-4 pb-3 sm:pt-1.5 sm:px-5 sm:pb-4'
                 : pageSize === 'a5'
                 ? 'max-w-[550px] w-full text-[10px] pt-0.5 px-2.5 pb-1.5 sm:pt-1 sm:px-3 sm:pb-2'
                 : pageSize === 'b6'
-                ? 'max-w-[430px] w-full text-[10px] pt-0.5 px-2.5 pb-2 sm:px-3'
+                ? 'max-w-[430px] w-full text-[10px] pt-1.5 px-2.5 pb-2 sm:px-3'
                 : pageSize === 'b7'
-                ? 'max-w-[300px] w-full text-[8.5px] pt-0.5 px-2 pb-1.5'
+                ? 'max-w-[300px] w-full text-[8.5px] pt-1.5 px-2 pb-1.5'
                 : 'max-w-[490px] w-full text-[11px] pt-0.5 px-3 pb-2 sm:pt-1 sm:px-3.5 sm:pb-2.5'
             }`}
             style={{ fontFamily: "'Plus Jakarta Sans', 'Noto Sans Devanagari', Arial, sans-serif", boxSizing: 'border-box' }}

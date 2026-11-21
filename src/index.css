@@ -441,15 +441,22 @@ input.no-spinners {
   color-scheme: light;
 }
 
+[data-pdf-export="true"] {
+  overflow: visible !important;
+}
+
 .print-bill-canvas .print-business-header--bill,
 [data-pdf-export="true"] .print-bill-canvas .print-business-header--bill,
-[data-pdf-export="true"] .print-business-header--bill {
+[data-pdf-export="true"] .print-business-header--bill,
+.print-bill-canvas .print-business-header--ledger-centered,
+[data-pdf-export="true"] .print-business-header--ledger-centered {
   margin-top: 0 !important;
-  padding-top: 0 !important;
 }
 
 .print-bill-canvas .print-business-header--bill img,
-[data-pdf-export="true"] .print-business-header--bill img {
+[data-pdf-export="true"] .print-business-header--bill img,
+.print-bill-canvas .print-business-header--ledger-centered img,
+[data-pdf-export="true"] .print-business-header--ledger-centered img {
   display: none !important;
 }
 
@@ -534,7 +541,7 @@ input.no-spinners {
    ========================================================================= */
 @media print {
   @page {
-    margin: 1mm 4mm 3mm 4mm;
+    margin: 3mm 4mm 3mm 4mm;
   }
 
   /* Universal reset for print medium: Force pure white page, black text, and light color-scheme */
@@ -773,7 +780,7 @@ input.no-spinners {
     top: 0 !important;
     box-sizing: border-box !important;
     margin: 0 auto !important;
-    padding: 0mm 2mm 1mm 2mm !important;
+    padding: 1mm 2mm 1mm 2mm !important;
     background-color: #ffffff !important;
     background: #ffffff !important;
     color: #000000 !important;
@@ -798,47 +805,48 @@ input.no-spinners {
     visibility: visible !important;
   }
 
-  /* Preserve centered vertical bill header and two-column left/right ledger header with zero top spacing in all print contexts */
-  #mandi-print-area > div:first-child,
-  #receipt-print-area > div:first-child,
-  #ledger-print-area > div:first-child,
-  #crate-statement-print-area > div:first-child,
-  #report-print-area > div:first-child,
-  #sale-proceeds-print-area > div:first-child,
-  #sale-proceeds-short-print-area > div:first-child,
-  #customer-ledger-detailed-print-area > div:first-child,
-  #customer-ledger-short-print-area > div:first-child,
-  #group-sale-print-summary > div:first-child,
+  /* Preserve centered vertical bill/ledger headers and two-column statement headers with safe compact top spacing */
   #erp-isolated-print-mount > * {
     margin-top: 0 !important;
-    padding-top: 0 !important;
   }
   .print-business-header--bill,
   .fixed.inset-0:not(.no-print):not(.print\:hidden) .print-business-header--bill,
-  #erp-isolated-print-mount .print-business-header--bill {
+  #erp-isolated-print-mount .print-business-header--bill,
+  .print-business-header--ledger-centered,
+  .fixed.inset-0:not(.no-print):not(.print\:hidden) .print-business-header--ledger-centered,
+  #erp-isolated-print-mount .print-business-header--ledger-centered {
     display: block !important;
     width: 100% !important;
     text-align: center !important;
     margin-top: 0 !important;
-    padding-top: 0 !important;
+    overflow: visible !important;
   }
   .print-business-header--bill img,
-  #erp-isolated-print-mount .print-business-header--bill img {
+  #erp-isolated-print-mount .print-business-header--bill img,
+  .print-business-header--ledger-centered img,
+  #erp-isolated-print-mount .print-business-header--ledger-centered img {
     display: none !important;
   }
   .print-business-header--bill > :first-child,
-  #erp-isolated-print-mount .print-business-header--bill > :first-child {
+  #erp-isolated-print-mount .print-business-header--bill > :first-child,
+  .print-business-header--ledger-centered > :first-child,
+  #erp-isolated-print-mount .print-business-header--ledger-centered > :first-child {
     margin-top: 0 !important;
-    padding-top: 0 !important;
+    overflow: visible !important;
   }
   .print-business-header--bill h1,
-  #erp-isolated-print-mount .print-business-header--bill h1 {
+  #erp-isolated-print-mount .print-business-header--bill h1,
+  .print-business-header--ledger-centered h1,
+  #erp-isolated-print-mount .print-business-header--ledger-centered h1 {
     margin-bottom: 0 !important;
     padding: 0 !important;
   }
   .print-business-header--bill .print-business-header-contacts,
   .fixed.inset-0:not(.no-print):not(.print\:hidden) .print-business-header--bill .print-business-header-contacts,
-  #erp-isolated-print-mount .print-business-header--bill .print-business-header-contacts {
+  #erp-isolated-print-mount .print-business-header--bill .print-business-header-contacts,
+  .print-business-header--ledger-centered .print-business-header-contacts,
+  .fixed.inset-0:not(.no-print):not(.print\:hidden) .print-business-header--ledger-centered .print-business-header-contacts,
+  #erp-isolated-print-mount .print-business-header--ledger-centered .print-business-header-contacts {
     display: flex !important;
     flex-wrap: wrap !important;
     align-items: center !important;
@@ -937,7 +945,7 @@ input.no-spinners {
     width: 100% !important;
     max-width: 100% !important;
     margin: 0 auto !important;
-    padding: 0mm 2.5mm 1.5mm 2.5mm !important;
+    padding: 1mm 2.5mm 1.5mm 2.5mm !important;
     background-color: #ffffff !important;
     background: #ffffff !important;
     color: #000000 !important;
@@ -951,7 +959,7 @@ input.no-spinners {
     break-before: avoid !important;
   }
 
-  /* Bill print containers must have zero outer top line and minimal top padding above company header */
+  /* Bill print containers must have zero outer top line and safe compact top padding above company header */
   #mandi-print-area,
   #receipt-print-area,
   #mandi-print-area.bill-outer-frame,
@@ -960,7 +968,7 @@ input.no-spinners {
   #erp-isolated-print-mount #receipt-print-area {
     border: none !important;
     margin-top: 0 !important;
-    padding: 0mm 2mm 1mm 2mm !important;
+    padding: 1mm 2mm 1mm 2mm !important;
   }
 
   /* Multi-page table support: repeat headers and keep rows together */
