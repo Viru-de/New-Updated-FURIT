@@ -59,7 +59,9 @@ export const PrintBusinessHeader: React.FC<PrintBusinessHeaderProps> = ({
 
   const ledgerLogoSizeClass = 'w-11 h-11 sm:w-12 sm:h-12 print:w-11 print:h-11';
 
-  const shortClass = !isBill
+  const shortClass = isLedgerCentered
+    ? 'text-[19px] sm:text-[21px] print:text-[20px] tracking-[0.14em]'
+    : !isBill
     ? 'text-[13px] sm:text-[14px] print:text-[13.5px] tracking-[0.18em]'
     : isB7
     ? 'text-[12px] print:text-[12px] tracking-[0.12em]'
@@ -124,15 +126,15 @@ export const PrintBusinessHeader: React.FC<PrintBusinessHeaderProps> = ({
       <div
         className={`print-business-header ${
           isLedgerCentered
-            ? 'print-business-header--ledger-centered pb-1.5 mb-1 pt-0.5'
+            ? 'print-business-header--ledger-centered pb-1.5 mb-1 pt-1'
             : 'print-business-header--bill pb-1 mb-0.5 pt-1'
         } text-center border-b border-black mt-0 ${className}`}
       >
         {showShortLabel && (
           <div
-            className={`print-business-short-name ${
-              isBill ? 'font-black text-slate-950 dark:text-slate-950' : 'font-bold text-slate-900 dark:text-slate-900'
-            } uppercase print:text-black leading-snug pt-[1px] m-0 px-0 pb-0 ${shortClass}`}
+            className={`print-business-short-name font-black text-slate-950 dark:text-slate-950 uppercase print:text-black leading-snug ${
+              isLedgerCentered ? 'pt-[2px]' : 'pt-[1px]'
+            } m-0 px-0 pb-0 ${shortClass}`}
           >
             {shortLabel}
           </div>

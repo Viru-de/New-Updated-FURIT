@@ -528,12 +528,21 @@ input.no-spinners {
   border-bottom-style: none !important;
 }
 
-/* Bold & clearly readable Company Short Name across all bill print previews & PDF exports */
+/* Bold & clearly readable Company Short Name across bill & centered ledger print previews & PDF exports */
 .print-bill-canvas .print-business-header--bill .print-business-short-name,
-[data-pdf-export="true"] .print-business-header--bill .print-business-short-name {
+[data-pdf-export="true"] .print-business-header--bill .print-business-short-name,
+.print-bill-canvas .print-business-header--ledger-centered .print-business-short-name,
+[data-pdf-export="true"] .print-business-header--ledger-centered .print-business-short-name {
   font-weight: 900 !important;
   color: #000000 !important;
   overflow: visible !important;
+}
+
+.print-bill-canvas .print-business-header--ledger-centered .print-business-short-name,
+[data-pdf-export="true"] .print-business-header--ledger-centered .print-business-short-name {
+  font-size: 20px !important;
+  line-height: 1.25 !important;
+  padding-top: 2px !important;
 }
 
 /* CSS-only bold & readable product transaction/particulars lines in Sale Proceed & Customer Ledger Detailed + Short Prints (PDF export & canvas) */
@@ -1759,12 +1768,21 @@ input.no-spinners {
     border-right: none !important;
   }
 
-  /* Bold & clearly visible Company Short Name across all bill print formats */
+  /* Bold & clearly visible Company Short Name across all bill & centered ledger print formats */
   .print-business-header--bill .print-business-short-name,
-  #erp-isolated-print-mount .print-business-header--bill .print-business-short-name {
+  #erp-isolated-print-mount .print-business-header--bill .print-business-short-name,
+  .print-business-header--ledger-centered .print-business-short-name,
+  #erp-isolated-print-mount .print-business-header--ledger-centered .print-business-short-name {
     font-weight: 900 !important;
     color: #000000 !important;
     overflow: visible !important;
+  }
+
+  .print-business-header--ledger-centered .print-business-short-name,
+  #erp-isolated-print-mount .print-business-header--ledger-centered .print-business-short-name {
+    font-size: 20px !important;
+    line-height: 1.25 !important;
+    padding-top: 2px !important;
   }
 
   /* CSS-only bold & readable product transaction/particulars lines in Sale Proceed & Customer Ledger Detailed + Short Prints */
