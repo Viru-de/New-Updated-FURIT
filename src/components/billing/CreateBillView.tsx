@@ -758,7 +758,7 @@ export const CreateBillView: React.FC<CreateBillViewProps> = ({
                   const colWidths = isB7
                     ? { no: 'w-[20px]', qty: 'w-[36px]', weight: 'w-[42px]', price: 'w-[40px]', amount: 'w-[50px]' }
                     : isB6
-                    ? { no: 'w-[24px]', qty: 'w-[44px]', weight: 'w-[52px]', price: 'w-[52px]', amount: 'w-[64px]' }
+                    ? { no: 'box-border tracking-tight whitespace-nowrap', qty: 'box-border whitespace-nowrap', weight: 'box-border tracking-tight whitespace-nowrap', price: 'box-border whitespace-nowrap', amount: 'box-border whitespace-nowrap' }
                     : { no: 'w-8', qty: 'w-16', weight: 'w-20', price: 'w-18', amount: 'w-22' };
                   const tablePad = isB7 ? 'p-0.5' : 'p-1';
                   const tableHeadFont = isB7 ? 'text-[8px] print:text-[9px]' : isB6 ? 'text-[9.5px] print:text-[11px]' : 'text-[11px] print:text-[12px]';
@@ -768,7 +768,7 @@ export const CreateBillView: React.FC<CreateBillViewProps> = ({
                   const blankRows = Math.max(0, (isB7 ? 1 : isB6 ? 3 : 6) - items.length - 1);
 
                   return (
-                    <table className={`w-full border-collapse border border-black ${isB7 ? 'max-w-full table-fixed box-border b7-bill-table' : ''} ${tableBodyFont}`}>
+                    <table className={`w-full border-collapse border border-black ${isB7 ? 'max-w-full table-fixed box-border b7-bill-table' : ''} ${isB6 ? 'max-w-full table-fixed box-border b6-bill-table' : ''} ${tableBodyFont}`}>
                       {isB7 && (
                         <colgroup>
                           <col style={{ width: '9%' }} />
@@ -779,10 +779,20 @@ export const CreateBillView: React.FC<CreateBillViewProps> = ({
                           <col style={{ width: '16%' }} />
                         </colgroup>
                       )}
+                      {isB6 && (
+                        <colgroup>
+                          <col style={{ width: '8%' }} />
+                          <col style={{ width: '32%' }} />
+                          <col style={{ width: '19%' }} />
+                          <col style={{ width: '11%' }} />
+                          <col style={{ width: '13%' }} />
+                          <col style={{ width: '17%' }} />
+                        </colgroup>
+                      )}
                       <thead>
                         <tr className={`border-b border-black font-bold uppercase ${tableHeadFont} bg-slate-50 print:bg-transparent`}>
-                          <th className={`border-r border-black ${tablePad} text-center ${isB7 ? 'box-border tracking-tight whitespace-nowrap' : colWidths.no}`}>No.</th>
-                          <th className={`border-r border-black ${tablePad} text-left ${isB7 ? 'box-border' : ''}`}>ITEM NAME</th>
+                          <th className={`border-r border-black ${isB6 ? 'px-0.5 py-1' : tablePad} text-center ${isB7 ? 'box-border tracking-tight whitespace-nowrap' : colWidths.no}`}>No.</th>
+                          <th className={`border-r border-black ${isB6 ? 'pl-1.5 pr-1 py-1 box-border' : tablePad} text-left ${isB7 ? 'box-border' : ''}`}>ITEM NAME</th>
                           <th className={`border-r border-black ${tablePad} text-right ${isB7 ? 'box-border whitespace-nowrap' : colWidths.qty}`}>QTY</th>
                           <th className={`border-r border-black ${tablePad} text-right ${isB7 ? 'box-border tracking-tight whitespace-nowrap' : colWidths.weight}`}>WEIGHT</th>
                           <th className={`border-r border-black ${tablePad} text-right ${isB7 ? 'box-border whitespace-nowrap' : colWidths.price}`}>PRICE</th>
@@ -792,16 +802,16 @@ export const CreateBillView: React.FC<CreateBillViewProps> = ({
                       <tbody>
                         {items.map((it, idx) => (
                           <tr key={it.id || idx} className="border-b border-black/40 print:text-black">
-                            <td className={`border-r border-black ${tablePad} ${isB7 ? 'box-border whitespace-nowrap tabular-nums' : ''} text-center font-mono print:font-semibold print:text-black`}>{idx + 1}</td>
-                            <td className={`border-r border-black ${tablePad} ${isB7 ? `box-border align-middle overflow-hidden ${getBillItemNameCellClass(it.fruitName, 'b7')}` : ''} font-semibold print:font-bold uppercase print:text-black`}>{it.fruitName}</td>
-                            <td className={`border-r border-black ${tablePad} text-right font-mono print:font-semibold print:text-black`}>{it.quantity}</td>
-                            <td className={`border-r border-black ${tablePad} ${isB7 ? 'box-border whitespace-nowrap tabular-nums' : ''} text-right font-mono print:font-semibold print:text-black`}>
+                            <td className={`border-r border-black ${isB6 ? 'px-0.5 py-1 box-border whitespace-nowrap tabular-nums' : tablePad} ${isB7 ? 'box-border whitespace-nowrap tabular-nums' : ''} text-center font-mono print:font-semibold print:text-black align-middle`}>{idx + 1}</td>
+                            <td className={`border-r border-black ${isB6 ? `pl-1.5 pr-1 py-1 box-border align-middle overflow-hidden ${getBillItemNameCellClass(it.fruitName, 'b6')}` : `${tablePad} ${isB7 ? `box-border align-middle overflow-hidden ${getBillItemNameCellClass(it.fruitName, 'b7')}` : ''}`} font-semibold print:font-bold uppercase print:text-black`}>{it.fruitName}</td>
+                            <td className={`border-r border-black ${tablePad} ${isB6 ? 'box-border' : ''} text-right font-mono print:font-semibold print:text-black align-middle`}>{it.quantity}</td>
+                            <td className={`border-r border-black ${tablePad} ${isB7 ? 'box-border whitespace-nowrap tabular-nums' : isB6 ? 'box-border whitespace-nowrap tabular-nums' : ''} text-right font-mono print:font-semibold print:text-black align-middle`}>
                               {it.unit === 'KG' ? `${it.quantity} KG` : ''}
                             </td>
-                            <td className={`border-r border-black ${tablePad} text-right font-mono print:font-semibold print:text-black`}>
+                            <td className={`border-r border-black ${tablePad} ${isB6 ? 'box-border' : ''} text-right font-mono print:font-semibold print:text-black align-middle`}>
                               {formatBillAmount(it.rate)}
                             </td>
-                            <td className={`${tablePad} text-right font-mono font-bold print:text-black`}>
+                            <td className={`${tablePad} ${isB6 ? 'box-border' : ''} text-right font-mono font-bold print:text-black align-middle`}>
                               {formatBillAmount(it.amount)}
                             </td>
                           </tr>
@@ -809,19 +819,19 @@ export const CreateBillView: React.FC<CreateBillViewProps> = ({
 
                         {/* Total Qty & Total Weight Row: immediately below the item rows */}
                         <tr className="border-b-2 border-t border-black font-bold bg-slate-50/50 print:bg-transparent text-slate-900 print:text-black">
-                          <td colSpan={2} className={`border-r border-black ${tablePad} text-right font-bold uppercase text-slate-900 print:text-black`}>
+                          <td colSpan={2} className={`border-r border-black ${tablePad} box-border text-right font-bold uppercase text-slate-900 print:text-black`}>
                             &nbsp;
                           </td>
-                          <td className={`border-r border-black ${tablePad} text-right font-mono font-bold text-slate-900 print:text-black`}>
+                          <td className={`border-r border-black ${tablePad} box-border text-right font-mono font-bold text-slate-900 print:text-black`}>
                             {totalQty}
                           </td>
-                          <td className={`border-r border-black ${tablePad} text-right font-mono font-bold text-slate-900 print:text-black whitespace-nowrap`}>
+                          <td className={`border-r border-black ${tablePad} box-border text-right font-mono font-bold text-slate-900 print:text-black whitespace-nowrap`}>
                             {totalWeight > 0 ? totalWeight : 0}
                           </td>
-                          <td className={`border-r border-black ${tablePad} text-right font-mono`}>
+                          <td className={`border-r border-black ${tablePad} box-border text-right font-mono`}>
                             &nbsp;
                           </td>
-                          <td className={`${tablePad} text-right font-mono font-bold`}>
+                          <td className={`${tablePad} box-border text-right font-mono font-bold`}>
                             &nbsp;
                           </td>
                         </tr>
@@ -829,12 +839,12 @@ export const CreateBillView: React.FC<CreateBillViewProps> = ({
                         {/* Preserved Blank Rows to maintain traditional wholesale bill spacing */}
                         {Array.from({ length: blankRows }).map((_, bIdx) => (
                           <tr key={`blank-${bIdx}`} className={`border-b border-black/20 ${isB7 ? 'h-3.5' : isB6 ? 'h-4' : 'h-6'}`}>
-                            <td className={`border-r border-black ${tablePad}`}>&nbsp;</td>
-                            <td className={`border-r border-black ${tablePad}`}>&nbsp;</td>
-                            <td className={`border-r border-black ${tablePad}`}>&nbsp;</td>
-                            <td className={`border-r border-black ${tablePad}`}>&nbsp;</td>
-                            <td className={`border-r border-black ${tablePad}`}>&nbsp;</td>
-                            <td className={tablePad}>&nbsp;</td>
+                            <td className={`border-r border-black box-border ${isB6 ? 'px-0.5 py-1' : tablePad}`}>&nbsp;</td>
+                            <td className={`border-r border-black box-border ${isB6 ? 'pl-1.5 pr-1 py-1' : tablePad}`}>&nbsp;</td>
+                            <td className={`border-r border-black box-border ${tablePad}`}>&nbsp;</td>
+                            <td className={`border-r border-black box-border ${tablePad}`}>&nbsp;</td>
+                            <td className={`border-r border-black box-border ${tablePad}`}>&nbsp;</td>
+                            <td className={`box-border ${tablePad}`}>&nbsp;</td>
                           </tr>
                         ))}
                       </tbody>

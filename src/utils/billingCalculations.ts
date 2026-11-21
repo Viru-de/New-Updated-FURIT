@@ -67,10 +67,10 @@ export function getBillItemNameCellClass(
     return 'text-[6px] print:text-[6.5px] tracking-tight leading-[1.1] whitespace-normal break-words [overflow-wrap:anywhere]';
   }
   if (pageSize === 'b6') {
-    if (len <= 18) return 'text-[9.5px] print:text-[10.5px] whitespace-nowrap';
-    if (len <= 26) return 'text-[8px] print:text-[9px] tracking-tight whitespace-nowrap';
-    if (len <= 34) return 'text-[7px] print:text-[8px] tracking-tighter whitespace-nowrap';
-    return 'text-[7px] print:text-[7.5px] tracking-tight leading-tight break-words';
+    if (len <= 14) return 'text-[9.5px] print:text-[10.5px] leading-[1.2] whitespace-normal break-words [overflow-wrap:anywhere]';
+    if (len <= 24) return 'text-[8.5px] print:text-[9.5px] tracking-tight leading-[1.2] whitespace-normal break-words [overflow-wrap:anywhere]';
+    if (len <= 34) return 'text-[8px] print:text-[8.5px] tracking-tight leading-[1.15] whitespace-normal break-words [overflow-wrap:anywhere]';
+    return 'text-[7.5px] print:text-[8px] tracking-tight leading-[1.15] whitespace-normal break-words [overflow-wrap:anywhere]';
   }
   if (pageSize === 'a4') {
     if (len <= 26) return 'text-[11.5px] print:text-[13px] whitespace-nowrap';

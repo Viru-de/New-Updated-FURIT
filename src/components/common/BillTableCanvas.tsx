@@ -141,8 +141,8 @@ export const BillTableCanvas: React.FC<BillTableCanvasProps> = ({
       }
     : isB6
     ? {
-        no: '5%',
-        item: '35%',
+        no: '8%',
+        item: '32%',
         qty: '19%',
         kg: '11%',
         rate: '13%',
@@ -269,7 +269,7 @@ export const BillTableCanvas: React.FC<BillTableCanvasProps> = ({
       )}
 
       {/* Exact Table Format: No. | Item Name | Qty | KG | Rate | Amount */}
-      <table className={`w-full max-w-full table-fixed box-border border-collapse border border-black ${isB7 ? 'b7-bill-table' : ''} ${tableBodyFont}`}>
+      <table className={`w-full max-w-full table-fixed box-border border-collapse border border-black ${isB7 ? 'b7-bill-table' : isB6 ? 'b6-bill-table' : ''} ${tableBodyFont}`}>
         <colgroup>
           <col style={{ width: colWidths.no }} />
           <col style={{ width: colWidths.item }} />
@@ -280,8 +280,8 @@ export const BillTableCanvas: React.FC<BillTableCanvasProps> = ({
         </colgroup>
         <thead>
           <tr className={`border-b border-black font-bold uppercase ${tableHeadFont} bg-slate-50 print:bg-transparent text-slate-950 print:text-black`}>
-            <th className={`border-r border-black ${tablePad} box-border text-center ${isB7 ? 'tracking-tight' : ''}`}>No.</th>
-            <th className={`border-r border-black ${tablePad} box-border text-left`}>ITEM NAME</th>
+            <th className={`border-r border-black ${isB6 ? 'px-0.5 py-1 tracking-tight whitespace-nowrap' : tablePad} box-border text-center ${isB7 ? 'tracking-tight' : ''}`}>No.</th>
+            <th className={`border-r border-black ${isB6 ? 'pl-1.5 pr-1 py-1' : tablePad} box-border text-left`}>ITEM NAME</th>
             <th className={`border-r border-black ${tablePad} box-border text-right ${!isLivePreview ? 'bill-qty-col' : 'print:whitespace-nowrap'} whitespace-nowrap`}>QTY</th>
             <th className={`border-r border-black ${tablePad} box-border text-right ${isB7 ? 'tracking-tight' : ''}`}>KG</th>
             <th className={`border-r border-black ${tablePad} box-border text-right`}>RATE</th>
@@ -301,11 +301,11 @@ export const BillTableCanvas: React.FC<BillTableCanvasProps> = ({
                 key={it.id || idx}
                 className={`border-b border-black/40 print:text-black ${rowHeight}`}
               >
-                <td className={`border-r border-black ${tablePad} ${isB7 ? 'box-border whitespace-nowrap tabular-nums' : ''} text-center font-mono print:font-semibold print:text-black align-middle`}>
+                <td className={`border-r border-black ${isB6 ? 'px-0.5 py-1 box-border whitespace-nowrap tabular-nums' : `${tablePad} ${isB7 ? 'box-border whitespace-nowrap tabular-nums' : ''}`} text-center font-mono print:font-semibold print:text-black align-middle`}>
                   {idx + 1}
                 </td>
                 <td
-                  className={`border-r border-black ${tablePad} ${isB7 ? 'box-border' : ''} font-semibold print:font-bold uppercase print:text-black align-middle overflow-hidden ${getBillItemNameCellClass(it.fruitName, pageSize)}`}
+                  className={`border-r border-black ${isB6 ? 'pl-1.5 pr-1 py-1 box-border' : `${tablePad} ${isB7 ? 'box-border' : ''}`} font-semibold print:font-bold uppercase print:text-black align-middle overflow-hidden ${getBillItemNameCellClass(it.fruitName, pageSize)}`}
                 >
                   {it.fruitName || 'ITEM'}
                 </td>
@@ -342,12 +342,12 @@ export const BillTableCanvas: React.FC<BillTableCanvasProps> = ({
           {/* Preserved Blank Rows for Mandi Balance */}
           {Array.from({ length: blankRowsCount }).map((_, bIdx) => (
             <tr key={`blank-${bIdx}`} className={`border-b border-black/20 ${rowHeight}`}>
-              <td className={`border-r border-black ${tablePad}`}>&nbsp;</td>
-              <td className={`border-r border-black ${tablePad}`}>&nbsp;</td>
-              <td className={`border-r border-black ${tablePad}`}>&nbsp;</td>
-              <td className={`border-r border-black ${tablePad}`}>&nbsp;</td>
-              <td className={`border-r border-black ${tablePad}`}>&nbsp;</td>
-              <td className={tablePad}>&nbsp;</td>
+              <td className={`border-r border-black box-border ${isB6 ? 'px-0.5 py-1' : tablePad}`}>&nbsp;</td>
+              <td className={`border-r border-black box-border ${isB6 ? 'pl-1.5 pr-1 py-1' : tablePad}`}>&nbsp;</td>
+              <td className={`border-r border-black box-border ${tablePad}`}>&nbsp;</td>
+              <td className={`border-r border-black box-border ${tablePad}`}>&nbsp;</td>
+              <td className={`border-r border-black box-border ${tablePad}`}>&nbsp;</td>
+              <td className={`box-border ${tablePad}`}>&nbsp;</td>
             </tr>
           ))}
         </tbody>
@@ -358,7 +358,7 @@ export const BillTableCanvas: React.FC<BillTableCanvasProps> = ({
             <tr className="border-t-2 border-b border-slate-300 print:border-black font-bold bg-slate-50/70 print:bg-transparent text-slate-950 dark:text-slate-950 print:text-black">
               <td
                 colSpan={2}
-                className={`border-r border-slate-300 print:border-black ${tablePad}`}
+                className={`border-r border-slate-300 print:border-black box-border ${tablePad}`}
               >
                 &nbsp;
               </td>
@@ -385,7 +385,7 @@ export const BillTableCanvas: React.FC<BillTableCanvasProps> = ({
             <tr className="border-t-2 border-b border-slate-300 print:border-black font-bold bg-slate-50/70 print:bg-transparent text-slate-950 dark:text-slate-950 print:text-black">
               <td
                 colSpan={2}
-                className={`border-r border-slate-300 print:border-black ${tablePad}`}
+                className={`border-r border-slate-300 print:border-black box-border ${tablePad}`}
               >
                 &nbsp;
               </td>
