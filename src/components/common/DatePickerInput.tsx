@@ -65,14 +65,14 @@ export const DatePickerInput: React.FC<DatePickerInputProps> = ({
           placeholder="DD-MM-YYYY"
           onChange={handleDisplayChange}
           disabled={disabled}
-          className="neu-inset w-full px-3.5 py-2 text-sm font-mono-numbers text-slate-900 outline-none transition-all focus:ring-2 focus:ring-blue-500/40 disabled:opacity-60"
+          className="neu-inset w-full px-3.5 py-2 text-sm font-mono-numbers text-slate-900 dark:text-slate-100 outline-none transition-all focus:ring-2 focus:ring-blue-500/40 disabled:opacity-60"
         />
         <button
           type="button"
           onClick={triggerCalendar}
           disabled={disabled}
           title="Open Calendar Picker (Select any date)"
-          className="absolute right-2 rounded-lg p-1.5 text-slate-500 hover:text-blue-600 hover:bg-white/60 transition-colors"
+          className="absolute right-2 rounded-lg p-1.5 text-slate-500 hover:text-blue-600 hover:bg-white/60 dark:text-slate-300 dark:hover:text-blue-400 dark:hover:bg-slate-700/60 transition-colors"
         >
           <Calendar className="h-4 w-4" />
         </button>

@@ -1535,9 +1535,9 @@ export const GroupSaleView: React.FC<GroupSaleViewProps> = ({
 
       {/* Clean Printable Daily Summary for window.print() */}
       <div className="hidden print:block font-sans text-black pt-1 px-3 pb-4 print:pt-0 bg-white" id="group-sale-print-summary" style={{ fontFamily: "'Plus Jakarta Sans', 'Noto Sans Devanagari', Arial, sans-serif" }}>
-        <div className="text-center border-b-2 border-black pb-2 mb-3">
-          <PrintBusinessHeader profile={currentProfile} variant="ledger" className="mb-1" />
-          <p className="text-xs font-semibold mt-1">Daily Group Sale Summary — {formatDate(selectedDate)}</p>
+        <div className="text-center pb-2 mb-3">
+          <PrintBusinessHeader profile={currentProfile} variant="ledger-centered" className="mb-1" />
+          <p className="text-xs font-semibold mt-1.5 uppercase tracking-wide text-black">Daily Group Sale Summary — {formatDate(selectedDate)}</p>
         </div>
 
         <div className="flex justify-between text-xs mb-4">
@@ -1572,7 +1572,7 @@ export const GroupSaleView: React.FC<GroupSaleViewProps> = ({
           </thead>
           <tbody>
             {rows.map((r, i) => (
-              <tr key={r.rowId} className="border-b border-black print:font-semibold print:text-black">
+              <tr key={r.rowId} className="ledger-tx-row border-b border-black print:font-semibold print:text-black">
                 <td className="border border-black p-1 text-center">{i + 1}</td>
                 <td className="border border-black p-1">{r.creditSaleNo}</td>
                 <td className="border border-black p-1 font-bold">{r.customerName}</td>
@@ -1587,7 +1587,7 @@ export const GroupSaleView: React.FC<GroupSaleViewProps> = ({
             ))}
 
             {/* Total Qty & Total Weight Row: immediately below the item rows */}
-            <tr className="border-b-2 border-t border-black font-bold bg-slate-50/50 print:bg-transparent text-slate-900 print:text-black">
+            <tr className="ledger-tx-row border-b-2 border-t border-black font-bold bg-slate-50/50 print:bg-transparent text-slate-900 print:text-black">
               <td colSpan={4} className="border border-black p-1 text-right font-bold uppercase">
                 Total:
               </td>
@@ -1618,7 +1618,7 @@ export const GroupSaleView: React.FC<GroupSaleViewProps> = ({
           </tfoot>
         </table>
 
-        <div className="mt-8 flex justify-between text-xs pt-8 border-t border-dashed border-gray-400">
+        <div className="bill-bottom-footer mt-8 flex justify-between text-xs pt-8 border-t border-dashed border-gray-400">
           <div>Prepared By: Mandi Accountant</div>
           <div>Authorized Signature: {formatCompanySignature(currentProfile)}</div>
         </div>

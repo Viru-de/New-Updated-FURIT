@@ -800,12 +800,37 @@ export const CustomerLedgerView: React.FC<CustomerLedgerViewProps> = ({
                 </td>
                 <td className="no-print"></td>
               </tr>
+              <tr className="hidden print:table-row ledger-closing-meta-row bg-white text-black">
+                <td colSpan={5} className="ledger-closing-meta-cell px-2 pt-2 pb-1 bg-white text-black">
+                  <div className="flex justify-end items-baseline gap-6 pb-1.5">
+                    <span className="text-sm font-medium uppercase tracking-wide text-black">
+                      CLOSING BALANCE :
+                    </span>
+                    <span className="text-sm font-extrabold font-mono text-black whitespace-nowrap">
+                      {Math.abs(ledger.closingBalance).toFixed(2)} {ledger.closingBalance > 0 ? 'Dr' : ledger.closingBalance < 0 ? 'Cr' : ''}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-end text-xs border-t border-black pt-1.5">
+                    <div className="text-[8.5px] text-black font-mono">
+                      Software Developed by: {currentProfile.softwareDevelopedBy || defaultProfile.softwareDevelopedBy || 'Klyia Technology'}
+                    </div>
+                    <div className="text-right shrink-0">
+                      <div className="text-[10.5px] font-bold uppercase text-black">
+                        {formatCompanySignature(currentProfile)}
+                      </div>
+                      <div className="text-[8.5px] uppercase tracking-wider text-black mt-3">
+                        AUTHORISED SIGNATURE
+                      </div>
+                    </div>
+                  </div>
+                </td>
+              </tr>
             </tfoot>
           </table>
         </div>
 
-        {/* Bottom Banner */}
-        <div className="flex flex-col sm:flex-row items-center justify-between border-t border-slate-200 bg-slate-50 px-6 py-4 dark:border-slate-800 dark:bg-slate-800/60">
+        {/* Bottom Banner (On-screen) */}
+        <div className="no-print flex flex-col sm:flex-row items-center justify-between border-t border-slate-200 bg-slate-50 px-6 py-4 dark:border-slate-800 dark:bg-slate-800/60">
           <div className="text-xs text-slate-600 dark:text-slate-400">
             Net balance is calculated dynamically from all historical transactions.
           </div>
@@ -827,13 +852,10 @@ export const CustomerLedgerView: React.FC<CustomerLedgerViewProps> = ({
           </div>
         </div>
 
-        {/* Software attribution & Signatory (matches requirement: left side, smaller font size) */}
-        <div className="p-3 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 print:border-black flex justify-between items-center text-xs">
-          <div className="text-[8px] sm:text-[8.5px] text-left text-slate-500 dark:text-slate-400 print:text-black font-mono">
+        {/* Software attribution (On-screen) */}
+        <div className="no-print p-3 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 flex justify-between items-center text-xs">
+          <div className="text-[8px] sm:text-[8.5px] text-left text-slate-500 dark:text-slate-400 font-mono">
             Software Developed by: {defaultProfile.softwareDevelopedBy || 'Klyia Technology'}
-          </div>
-          <div className="hidden print:block text-right font-bold uppercase text-[11px]">
-            {formatCompanySignature(defaultProfile)}
           </div>
         </div>
       </div>
@@ -1049,121 +1071,145 @@ export const CustomerLedgerView: React.FC<CustomerLedgerViewProps> = ({
                   const creditVal = entry.credit !== null && entry.credit !== undefined && entry.credit > 0 ? Number(entry.credit).toFixed(2) : '';
                   const balanceVal = entry.balance < 0 ? `(${Math.abs(entry.balance).toFixed(2)})` : Number(entry.balance).toFixed(2);
 
+                  // Keep every normal transaction together as a single unbroken block.
+                  // Only if a single transaction has > 24 items (exceeds one full A4 page) split it cleanly into 22-item chunks with repeated heading.
+                  const ITEM_CHUNK_LIMIT = 24;
+                  const ITEM_CHUNK_SIZE = 22;
+                  const itemChunks: typeof rawItems[] =
+                    rawItems.length > ITEM_CHUNK_LIMIT
+                      ? Array.from(
+                          { length: Math.ceil(rawItems.length / ITEM_CHUNK_SIZE) },
+                          (_, cIdx) => rawItems.slice(cIdx * ITEM_CHUNK_SIZE, (cIdx + 1) * ITEM_CHUNK_SIZE)
+                        )
+                      : [rawItems];
+
                   return (
-                    <tr key={`cl-det-${entry.id}`} className="border-b border-black/35">
-                      {/* DATE */}
-                      <td className="py-1.5 px-2 font-mono text-[11px] text-black align-top whitespace-nowrap border-r border-black/35">
-                        {formatDate(entry.date)}
-                      </td>
+                    <React.Fragment key={`cl-det-grp-${entry.id}`}>
+                      {itemChunks.map((chunkItems, chunkIdx) => {
+                        const isFirstChunk = chunkIdx === 0;
+                        const isLastChunk = chunkIdx === itemChunks.length - 1;
+                        return (
+                          <tr
+                            key={`cl-det-${entry.id}${itemChunks.length > 1 ? `-c${chunkIdx}` : ''}`}
+                            className="ledger-tx-row border-b border-black/35"
+                          >
+                            {/* DATE */}
+                            <td className="py-1.5 px-2 font-mono text-[11px] text-black align-top whitespace-nowrap border-r border-black/35">
+                              {isFirstChunk ? formatDate(entry.date) : ''}
+                            </td>
 
-                      {/* PARTICULARS */}
-                      <td className="py-1.5 px-2.5 text-black align-top border-r border-black/35">
-                        {isOb ? (
-                          <div className="font-semibold text-[11.5px] text-black uppercase">
-                            {entry.particulars || 'Opening Balance'}
-                          </div>
-                        ) : (
-                          <div className="space-y-0.5">
-                            {/* Line 1: Transaction number on Left, Account Ref / Qty on Right */}
-                            <div className="flex items-baseline justify-between gap-3 text-[11.5px] leading-snug text-black">
-                              <span className="font-semibold text-black whitespace-nowrap">
-                                {shortInfo.primaryRef}
-                              </span>
-                              <div className="flex items-baseline gap-2.5 shrink-0 font-mono text-black">
-                                {shortInfo.accountRef && (
-                                  <span className="uppercase font-medium whitespace-nowrap">
-                                    {shortInfo.accountRef}
-                                  </span>
-                                )}
-                                {txQty > 0 && (
-                                  <span className="font-semibold whitespace-nowrap">
-                                    Qty:{txQty}
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-
-                            {/* Item details: Name on Left, Qty Unit [Weight] @ Rate = Amount on Right */}
-                            {rawItems.length > 0 ? (
-                              <div className="space-y-0.5 text-black">
-                                {rawItems.map((it, iIdx) => {
-                                  const itRate = Number(it.rate ?? 0);
-                                  const itAmount = Number(it.amount ?? (it.qty * itRate));
-
-                                  return (
-                                    <div
-                                      key={iIdx}
-                                      className="sp-detail-line flex items-baseline justify-between gap-3 text-[11.5px] leading-snug text-black"
-                                    >
-                                      <span className="font-medium text-black uppercase">
-                                        {it.name}
-                                      </span>
-                                      <span className="font-mono text-black text-right shrink-0">
-                                        <span className="whitespace-nowrap sp-qty-nowrap">
-                                          {it.qty} {it.unit}
+                            {/* PARTICULARS */}
+                            <td className="py-1.5 px-2.5 text-black align-top border-r border-black/35">
+                              {isOb ? (
+                                <div className="ledger-tx-block font-semibold text-[11.5px] text-black uppercase">
+                                  {entry.particulars || 'Opening Balance'}
+                                </div>
+                              ) : (
+                                <div className="ledger-tx-block space-y-0.5">
+                                  {/* Line 1: Transaction number on Left, Account Ref / Qty on Right */}
+                                  <div className="flex items-baseline justify-between gap-3 text-[11.5px] leading-snug text-black">
+                                    <span className="font-semibold text-black whitespace-nowrap">
+                                      {shortInfo.primaryRef}
+                                      {!isFirstChunk ? ' (contd.)' : ''}
+                                    </span>
+                                    <div className="flex items-baseline gap-2.5 shrink-0 font-mono text-black">
+                                      {shortInfo.accountRef && (
+                                        <span className="uppercase font-medium whitespace-nowrap">
+                                          {shortInfo.accountRef}
                                         </span>
-                                        {it.weight && Number(it.weight) > 0 ? ` ${it.weight}kg` : ''}
-                                        {` @ ${Number(itRate.toFixed(2))}`}
-                                        {itAmount > 0 ? ` = ${Number(itAmount.toFixed(2))}` : ''}
+                                      )}
+                                      {isFirstChunk && txQty > 0 && (
+                                        <span className="font-semibold whitespace-nowrap">
+                                          Qty:{txQty}
+                                        </span>
+                                      )}
+                                    </div>
+                                  </div>
+
+                                  {/* Item details: Name on Left, Qty Unit [Weight] @ Rate = Amount on Right */}
+                                  {chunkItems.length > 0 ? (
+                                    <div className="space-y-0.5 text-black">
+                                      {chunkItems.map((it, iIdx) => {
+                                        const itRate = Number(it.rate ?? 0);
+                                        const itAmount = Number(it.amount ?? (it.qty * itRate));
+
+                                        return (
+                                          <div
+                                            key={iIdx}
+                                            className="sp-detail-line flex items-baseline justify-between gap-3 text-[11.5px] leading-snug text-black"
+                                          >
+                                            <span className="font-medium text-black uppercase">
+                                              {it.name}
+                                            </span>
+                                            <span className="font-mono text-black text-right shrink-0">
+                                              <span className="whitespace-nowrap sp-qty-nowrap">
+                                                {it.qty} {it.unit}
+                                              </span>
+                                              {it.weight && Number(it.weight) > 0 ? ` ${it.weight}kg` : ''}
+                                              {` @ ${Number(itRate.toFixed(2))}`}
+                                              {itAmount > 0 ? ` = ${Number(itAmount.toFixed(2))}` : ''}
+                                            </span>
+                                          </div>
+                                        );
+                                      })}
+                                    </div>
+                                  ) : isFirstChunk && spRecord && (spRecord.quantity > 0 || spRecord.rate > 0) ? (
+                                    <div className="flex items-baseline justify-between gap-3 text-[11.5px] text-black font-mono">
+                                      <span>&nbsp;</span>
+                                      <span>
+                                        <span className="whitespace-nowrap sp-qty-nowrap">
+                                          {spRecord.quantity} {spRecord.unit || 'Crate'}
+                                        </span>
+                                        {(spRecord.weight ?? spRecord.kg) ? ` ${spRecord.weight ?? spRecord.kg}kg` : ''}
+                                        {spRecord.rate ? ` @ ${spRecord.rate}` : ''}
+                                        {spRecord.amount ? ` = ${Number(Number(spRecord.amount).toFixed(2))}` : ''}
                                       </span>
                                     </div>
-                                  );
-                                })}
-                              </div>
-                            ) : spRecord && (spRecord.quantity > 0 || spRecord.rate > 0) ? (
-                              <div className="flex items-baseline justify-between gap-3 text-[11.5px] text-black font-mono">
-                                <span>&nbsp;</span>
-                                <span>
-                                  <span className="whitespace-nowrap sp-qty-nowrap">
-                                    {spRecord.quantity} {spRecord.unit || 'Crate'}
-                                  </span>
-                                  {(spRecord.weight ?? spRecord.kg) ? ` ${spRecord.weight ?? spRecord.kg}kg` : ''}
-                                  {spRecord.rate ? ` @ ${spRecord.rate}` : ''}
-                                  {spRecord.amount ? ` = ${Number(Number(spRecord.amount).toFixed(2))}` : ''}
-                                </span>
-                              </div>
-                            ) : null}
+                                  ) : null}
 
-                            {/* Expenses Breakdown: items on Left, total expense on Right */}
-                            {txExpenses.length > 0 && (
-                              <div className="flex items-baseline justify-between gap-3 text-[11px] leading-snug text-black">
-                                <span>
-                                  {txExpenses.map((e) => `${e.name} ${Number(Number(e.amount).toFixed(2))}`).join('  ')}
-                                </span>
-                                {totalExpenseSum > 0 && (
-                                  <span className="font-mono font-medium shrink-0">
-                                    {Number(totalExpenseSum.toFixed(2))}
-                                  </span>
-                                )}
-                              </div>
-                            )}
+                                  {/* Expenses Breakdown: attached to the transaction's final chunk */}
+                                  {isLastChunk && txExpenses.length > 0 && (
+                                    <div className="flex items-baseline justify-between gap-3 text-[11px] leading-snug text-black">
+                                      <span>
+                                        {txExpenses.map((e) => `${e.name} ${Number(Number(e.amount).toFixed(2))}`).join('  ')}
+                                      </span>
+                                      {totalExpenseSum > 0 && (
+                                        <span className="font-mono font-medium shrink-0">
+                                          {Number(totalExpenseSum.toFixed(2))}
+                                        </span>
+                                      )}
+                                    </div>
+                                  )}
 
-                            {/* Crate Movement if present */}
-                            {crateLeft && (
-                              <div className="flex items-baseline justify-between gap-3 text-[10.5px] leading-snug text-black font-mono">
-                                <span>{crateLeft}</span>
-                                <span className="shrink-0">{crateRight}</span>
-                              </div>
-                            )}
-                          </div>
-                        )}
-                      </td>
+                                  {/* Crate Movement if present: attached to the transaction's final chunk */}
+                                  {isLastChunk && crateLeft && (
+                                    <div className="flex items-baseline justify-between gap-3 text-[10.5px] leading-snug text-black font-mono">
+                                      <span>{crateLeft}</span>
+                                      <span className="shrink-0">{crateRight}</span>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                            </td>
 
-                      {/* DEBIT */}
-                      <td className="py-1.5 px-2 text-right font-mono text-[11.5px] text-black align-top whitespace-nowrap border-r border-black/35">
-                        {debitVal}
-                      </td>
+                            {/* DEBIT */}
+                            <td className="py-1.5 px-2 text-right font-mono text-[11.5px] text-black align-top whitespace-nowrap border-r border-black/35">
+                              {isLastChunk ? debitVal : ''}
+                            </td>
 
-                      {/* CREDIT */}
-                      <td className="py-1.5 px-2 text-right font-mono text-[11.5px] text-black align-top whitespace-nowrap border-r border-black/35">
-                        {creditVal}
-                      </td>
+                            {/* CREDIT */}
+                            <td className="py-1.5 px-2 text-right font-mono text-[11.5px] text-black align-top whitespace-nowrap border-r border-black/35">
+                              {isLastChunk ? creditVal : ''}
+                            </td>
 
-                      {/* BALANCE */}
-                      <td className="py-1.5 px-2 text-right font-mono text-[11.5px] font-semibold text-black align-top whitespace-nowrap">
-                        {balanceVal}
-                      </td>
-                    </tr>
+                            {/* BALANCE */}
+                            <td className="py-1.5 px-2 text-right font-mono text-[11.5px] font-semibold text-black align-top whitespace-nowrap">
+                              {isLastChunk ? balanceVal : ''}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </React.Fragment>
                   );
                 })
               )}
@@ -1173,14 +1219,6 @@ export const CustomerLedgerView: React.FC<CustomerLedgerViewProps> = ({
               <tr className="border-t border-b border-black text-xs bg-white text-black">
                 <td colSpan={2} className="py-1.5 px-2 text-left text-[11.5px] font-semibold text-black border-r border-black/35 align-top">
                   <div>Crate Balance: {crateBalance}</div>
-                  {crateStatement &&
-                    crateStatement.typeBalances
-                      .filter((tb) => tb.issued > 0 || tb.returned > 0 || tb.balance !== 0)
-                      .map((tb) => (
-                        <div key={tb.crateTypeId} className="text-[10.5px] font-mono font-normal">
-                          {tb.crateName}: {tb.issued} Out, {tb.returned} In (Bal: {tb.balance})
-                        </div>
-                      ))}
                   <div className="flex items-center gap-4">
                     <span>= {crateBalance}</span>
                     {totalQty > 0 && <span>Total Qty: {totalQty}</span>}
@@ -1196,33 +1234,35 @@ export const CustomerLedgerView: React.FC<CustomerLedgerViewProps> = ({
                   &nbsp;
                 </td>
               </tr>
+
+              {/* Closing Balance & Signature grouped inside tfoot so the entire closing section appears on the final page together */}
+              <tr className="ledger-closing-meta-row bg-white text-black">
+                <td colSpan={5} className="ledger-closing-meta-cell p-0 bg-white text-black">
+                  <div className="pt-2 pb-1 px-2 flex justify-end items-baseline gap-6 bg-white text-black">
+                    <span className="text-sm font-medium uppercase tracking-wide text-black">
+                      CLOSING BALANCE :
+                    </span>
+                    <span className="text-sm sm:text-base font-extrabold font-mono text-black whitespace-nowrap">
+                      {Math.abs(ledger.closingBalance).toFixed(2)} {ledger.closingBalance > 0 ? 'Dr' : ledger.closingBalance < 0 ? 'Cr' : ''}
+                    </span>
+                  </div>
+                  <div className="px-2 pt-2 pb-1 flex justify-between items-end text-xs bg-white text-black">
+                    <div className="text-[9px] text-black font-mono">
+                      Software Developed By: {currentProfile.softwareDevelopedBy || defaultProfile.softwareDevelopedBy || 'Klyia Technology'}
+                    </div>
+                    <div className="text-right shrink-0">
+                      <div className="text-[10.5px] font-bold uppercase text-black">
+                        {formatCompanySignature(currentProfile)}
+                      </div>
+                      <div className="text-[8.5px] uppercase tracking-wider text-black mt-3">
+                        AUTHORISED SIGNATURE
+                      </div>
+                    </div>
+                  </div>
+                </td>
+              </tr>
             </tfoot>
           </table>
-        </div>
-
-        {/* Closing Balance Line matching reference image */}
-        <div className="pt-2 pb-1 px-2 flex justify-end items-baseline gap-6 bg-white text-black">
-          <span className="text-sm font-medium uppercase tracking-wide text-black">
-            CLOSING BALANCE :
-          </span>
-          <span className="text-sm sm:text-base font-extrabold font-mono text-black whitespace-nowrap">
-            {Math.abs(ledger.closingBalance).toFixed(2)} {ledger.closingBalance > 0 ? 'Dr' : ledger.closingBalance < 0 ? 'Cr' : ''}
-          </span>
-        </div>
-
-        {/* Software Developed By & Authorised Signature */}
-        <div className="px-2 pt-2 pb-1 flex justify-between items-end text-xs bg-white text-black">
-          <div className="text-[9px] text-black font-mono">
-            Software Developed By: {currentProfile.softwareDevelopedBy || defaultProfile.softwareDevelopedBy || 'Klyia Technology'}
-          </div>
-          <div className="text-right shrink-0">
-            <div className="text-[10.5px] font-bold uppercase text-black">
-              {formatCompanySignature(currentProfile)}
-            </div>
-            <div className="text-[8.5px] uppercase tracking-wider text-black mt-3">
-              AUTHORISED SIGNATURE
-            </div>
-          </div>
         </div>
       </div>
 
@@ -1316,7 +1356,7 @@ export const CustomerLedgerView: React.FC<CustomerLedgerViewProps> = ({
                   return (
                     <tr
                       key={`short-${entry.id}`}
-                      className={isShaded ? 'sp-zebra-even bg-[#eaedf1]' : 'sp-zebra-odd bg-white'}
+                      className={`ledger-tx-row ${isShaded ? 'sp-zebra-even bg-[#eaedf1]' : 'sp-zebra-odd bg-white'}`}
                     >
                       <td className="py-1 px-2 font-mono text-[11px] text-black align-top whitespace-nowrap">
                         {formatDate(entry.date)}
@@ -1364,14 +1404,6 @@ export const CustomerLedgerView: React.FC<CustomerLedgerViewProps> = ({
               <tr className="sp-short-total-row border-t border-black text-xs bg-white text-black">
                 <td colSpan={2} className="pt-1.5 pb-0.5 px-2 text-left text-[11.5px] font-semibold text-black align-top">
                   <div>Crate Balance: {crateBalance}</div>
-                  {crateStatement &&
-                    crateStatement.typeBalances
-                      .filter((tb) => tb.issued > 0 || tb.returned > 0 || tb.balance !== 0)
-                      .map((tb) => (
-                        <div key={tb.crateTypeId} className="text-[10px] font-mono font-normal">
-                          {tb.crateName}: {tb.issued} Out, {tb.returned} In (Bal: {tb.balance})
-                        </div>
-                      ))}
                 </td>
                 <td className="pt-1.5 pb-0.5 px-2 text-right font-mono text-[11.5px] font-semibold text-black whitespace-nowrap align-top">
                   {ledger.totalDebit > 0 ? Number(ledger.totalDebit).toFixed(2) : ''}
@@ -1401,23 +1433,25 @@ export const CustomerLedgerView: React.FC<CustomerLedgerViewProps> = ({
                   </div>
                 </td>
               </tr>
+              <tr className="ledger-closing-meta-row bg-white text-black">
+                <td colSpan={5} className="ledger-closing-meta-cell px-2 pt-2 pb-1 bg-white text-black">
+                  <div className="flex justify-between items-end text-xs bg-white text-black">
+                    <div className="text-[9px] text-black font-mono">
+                      Software Developed By: {currentProfile.softwareDevelopedBy || defaultProfile.softwareDevelopedBy || 'Klyia Technology'}
+                    </div>
+                    <div className="text-right shrink-0">
+                      <div className="text-[10.5px] font-bold uppercase text-black">
+                        {formatCompanySignature(currentProfile)}
+                      </div>
+                      <div className="text-[8.5px] uppercase tracking-wider text-black mt-3">
+                        AUTHORISED SIGNATURE
+                      </div>
+                    </div>
+                  </div>
+                </td>
+              </tr>
             </tfoot>
           </table>
-        </div>
-
-        {/* Software attribution & Signatory */}
-        <div className="px-2 pt-2 pb-1 flex justify-between items-end text-xs bg-white text-black">
-          <div className="text-[9px] text-black font-mono">
-            Software Developed By: {currentProfile.softwareDevelopedBy || defaultProfile.softwareDevelopedBy || 'Klyia Technology'}
-          </div>
-          <div className="text-right shrink-0">
-            <div className="text-[10.5px] font-bold uppercase text-black">
-              {formatCompanySignature(currentProfile)}
-            </div>
-            <div className="text-[8.5px] uppercase tracking-wider text-black mt-3">
-              AUTHORISED SIGNATURE
-            </div>
-          </div>
         </div>
       </div>
 

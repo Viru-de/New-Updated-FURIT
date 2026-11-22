@@ -266,20 +266,24 @@ async function run() {
   const custLedgerHtml = renderToStaticMarkup(React.createElement(CustomerLedgerView, {}));
   const spLedgerHtml = renderToStaticMarkup(React.createElement(SaleProceedsLedgerView, {}));
 
-  for (const [name, html] of [
-    ['CustomerLedgerView', custLedgerHtml],
-    ['SaleProceedsLedgerView', spLedgerHtml],
-  ] as const) {
-    check(
-      html.includes('sp-short-table w-full table-fixed box-border') &&
-        html.includes('ledger-ref-table') &&
-        html.includes('table-fixed box-border') &&
-        html.includes('width:80px') &&
-        html.includes('width:92px') &&
-        html.includes('width:106px'),
-      `${name}: Short Print & Detailed Print enforce widened table-fixed colgroup (80px/auto/92px/92px/106px)`
-    );
-  }
+  check(
+    custLedgerHtml.includes('sp-short-table w-full table-fixed box-border') &&
+      custLedgerHtml.includes('ledger-ref-table') &&
+      custLedgerHtml.includes('table-fixed box-border') &&
+      custLedgerHtml.includes('width:80px') &&
+      custLedgerHtml.includes('width:92px') &&
+      custLedgerHtml.includes('width:106px'),
+    'CustomerLedgerView: Short Print & Detailed Print enforce table-fixed colgroup (80px/auto/92px/92px/106px)'
+  );
+  check(
+    spLedgerHtml.includes('sp-short-table w-full table-fixed box-border') &&
+      spLedgerHtml.includes('ledger-ref-table') &&
+      spLedgerHtml.includes('table-fixed box-border') &&
+      spLedgerHtml.includes('width:86px') &&
+      spLedgerHtml.includes('width:102px') &&
+      spLedgerHtml.includes('width:116px'),
+    'SaleProceedsLedgerView: Short Print & Detailed Print enforce widened table-fixed colgroup (86px/auto/102px/102px/116px)'
+  );
 
   // 6. CSS rules verification in src/index.css
   console.log('\n--- 6. Testing CSS Rules & Specificity in src/index.css ---');

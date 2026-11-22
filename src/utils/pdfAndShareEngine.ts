@@ -101,12 +101,26 @@ export function applyPrintPageSize(size: BillPaperSize = 'a5', targetElementId?:
     document.head.appendChild(styleEl);
   }
 
+  const isMultiPageLedgerOrReport = Boolean(
+    targetElementId &&
+      [
+        'customer-ledger-detailed-print-area',
+        'customer-ledger-short-print-area',
+        'ledger-print-area',
+        'sale-proceeds-print-area',
+        'sale-proceeds-short-print-area',
+        'group-sale-print-summary',
+        'crate-statement-print-area',
+        'report-print-area',
+      ].includes(targetElementId)
+  );
+
   const margins: Record<BillPaperSize, string> = {
     b7: '1.5mm 2.5mm 1.5mm 2.5mm',
     b6: '2mm 3mm 2mm 3mm',
     a5: '2mm 4mm 2mm 4mm',
     compact: '2mm 4mm 2.5mm 4mm',
-    a4: '3mm 5mm 3.5mm 5mm',
+    a4: isMultiPageLedgerOrReport ? '7mm 6mm 9mm 6mm' : '3mm 5mm 3.5mm 5mm',
   };
   const margin = margins[size] || margins.a5;
 
@@ -455,8 +469,15 @@ export async function generatePdfDoc(
     element.style.width = `${targetPxWidth}px`;
   }
 
-  // Track unbreakable DOM element bounds (rows, tfoot, bottom signature) in CSS px relative to root
+  // Track unbreakable DOM element bounds (rows, tfoot, bottom signature) & repeating table header bounds in CSS px relative to root
   let unbreakableCssBounds: Array<{ top: number; bottom: number }> = [];
+  const tableMeasure: {
+    theadCssBounds: { top: number; bottom: number } | null;
+    tfootCssTop: number | null;
+  } = {
+    theadCssBounds: null,
+    tfootCssTop: null,
+  };
   let clonedScrollHeight = 0;
 
   try {
@@ -559,11 +580,31 @@ export async function generatePdfDoc(
           }
         });
 
-        // 4. Measure unbreakable row/block boundaries after layout overrides for clean multi-page splits
+        // 4. Measure unbreakable row/block boundaries and primary table header bounds for clean multi-page splits
         const rootRect = clonedElement.getBoundingClientRect();
         clonedScrollHeight = clonedElement.scrollHeight || rootRect.height;
+
+        const primaryThead = clonedElement.querySelector('table > thead') as HTMLElement | null;
+        if (primaryThead) {
+          const hr = primaryThead.getBoundingClientRect();
+          if (hr.height > 0) {
+            tableMeasure.theadCssBounds = {
+              top: hr.top - rootRect.top,
+              bottom: hr.bottom - rootRect.top,
+            };
+          }
+        }
+
+        const primaryTfoot = clonedElement.querySelector('table > tfoot') as HTMLElement | null;
+        if (primaryTfoot) {
+          const fr = primaryTfoot.getBoundingClientRect();
+          if (fr.height > 0) {
+            tableMeasure.tfootCssTop = fr.top - rootRect.top;
+          }
+        }
+
         const protectedEls = clonedElement.querySelectorAll(
-          'tbody > tr, tfoot, tfoot > tr, .bill-bottom-footer'
+          'tbody > tr, .ledger-tx-row, tfoot, .ledger-closing-meta-row, .bill-bottom-footer'
         );
         unbreakableCssBounds = Array.from(protectedEls)
           .map((el) => {
@@ -599,40 +640,99 @@ export async function generatePdfDoc(
       const imgData = canvas.toDataURL('image/jpeg', 0.95);
       doc.addImage(imgData, 'JPEG', 0, 0, pageWidthMm, fitHeightMm, undefined, 'FAST');
     } else {
-      // Case 2: Multi-page document — slice canvas at clean row/footer boundaries to prevent mid-row or total cutoffs
-      const pxPerFullPage = Math.floor((pageHeightMm / pageWidthMm) * canvas.width);
+      // Case 2: Multi-page document — slice canvas at clean row/footer boundaries, repeat table headers on continuation pages, and reserve safe top/bottom margins
       const canvasScaleY =
         clonedScrollHeight > 0 ? canvas.height / clonedScrollHeight : 2;
       const canvasBounds = unbreakableCssBounds.map((b) => ({
         top: b.top * canvasScaleY,
         bottom: b.bottom * canvasScaleY,
       }));
-      const continuationTopMarginMm = 4;
-      const continuationUsableMm = pageHeightMm - continuationTopMarginMm * 2;
-      const pxPerContinuationPage = Math.floor(
-        (continuationUsableMm / pageWidthMm) * canvas.width
+      const theadCanvasBounds = tableMeasure.theadCssBounds
+        ? {
+            top: Math.max(0, Math.floor(tableMeasure.theadCssBounds.top * canvasScaleY)),
+            bottom: Math.min(canvas.height, Math.ceil(tableMeasure.theadCssBounds.bottom * canvasScaleY)),
+          }
+        : null;
+      const tfootCanvasTop =
+        tableMeasure.tfootCssTop !== null
+          ? Math.floor(tableMeasure.tfootCssTop * canvasScaleY)
+          : null;
+
+      const page1BottomMarginMm = 6;
+      const continuationTopMarginMm = 6;
+      const continuationBottomMarginMm = 7;
+
+      const pxPerPage1 = Math.floor(
+        ((pageHeightMm - page1BottomMarginMm) / pageWidthMm) * canvas.width
       );
+
+      let repeatedTheadImgData: string | null = null;
+      let repeatedTheadHeightMm = 0;
+      let repeatedTheadHeightPx = 0;
+
+      if (theadCanvasBounds && theadCanvasBounds.bottom > theadCanvasBounds.top + 4) {
+        repeatedTheadHeightPx = theadCanvasBounds.bottom - theadCanvasBounds.top;
+        const theadCanvas = document.createElement('canvas');
+        theadCanvas.width = canvas.width;
+        theadCanvas.height = repeatedTheadHeightPx;
+        const hCtx = theadCanvas.getContext('2d');
+        if (hCtx) {
+          hCtx.fillStyle = '#ffffff';
+          hCtx.fillRect(0, 0, theadCanvas.width, theadCanvas.height);
+          hCtx.drawImage(
+            canvas,
+            0,
+            theadCanvasBounds.top,
+            canvas.width,
+            repeatedTheadHeightPx,
+            0,
+            0,
+            canvas.width,
+            repeatedTheadHeightPx
+          );
+          repeatedTheadImgData = theadCanvas.toDataURL('image/jpeg', 0.95);
+          repeatedTheadHeightMm = (repeatedTheadHeightPx * pageWidthMm) / canvas.width;
+        }
+      }
 
       let startY = 0;
       let actualPages = 0;
 
       while (startY < canvas.height) {
         const remaining = canvas.height - startY;
-        if (actualPages > 0 && remaining < 30) {
+        if (actualPages > 0 && remaining < 24) {
           break;
         }
 
-        const maxSlice = actualPages === 0 ? pxPerFullPage : pxPerContinuationPage;
+        const shouldRepeatThead =
+          actualPages > 0 &&
+          Boolean(repeatedTheadImgData) &&
+          theadCanvasBounds !== null &&
+          startY >= theadCanvasBounds.bottom &&
+          (tfootCanvasTop === null || startY < tfootCanvasTop);
+
+        const headerReserveMm = shouldRepeatThead ? repeatedTheadHeightMm + 0.8 : 0;
+        const maxUsableHeightMm =
+          actualPages === 0
+            ? pageHeightMm - page1BottomMarginMm
+            : pageHeightMm - continuationTopMarginMm - continuationBottomMarginMm - headerReserveMm;
+
+        const maxSlice = Math.max(
+          80,
+          actualPages === 0
+            ? pxPerPage1
+            : Math.floor((maxUsableHeightMm / pageWidthMm) * canvas.width)
+        );
         let endY = Math.min(canvas.height, startY + maxSlice);
 
         if (endY < canvas.height) {
           // Snap upward before any unbreakable block (row, tfoot, footer) straddling endY
           for (const b of canvasBounds) {
-            if (b.top < endY && b.bottom > endY && b.top > startY + 60) {
+            if (b.top < endY && b.bottom > endY && b.top > startY + 40) {
               endY = Math.min(endY, Math.floor(b.top) - 1);
             }
           }
-          // Guarantee positive forward progress
+          // Guarantee positive forward progress even if a single block exceeds one page
           if (endY <= startY + 40) {
             endY = Math.min(canvas.height, startY + maxSlice);
           }
@@ -661,12 +761,27 @@ export async function generatePdfDoc(
 
         const sliceImgData = pageCanvas.toDataURL('image/jpeg', 0.95);
         const sliceHeightMm = (slicePxHeight * pageWidthMm) / canvas.width;
-        const yOffsetMm = actualPages === 0 ? 0 : continuationTopMarginMm;
 
         if (actualPages > 0) {
           doc.addPage([pageWidthMm, pageHeightMm]);
         }
-        doc.addImage(sliceImgData, 'JPEG', 0, yOffsetMm, pageWidthMm, sliceHeightMm, undefined, 'FAST');
+
+        let drawY = actualPages === 0 ? 0 : continuationTopMarginMm;
+        if (shouldRepeatThead && repeatedTheadImgData) {
+          doc.addImage(
+            repeatedTheadImgData,
+            'JPEG',
+            0,
+            drawY,
+            pageWidthMm,
+            repeatedTheadHeightMm,
+            undefined,
+            'FAST'
+          );
+          drawY += repeatedTheadHeightMm + 0.8;
+        }
+
+        doc.addImage(sliceImgData, 'JPEG', 0, drawY, pageWidthMm, sliceHeightMm, undefined, 'FAST');
         actualPages++;
         startY = endY;
       }
