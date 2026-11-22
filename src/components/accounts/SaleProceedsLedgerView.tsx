@@ -665,14 +665,21 @@ export const SaleProceedsLedgerView: React.FC<SaleProceedsLedgerViewProps> = ({
 
         {/* Short Print Table: DATE | PARTICULARS | DEBIT | CREDIT | BALANCE */}
         <div className="overflow-x-auto">
-          <table className="sp-short-table w-full text-left text-xs border-collapse bg-white text-black">
+          <table className="sp-short-table w-full table-fixed box-border text-left text-xs border-collapse bg-white text-black">
+            <colgroup>
+              <col style={{ width: '80px' }} />
+              <col />
+              <col style={{ width: '92px' }} />
+              <col style={{ width: '92px' }} />
+              <col style={{ width: '106px' }} />
+            </colgroup>
             <thead>
               <tr className="sp-short-col-header border-t border-b border-black bg-white text-[11px] font-bold uppercase tracking-wider text-black">
-                <th className="py-1.5 px-2 w-[84px] text-left whitespace-nowrap">DATE</th>
-                <th className="py-1.5 px-2.5 text-left">PARTICULARS</th>
-                <th className="py-1.5 px-2 text-right w-[84px] whitespace-nowrap">DEBIT</th>
-                <th className="py-1.5 px-2 text-right w-[84px] whitespace-nowrap">CREDIT</th>
-                <th className="py-1.5 px-2 text-right w-[96px] whitespace-nowrap">BALANCE</th>
+                <th className="py-1.5 px-2 text-left whitespace-nowrap box-border">DATE</th>
+                <th className="py-1.5 px-2.5 text-left box-border">PARTICULARS</th>
+                <th className="py-1.5 px-2 text-right whitespace-nowrap box-border">DEBIT</th>
+                <th className="py-1.5 px-2 text-right whitespace-nowrap box-border">CREDIT</th>
+                <th className="py-1.5 px-2 text-right whitespace-nowrap box-border">BALANCE</th>
               </tr>
             </thead>
             <tbody className="bg-white text-black">
@@ -840,13 +847,13 @@ export const SaleProceedsLedgerView: React.FC<SaleProceedsLedgerViewProps> = ({
 
         {/* Ledger Table: DATE | PARTICULARS | DEBIT | CREDIT | BALANCE */}
         <div className="overflow-x-auto">
-          <table className="ledger-ref-table sp-detailed-ref-table w-full table-fixed text-left text-xs border-collapse bg-white text-black">
+          <table className="ledger-ref-table sp-detailed-ref-table w-full table-fixed box-border text-left text-xs border-collapse bg-white text-black">
             <colgroup>
-              <col style={{ width: '84px' }} />
+              <col style={{ width: '80px' }} />
               <col />
-              <col style={{ width: '84px' }} />
-              <col style={{ width: '84px' }} />
-              <col style={{ width: '96px' }} />
+              <col style={{ width: '92px' }} />
+              <col style={{ width: '92px' }} />
+              <col style={{ width: '106px' }} />
             </colgroup>
             <thead>
               <tr className="border-0 bg-white text-[11px] font-bold uppercase tracking-wider text-black">

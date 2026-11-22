@@ -73,22 +73,22 @@ export function getBillItemNameCellClass(
     return 'text-[7.5px] print:text-[8px] tracking-tight leading-[1.15] whitespace-normal break-words [overflow-wrap:anywhere]';
   }
   if (pageSize === 'a4') {
-    if (len <= 26) return 'text-[11.5px] print:text-[13px] whitespace-nowrap';
-    if (len <= 36) return 'text-[10px] print:text-[11.5px] tracking-tight whitespace-nowrap';
-    if (len <= 46) return 'text-[9px] print:text-[10px] tracking-tighter whitespace-nowrap';
-    return 'text-[8.5px] print:text-[9.5px] tracking-tight leading-tight break-words';
+    if (len <= 24) return 'text-[11.5px] print:text-[12.5px] leading-[1.2] whitespace-normal break-words [overflow-wrap:anywhere]';
+    if (len <= 36) return 'text-[10.5px] print:text-[11.5px] tracking-tight leading-[1.15] whitespace-normal break-words [overflow-wrap:anywhere]';
+    if (len <= 48) return 'text-[9.5px] print:text-[10.5px] tracking-tight leading-[1.15] whitespace-normal break-words [overflow-wrap:anywhere]';
+    return 'text-[8.5px] print:text-[9.5px] tracking-tight leading-[1.15] whitespace-normal break-words [overflow-wrap:anywhere]';
   }
   if (pageSize === 'a5') {
-    if (len <= 22) return 'text-[10px] print:text-[10px] whitespace-nowrap';
-    if (len <= 30) return 'text-[9px] print:text-[9px] tracking-tight whitespace-nowrap';
-    if (len <= 38) return 'text-[8px] print:text-[8px] tracking-tighter whitespace-nowrap';
-    return 'text-[7.5px] print:text-[7.5px] tracking-tight leading-[1.1] break-words';
+    if (len <= 18) return 'text-[10px] print:text-[10px] leading-[1.15] whitespace-normal break-words [overflow-wrap:anywhere]';
+    if (len <= 28) return 'text-[9px] print:text-[9.5px] tracking-tight leading-[1.15] whitespace-normal break-words [overflow-wrap:anywhere]';
+    if (len <= 38) return 'text-[8.5px] print:text-[8.5px] tracking-tight leading-[1.15] whitespace-normal break-words [overflow-wrap:anywhere]';
+    return 'text-[7.5px] print:text-[8px] tracking-tight leading-[1.1] whitespace-normal break-words [overflow-wrap:anywhere]';
   }
   // compact
-  if (len <= 20) return 'text-[10.5px] print:text-[11px] whitespace-nowrap';
-  if (len <= 28) return 'text-[9.5px] print:text-[10px] tracking-tight whitespace-nowrap';
-  if (len <= 36) return 'text-[8.5px] print:text-[9px] tracking-tighter whitespace-nowrap';
-  return 'text-[8px] print:text-[8.5px] tracking-tight leading-tight break-words';
+  if (len <= 16) return 'text-[10.5px] print:text-[11px] leading-[1.15] whitespace-normal break-words [overflow-wrap:anywhere]';
+  if (len <= 26) return 'text-[9.5px] print:text-[10px] tracking-tight leading-[1.15] whitespace-normal break-words [overflow-wrap:anywhere]';
+  if (len <= 36) return 'text-[8.5px] print:text-[9px] tracking-tight leading-[1.15] whitespace-normal break-words [overflow-wrap:anywhere]';
+  return 'text-[8px] print:text-[8.5px] tracking-tight leading-[1.1] whitespace-normal break-words [overflow-wrap:anywhere]';
 }
 
 /**

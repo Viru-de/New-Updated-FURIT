@@ -758,63 +758,58 @@ export const CreateBillView: React.FC<CreateBillViewProps> = ({
                 {(() => {
                   const isB7 = pageSize === 'b7';
                   const isB6 = pageSize === 'b6';
+                  const isA5 = pageSize === 'a5';
                   const colWidths = isB7
-                    ? { no: 'w-[20px]', qty: 'w-[36px]', weight: 'w-[42px]', price: 'w-[40px]', amount: 'w-[50px]' }
+                    ? { no: '9%', item: '27%', qty: '18%', weight: '14%', price: '14%', amount: '18%' }
                     : isB6
-                    ? { no: 'box-border tracking-tight whitespace-nowrap', qty: 'box-border whitespace-nowrap', weight: 'box-border tracking-tight whitespace-nowrap', price: 'box-border whitespace-nowrap', amount: 'box-border whitespace-nowrap' }
-                    : { no: 'w-8', qty: 'w-16', weight: 'w-20', price: 'w-18', amount: 'w-22' };
-                  const tablePad = isB7 ? 'p-0.5' : 'p-1';
-                  const tableHeadFont = isB7 ? 'text-[8px] print:text-[9px]' : isB6 ? 'text-[9.5px] print:text-[11px]' : 'text-[11px] print:text-[12px]';
-                  const tableBodyFont = isB7 ? 'text-[8px] print:text-[9.5px]' : isB6 ? 'text-[10px] print:text-[11.5px]' : 'text-xs print:text-[14px]';
-                  const footerFont = isB7 ? 'text-[7.5px] print:text-[9px]' : isB6 ? 'text-[9.5px] print:text-[11px]' : 'text-xs print:text-[13px]';
+                    ? { no: '8%', item: '31%', qty: '18%', weight: '11%', price: '13%', amount: '19%' }
+                    : pageSize === 'a4'
+                    ? { no: '6%', item: '36%', qty: '16%', weight: '11%', price: '13%', amount: '18%' }
+                    : isA5
+                    ? { no: '7%', item: '32%', qty: '17%', weight: '12%', price: '13%', amount: '19%' }
+                    : { no: '7%', item: '31%', qty: '17%', weight: '12%', price: '13%', amount: '20%' };
+                  const tablePad = isB7 ? 'px-0.5 py-[1.5px]' : isB6 || isA5 ? 'px-1 py-[2px]' : 'px-1.5 py-1';
+                  const tableHeadFont = isB7 ? 'text-[8px] print:text-[9px]' : isB6 ? 'text-[9.5px] print:text-[11px]' : isA5 ? 'text-[9.5px] print:text-[9.5px]' : 'text-[10.5px] print:text-[11.5px]';
+                  const tableBodyFont = isB7 ? 'text-[8px] print:text-[9px]' : isB6 ? 'text-[10px] print:text-[11px]' : isA5 ? 'text-[10px] print:text-[10px]' : 'text-[11px] print:text-[12px]';
+                  const footerFont = isB7 ? 'text-[7.5px] print:text-[8.5px]' : isB6 ? 'text-[9px] print:text-[10px]' : isA5 ? 'text-[9.5px] print:text-[9.5px]' : 'text-[10.5px] print:text-[11.5px]';
+                  const summaryLabelFont = isB7 ? 'text-[7px] print:text-[8px] tracking-tight' : isB6 ? 'text-[8.5px] print:text-[9.5px] tracking-tight' : isA5 ? 'text-[9px] print:text-[9.5px] tracking-tight' : 'text-[10px] print:text-[11px] tracking-tight';
+                  const summaryValueFont = isB7 ? 'text-[7.5px] print:text-[8.5px] tracking-tight' : isB6 ? 'text-[9.5px] print:text-[10.5px] tracking-tight' : isA5 ? 'text-[10px] print:text-[10.5px] tracking-tight' : 'text-[10.5px] print:text-[11.5px] tracking-tight';
                   const totalQty = Math.round(items.reduce((sum, it) => sum + (Number(it.quantity) || 0), 0) * 1000) / 1000;
                   const blankRows = Math.max(0, (isB7 ? 1 : isB6 ? 3 : 6) - items.length - 1);
 
                   return (
-                    <table className={`w-full border-collapse border border-black ${isB7 ? 'max-w-full table-fixed box-border b7-bill-table' : ''} ${isB6 ? 'max-w-full table-fixed box-border b6-bill-table' : ''} ${tableBodyFont}`}>
-                      {isB7 && (
-                        <colgroup>
-                          <col style={{ width: '9%' }} />
-                          <col style={{ width: '28%' }} />
-                          <col style={{ width: '18%' }} />
-                          <col style={{ width: '16%' }} />
-                          <col style={{ width: '13%' }} />
-                          <col style={{ width: '16%' }} />
-                        </colgroup>
-                      )}
-                      {isB6 && (
-                        <colgroup>
-                          <col style={{ width: '8%' }} />
-                          <col style={{ width: '32%' }} />
-                          <col style={{ width: '19%' }} />
-                          <col style={{ width: '11%' }} />
-                          <col style={{ width: '13%' }} />
-                          <col style={{ width: '17%' }} />
-                        </colgroup>
-                      )}
+                    <table className={`w-full max-w-full table-fixed box-border border-collapse border border-black bill-items-table ${isB7 ? 'b7-bill-table' : ''} ${isB6 ? 'b6-bill-table' : ''} ${tableBodyFont}`}>
+                      <colgroup>
+                        <col style={{ width: colWidths.no }} />
+                        <col style={{ width: colWidths.item }} />
+                        <col style={{ width: colWidths.qty }} />
+                        <col style={{ width: colWidths.weight }} />
+                        <col style={{ width: colWidths.price }} />
+                        <col style={{ width: colWidths.amount }} />
+                      </colgroup>
                       <thead>
                         <tr className={`border-b border-black font-bold uppercase ${tableHeadFont} bg-slate-50 print:bg-transparent`}>
-                          <th className={`border-r border-black ${isB6 ? 'px-0.5 py-1' : tablePad} text-center ${isB7 ? 'box-border tracking-tight whitespace-nowrap' : colWidths.no}`}>No.</th>
-                          <th className={`border-r border-black ${isB6 ? 'pl-1.5 pr-1 py-1 box-border' : tablePad} text-left ${isB7 ? 'box-border' : ''}`}>ITEM NAME</th>
-                          <th className={`border-r border-black ${tablePad} text-right ${isB7 ? 'box-border whitespace-nowrap' : colWidths.qty}`}>QTY</th>
-                          <th className={`border-r border-black ${tablePad} text-right ${isB7 ? 'box-border tracking-tight whitespace-nowrap' : colWidths.weight}`}>WEIGHT</th>
-                          <th className={`border-r border-black ${tablePad} text-right ${isB7 ? 'box-border whitespace-nowrap' : colWidths.price}`}>PRICE</th>
-                          <th className={`${tablePad} text-right ${isB7 ? 'box-border whitespace-nowrap' : colWidths.amount}`}>AMOUNT</th>
+                          <th className={`border-r border-black px-0.5 ${isB7 ? 'py-[1.5px]' : 'py-1'} box-border text-center tracking-tight whitespace-nowrap`}>No.</th>
+                          <th className={`border-r border-black pl-1.5 pr-1 ${isB7 ? 'py-[1.5px]' : 'py-1'} box-border text-left`}>ITEM NAME</th>
+                          <th className={`border-r border-black ${tablePad} box-border text-right bill-qty-col whitespace-nowrap`}>QTY</th>
+                          <th className={`border-r border-black ${tablePad} box-border text-right tracking-tight whitespace-nowrap`}>WEIGHT</th>
+                          <th className={`border-r border-black ${tablePad} box-border text-right whitespace-nowrap`}>PRICE</th>
+                          <th className={`${tablePad} box-border text-right whitespace-nowrap`}>AMOUNT</th>
                         </tr>
                       </thead>
                       <tbody>
                         {items.map((it, idx) => (
                           <tr key={it.id || idx} className="border-b border-black/40 print:text-black">
-                            <td className={`border-r border-black ${isB6 ? 'px-0.5 py-1 box-border whitespace-nowrap tabular-nums' : tablePad} ${isB7 ? 'box-border whitespace-nowrap tabular-nums' : ''} text-center font-mono print:font-semibold print:text-black align-middle`}>{idx + 1}</td>
-                            <td className={`border-r border-black ${isB6 ? `pl-1.5 pr-1 py-1 box-border align-middle overflow-hidden ${getBillItemNameCellClass(it.fruitName, 'b6')}` : `${tablePad} ${isB7 ? `box-border align-middle overflow-hidden ${getBillItemNameCellClass(it.fruitName, 'b7')}` : ''}`} font-semibold print:font-bold uppercase print:text-black`}>{it.fruitName}</td>
-                            <td className={`border-r border-black ${tablePad} ${isB6 ? 'box-border' : ''} text-right font-mono print:font-semibold print:text-black align-middle`}>{it.quantity}</td>
-                            <td className={`border-r border-black ${tablePad} ${isB7 ? 'box-border whitespace-nowrap tabular-nums' : isB6 ? 'box-border whitespace-nowrap tabular-nums' : ''} text-right font-mono print:font-semibold print:text-black align-middle`}>
+                            <td className={`border-r border-black px-0.5 ${isB7 ? 'py-[1.5px]' : 'py-[2px]'} box-border whitespace-nowrap tabular-nums text-center font-mono print:font-semibold print:text-black align-middle`}>{idx + 1}</td>
+                            <td className={`border-r border-black pl-1.5 pr-1 ${isB7 ? 'py-[1.5px]' : 'py-[2px]'} box-border align-middle overflow-hidden ${getBillItemNameCellClass(it.fruitName, pageSize)} font-semibold print:font-bold uppercase print:text-black`}>{it.fruitName}</td>
+                            <td className={`border-r border-black ${tablePad} box-border whitespace-nowrap tabular-nums text-right font-mono print:font-semibold print:text-black align-middle`}>{it.quantity}</td>
+                            <td className={`border-r border-black ${tablePad} box-border whitespace-nowrap tabular-nums text-right font-mono print:font-semibold print:text-black align-middle`}>
                               {it.unit === 'KG' ? `${it.quantity} KG` : ''}
                             </td>
-                            <td className={`border-r border-black ${tablePad} ${isB6 ? 'box-border' : ''} text-right font-mono print:font-semibold print:text-black align-middle`}>
+                            <td className={`border-r border-black ${tablePad} box-border whitespace-nowrap tabular-nums ${isB7 || isB6 ? 'tracking-tight' : ''} text-right font-mono print:font-semibold print:text-black align-middle`}>
                               {formatBillAmount(it.rate)}
                             </td>
-                            <td className={`${tablePad} ${isB6 ? 'box-border' : ''} text-right font-mono font-bold print:text-black align-middle`}>
+                            <td className={`${tablePad} box-border whitespace-nowrap tabular-nums ${isB7 || isB6 || pageSize === 'compact' ? 'tracking-tight' : ''} text-right font-mono font-bold print:text-black align-middle`}>
                               {formatBillAmount(it.amount)}
                             </td>
                           </tr>
@@ -825,10 +820,10 @@ export const CreateBillView: React.FC<CreateBillViewProps> = ({
                           <td colSpan={2} className={`border-r border-black ${tablePad} box-border text-right font-bold uppercase text-slate-900 print:text-black`}>
                             &nbsp;
                           </td>
-                          <td className={`border-r border-black ${tablePad} box-border text-right font-mono font-bold text-slate-900 print:text-black`}>
+                          <td className={`border-r border-black ${tablePad} box-border whitespace-nowrap tabular-nums text-right font-mono font-bold text-slate-900 print:text-black`}>
                             {totalQty}
                           </td>
-                          <td className={`border-r border-black ${tablePad} box-border text-right font-mono font-bold text-slate-900 print:text-black whitespace-nowrap`}>
+                          <td className={`border-r border-black ${tablePad} box-border whitespace-nowrap tabular-nums text-right font-mono font-bold text-slate-900 print:text-black`}>
                             {totalWeight > 0 ? totalWeight : 0}
                           </td>
                           <td className={`border-r border-black ${tablePad} box-border text-right font-mono`}>
@@ -842,8 +837,8 @@ export const CreateBillView: React.FC<CreateBillViewProps> = ({
                         {/* Preserved Blank Rows to maintain traditional wholesale bill spacing */}
                         {Array.from({ length: blankRows }).map((_, bIdx) => (
                           <tr key={`blank-${bIdx}`} className={`border-b border-black/20 ${isB7 ? 'h-3.5' : isB6 ? 'h-4' : 'h-6'}`}>
-                            <td className={`border-r border-black box-border ${isB6 ? 'px-0.5 py-1' : tablePad}`}>&nbsp;</td>
-                            <td className={`border-r border-black box-border ${isB6 ? 'pl-1.5 pr-1 py-1' : tablePad}`}>&nbsp;</td>
+                            <td className={`border-r border-black box-border px-0.5 ${isB7 ? 'py-[1.5px]' : 'py-[2px]'}`}>&nbsp;</td>
+                            <td className={`border-r border-black box-border pl-1.5 pr-1 ${isB7 ? 'py-[1.5px]' : 'py-[2px]'}`}>&nbsp;</td>
                             <td className={`border-r border-black box-border ${tablePad}`}>&nbsp;</td>
                             <td className={`border-r border-black box-border ${tablePad}`}>&nbsp;</td>
                             <td className={`border-r border-black box-border ${tablePad}`}>&nbsp;</td>
@@ -856,17 +851,17 @@ export const CreateBillView: React.FC<CreateBillViewProps> = ({
                       <tfoot>
                         <tr className="border-t-2 border-black">
                           {/* Left Bottom Section: E & O.E. + Expenses List */}
-                          <td colSpan={isB7 ? 3 : 5} className={`border-r border-black ${tablePad} align-top`}>
+                          <td colSpan={isB7 ? 3 : 4} className={`border-r border-black ${tablePad} align-top box-border`}>
                             <div className={`flex flex-col justify-between h-full ${isB7 ? 'min-h-[28px]' : isB6 ? 'min-h-[34px]' : 'min-h-[50px]'}`}>
                               <div className={`${isB7 ? 'text-[7.5px] print:text-[8.5px]' : 'text-[10px] print:text-[11px]'} font-bold text-slate-950 dark:text-slate-950 print:text-black`}>* E & O.E.</div>
 
                               {/* Listed Individual Expenses (Freight, Hamali, etc.) */}
                               {expenses && expenses.length > 0 && (
-                                <div className={`self-end text-right font-mono ${isB7 ? 'text-[7.5px] print:text-[9px]' : isB6 ? 'text-[9.5px] print:text-[11px]' : 'text-[11px] print:text-[13px]'} space-y-0.5 pr-1`}>
+                                <div className={`self-end text-right font-mono ${isB7 ? 'text-[7.5px] print:text-[9px]' : isB6 ? 'text-[9.5px] print:text-[11px]' : 'text-[11px] print:text-[12px]'} space-y-0.5 pr-1`}>
                                   {expenses.map((exp, expIdx) => (
                                     <div key={expIdx} className="flex justify-end gap-2 sm:gap-3 text-slate-950 dark:text-slate-950 print:text-black">
                                       <span className="font-sans font-medium print:font-semibold text-slate-950 dark:text-slate-950 print:text-black">{exp.name}</span>
-                                      <span className="font-bold text-slate-950 dark:text-slate-950 print:text-black">{formatBillAmount(exp.amount)}</span>
+                                      <span className="font-bold whitespace-nowrap tabular-nums text-slate-950 dark:text-slate-950 print:text-black">{formatBillAmount(exp.amount)}</span>
                                     </div>
                                   ))}
                                 </div>
@@ -875,26 +870,30 @@ export const CreateBillView: React.FC<CreateBillViewProps> = ({
                           </td>
 
                           {/* Right Bottom Section: Sub Total, Expenses, Net Total */}
-                          <td colSpan={isB7 ? 3 : 1} className="p-0 align-top">
-                            <table className={`w-full ${footerFont} border-collapse`}>
+                          <td colSpan={isB7 ? 3 : 2} className="p-0 align-top box-border">
+                            <table className={`w-full max-w-full table-fixed box-border border-collapse bill-summary-table ${footerFont}`}>
+                              <colgroup>
+                                <col style={{ width: '47%' }} />
+                                <col style={{ width: '53%' }} />
+                              </colgroup>
                               <tbody>
-                                <tr className="border-b border-black">
-                                  <td className={`${tablePad} font-semibold text-left border-r border-black text-slate-950 dark:text-slate-950 print:text-black`}>Sub Total</td>
-                                  <td className={`${tablePad} text-right font-mono font-bold text-slate-950 dark:text-slate-950 print:text-black`}>
+                                <tr className="border-b border-black last:border-b-0">
+                                  <td className={`${tablePad} font-semibold text-left border-r border-black whitespace-nowrap box-border ${summaryLabelFont} text-slate-950 dark:text-slate-950 print:text-black`}>Sub Total</td>
+                                  <td className={`${tablePad} text-right font-mono font-bold whitespace-nowrap tabular-nums box-border ${summaryValueFont} text-slate-950 dark:text-slate-950 print:text-black`}>
                                     {formatBillAmount(subtotal)}
                                   </td>
                                 </tr>
-                                <tr className="border-b border-black">
-                                  <td className={`${tablePad} font-semibold text-left border-r border-black text-slate-950 dark:text-slate-950 print:text-black`}>Expenses</td>
-                                  <td className={`${tablePad} text-right font-mono font-bold text-slate-950 dark:text-slate-950 print:text-black`}>
+                                <tr className="border-b border-black last:border-b-0">
+                                  <td className={`${tablePad} font-semibold text-left border-r border-black whitespace-nowrap box-border ${summaryLabelFont} text-slate-950 dark:text-slate-950 print:text-black`}>Expenses</td>
+                                  <td className={`${tablePad} text-right font-mono font-bold whitespace-nowrap tabular-nums box-border ${summaryValueFont} text-slate-950 dark:text-slate-950 print:text-black`}>
                                     {expenses.reduce((s, e) => s + (e.amount || 0), 0) !== 0 ? `+${formatBillAmount(expenses.reduce((s, e) => s + (e.amount || 0), 0))}` : '0.00'}
                                   </td>
                                 </tr>
-                                <tr>
-                                  <td className={`${tablePad} font-bold text-left border-r border-black bg-slate-100 text-slate-950 dark:text-slate-950 print:bg-transparent print:text-black`}>
+                                <tr className="border-b border-black last:border-b-0 bg-slate-100 print:bg-transparent">
+                                  <td className={`${tablePad} font-bold text-left border-r border-black whitespace-nowrap box-border ${summaryLabelFont} text-slate-950 dark:text-slate-950 print:text-black`}>
                                     Net Total
                                   </td>
-                                  <td className={`${tablePad} text-right font-mono font-black ${isB7 ? 'text-[8.5px] print:text-[10px]' : isB6 ? 'text-[11px] print:text-[12.5px]' : 'text-sm print:text-[15.5px]'} bg-slate-100 text-slate-950 dark:text-slate-950 print:bg-transparent print:text-black`}>
+                                  <td className={`${tablePad} text-right font-mono font-black whitespace-nowrap tabular-nums box-border ${summaryValueFont} text-slate-950 dark:text-slate-950 print:text-black`}>
                                     {formatBillAmount(totalAmount)}
                                   </td>
                                 </tr>
