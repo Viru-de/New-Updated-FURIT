@@ -663,7 +663,7 @@ export const CreditSaleModal: React.FC<CreditSaleModalProps> = ({
 
           <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5 p-4 sm:p-6">
             {/* Customer & Date Card */}
-            <div className="rounded-lg border border-slate-200 bg-slate-50/60 p-4 dark:border-slate-800 dark:bg-slate-800/30">
+            <div className="rounded-lg border border-slate-200 bg-slate-50/60 erp-dark-panel p-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <div className="mb-1 flex items-center justify-between">
@@ -714,7 +714,7 @@ export const CreditSaleModal: React.FC<CreditSaleModalProps> = ({
             </div>
 
             {/* Bill Items Card */}
-            <div className="rounded-lg border border-slate-200 bg-slate-50/60 p-4 dark:border-slate-800 dark:bg-slate-800/30">
+            <div className="rounded-lg border border-slate-200 bg-slate-50/60 erp-dark-panel p-4">
               <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-center gap-2.5">
                   <span className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
@@ -927,7 +927,7 @@ export const CreditSaleModal: React.FC<CreditSaleModalProps> = ({
             </div>
 
             {/* Consignment Expenses Card */}
-            <div className="rounded-lg border border-slate-200 p-4 dark:border-slate-800">
+            <div className="rounded-lg border border-slate-200 bg-slate-50/60 erp-dark-panel p-4">
               <div className="mb-2 flex items-center justify-between">
                 <div>
                   <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
@@ -983,27 +983,27 @@ export const CreditSaleModal: React.FC<CreditSaleModalProps> = ({
             </div>
 
             {/* Calculations Summary Box (4 metric cards matching Sale Proceeds) */}
-            <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/40">
+            <div className="rounded-lg border border-slate-200 bg-slate-50 erp-dark-panel p-4">
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
-                <div className="p-3 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xs">
+                <div className="erp-dark-card p-3 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xs">
                   <span className="block text-[11px] font-medium text-slate-500">Items Total</span>
                   <span className="text-base font-bold font-mono-numbers text-slate-900 dark:text-white">
                     {formatCurrency(totalItemAmount)}
                   </span>
                 </div>
-                <div className="p-3 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xs">
+                <div className="erp-dark-card p-3 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xs">
                   <span className="block text-[11px] font-medium text-slate-500">Total Expense</span>
                   <span className="text-base font-bold font-mono-numbers text-rose-600 dark:text-rose-400">
                     +{formatCurrency(totalExpense)}
                   </span>
                 </div>
-                <div className="p-3 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900 shadow-2xs">
+                <div className="p-3 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-700/60 shadow-2xs">
                   <span className="block text-[11px] font-medium text-emerald-700 dark:text-emerald-300">Net Bill Total</span>
                   <span className="text-base font-bold font-mono-numbers text-emerald-700 dark:text-emerald-300">
                     {formatCurrency(netTotal)}
                   </span>
                 </div>
-                <div className="p-3 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xs">
+                <div className="erp-dark-card p-3 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xs">
                   <span className="block text-[11px] font-medium text-slate-500">Total Balance</span>
                   <span className="text-base font-bold font-mono-numbers text-rose-600 dark:text-rose-400">
                     {formatCurrency(totalBalance)}
@@ -1013,13 +1013,13 @@ export const CreditSaleModal: React.FC<CreditSaleModalProps> = ({
 
               {/* Old Balance & Cash Receipt Row */}
               <div className="mt-4 pt-3 border-t border-slate-200 dark:border-slate-700/60 grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                <div className="flex items-center justify-between p-2.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                <div className="erp-dark-card flex items-center justify-between p-2.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
                   <span className="text-slate-600 dark:text-slate-400 font-medium">Customer Old Balance:</span>
                   <span className="font-mono font-bold text-slate-900 dark:text-white">
                     {formatCurrency(oldBalance)}
                   </span>
                 </div>
-                <div className="flex items-center justify-between p-2.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                <div className="erp-dark-card flex items-center justify-between p-2.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
                   <span className="text-slate-600 dark:text-slate-400 font-medium">Cash Receipt (Paid Now):</span>
                   <div className="relative w-36">
                     <span className="absolute left-2.5 top-1.5 text-xs text-slate-400">₹</span>

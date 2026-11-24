@@ -413,8 +413,8 @@ export const SaleProceedsLedgerView: React.FC<SaleProceedsLedgerViewProps> = ({
               </button>
             </div>
           ) : (
-            <div className="hidden sm:flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-700 dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-200">
-              <Users className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+            <div className="hidden sm:flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 erp-dark-panel px-3 py-2 text-xs font-medium text-slate-700">
+              <Users className="h-4 w-4 text-emerald-600 dark:text-emerald-300" />
               <span>All Customers (Complete Ledger)</span>
             </div>
           )}
@@ -458,12 +458,12 @@ export const SaleProceedsLedgerView: React.FC<SaleProceedsLedgerViewProps> = ({
           )}
 
           {/* Crate Balance Quick Summary on screen */}
-          <div className="sm:ml-auto rounded-lg border border-slate-200 bg-slate-50/80 px-3 py-1.5 text-xs dark:border-slate-700 dark:bg-slate-800/80">
+          <div className="sm:ml-auto rounded-lg border border-slate-200 bg-slate-50/80 erp-dark-panel px-3 py-1.5 text-xs">
             <div className="font-bold text-slate-900 dark:text-white">
-              Balance Crate: <span className="text-emerald-700 dark:text-emerald-400">{crateSummary.balanceCrate}</span>
+              Balance Crate: <span className="text-emerald-700 dark:text-emerald-300">{crateSummary.balanceCrate}</span>
             </div>
             {crateSummary.typeBalances.map((tb, idx) => (
-              <div key={idx} className="font-semibold text-slate-700 dark:text-slate-300">
+              <div key={idx} className="font-semibold text-slate-700 dark:text-slate-200">
                 {tb.crateName}: {tb.issued} Out ({tb.balance} Bal)
               </div>
             ))}
@@ -574,7 +574,7 @@ export const SaleProceedsLedgerView: React.FC<SaleProceedsLedgerViewProps> = ({
         </div>
 
         {/* Bottom Closing Balance Banner */}
-        <div className="flex flex-col sm:flex-row items-center justify-between border-t border-slate-200 bg-emerald-50/70 px-6 py-4 dark:border-emerald-800/70 dark:bg-emerald-950/50">
+        <div className="flex flex-col sm:flex-row items-center justify-between border-t border-slate-200 bg-emerald-50/70 erp-dark-panel px-6 py-4">
           <div>
             <div className="text-xs font-medium text-emerald-950 dark:text-emerald-100">
               {selectedCustomer ? (

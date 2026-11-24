@@ -97,7 +97,7 @@ export const CreditSalePrintModal: React.FC<CreditSalePrintModalProps> = ({
                       : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700'
                   }`}
                 >
-                  {sizeKey === 'compact' ? 'Compact' : sizeKey.toUpperCase()}
+                  {sizeKey === 'compact' ? 'Small Bill' : sizeKey.toUpperCase()}
                 </button>
               ))}
             </div>
@@ -112,6 +112,8 @@ export const CreditSalePrintModal: React.FC<CreditSalePrintModalProps> = ({
               summaryText={summaryText}
               defaultPaperSize={pageSize}
               onPaperSizeChange={setPageSize}
+              useCompatB7={true}
+              optionLabelOverrides={{ compact: 'Small Bill', b7: 'B7' }}
             />
             <button
               type="button"
@@ -170,6 +172,8 @@ export const CreditSalePrintModal: React.FC<CreditSalePrintModalProps> = ({
         defaultSize={pageSize}
         initialAction="print"
         onPaperSizeChange={setPageSize}
+        useCompatB7={true}
+        optionLabelOverrides={{ compact: 'Small Bill', b7: 'B7' }}
       />
     </div>
   );

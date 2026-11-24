@@ -403,7 +403,7 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
               </div>
 
               {/* Duplicate Handling Mode & Actions */}
-              <div className="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+              <div className="p-3.5 rounded-xl border border-slate-200 bg-slate-50 erp-dark-panel flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
                 <div className="flex items-center gap-2">
                   <Sliders className="h-4 w-4 text-slate-500" />
                   <span className="font-bold text-slate-700 dark:text-slate-300">

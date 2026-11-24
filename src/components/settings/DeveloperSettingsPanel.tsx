@@ -378,7 +378,7 @@ export const DeveloperSettingsPanel: React.FC<DeveloperSettingsPanelProps> = ({
             </div>
           </form>
 
-          <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 text-[11px] text-slate-600 dark:border-slate-800 dark:bg-slate-800/50 dark:text-slate-300">
+          <div className="rounded-lg border border-slate-200 bg-slate-50 erp-dark-panel p-3 text-[11px] text-slate-600">
             <strong className="text-slate-800 dark:text-slate-200">Forgotten Developer Password?</strong>{' '}
             For security, Admin and Accountant accounts cannot reset Developer credentials from the interface. Recovery must be performed directly on the private server host via the server-side CLI recovery tool (<code className="font-mono text-[10px] bg-slate-200/70 dark:bg-slate-700 px-1 py-0.5 rounded">npm run dev:recover-password</code>).
           </div>
@@ -408,16 +408,16 @@ export const DeveloperSettingsPanel: React.FC<DeveloperSettingsPanelProps> = ({
           {capabilities.blueprintAreas.map((item) => (
             <div
               key={item.id}
-              className="rounded-lg border border-slate-100 bg-slate-50/70 p-3 text-xs dark:border-slate-800 dark:bg-slate-800/40"
+              className="rounded-lg border border-slate-100 bg-slate-50/70 erp-dark-panel p-3 text-xs"
             >
-              <div className="font-bold text-slate-800 dark:text-slate-100">{item.area}</div>
-              <div className="mt-1 grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] text-slate-600 dark:text-slate-400">
+              <div className="font-bold text-slate-800 dark:text-white">{item.area}</div>
+              <div className="mt-1 grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] text-slate-600 dark:text-slate-200">
                 <div>
-                  <span className="font-semibold text-slate-700 dark:text-slate-300">Current Web:</span>{' '}
+                  <span className="font-semibold text-slate-700 dark:text-white">Current Web:</span>{' '}
                   {item.currentWebImplementation}
                 </div>
                 <div>
-                  <span className="font-semibold text-indigo-700 dark:text-indigo-300">Desktop Target:</span>{' '}
+                  <span className="font-semibold text-indigo-700 dark:text-indigo-200">Desktop Target:</span>{' '}
                   {item.futureWindowsImplementation}
                 </div>
               </div>

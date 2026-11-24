@@ -252,7 +252,7 @@ export const FruitMasterView: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="space-y-1.5 rounded-lg border border-slate-100 bg-slate-50 p-2.5 text-xs dark:border-slate-800 dark:bg-slate-800/40">
+                <div className="space-y-1.5 rounded-lg border border-slate-100 bg-slate-50 erp-dark-panel p-2.5 text-xs">
                   <div className="flex justify-between">
                     <span className="text-slate-500">Unit:</span>
                     <span className="font-semibold text-slate-800 dark:text-slate-200">

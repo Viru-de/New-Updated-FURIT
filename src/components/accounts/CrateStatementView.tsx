@@ -240,7 +240,7 @@ export const CrateStatementView: React.FC<CrateStatementViewProps> = ({
             />
           </div>
 
-          <div className="md:col-span-7 bg-sky-50 border border-sky-100 rounded-lg p-3 dark:border-sky-900/50 dark:bg-sky-950/20">
+          <div className="md:col-span-7 bg-sky-50 border border-sky-100 erp-dark-panel rounded-lg p-3 dark:border-sky-400/50">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="flex items-center gap-3">
                 {activeCustomer && (
@@ -251,32 +251,32 @@ export const CrateStatementView: React.FC<CrateStatementViewProps> = ({
                   />
                 )}
                 <div>
-                  <span className="block text-xs font-medium text-sky-800 dark:text-sky-300">
+                  <span className="block text-xs font-medium text-sky-800 dark:text-sky-200">
                     Current Customer Crate Balance
                   </span>
                   <span className="text-sm font-bold text-sky-950 dark:text-white">
                     {activeCustomer?.name}
                   </span>
                   {activeCustomer?.mobile && (
-                    <span className="block text-[11px] text-sky-700 dark:text-sky-400">
+                    <span className="block text-[11px] text-sky-700 dark:text-sky-200">
                       Mob: {activeCustomer.mobile} {activeCustomer.city ? `· ${activeCustomer.city}` : ''}
                     </span>
                   )}
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-base sm:text-lg font-bold font-mono-numbers text-sky-900 dark:text-sky-200">
+                <div className="text-base sm:text-lg font-bold font-mono-numbers text-sky-900 dark:text-white">
                   Total: {statement.closingCrates} Crates
                 </div>
-                <div className="text-[11px] text-sky-600 dark:text-sky-400">
+                <div className="text-[11px] text-sky-600 dark:text-sky-200">
                   Weight Equivalent: {statement.closingTotalKg} KG
                 </div>
               </div>
             </div>
 
             {/* Individual Crate-Type Balances Breakdown */}
-            <div className="mt-3 pt-2.5 border-t border-sky-200/70 dark:border-sky-900/60">
-              <div className="text-[11px] font-bold uppercase tracking-wider text-sky-900 dark:text-sky-300 mb-1.5">
+            <div className="mt-3 pt-2.5 border-t border-sky-200/70 dark:border-slate-400/40">
+              <div className="text-[11px] font-bold uppercase tracking-wider text-sky-900 dark:text-sky-200 mb-1.5">
                 Crate-Type Breakdown (Tracked Separately)
               </div>
               <div className="flex flex-wrap gap-2">
@@ -286,10 +286,10 @@ export const CrateStatementView: React.FC<CrateStatementViewProps> = ({
                     .map((tb) => (
                       <div
                         key={tb.crateTypeId}
-                        className="flex items-center gap-2 rounded-lg bg-white/90 dark:bg-slate-900/90 px-3 py-1.5 text-xs font-mono shadow-2xs border border-sky-200 dark:border-sky-800"
+                        className="erp-dark-card flex items-center gap-2 rounded-lg bg-white/90 px-3 py-1.5 text-xs font-mono shadow-2xs border border-sky-200 dark:border-sky-700/60"
                       >
                         <span className="font-bold text-slate-900 dark:text-white">{tb.crateName}:</span>
-                        <span className="text-slate-500 text-[11px]">
+                        <span className="text-slate-500 dark:text-slate-300 text-[11px]">
                           {tb.issued} Out - {tb.returned} In
                         </span>
                         <span className="text-slate-400">=</span>
@@ -298,8 +298,8 @@ export const CrateStatementView: React.FC<CrateStatementViewProps> = ({
                             tb.balance > 0
                               ? 'text-sky-700 dark:text-sky-300'
                               : tb.balance < 0
-                              ? 'text-rose-600'
-                              : 'text-slate-500'
+                              ? 'text-rose-600 dark:text-rose-400'
+                              : 'text-slate-500 dark:text-slate-300'
                           }`}
                         >
                           {tb.balance} Bal
@@ -309,7 +309,7 @@ export const CrateStatementView: React.FC<CrateStatementViewProps> = ({
                 ) : null}
                 {(!statement.typeBalances ||
                   statement.typeBalances.filter((tb) => tb.issued > 0 || tb.returned > 0 || tb.balance !== 0).length === 0) && (
-                  <span className="text-xs text-sky-700 dark:text-sky-400 italic">
+                  <span className="text-xs text-sky-700 dark:text-sky-200 italic">
                     No individual crate types active. Combined balance: {statement.closingCrates} Crates.
                   </span>
                 )}

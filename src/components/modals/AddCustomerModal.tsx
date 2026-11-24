@@ -205,7 +205,7 @@ export const AddCustomerModal: React.FC<AddCustomerModalProps> = ({
             />
           </div>
 
-          <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-800/60">
+          <div className="rounded-lg border border-slate-200 bg-slate-50 erp-dark-panel p-3">
             <h4 className="mb-2 text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300">
               Opening Balances (Money & Crate)
             </h4>

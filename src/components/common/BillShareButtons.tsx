@@ -18,6 +18,8 @@ export interface BillShareButtonsProps {
   defaultPaperSize?: BillPaperSize;
   onPaperSizeChange?: (size: BillPaperSize) => void;
   showPrintButton?: boolean;
+  useCompatB7?: boolean;
+  optionLabelOverrides?: Partial<Record<BillPaperSize, string>>;
 }
 
 export const BillShareButtons: React.FC<BillShareButtonsProps> = ({
@@ -31,6 +33,8 @@ export const BillShareButtons: React.FC<BillShareButtonsProps> = ({
   defaultPaperSize = 'a5',
   onPaperSizeChange,
   showPrintButton = false,
+  useCompatB7 = false,
+  optionLabelOverrides,
 }) => {
   const [isFormatModalOpen, setIsFormatModalOpen] = useState(false);
   const [modalAction, setModalAction] = useState<'print' | 'download'>('download');
@@ -116,6 +120,8 @@ export const BillShareButtons: React.FC<BillShareButtonsProps> = ({
         defaultSize={defaultPaperSize}
         initialAction={modalAction}
         onPaperSizeChange={onPaperSizeChange}
+        useCompatB7={useCompatB7}
+        optionLabelOverrides={optionLabelOverrides}
       />
     </>
   );

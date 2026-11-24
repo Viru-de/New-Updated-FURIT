@@ -126,7 +126,7 @@ export const BillTableCanvas: React.FC<BillTableCanvasProps> = ({
       : pageSize === 'b6'
       ? 'max-w-[430px] w-full text-[10px] pt-1 px-2.5 pb-1.5 sm:px-3'
       : isB7
-      ? 'max-w-[316px] w-full text-[8.5px] pt-0.5 px-1 pb-1'
+      ? 'max-w-[397px] w-full text-[8.5px] pt-1 px-2 pb-1.5'
       : 'max-w-[490px] w-full text-[11px] pt-0.5 px-3 pb-2 sm:pt-1 sm:px-3.5 sm:pb-2.5';
 
   // Balanced percentage column widths with safe NO. separation and generous ITEM NAME / AMOUNT space
@@ -236,6 +236,7 @@ export const BillTableCanvas: React.FC<BillTableCanvasProps> = ({
     <div
       id={isLivePreview ? 'mandi-live-preview-canvas' : 'mandi-print-area'}
       data-paper-size={pageSize}
+      data-compat-105={isB7 ? 'true' : undefined}
       data-theme-isolated="true"
       className={`bg-white text-slate-900 font-sans leading-tight ${
         isLivePreview

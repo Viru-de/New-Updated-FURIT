@@ -562,19 +562,19 @@ export const CustomerLedgerView: React.FC<CustomerLedgerViewProps> = ({
             </div>
 
             {/* Prominent Current Balance in Top-Right Corner */}
-            <div className="w-full lg:w-72 shrink-0 flex flex-col justify-between bg-slate-50 dark:bg-slate-800/60 p-4 sm:p-5 rounded-xl border border-slate-200 dark:border-slate-700/60 shadow-2xs">
+            <div className="w-full lg:w-72 shrink-0 flex flex-col justify-between bg-slate-50 erp-dark-panel p-4 sm:p-5 rounded-xl border border-slate-200 dark:border-slate-700/60 shadow-2xs">
               <div>
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-200">
                     {(filterStartDate || filterEndDate) ? 'Period Balance' : 'Current Balance'}
                   </span>
                   <span
                     className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
                       ledger.closingBalance > 0
-                        ? 'bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300'
+                        ? 'bg-rose-100 text-rose-800 dark:bg-[#131d31] dark:text-rose-300 dark:border dark:border-rose-400/50'
                         : ledger.closingBalance < 0
-                        ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300'
-                        : 'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-300'
+                        ? 'bg-emerald-100 text-emerald-800 dark:bg-[#131d31] dark:text-emerald-300 dark:border dark:border-emerald-400/50'
+                        : 'bg-slate-200 text-slate-700 dark:bg-[#131d31] dark:text-slate-200 dark:border dark:border-slate-500'
                     }`}
                   >
                     {ledger.closingBalance > 0 ? 'Dr · Due' : ledger.closingBalance < 0 ? 'Cr · Advance' : 'Settled'}
@@ -830,7 +830,7 @@ export const CustomerLedgerView: React.FC<CustomerLedgerViewProps> = ({
         </div>
 
         {/* Bottom Banner (On-screen) */}
-        <div className="no-print flex flex-col sm:flex-row items-center justify-between border-t border-slate-200 bg-slate-50 px-6 py-4 dark:border-slate-800 dark:bg-slate-800/60">
+        <div className="no-print flex flex-col sm:flex-row items-center justify-between border-t border-slate-200 bg-slate-50 erp-dark-panel px-6 py-4">
           <div className="text-xs text-slate-600 dark:text-slate-400">
             Net balance is calculated dynamically from all historical transactions.
           </div>

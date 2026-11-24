@@ -313,7 +313,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ initialTab = 'genera
           </div>
 
           {/* Business Logo Section for Primary Default Profile */}
-          <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-4 dark:border-slate-800 dark:bg-slate-900/50 space-y-2">
+          <div className="rounded-xl border border-slate-200 bg-slate-50/70 erp-dark-panel p-4 space-y-2">
             <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider dark:text-slate-200 flex items-center justify-between">
               <span>Primary Business Logo</span>
               <span className="text-[11px] font-normal text-emerald-600">Default Mandi Profile</span>
@@ -581,7 +581,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ initialTab = 'genera
               </button>
             </div>
 
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-lg border border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-800/40">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-lg border border-slate-200 bg-slate-50 erp-dark-panel">
               <div>
                 <span className="font-semibold text-xs text-slate-900 dark:text-white block">Export Database Backup</span>
                 <span className="text-[11px] text-slate-500">
@@ -597,7 +597,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ initialTab = 'genera
               </button>
             </div>
 
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-lg border border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-800/40">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-lg border border-slate-200 bg-slate-50 erp-dark-panel">
               <div>
                 <span className="font-semibold text-xs text-slate-900 dark:text-white block">Restore from Backup</span>
                 <span className="text-[11px] text-slate-500">

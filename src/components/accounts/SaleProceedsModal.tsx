@@ -708,7 +708,7 @@ export const SaleProceedsModal: React.FC<SaleProceedsModalProps> = ({
             </div>
 
             {/* Consignor and Customer Information Card */}
-            <div className="rounded-lg border border-slate-200 bg-white p-3.5 sm:p-4 shadow-2xs dark:border-slate-800 dark:bg-slate-800/40 space-y-3">
+            <div className="rounded-lg border border-slate-200 bg-white erp-dark-panel p-3.5 sm:p-4 shadow-2xs dark:border-slate-700 space-y-3">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Consignor / Vendor */}
                 <div>
@@ -758,7 +758,7 @@ export const SaleProceedsModal: React.FC<SaleProceedsModalProps> = ({
                   const cust = customers.find((c) => c.id === customerId);
                   const ledger = cust ? getCustomerLedger(cust.id) : null;
                   return (
-                    <div className="mt-2 rounded-lg border border-emerald-100 bg-emerald-50/60 p-3 dark:border-emerald-900/40 dark:bg-emerald-950/20">
+                    <div className="erp-dark-card mt-2 rounded-lg border border-emerald-100 bg-emerald-50/60 p-3 dark:border-emerald-800/60">
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
                         <div className="flex items-center gap-3">
                           <CustomerAvatar name={cust?.name || 'Customer'} size="md" />
@@ -828,7 +828,7 @@ export const SaleProceedsModal: React.FC<SaleProceedsModalProps> = ({
             </div>
 
             {/* Product Section: Table Format */}
-            <div className="rounded-lg border border-slate-200 bg-slate-50/60 p-3 sm:p-4 dark:border-slate-800 dark:bg-slate-800/30">
+            <div className="rounded-lg border border-slate-200 bg-slate-50/60 erp-dark-panel p-3 sm:p-4">
               <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
                 <div>
                   <span className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
@@ -1060,7 +1060,7 @@ export const SaleProceedsModal: React.FC<SaleProceedsModalProps> = ({
             </div>
 
             {/* Expenses Section */}
-            <div className="rounded-lg border border-slate-200 p-4 dark:border-slate-800">
+            <div className="rounded-lg border border-slate-200 bg-slate-50/60 erp-dark-panel p-4">
               <div className="mb-2 flex items-center justify-between">
                 <div>
                   <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
@@ -1123,21 +1123,21 @@ export const SaleProceedsModal: React.FC<SaleProceedsModalProps> = ({
             </div>
 
             {/* Calculations Summary Box */}
-            <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/40">
+            <div className="rounded-lg border border-slate-200 bg-slate-50 erp-dark-panel p-4">
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
-                <div className="p-2 rounded bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                <div className="erp-dark-card p-2 rounded bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
                   <span className="block text-[11px] font-medium text-slate-500">Total Amount</span>
                   <span className="text-base font-bold font-mono-numbers text-slate-900 dark:text-white">
                     {formatCurrency(totalProductAmount)}
                   </span>
                 </div>
-                <div className="p-2 rounded bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                <div className="erp-dark-card p-2 rounded bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
                   <span className="block text-[11px] font-medium text-slate-500">Total Expense</span>
                   <span className="text-base font-bold font-mono-numbers text-rose-600 dark:text-rose-400">
                     {formatCurrency(totalExpense)}
                   </span>
                 </div>
-                <div className="p-2 rounded bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900">
+                <div className="p-2 rounded bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-700/60">
                   <span className="block text-[11px] font-medium text-emerald-700 dark:text-emerald-300">
                     Net Credit
                   </span>
@@ -1145,7 +1145,7 @@ export const SaleProceedsModal: React.FC<SaleProceedsModalProps> = ({
                     {formatCurrency(netAmount)}
                   </span>
                 </div>
-                <div className="p-2 rounded bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                <div className="erp-dark-card p-2 rounded bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
                   <span className="block text-[11px] font-medium text-slate-500">Difference</span>
                   <span className="text-base font-bold font-mono-numbers text-slate-600 dark:text-slate-400">
                     {formatCurrency(difference)}

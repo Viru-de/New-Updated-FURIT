@@ -179,7 +179,7 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
 
             {/* Current Balance Indicator */}
             {selectedCustomer && (
-              <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-800/40">
+              <div className="rounded-lg border border-slate-200 bg-slate-50 erp-dark-panel p-3">
                 <div className="flex items-center justify-between text-xs">
                   <div className="flex items-center gap-2">
                     <CustomerAvatar

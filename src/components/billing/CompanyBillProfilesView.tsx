@@ -363,7 +363,7 @@ export const CompanyBillProfilesView: React.FC = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-2 rounded-lg border border-slate-100 bg-slate-50 p-2.5 text-xs dark:border-slate-800 dark:bg-slate-800/40 mb-3">
+            <div className="grid grid-cols-2 gap-2 rounded-lg border border-slate-100 bg-slate-50 erp-dark-panel p-2.5 text-xs mb-3">
               <div>
                 <span className="text-slate-400 block text-[10px] uppercase font-bold">Aadhaar Card No.</span>
                 <div className="flex items-center gap-1.5 font-mono text-xs font-semibold text-slate-800 dark:text-slate-200">
@@ -393,8 +393,8 @@ export const CompanyBillProfilesView: React.FC = () => {
             </div>
 
             {profile.bankName && (
-              <div className="text-xs text-slate-500 rounded-lg border border-slate-100 p-2 dark:border-slate-800">
-                <span className="font-semibold text-slate-700 dark:text-slate-300 block mb-0.5">
+              <div className="text-xs text-slate-500 rounded-lg border border-slate-100 erp-dark-panel p-2.5">
+                <span className="font-semibold text-slate-700 dark:text-white block mb-0.5">
                   Bank Account:
                 </span>
                 <span className="font-mono-numbers">
@@ -693,7 +693,7 @@ export const CompanyBillProfilesView: React.FC = () => {
               </div>
 
               {/* Bank Details */}
-              <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-800/40 space-y-2">
+              <div className="rounded-lg border border-slate-200 bg-slate-50 erp-dark-panel p-3 space-y-2">
                 <span className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 block">
                   Bank Details for Invoice
                 </span>

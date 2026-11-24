@@ -88,12 +88,49 @@ export function saveLastSelectedPaperSize(size: BillPaperSize): void {
 }
 
 /**
+ * Resolves effective paper dimensions.
+ * Credit Sale and Cash Sale B7 ("Compat") prints carry `data-compat-105="true"` and use 105 × 148.5 mm Portrait,
+ * while Sale Proceeds and other sections preserve standard PAPER_SIZE_SPECS.b7 (88 × 125 mm).
+ */
+export function resolvePaperSizeSpec(
+  size: BillPaperSize = 'a5',
+  targetElementOrId?: HTMLElement | string | null
+): PaperSizeSpec {
+  const base = PAPER_SIZE_SPECS[size] || PAPER_SIZE_SPECS.a5;
+  if (size !== 'b7') return base;
+
+  let el: HTMLElement | null = null;
+  if (typeof targetElementOrId === 'string') {
+    el = typeof document !== 'undefined' ? document.getElementById(targetElementOrId) : null;
+  } else if (targetElementOrId) {
+    el = targetElementOrId;
+  } else if (typeof document !== 'undefined') {
+    el = document.getElementById('mandi-print-area');
+  }
+
+  if (el && el.getAttribute('data-compat-105') === 'true') {
+    return {
+      ...base,
+      name: 'Small Bill',
+      dimensionsMm: '105 × 148.5 mm',
+      widthMm: 105,
+      heightMm: 148.5,
+      description:
+        'Compact portrait bill format (105 × 148.5 mm). Suitable for small wholesale bills and compact records.',
+      warning:
+        'Small Bill (105 × 148.5 mm) has compact space. Longer bills may require multiple pages or a larger paper size.',
+    };
+  }
+  return base;
+}
+
+/**
  * Dynamically injects an @page stylesheet rule before browser printing so that
  * the printer dialogue respects the selected paper dimensions and margins.
  */
 export function applyPrintPageSize(size: BillPaperSize = 'a5', targetElementId?: string): void {
   if (typeof document === 'undefined') return;
-  const spec = PAPER_SIZE_SPECS[size] || PAPER_SIZE_SPECS.a5;
+  const spec = resolvePaperSizeSpec(size, targetElementId);
   let styleEl = document.getElementById('dynamic-print-page-style') as HTMLStyleElement | null;
   if (!styleEl) {
     styleEl = document.createElement('style');
@@ -116,7 +153,7 @@ export function applyPrintPageSize(size: BillPaperSize = 'a5', targetElementId?:
   );
 
   const margins: Record<BillPaperSize, string> = {
-    b7: '1.5mm 2.5mm 1.5mm 2.5mm',
+    b7: spec.widthMm === 105 ? '2mm 2.5mm 2mm 2.5mm' : '1.5mm 2.5mm 1.5mm 2.5mm',
     b6: '2mm 3mm 2mm 3mm',
     a5: '2mm 4mm 2mm 4mm',
     compact: '2mm 4mm 2.5mm 4mm',
@@ -440,7 +477,7 @@ export async function generatePdfDoc(
     throw new Error(`Printable element #${elementId} not found in the DOM`);
   }
 
-  const spec = PAPER_SIZE_SPECS[paperSize] || PAPER_SIZE_SPECS.a5;
+  const spec = resolvePaperSizeSpec(paperSize, element);
   const targetPxWidth = Math.round(spec.widthMm * 3.7795);
 
   // CRITICAL: Ensure all web fonts (especially Noto Sans Devanagari & Plus Jakarta Sans) are fully loaded
@@ -516,11 +553,11 @@ export async function generatePdfDoc(
         // Keep safe compact PDF margins without clipping Company Short Name
         clonedElement.style.marginTop = '0';
         clonedElement.style.paddingTop =
-          paperSize === 'b7' ? '4px' : paperSize === 'b6' ? '5px' : '8px';
+          paperSize === 'b7' ? (spec.widthMm === 105 ? '6px' : '4px') : paperSize === 'b6' ? '5px' : '8px';
         if (paperSize === 'b7') {
-          clonedElement.style.paddingLeft = '5px';
-          clonedElement.style.paddingRight = '5px';
-          clonedElement.style.paddingBottom = '4px';
+          clonedElement.style.paddingLeft = spec.widthMm === 105 ? '7px' : '5px';
+          clonedElement.style.paddingRight = spec.widthMm === 105 ? '7px' : '5px';
+          clonedElement.style.paddingBottom = spec.widthMm === 105 ? '5px' : '4px';
         } else if (paperSize === 'b6') {
           clonedElement.style.paddingLeft = '7px';
           clonedElement.style.paddingRight = '7px';

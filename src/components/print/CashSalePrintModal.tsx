@@ -5,7 +5,7 @@ import { Printer, X, Building2 } from 'lucide-react';
 import { BillTableCanvas } from '../common/BillTableCanvas';
 import { BillShareButtons } from '../common/BillShareButtons';
 import { ChooseBillPrintFormatModal } from '../common/ChooseBillPrintFormatModal';
-import { BillPaperSize, getLastSelectedPaperSize } from '../../utils/pdfAndShareEngine';
+import { BillPaperSize, getLastSelectedPaperSize, saveLastSelectedPaperSize } from '../../utils/pdfAndShareEngine';
 import { getCustomerPrintContactLines } from '../../utils/customerContactUtils';
 
 interface CashSalePrintModalProps {
@@ -86,14 +86,17 @@ export const CashSalePrintModal: React.FC<CashSalePrintModalProps> = ({
                 <button
                   key={sizeKey}
                   type="button"
-                  onClick={() => setPageSize(sizeKey)}
+                  onClick={() => {
+                    setPageSize(sizeKey);
+                    saveLastSelectedPaperSize(sizeKey);
+                  }}
                   className={`px-2 py-0.5 sm:px-2.5 sm:py-1 rounded text-[11px] sm:text-xs font-semibold cursor-pointer transition-all ${
                     pageSize === sizeKey
                       ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 shadow-2xs font-bold'
                       : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700'
                   }`}
                 >
-                  {sizeKey === 'compact' ? 'Compact' : sizeKey.toUpperCase()}
+                  {sizeKey === 'compact' ? 'Small Bill' : sizeKey.toUpperCase()}
                 </button>
               ))}
             </div>
@@ -108,6 +111,8 @@ export const CashSalePrintModal: React.FC<CashSalePrintModalProps> = ({
               summaryText={summaryText}
               defaultPaperSize={pageSize}
               onPaperSizeChange={setPageSize}
+              useCompatB7={true}
+              optionLabelOverrides={{ compact: 'Small Bill', b7: 'B7' }}
             />
             <button
               type="button"
@@ -163,6 +168,8 @@ export const CashSalePrintModal: React.FC<CashSalePrintModalProps> = ({
         defaultSize={pageSize}
         initialAction="print"
         onPaperSizeChange={setPageSize}
+        useCompatB7={true}
+        optionLabelOverrides={{ compact: 'Small Bill', b7: 'B7' }}
       />
     </div>
   );

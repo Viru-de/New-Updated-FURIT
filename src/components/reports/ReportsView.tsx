@@ -716,7 +716,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-5 dark:border-slate-800 dark:bg-slate-800/40">
+            <div className="rounded-xl border border-slate-200 bg-slate-50 erp-dark-panel p-5">
               <span className="text-xs font-semibold text-slate-500 block mb-1">Total Sales Revenue</span>
               <span className="font-mono-numbers text-2xl font-black text-slate-900 dark:text-white">
                 {formatCurrency(totalSales)}

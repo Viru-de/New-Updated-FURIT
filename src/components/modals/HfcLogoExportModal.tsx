@@ -164,7 +164,7 @@ export const HfcLogoExportModal: React.FC<HfcLogoExportModalProps> = ({
           {/* Export Options Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             {/* 1. White Print PNG */}
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-3.5 dark:border-slate-800 dark:bg-slate-800/50 flex flex-col justify-between">
+            <div className="rounded-xl border border-slate-200 bg-slate-50 erp-dark-panel p-3.5 flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between mb-1">
                   <span className="font-bold text-xs text-slate-900 dark:text-white flex items-center gap-1">
@@ -182,14 +182,14 @@ export const HfcLogoExportModal: React.FC<HfcLogoExportModalProps> = ({
               <button
                 type="button"
                 onClick={() => handleDownload('white')}
-                className="mt-3 flex items-center justify-center gap-1.5 rounded-lg border border-slate-300 bg-white py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 cursor-pointer shadow-2xs"
+                className="neu-btn mt-3 flex items-center justify-center gap-1.5 py-1.5 text-xs font-bold cursor-pointer"
               >
                 <Download className="h-3.5 w-3.5 text-blue-600" /> Download
               </button>
             </div>
 
             {/* 2. Transparent PNG */}
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-3.5 dark:border-slate-800 dark:bg-slate-800/50 flex flex-col justify-between">
+            <div className="rounded-xl border border-slate-200 bg-slate-50 erp-dark-panel p-3.5 flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between mb-1">
                   <span className="font-bold text-xs text-slate-900 dark:text-white flex items-center gap-1">
@@ -207,14 +207,14 @@ export const HfcLogoExportModal: React.FC<HfcLogoExportModalProps> = ({
               <button
                 type="button"
                 onClick={() => handleDownload('transparent')}
-                className="mt-3 flex items-center justify-center gap-1.5 rounded-lg border border-slate-300 bg-white py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 cursor-pointer shadow-2xs"
+                className="neu-btn mt-3 flex items-center justify-center gap-1.5 py-1.5 text-xs font-bold cursor-pointer"
               >
                 <Download className="h-3.5 w-3.5 text-purple-600" /> Download
               </button>
             </div>
 
             {/* 3. Cream PNG */}
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-3.5 dark:border-slate-800 dark:bg-slate-800/50 flex flex-col justify-between">
+            <div className="rounded-xl border border-slate-200 bg-slate-50 erp-dark-panel p-3.5 flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between mb-1">
                   <span className="font-bold text-xs text-slate-900 dark:text-white">
@@ -231,14 +231,14 @@ export const HfcLogoExportModal: React.FC<HfcLogoExportModalProps> = ({
               <button
                 type="button"
                 onClick={() => handleDownload('cream')}
-                className="mt-3 flex items-center justify-center gap-1.5 rounded-lg border border-slate-300 bg-white py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 cursor-pointer shadow-2xs"
+                className="neu-btn mt-3 flex items-center justify-center gap-1.5 py-1.5 text-xs font-bold cursor-pointer"
               >
                 <Download className="h-3.5 w-3.5 text-emerald-600" /> Download
               </button>
             </div>
 
             {/* 4. Circle Emblem Only */}
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-3.5 dark:border-slate-800 dark:bg-slate-800/50 flex flex-col justify-between">
+            <div className="rounded-xl border border-slate-200 bg-slate-50 erp-dark-panel p-3.5 flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between mb-1">
                   <span className="font-bold text-xs text-slate-900 dark:text-white">
@@ -255,7 +255,7 @@ export const HfcLogoExportModal: React.FC<HfcLogoExportModalProps> = ({
               <button
                 type="button"
                 onClick={() => handleDownload('circle')}
-                className="mt-3 flex items-center justify-center gap-1.5 rounded-lg border border-slate-300 bg-white py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 cursor-pointer shadow-2xs"
+                className="neu-btn mt-3 flex items-center justify-center gap-1.5 py-1.5 text-xs font-bold cursor-pointer"
               >
                 <Download className="h-3.5 w-3.5 text-amber-600" /> Download
               </button>

@@ -296,7 +296,7 @@ export const CustomerDirectoryView: React.FC<CustomerDirectoryViewProps> = ({
                 )}
 
                 {/* Balances strip */}
-                <div className="grid grid-cols-2 gap-2 my-3 rounded-lg border border-slate-100 bg-slate-50 p-2.5 dark:border-slate-800 dark:bg-slate-800/40">
+                <div className="grid grid-cols-2 gap-2 my-3 rounded-lg border border-slate-100 bg-slate-50 erp-dark-panel p-2.5">
                   <div>
                     <span className="block text-[10px] uppercase font-bold text-slate-400">
                       Outstanding (₹)

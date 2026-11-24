@@ -282,7 +282,7 @@ export const CashSaleListView: React.FC<CashSaleListViewProps> = ({
 
                 {/* Expanded Details */}
                 {isExpanded && (
-                  <div className="border-t border-slate-100 bg-slate-50/50 p-4 dark:border-slate-800 dark:bg-slate-900/40">
+                  <div className="border-t border-slate-100 bg-slate-50/50 erp-dark-panel p-4 dark:border-slate-700">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {/* Items */}
                       <div>
@@ -293,7 +293,7 @@ export const CashSaleListView: React.FC<CashSaleListViewProps> = ({
                           {s.items?.map((it, idx) => (
                             <div
                               key={it.id || idx}
-                              className="flex items-center justify-between rounded-lg border border-slate-200/80 bg-white px-3 py-2 text-xs dark:border-slate-800 dark:bg-slate-800"
+                              className="neu-inset-sm flex items-center justify-between px-3 py-2 text-xs"
                             >
                               <div>
                                 <span className="font-semibold text-slate-800 dark:text-slate-200">
@@ -314,7 +314,7 @@ export const CashSaleListView: React.FC<CashSaleListViewProps> = ({
 
                       {/* Crates & Expenses */}
                       <div className="space-y-3">
-                        <div className="rounded-lg border border-sky-100 bg-sky-50/60 p-3 text-xs dark:border-sky-900/30 dark:bg-sky-950/20">
+                        <div className="erp-dark-card rounded-lg border border-sky-100 bg-sky-50/60 p-3 text-xs dark:border-sky-700/60">
                           <span className="font-bold text-sky-900 dark:text-sky-300 block mb-1">
                             Balance Crate Status
                           </span>

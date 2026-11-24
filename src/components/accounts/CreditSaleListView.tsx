@@ -258,7 +258,7 @@ export const CreditSaleListView: React.FC<CreditSaleListViewProps> = ({
 
                 {/* Expanded Details */}
                 {isExpanded && (
-                  <div className="border-t border-slate-100 bg-slate-50/50 p-5 dark:border-slate-800 dark:bg-slate-800/30 space-y-4">
+                  <div className="border-t border-slate-100 bg-slate-50/50 erp-dark-panel p-5 dark:border-slate-700 space-y-4">
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
                       <div className="flex items-center gap-2.5">
                         <CustomerAvatar
@@ -298,7 +298,7 @@ export const CreditSaleListView: React.FC<CreditSaleListViewProps> = ({
                       <h4 className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-2">
                         Fruit Items
                       </h4>
-                      <div className="rounded-lg border border-slate-200 bg-white divide-y divide-slate-100 dark:border-slate-800 dark:bg-slate-900 dark:divide-slate-800">
+                      <div className="neu-inset-sm divide-y divide-slate-100 dark:divide-slate-800">
                         {sale.items?.map((it, idx) => (
                           <div
                             key={it.id || idx}
@@ -327,7 +327,7 @@ export const CreditSaleListView: React.FC<CreditSaleListViewProps> = ({
                         <h4 className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-2">
                           Expenses
                         </h4>
-                        <div className="rounded-lg border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-900 space-y-1 text-xs">
+                        <div className="neu-inset-sm p-3 space-y-1 text-xs">
                           {sale.expenses && sale.expenses.length > 0 ? (
                             sale.expenses.map((exp, i) => (
                               <div key={exp.id || i} className="flex items-center justify-between">
@@ -353,7 +353,7 @@ export const CreditSaleListView: React.FC<CreditSaleListViewProps> = ({
                         <h4 className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-2">
                           Crate Summary
                         </h4>
-                        <div className="rounded-lg border border-sky-100 bg-sky-50/50 p-3 dark:border-sky-900/40 dark:bg-sky-950/20 text-xs space-y-1">
+                        <div className="erp-dark-card rounded-lg border border-sky-100 bg-sky-50/50 p-3 dark:border-sky-700/60 text-xs space-y-1">
                           <div className="flex justify-between">
                             <span className="text-slate-600 dark:text-slate-400">Balance Crates Issued:</span>
                             <span className="font-mono font-bold text-sky-700 dark:text-sky-300">
@@ -371,7 +371,7 @@ export const CreditSaleListView: React.FC<CreditSaleListViewProps> = ({
                     </div>
 
                     {/* Financial Summary */}
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 rounded-lg border border-slate-200 bg-white p-3 text-center dark:border-slate-800 dark:bg-slate-900 text-xs">
+                    <div className="neu-card-sm grid grid-cols-2 sm:grid-cols-4 gap-3 p-3 text-center text-xs">
                       <div>
                         <span className="text-[11px] text-slate-500 block">Product Total</span>
                         <span className="font-mono-numbers font-bold text-sm text-slate-900 dark:text-white">
@@ -405,9 +405,9 @@ export const CreditSaleListView: React.FC<CreditSaleListViewProps> = ({
                       <button
                         type="button"
                         onClick={() => setPrintingItem(sale)}
-                        className="flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3.5 py-1.5 text-xs font-semibold text-slate-700 shadow-2xs hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                        className="neu-btn flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold cursor-pointer"
                       >
-                        <Printer className="h-3.5 w-3.5 text-emerald-600" /> Print Credit Sale (Ref 2)
+                        <Printer className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" /> Print Credit Sale (Ref 2)
                       </button>
 
                       {onNavigateToCustomerLedger && (

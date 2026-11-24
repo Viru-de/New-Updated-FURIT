@@ -26,6 +26,8 @@ export interface ChooseBillPrintFormatModalProps {
   defaultSize?: BillPaperSize;
   initialAction?: 'print' | 'download';
   onPaperSizeChange?: (size: BillPaperSize) => void;
+  useCompatB7?: boolean;
+  optionLabelOverrides?: Partial<Record<BillPaperSize, string>>;
 }
 
 export const ChooseBillPrintFormatModal: React.FC<ChooseBillPrintFormatModalProps> = ({
@@ -37,6 +39,8 @@ export const ChooseBillPrintFormatModal: React.FC<ChooseBillPrintFormatModalProp
   defaultSize = 'a5',
   initialAction = 'print',
   onPaperSizeChange,
+  useCompatB7 = false,
+  optionLabelOverrides,
 }) => {
   const [selectedSize, setSelectedSize] = useState<BillPaperSize>(() =>
     getLastSelectedPaperSize(defaultSize)
@@ -122,7 +126,36 @@ export const ChooseBillPrintFormatModal: React.FC<ChooseBillPrintFormatModalProp
     }
   };
 
-  const currentSpec = PAPER_SIZE_SPECS[selectedSize];
+  const isCompatBill = Boolean(
+    useCompatB7 ||
+      (typeof document !== 'undefined' &&
+        document.getElementById(elementId)?.getAttribute('data-compat-105') === 'true')
+  );
+  const getDisplaySpec = (size: BillPaperSize) => {
+    const base = PAPER_SIZE_SPECS[size];
+    const overrideName = optionLabelOverrides?.[size];
+    if (size === 'b7' && isCompatBill) {
+      const resolvedName = overrideName || 'Small Bill';
+      return {
+        ...base,
+        name: resolvedName,
+        dimensionsMm: '105 × 148.5 mm',
+        widthMm: 105,
+        heightMm: 148.5,
+        description:
+          'Compact portrait bill format (105 × 148.5 mm). Suitable for small wholesale bills and compact records.',
+        warning: `${resolvedName} (105 × 148.5 mm) has compact space. Longer bills may require multiple pages or a larger paper size.`,
+      };
+    }
+    if (overrideName) {
+      return {
+        ...base,
+        name: overrideName,
+      };
+    }
+    return base;
+  };
+  const currentSpec = getDisplaySpec(selectedSize);
   const sizeKeys: BillPaperSize[] = ['compact', 'b7', 'b6', 'a5', 'a4'];
 
   return (
@@ -171,7 +204,7 @@ export const ChooseBillPrintFormatModal: React.FC<ChooseBillPrintFormatModalProp
 
             <div className="grid grid-cols-1 gap-2.5">
               {sizeKeys.map((key) => {
-                const spec = PAPER_SIZE_SPECS[key];
+                const spec = getDisplaySpec(key);
                 const isSelected = selectedSize === key;
 
                 return (

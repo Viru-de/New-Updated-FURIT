@@ -354,8 +354,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
       {/* Recent Activity Sections (Sale Proceeds, Credit Sales, Receipts) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Recent Sale Proceeds */}
-        <div className="neu-card p-5">
-          <div className="flex items-center justify-between border-b border-slate-300/40 dark:border-slate-700 pb-3 mb-3">
+        <div className="neu-card overflow-hidden">
+          <div className="flex items-center justify-between border-b border-slate-300/40 dark:border-slate-700 px-5 py-3.5">
             <h3 className="font-bold text-xs uppercase tracking-wider text-slate-700 dark:text-slate-300">
               Recent Sale Proceeds
             </h3>
@@ -367,7 +367,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
               All &rarr;
             </button>
           </div>
-          <div className="space-y-2.5">
+          <div className="erp-dark-panel p-4 space-y-2.5">
             {metrics.recentSaleProceeds.length === 0 ? (
               <p className="text-xs text-slate-400 py-4 text-center">No recent proceeds</p>
             ) : (
@@ -375,7 +375,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
                 <div
                   key={sp.id}
                   onClick={() => onNavigate('saleProceeds')}
-                  className="neu-inset-sm cursor-pointer flex items-center justify-between p-2.5 hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition-colors"
+                  className="neu-inset-sm cursor-pointer flex items-center justify-between p-2.5 hover:bg-slate-50/60 dark:hover:bg-[#1b2942] transition-colors"
                 >
                   <div>
                     <span className="font-bold text-xs text-slate-900 dark:text-white block">
@@ -395,8 +395,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
         </div>
 
         {/* Recent Credit Sales */}
-        <div className="neu-card p-5">
-          <div className="flex items-center justify-between border-b border-slate-300/40 dark:border-slate-700 pb-3 mb-3">
+        <div className="neu-card overflow-hidden">
+          <div className="flex items-center justify-between border-b border-slate-300/40 dark:border-slate-700 px-5 py-3.5">
             <h3 className="font-bold text-xs uppercase tracking-wider text-slate-700 dark:text-slate-300">
               Recent Credit Sales
             </h3>
@@ -408,7 +408,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
               All &rarr;
             </button>
           </div>
-          <div className="space-y-2.5">
+          <div className="erp-dark-panel p-4 space-y-2.5">
             {metrics.recentCreditSales.length === 0 ? (
               <p className="text-xs text-slate-400 py-4 text-center">No recent credit sales</p>
             ) : (
@@ -416,7 +416,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
                 <div
                   key={cs.id}
                   onClick={() => onNavigate('creditSales')}
-                  className="neu-inset-sm cursor-pointer flex items-center justify-between p-2.5 hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition-colors"
+                  className="neu-inset-sm cursor-pointer flex items-center justify-between p-2.5 hover:bg-slate-50/60 dark:hover:bg-[#1b2942] transition-colors"
                 >
                   <div>
                     <span className="font-bold text-xs text-slate-900 dark:text-white block">
@@ -436,8 +436,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
         </div>
 
         {/* Recent Receipts */}
-        <div className="neu-card p-5">
-          <div className="flex items-center justify-between border-b border-slate-300/40 dark:border-slate-700 pb-3 mb-3">
+        <div className="neu-card overflow-hidden">
+          <div className="flex items-center justify-between border-b border-slate-300/40 dark:border-slate-700 px-5 py-3.5">
             <h3 className="font-bold text-xs uppercase tracking-wider text-slate-700 dark:text-slate-300">
               Recent Collections / Cash
             </h3>
@@ -449,7 +449,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
               All &rarr;
             </button>
           </div>
-          <div className="space-y-2.5">
+          <div className="erp-dark-panel p-4 space-y-2.5">
             {metrics.recentReceipts.length === 0 ? (
               <p className="text-xs text-slate-400 py-4 text-center">No recent receipts</p>
             ) : (
@@ -457,7 +457,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
                 <div
                   key={r.id}
                   onClick={() => onNavigate('receipts')}
-                  className="neu-inset-sm cursor-pointer flex items-center justify-between p-2.5 hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition-colors"
+                  className="neu-inset-sm cursor-pointer flex items-center justify-between p-2.5 hover:bg-slate-50/60 dark:hover:bg-[#1b2942] transition-colors"
                 >
                   <div>
                     <span className="font-bold text-xs text-slate-900 dark:text-white block">

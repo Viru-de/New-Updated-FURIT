@@ -586,7 +586,7 @@ export const CashSaleModal: React.FC<CashSaleModalProps> = ({
               </div>
 
               {/* Items Table with exact headings: No. | Item Name | Qty | KG | Rate | Amount */}
-              <div className="rounded-lg border border-slate-200 p-3 sm:p-4 dark:border-slate-800">
+              <div className="rounded-lg border border-slate-200 bg-slate-50/60 erp-dark-panel p-3 sm:p-4">
                 <div className="mb-3 flex items-center justify-between">
                   <div>
                     <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
@@ -782,7 +782,7 @@ export const CashSaleModal: React.FC<CashSaleModalProps> = ({
 
                 {/* Crate Balance Indicator (tracked separately by crate type) */}
                 {crateBreakdownText && (
-                  <div className="mt-3 flex items-center justify-between rounded-lg border border-sky-200 bg-sky-50/70 px-3.5 py-2 text-xs dark:border-sky-900/50 dark:bg-sky-950/30">
+                  <div className="erp-dark-card mt-3 flex items-center justify-between rounded-lg border border-sky-200 bg-sky-50/70 px-3.5 py-2 text-xs dark:border-sky-800/60">
                     <div className="flex items-center gap-2">
                       <Box className="h-4 w-4 text-sky-600 dark:text-sky-400" />
                       <span className="font-semibold text-sky-900 dark:text-sky-200">
@@ -797,7 +797,7 @@ export const CashSaleModal: React.FC<CashSaleModalProps> = ({
               </div>
 
               {/* Expenses */}
-              <div className="rounded-lg border border-slate-200 p-4 dark:border-slate-800">
+              <div className="rounded-lg border border-slate-200 bg-slate-50/60 erp-dark-panel p-4">
                 <div className="mb-2 flex items-center justify-between">
                   <span className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
                     Cash Sale Expenses (Hamali, Freight, etc.)
@@ -845,7 +845,7 @@ export const CashSaleModal: React.FC<CashSaleModalProps> = ({
               </div>
 
               {/* Totals Summary */}
-              <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-4 dark:border-slate-800 dark:bg-slate-800/40">
+              <div className="rounded-xl border border-slate-200 bg-slate-50/70 erp-dark-panel p-4">
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
                   <div>
                     <span className="text-[11px] text-slate-500">Items Total</span>

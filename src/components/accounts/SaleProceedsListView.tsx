@@ -285,7 +285,7 @@ export const SaleProceedsListView: React.FC<SaleProceedsListViewProps> = ({
 
                 {/* Expanded Details View */}
                 {isExpanded && (
-                  <div className="border-t border-slate-300/40 bg-[#e4e9f0]/40 p-5 space-y-4">
+                  <div className="border-t border-slate-300/40 bg-[#e4e9f0]/40 erp-dark-panel p-5 space-y-4">
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
                       <div>
                         <span className="text-slate-500 block">Date</span>
@@ -370,7 +370,7 @@ export const SaleProceedsListView: React.FC<SaleProceedsListViewProps> = ({
 
                         <div className="flex items-center justify-between border-t border-slate-300/40 pt-2 font-semibold text-slate-800">
                           <span>Total Expense</span>
-                          <span className="font-mono-numbers text-rose-600">
+                          <span className="font-mono-numbers text-rose-600 dark:text-rose-400">
                             {formatCurrency(sale.totalExpense)}
                           </span>
                         </div>
@@ -387,13 +387,13 @@ export const SaleProceedsListView: React.FC<SaleProceedsListViewProps> = ({
                       </div>
                       <div>
                         <span className="text-[11px] text-slate-500 block">Total Expense</span>
-                        <span className="font-mono-numbers font-bold text-sm text-rose-600">
+                        <span className="font-mono-numbers font-bold text-sm text-rose-600 dark:text-rose-400">
                           {formatCurrency(sale.totalExpense)}
                         </span>
                       </div>
                       <div>
-                        <span className="text-[11px] text-emerald-700 block font-semibold">Net Credit</span>
-                        <span className="font-mono-numbers font-bold text-sm text-emerald-700">
+                        <span className="text-[11px] text-emerald-700 dark:text-emerald-400 block font-semibold">Net Credit</span>
+                        <span className="font-mono-numbers font-bold text-sm text-emerald-700 dark:text-emerald-400">
                           {formatCurrency(sale.netAmount)}
                         </span>
                       </div>

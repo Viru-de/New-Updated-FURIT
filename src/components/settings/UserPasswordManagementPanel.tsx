@@ -751,7 +751,7 @@ export const UserPasswordManagementPanel: React.FC<UserPasswordManagementPanelPr
 
         {/* Selected Staff Password Reset Panel */}
         {selectedUserForReset && (
-          <div className="mt-4 rounded-xl border border-blue-200 bg-blue-50/50 p-5 dark:border-blue-900/50 dark:bg-blue-950/20 space-y-4">
+          <div className="mt-4 rounded-xl border border-blue-200 bg-blue-50/50 erp-dark-panel p-5 space-y-4">
             <div className="flex items-center justify-between">
               <div>
                 <h5 className="text-xs font-bold text-slate-900 dark:text-white">

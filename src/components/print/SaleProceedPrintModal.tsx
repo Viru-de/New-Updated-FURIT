@@ -236,7 +236,7 @@ export const SaleProceedPrintModal: React.FC<SaleProceedPrintModalProps> = ({
                       : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700'
                   }`}
                 >
-                  {sizeKey === 'compact' ? 'Compact' : sizeKey.toUpperCase()}
+                  {sizeKey === 'compact' ? 'Small Bill' : sizeKey.toUpperCase()}
                 </button>
               ))}
             </div>
@@ -251,6 +251,7 @@ export const SaleProceedPrintModal: React.FC<SaleProceedPrintModalProps> = ({
               summaryText={`Sale Proceeds No: ${proceeds.proceedsNo}\nDate: ${proceeds.date}\nConsignor: ${vendorName}\nNet Amount: ₹${proceeds.netAmount.toLocaleString('en-IN')}`}
               defaultPaperSize={pageSize}
               onPaperSizeChange={setPageSize}
+              optionLabelOverrides={{ compact: 'Small Bill', b7: 'B7' }}
             />
             <button
               type="button"
@@ -526,6 +527,7 @@ export const SaleProceedPrintModal: React.FC<SaleProceedPrintModalProps> = ({
         defaultSize={pageSize}
         initialAction="print"
         onPaperSizeChange={setPageSize}
+        optionLabelOverrides={{ compact: 'Small Bill', b7: 'B7' }}
       />
     </div>
   );

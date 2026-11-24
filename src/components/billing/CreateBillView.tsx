@@ -615,10 +615,10 @@ export const CreateBillView: React.FC<CreateBillViewProps> = ({
         </div>
 
         {/* Total Banner & Actions */}
-        <div className="rounded-xl border border-slate-200 bg-slate-50 p-5 dark:border-slate-800 dark:bg-slate-800/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="rounded-xl border border-slate-200 bg-slate-50 erp-dark-panel p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <span className="text-xs text-slate-500 block">Total Invoice Payable Amount</span>
-            <span className="font-mono-numbers text-2xl font-black text-emerald-700 dark:text-emerald-400">
+            <span className="font-mono-numbers text-2xl font-black text-emerald-700 dark:text-emerald-300">
               {formatCurrency(totalAmount)}
             </span>
           </div>

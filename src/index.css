@@ -12,7 +12,10 @@
   .dark {
     --erp-bg: #0b1120;
     --erp-surface: #131d31;
+    --erp-panel: #0D1527;
+    --erp-inset: #0b1324;
     --erp-border: #24344d;
+    --erp-panel-border: #24344d;
     --erp-text-main: #f8fafc;
     --erp-text-muted: #94a3b8;
   }
@@ -211,16 +214,26 @@ input.no-spinners {
 
 /* =========================================================================
    DARK MODE SYSTEM RULES
-   Clean slate tones, comfortable eye contrast, no pure-black harshness
+   Unified dark navy hierarchy anchored on #0D1527 content panel color:
+   - Canvas (--erp-bg): #0b1120
+   - Cards / Shells / Modals (--erp-surface): #131d31
+   - Content / Expanded / Data Panels & Table Headers (--erp-panel): #0D1527
+   - Recessed Inputs & Inset Sub-cards (--erp-inset): #0b1324
+   Excludes .print-bill-canvas, [data-theme-isolated="true"], [data-pdf-export="true"]
    ========================================================================= */
+.dark .erp-app-shell {
+  background-color: var(--erp-bg) !important;
+  color: var(--erp-text-main) !important;
+}
+
 .dark .neu-card, .dark .neu-card-sm, .dark .neu-card-lg {
-  background-color: #131d31;
-  border-color: #24344d;
+  background-color: var(--erp-surface);
+  border-color: var(--erp-border);
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.35);
   color: #f1f5f9;
 }
 .dark .neu-inset, .dark .neu-inset-sm {
-  background-color: #0b1324;
+  background-color: var(--erp-inset);
   border-color: #263554;
   color: #f8fafc;
 }
@@ -250,97 +263,186 @@ input.no-spinners {
   border-color: #3b82f6 !important;
 }
 .dark .neu-dropdown {
-  background-color: #131d31;
+  background-color: var(--erp-surface);
   border-color: #293a58;
   box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -4px rgba(0, 0, 0, 0.3);
   color: #f1f5f9;
 }
 .dark .neu-modal {
-  background-color: #131d31;
+  background-color: var(--erp-surface);
   border-color: #293a58;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.6), 0 8px 10px -6px rgba(0, 0, 0, 0.4);
   color: #f1f5f9;
 }
 .dark .neu-header {
-  background-color: #0f172a;
-  border-color: #1e293b;
+  background-color: var(--erp-surface);
+  border-color: var(--erp-border);
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3);
 }
 
 /* =========================================================================
+   STANDARDIZED #0D1527 NAVY PANEL SYSTEM (DARK MODE ONLY)
+   Applies unified #0D1527 dark navy background across expanded sections and
+   content panels while preserving nested .neu-inset-sm (#0b1324), .neu-card-sm
+   (#131d31), and crisp legible text contrast without altering Light Mode.
+   ========================================================================= */
+.dark *:not(.print-bill-canvas):not(.print-bill-canvas *):not([data-theme-isolated="true"]):not([data-theme-isolated="true"] *).erp-dark-panel {
+  background-color: var(--erp-panel) !important;
+  border-color: var(--erp-panel-border) !important;
+  color: #f8fafc !important;
+}
+
+/* Nested cards & inset data blocks inside #0D1527 panels retain crisp dark separation */
+.dark .erp-dark-panel .neu-card,
+.dark .erp-dark-panel .neu-card-sm,
+.dark .erp-dark-panel .erp-dark-card {
+  background-color: var(--erp-surface) !important;
+  border-color: var(--erp-border) !important;
+  color: #f1f5f9 !important;
+}
+.dark .erp-dark-panel .neu-inset,
+.dark .erp-dark-panel .neu-inset-sm {
+  background-color: var(--erp-inset) !important;
+  border-color: #263554 !important;
+  color: #f8fafc !important;
+}
+
+/* Keep text and dividers crisp & legible directly on #0D1527 surfaces */
+.dark .erp-dark-panel *:not(.neu-card):not(.neu-card *):not(.neu-card-sm):not(.neu-card-sm *):not(.neu-inset):not(.neu-inset *):not(.neu-inset-sm):not(.neu-inset-sm *):not(.erp-dark-card):not(.erp-dark-card *):not(.neu-btn):not(.neu-btn *).text-slate-950,
+.dark .erp-dark-panel *:not(.neu-card):not(.neu-card *):not(.neu-card-sm):not(.neu-card-sm *):not(.neu-inset):not(.neu-inset *):not(.neu-inset-sm):not(.neu-inset-sm *):not(.erp-dark-card):not(.erp-dark-card *):not(.neu-btn):not(.neu-btn *).text-slate-900,
+.dark .erp-dark-panel *:not(.neu-card):not(.neu-card *):not(.neu-card-sm):not(.neu-card-sm *):not(.neu-inset):not(.neu-inset *):not(.neu-inset-sm):not(.neu-inset-sm *):not(.erp-dark-card):not(.erp-dark-card *):not(.neu-btn):not(.neu-btn *).text-slate-800,
+.dark .erp-dark-panel *:not(.neu-card):not(.neu-card *):not(.neu-card-sm):not(.neu-card-sm *):not(.neu-inset):not(.neu-inset *):not(.neu-inset-sm):not(.neu-inset-sm *):not(.erp-dark-card):not(.erp-dark-card *):not(.neu-btn):not(.neu-btn *).text-emerald-950,
+.dark .erp-dark-panel *:not(.neu-card):not(.neu-card *):not(.neu-card-sm):not(.neu-card-sm *):not(.neu-inset):not(.neu-inset *):not(.neu-inset-sm):not(.neu-inset-sm *):not(.erp-dark-card):not(.erp-dark-card *):not(.neu-btn):not(.neu-btn *).text-emerald-900,
+.dark .erp-dark-panel *:not(.neu-card):not(.neu-card *):not(.neu-card-sm):not(.neu-card-sm *):not(.neu-inset):not(.neu-inset *):not(.neu-inset-sm):not(.neu-inset-sm *):not(.erp-dark-card):not(.erp-dark-card *):not(.neu-btn):not(.neu-btn *).text-emerald-800,
+.dark .erp-dark-panel.text-slate-900,
+.dark .erp-dark-panel.text-slate-800 {
+  color: #f8fafc !important;
+}
+.dark .erp-dark-panel *:not(.neu-card):not(.neu-card *):not(.neu-card-sm):not(.neu-card-sm *):not(.neu-inset):not(.neu-inset *):not(.neu-inset-sm):not(.neu-inset-sm *):not(.erp-dark-card):not(.erp-dark-card *):not(.neu-btn):not(.neu-btn *).text-slate-700,
+.dark .erp-dark-panel *:not(.neu-card):not(.neu-card *):not(.neu-card-sm):not(.neu-card-sm *):not(.neu-inset):not(.neu-inset *):not(.neu-inset-sm):not(.neu-inset-sm *):not(.erp-dark-card):not(.erp-dark-card *):not(.neu-btn):not(.neu-btn *).text-slate-600,
+.dark .erp-dark-panel *:not(.neu-card):not(.neu-card *):not(.neu-card-sm):not(.neu-card-sm *):not(.neu-inset):not(.neu-inset *):not(.neu-inset-sm):not(.neu-inset-sm *):not(.erp-dark-card):not(.erp-dark-card *):not(.neu-btn):not(.neu-btn *).text-slate-300,
+.dark .erp-dark-panel *:not(.neu-card):not(.neu-card *):not(.neu-card-sm):not(.neu-card-sm *):not(.neu-inset):not(.neu-inset *):not(.neu-inset-sm):not(.neu-inset-sm *):not(.erp-dark-card):not(.erp-dark-card *):not(.neu-btn):not(.neu-btn *).text-slate-200 {
+  color: #cbd5e1 !important;
+}
+.dark .erp-dark-panel *:not(.neu-card):not(.neu-card *):not(.neu-card-sm):not(.neu-card-sm *):not(.neu-inset):not(.neu-inset *):not(.neu-inset-sm):not(.neu-inset-sm *):not(.erp-dark-card):not(.erp-dark-card *):not(.neu-btn):not(.neu-btn *).text-slate-500,
+.dark .erp-dark-panel *:not(.neu-card):not(.neu-card *):not(.neu-card-sm):not(.neu-card-sm *):not(.neu-inset):not(.neu-inset *):not(.neu-inset-sm):not(.neu-inset-sm *):not(.erp-dark-card):not(.erp-dark-card *):not(.neu-btn):not(.neu-btn *).text-slate-400 {
+  color: #94a3b8 !important;
+}
+.dark .erp-dark-panel *:not(.neu-card):not(.neu-card *):not(.neu-card-sm):not(.neu-card-sm *):not(.neu-inset):not(.neu-inset *):not(.neu-inset-sm):not(.neu-inset-sm *):not(.erp-dark-card):not(.erp-dark-card *):not(.neu-btn):not(.neu-btn *).text-rose-600,
+.dark .erp-dark-panel *:not(.neu-card):not(.neu-card *):not(.neu-card-sm):not(.neu-card-sm *):not(.neu-inset):not(.neu-inset *):not(.neu-inset-sm):not(.neu-inset-sm *):not(.erp-dark-card):not(.erp-dark-card *):not(.neu-btn):not(.neu-btn *).text-rose-400 {
+  color: #fb7185 !important;
+}
+.dark .erp-dark-panel *:not(.neu-card):not(.neu-card *):not(.neu-card-sm):not(.neu-card-sm *):not(.neu-inset):not(.neu-inset *):not(.neu-inset-sm):not(.neu-inset-sm *):not(.erp-dark-card):not(.erp-dark-card *):not(.neu-btn):not(.neu-btn *).text-emerald-700,
+.dark .erp-dark-panel *:not(.neu-card):not(.neu-card *):not(.neu-card-sm):not(.neu-card-sm *):not(.neu-inset):not(.neu-inset *):not(.neu-inset-sm):not(.neu-inset-sm *):not(.erp-dark-card):not(.erp-dark-card *):not(.neu-btn):not(.neu-btn *).text-emerald-600,
+.dark .erp-dark-panel *:not(.neu-card):not(.neu-card *):not(.neu-card-sm):not(.neu-card-sm *):not(.neu-inset):not(.neu-inset *):not(.neu-inset-sm):not(.neu-inset-sm *):not(.erp-dark-card):not(.erp-dark-card *):not(.neu-btn):not(.neu-btn *).text-emerald-400 {
+  color: #34d399 !important;
+}
+.dark .erp-dark-panel *:not(.neu-card):not(.neu-card *):not(.neu-card-sm):not(.neu-card-sm *):not(.neu-inset):not(.neu-inset *):not(.neu-inset-sm):not(.neu-inset-sm *):not(.erp-dark-card):not(.erp-dark-card *):not(.neu-btn):not(.neu-btn *).text-emerald-300,
+.dark .erp-dark-panel *:not(.neu-card):not(.neu-card *):not(.neu-card-sm):not(.neu-card-sm *):not(.neu-inset):not(.neu-inset *):not(.neu-inset-sm):not(.neu-inset-sm *):not(.erp-dark-card):not(.erp-dark-card *):not(.neu-btn):not(.neu-btn *).text-emerald-200,
+.dark .erp-dark-panel *:not(.neu-card):not(.neu-card *):not(.neu-card-sm):not(.neu-card-sm *):not(.neu-inset):not(.neu-inset *):not(.neu-inset-sm):not(.neu-inset-sm *):not(.erp-dark-card):not(.erp-dark-card *):not(.neu-btn):not(.neu-btn *).text-emerald-100 {
+  color: #6ee7b7 !important;
+}
+.dark .erp-dark-panel *:not(.neu-card):not(.neu-card *):not(.neu-card-sm):not(.neu-card-sm *):not(.neu-inset):not(.neu-inset *):not(.neu-inset-sm):not(.neu-inset-sm *):not(.erp-dark-card):not(.erp-dark-card *):not(.neu-btn):not(.neu-btn *).text-sky-700,
+.dark .erp-dark-panel *:not(.neu-card):not(.neu-card *):not(.neu-card-sm):not(.neu-card-sm *):not(.neu-inset):not(.neu-inset *):not(.neu-inset-sm):not(.neu-inset-sm *):not(.erp-dark-card):not(.erp-dark-card *):not(.neu-btn):not(.neu-btn *).text-sky-300 {
+  color: #7dd3fc !important;
+}
+.dark .erp-dark-panel *:not(.neu-card):not(.neu-card *):not(.neu-card-sm):not(.neu-card-sm *):not(.neu-inset):not(.neu-inset *):not(.neu-inset-sm):not(.neu-inset-sm *):not(.erp-dark-card):not(.erp-dark-card *):not(.neu-btn):not(.neu-btn *).text-blue-700,
+.dark .erp-dark-panel *:not(.neu-card):not(.neu-card *):not(.neu-card-sm):not(.neu-card-sm *):not(.neu-inset):not(.neu-inset *):not(.neu-inset-sm):not(.neu-inset-sm *):not(.erp-dark-card):not(.erp-dark-card *):not(.neu-btn):not(.neu-btn *).text-blue-400,
+.dark .erp-dark-panel *:not(.neu-card):not(.neu-card *):not(.neu-card-sm):not(.neu-card-sm *):not(.neu-inset):not(.neu-inset *):not(.neu-inset-sm):not(.neu-inset-sm *):not(.erp-dark-card):not(.erp-dark-card *):not(.neu-btn):not(.neu-btn *).text-indigo-700,
+.dark .erp-dark-panel *:not(.neu-card):not(.neu-card *):not(.neu-card-sm):not(.neu-card-sm *):not(.neu-inset):not(.neu-inset *):not(.neu-inset-sm):not(.neu-inset-sm *):not(.erp-dark-card):not(.erp-dark-card *):not(.neu-btn):not(.neu-btn *).text-indigo-400 {
+  color: #60a5fa !important;
+}
+.dark .erp-dark-panel *:not(.neu-card):not(.neu-card *):not(.neu-card-sm):not(.neu-card-sm *):not(.neu-inset):not(.neu-inset *):not(.neu-inset-sm):not(.neu-inset-sm *):not(.erp-dark-card):not(.erp-dark-card *):not(.neu-btn):not(.neu-btn *).text-amber-700,
+.dark .erp-dark-panel *:not(.neu-card):not(.neu-card *):not(.neu-card-sm):not(.neu-card-sm *):not(.neu-inset):not(.neu-inset *):not(.neu-inset-sm):not(.neu-inset-sm *):not(.erp-dark-card):not(.erp-dark-card *):not(.neu-btn):not(.neu-btn *).text-amber-400 {
+  color: #fbbf24 !important;
+}
+.dark .erp-dark-panel *:not(.neu-card):not(.neu-card *):not(.neu-card-sm):not(.neu-card-sm *):not(.neu-inset):not(.neu-inset *):not(.neu-inset-sm):not(.neu-inset-sm *):not(.erp-dark-card):not(.erp-dark-card *):not(.neu-btn):not(.neu-btn *).border-slate-100,
+.dark .erp-dark-panel *:not(.neu-card):not(.neu-card *):not(.neu-card-sm):not(.neu-card-sm *):not(.neu-inset):not(.neu-inset *):not(.neu-inset-sm):not(.neu-inset-sm *):not(.erp-dark-card):not(.erp-dark-card *):not(.neu-btn):not(.neu-btn *).border-slate-200,
+.dark .erp-dark-panel *:not(.neu-card):not(.neu-card *):not(.neu-card-sm):not(.neu-card-sm *):not(.neu-inset):not(.neu-inset *):not(.neu-inset-sm):not(.neu-inset-sm *):not(.erp-dark-card):not(.erp-dark-card *):not(.neu-btn):not(.neu-btn *).border-slate-300,
+.dark .erp-dark-panel *:not(.neu-card):not(.neu-card *):not(.neu-card-sm):not(.neu-card-sm *):not(.neu-inset):not(.neu-inset *):not(.neu-inset-sm):not(.neu-inset-sm *):not(.erp-dark-card):not(.erp-dark-card *):not(.neu-btn):not(.neu-btn *).border-slate-700,
+.dark .erp-dark-panel *:not(.neu-card):not(.neu-card *):not(.neu-card-sm):not(.neu-card-sm *):not(.neu-inset):not(.neu-inset *):not(.neu-inset-sm):not(.neu-inset-sm *):not(.erp-dark-card):not(.erp-dark-card *):not(.neu-btn):not(.neu-btn *).border-slate-800 {
+  border-color: var(--erp-border) !important;
+}
+
+/* =========================================================================
    COMPREHENSIVE DARK MODE SYSTEM RULES
-   Clean slate tones, comfortable eye contrast, no pure-black harshness,
-   100% legible typography with zero invisible text or white flash panels.
+   Clean unified tones across all screens, excluding isolated print canvases.
    ========================================================================= */
 .dark body {
-  background-color: #0b1120;
+  background-color: var(--erp-bg);
   color: #f8fafc;
 }
 
-/* Background containers inside dark mode (excluding modal bill canvas) */
-.dark *:not(.print-bill-canvas):not(.print-bill-canvas *).bg-white,
-.dark *:not(.print-bill-canvas):not(.print-bill-canvas *)[class*="bg-white/"] {
-  background-color: #131d31 !important;
+/* Background containers inside dark mode (excluding print/PDF canvases) */
+.dark *:not(.print-bill-canvas):not(.print-bill-canvas *):not([data-theme-isolated="true"]):not([data-theme-isolated="true"] *):not(.erp-dark-panel):not(.erp-app-shell).bg-white,
+.dark *:not(.print-bill-canvas):not(.print-bill-canvas *):not([data-theme-isolated="true"]):not([data-theme-isolated="true"] *):not(.erp-dark-panel):not(.erp-app-shell)[class*="bg-white/"],
+.dark *:not(.print-bill-canvas):not(.print-bill-canvas *):not([data-theme-isolated="true"]):not([data-theme-isolated="true"] *):not(.erp-dark-panel):not(.erp-app-shell).dark\:bg-slate-900,
+.dark *:not(.print-bill-canvas):not(.print-bill-canvas *):not([data-theme-isolated="true"]):not([data-theme-isolated="true"] *):not(.erp-dark-panel):not(.erp-app-shell)[class*="dark:bg-slate-900/"] {
+  background-color: var(--erp-surface) !important;
 }
 
-.dark *:not(.print-bill-canvas):not(.print-bill-canvas *).bg-slate-50,
-.dark *:not(.print-bill-canvas):not(.print-bill-canvas *)[class*="bg-slate-50/"] {
-  background-color: #0d1527 !important;
+.dark *:not(.print-bill-canvas):not(.print-bill-canvas *):not([data-theme-isolated="true"]):not([data-theme-isolated="true"] *):not(.erp-dark-panel):not(.erp-app-shell).bg-slate-50,
+.dark *:not(.print-bill-canvas):not(.print-bill-canvas *):not([data-theme-isolated="true"]):not([data-theme-isolated="true"] *):not(.erp-dark-panel):not(.erp-app-shell)[class*="bg-slate-50/"] {
+  background-color: var(--erp-surface) !important;
 }
 
-.dark *:not(.print-bill-canvas):not(.print-bill-canvas *).bg-slate-100,
-.dark *:not(.print-bill-canvas):not(.print-bill-canvas *)[class*="bg-slate-100/"] {
-  background-color: #10192a !important;
+.dark *:not(.print-bill-canvas):not(.print-bill-canvas *):not([data-theme-isolated="true"]):not([data-theme-isolated="true"] *):not(.erp-dark-panel):not(.erp-app-shell).bg-slate-100,
+.dark *:not(.print-bill-canvas):not(.print-bill-canvas *):not([data-theme-isolated="true"]):not([data-theme-isolated="true"] *):not(.erp-dark-panel):not(.erp-app-shell)[class*="bg-slate-100/"] {
+  background-color: #18243c !important;
+}
+
+.dark *:not(.print-bill-canvas):not(.print-bill-canvas *):not([data-theme-isolated="true"]):not([data-theme-isolated="true"] *):not(.erp-dark-panel):not(.erp-app-shell).dark\:bg-slate-950 {
+  background-color: var(--erp-bg) !important;
 }
 
 /* Borders in dark mode */
-.dark *:not(.print-bill-canvas):not(.print-bill-canvas *).border-slate-100,
-.dark *:not(.print-bill-canvas):not(.print-bill-canvas *)[class*="border-slate-100/"] {
-  border-color: #1a253a !important;
+.dark *:not(.print-bill-canvas):not(.print-bill-canvas *):not([data-theme-isolated="true"]):not([data-theme-isolated="true"] *):not(.erp-dark-panel).border-slate-100,
+.dark *:not(.print-bill-canvas):not(.print-bill-canvas *):not([data-theme-isolated="true"]):not([data-theme-isolated="true"] *):not(.erp-dark-panel)[class*="border-slate-100/"] {
+  border-color: #1e2d47 !important;
 }
 
-.dark *:not(.print-bill-canvas):not(.print-bill-canvas *).border-slate-200,
-.dark *:not(.print-bill-canvas):not(.print-bill-canvas *)[class*="border-slate-200/"] {
-  border-color: #24344d !important;
+.dark *:not(.print-bill-canvas):not(.print-bill-canvas *):not([data-theme-isolated="true"]):not([data-theme-isolated="true"] *):not(.erp-dark-panel).border-slate-200,
+.dark *:not(.print-bill-canvas):not(.print-bill-canvas *):not([data-theme-isolated="true"]):not([data-theme-isolated="true"] *):not(.erp-dark-panel)[class*="border-slate-200/"] {
+  border-color: var(--erp-border) !important;
 }
 
-.dark *:not(.print-bill-canvas):not(.print-bill-canvas *).border-slate-300,
-.dark *:not(.print-bill-canvas):not(.print-bill-canvas *)[class*="border-slate-300/"] {
+.dark *:not(.print-bill-canvas):not(.print-bill-canvas *):not([data-theme-isolated="true"]):not([data-theme-isolated="true"] *):not(.erp-dark-panel).border-slate-300,
+.dark *:not(.print-bill-canvas):not(.print-bill-canvas *):not([data-theme-isolated="true"]):not([data-theme-isolated="true"] *):not(.erp-dark-panel)[class*="border-slate-300/"] {
   border-color: #334668 !important;
 }
 
-.dark *:not(.print-bill-canvas):not(.print-bill-canvas *).border-slate-400 {
+.dark *:not(.print-bill-canvas):not(.print-bill-canvas *):not([data-theme-isolated="true"]):not([data-theme-isolated="true"] *):not(.erp-dark-panel).border-slate-400 {
   border-color: #475569 !important;
 }
 
-/* Text colors in dark mode (excluding modal bill canvas) */
-.dark *:not(.print-bill-canvas):not(.print-bill-canvas *).text-slate-950 {
+/* Text colors in dark mode (excluding print/PDF canvases) */
+.dark *:not(.print-bill-canvas):not(.print-bill-canvas *):not([data-theme-isolated="true"]):not([data-theme-isolated="true"] *).text-slate-950 {
   color: #f8fafc !important;
 }
-.dark *:not(.print-bill-canvas):not(.print-bill-canvas *).text-slate-900 {
+.dark *:not(.print-bill-canvas):not(.print-bill-canvas *):not([data-theme-isolated="true"]):not([data-theme-isolated="true"] *).text-slate-900 {
   color: #f8fafc !important;
 }
-.dark *:not(.print-bill-canvas):not(.print-bill-canvas *).text-slate-800 {
+.dark *:not(.print-bill-canvas):not(.print-bill-canvas *):not([data-theme-isolated="true"]):not([data-theme-isolated="true"] *).text-slate-800 {
   color: #f1f5f9 !important;
 }
-.dark *:not(.print-bill-canvas):not(.print-bill-canvas *).text-slate-700 {
+.dark *:not(.print-bill-canvas):not(.print-bill-canvas *):not([data-theme-isolated="true"]):not([data-theme-isolated="true"] *).text-slate-700 {
   color: #cbd5e1 !important;
 }
-.dark *:not(.print-bill-canvas):not(.print-bill-canvas *).text-slate-600 {
+.dark *:not(.print-bill-canvas):not(.print-bill-canvas *):not([data-theme-isolated="true"]):not([data-theme-isolated="true"] *).text-slate-600 {
   color: #94a3b8 !important;
 }
-.dark *:not(.print-bill-canvas):not(.print-bill-canvas *).text-slate-500 {
+.dark *:not(.print-bill-canvas):not(.print-bill-canvas *):not([data-theme-isolated="true"]):not([data-theme-isolated="true"] *).text-slate-500 {
   color: #94a3b8 !important;
 }
-.dark *:not(.print-bill-canvas):not(.print-bill-canvas *).text-slate-400 {
+.dark *:not(.print-bill-canvas):not(.print-bill-canvas *):not([data-theme-isolated="true"]):not([data-theme-isolated="true"] *).text-slate-400 {
   color: #94a3b8 !important;
 }
 
 /* Inputs, selects, and textareas in dark mode */
-.dark input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]):not(.bill-input):not(.print-bill-canvas *),
-.dark select:not(.print-bill-canvas *),
-.dark textarea:not(.print-bill-canvas *) {
-  background-color: #0b1324 !important;
+.dark input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]):not(.bill-input):not(.print-bill-canvas *):not([data-theme-isolated="true"] *),
+.dark select:not(.print-bill-canvas *):not([data-theme-isolated="true"] *),
+.dark textarea:not(.print-bill-canvas *):not([data-theme-isolated="true"] *) {
+  background-color: var(--erp-inset) !important;
   color: #f8fafc !important;
   border-color: #263554 !important;
 }
@@ -350,7 +452,7 @@ input.no-spinners {
 }
 
 .dark .neu-dropdown input {
-  background-color: #0b1324 !important;
+  background-color: var(--erp-inset) !important;
   color: #f8fafc !important;
 }
 .dark .neu-dropdown .hover\:bg-slate-100\/70:hover,
@@ -358,24 +460,63 @@ input.no-spinners {
   background-color: #1c2942 !important;
 }
 
-/* Table styling in dark mode */
-.dark table:not(.print-bill-canvas *) thead th {
-  background-color: #10192a !important;
+/* Table styling in dark mode — standardized #0D1527 navy header & footer bands */
+.dark table:not(.print-bill-canvas *):not([data-theme-isolated="true"] *) thead th {
+  background-color: var(--erp-panel) !important;
   color: #f8fafc !important;
   font-weight: 700 !important;
-  border-color: #24344d !important;
+  border-color: var(--erp-panel-border) !important;
 }
-.dark table:not(.print-bill-canvas *) tbody td {
-  border-color: #24344d !important;
+.dark table:not(.print-bill-canvas *):not([data-theme-isolated="true"] *) tbody td {
+  border-color: var(--erp-border) !important;
   color: #f1f5f9;
 }
-.dark table:not(.print-bill-canvas *) tbody tr:hover {
-  background-color: #17243b !important;
+.dark table:not(.print-bill-canvas *):not([data-theme-isolated="true"] *) tbody tr:hover {
+  background-color: #1b2942 !important;
 }
-.dark table:not(.print-bill-canvas *) tfoot tr,
-.dark table:not(.print-bill-canvas *) tfoot td {
-  background-color: #10192a !important;
-  border-color: #2c3e5d !important;
+.dark table:not(.print-bill-canvas *):not([data-theme-isolated="true"] *) tfoot tr,
+.dark table:not(.print-bill-canvas *):not([data-theme-isolated="true"] *) tfoot td,
+.dark table:not(.print-bill-canvas *):not([data-theme-isolated="true"] *) tfoot td .text-slate-900,
+.dark table:not(.print-bill-canvas *):not([data-theme-isolated="true"] *) tfoot td .text-slate-800,
+.dark table:not(.print-bill-canvas *):not([data-theme-isolated="true"] *) tfoot td .text-slate-700,
+.dark table:not(.print-bill-canvas *):not([data-theme-isolated="true"] *) tfoot td.text-slate-900,
+.dark table:not(.print-bill-canvas *):not([data-theme-isolated="true"] *) tfoot td.text-slate-800,
+.dark table:not(.print-bill-canvas *):not([data-theme-isolated="true"] *) tfoot td.text-slate-700 {
+  background-color: var(--erp-panel) !important;
+  color: #f8fafc !important;
+  border-color: var(--erp-panel-border) !important;
+}
+.dark table:not(.print-bill-canvas *):not([data-theme-isolated="true"] *) tfoot td .text-slate-600,
+.dark table:not(.print-bill-canvas *):not([data-theme-isolated="true"] *) tfoot td .text-slate-500,
+.dark table:not(.print-bill-canvas *):not([data-theme-isolated="true"] *) tfoot td .text-slate-400,
+.dark table:not(.print-bill-canvas *):not([data-theme-isolated="true"] *) tfoot td.text-slate-600,
+.dark table:not(.print-bill-canvas *):not([data-theme-isolated="true"] *) tfoot td.text-slate-500,
+.dark table:not(.print-bill-canvas *):not([data-theme-isolated="true"] *) tfoot td.text-slate-400 {
+  color: #cbd5e1 !important;
+}
+.dark table:not(.print-bill-canvas *):not([data-theme-isolated="true"] *) tfoot td .text-rose-600,
+.dark table:not(.print-bill-canvas *):not([data-theme-isolated="true"] *) tfoot td.text-rose-600,
+.dark table:not(.print-bill-canvas *):not([data-theme-isolated="true"] *) tfoot td .text-rose-400,
+.dark table:not(.print-bill-canvas *):not([data-theme-isolated="true"] *) tfoot td.text-rose-400 {
+  color: #fb7185 !important;
+}
+.dark table:not(.print-bill-canvas *):not([data-theme-isolated="true"] *) tfoot td .text-emerald-700,
+.dark table:not(.print-bill-canvas *):not([data-theme-isolated="true"] *) tfoot td .text-emerald-600,
+.dark table:not(.print-bill-canvas *):not([data-theme-isolated="true"] *) tfoot td.text-emerald-600,
+.dark table:not(.print-bill-canvas *):not([data-theme-isolated="true"] *) tfoot td .text-emerald-400,
+.dark table:not(.print-bill-canvas *):not([data-theme-isolated="true"] *) tfoot td.text-emerald-300,
+.dark table:not(.print-bill-canvas *):not([data-theme-isolated="true"] *) tfoot td .text-emerald-200 {
+  color: #34d399 !important;
+}
+.dark table:not(.print-bill-canvas *):not([data-theme-isolated="true"] *) tfoot td .text-blue-700,
+.dark table:not(.print-bill-canvas *):not([data-theme-isolated="true"] *) tfoot td.text-blue-700,
+.dark table:not(.print-bill-canvas *):not([data-theme-isolated="true"] *) tfoot td .text-blue-400,
+.dark table:not(.print-bill-canvas *):not([data-theme-isolated="true"] *) tfoot td.text-blue-400,
+.dark table:not(.print-bill-canvas *):not([data-theme-isolated="true"] *) tfoot td .text-indigo-700,
+.dark table:not(.print-bill-canvas *):not([data-theme-isolated="true"] *) tfoot td.text-indigo-700,
+.dark table:not(.print-bill-canvas *):not([data-theme-isolated="true"] *) tfoot td .text-indigo-400,
+.dark table:not(.print-bill-canvas *):not([data-theme-isolated="true"] *) tfoot td.text-indigo-400 {
+  color: #60a5fa !important;
 }
 
 /* Status and badge pill styling in dark mode */
@@ -1192,6 +1333,14 @@ input.no-spinners {
   #erp-isolated-print-mount #mandi-print-area[data-paper-size="b7"],
   #erp-isolated-print-mount #receipt-print-area[data-paper-size="b7"] {
     padding: 0.5mm 1mm 0.5mm 1mm !important;
+  }
+
+  #mandi-print-area[data-paper-size="b7"][data-compat-105="true"],
+  #erp-isolated-print-mount #mandi-print-area[data-paper-size="b7"][data-compat-105="true"] {
+    padding: 1mm 1.5mm 1mm 1.5mm !important;
+    margin: 0 auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
   }
 
   #mandi-print-area[data-paper-size="b6"],
