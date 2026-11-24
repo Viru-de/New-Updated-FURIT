@@ -125,18 +125,18 @@ export const BillTableCanvas: React.FC<BillTableCanvasProps> = ({
       ? 'max-w-[550px] w-full text-[10px] pt-0.5 px-2.5 pb-1.5 sm:pt-1 sm:px-3 sm:pb-2'
       : pageSize === 'b6'
       ? 'max-w-[430px] w-full text-[10px] pt-1 px-2.5 pb-1.5 sm:px-3'
-      : pageSize === 'b7'
-      ? 'max-w-[300px] w-full text-[8.5px] pt-0.5 px-1.5 pb-1'
+      : isB7
+      ? 'max-w-[316px] w-full text-[8.5px] pt-0.5 px-1 pb-1'
       : 'max-w-[490px] w-full text-[11px] pt-0.5 px-3 pb-2 sm:pt-1 sm:px-3.5 sm:pb-2.5';
 
-  // Balanced percentage column widths with safe NO. separation and generous RATE/AMOUNT space
+  // Balanced percentage column widths with safe NO. separation and generous ITEM NAME / AMOUNT space
   const colWidths = isB7
     ? {
-        no: '9%',
-        item: '27%',
-        qty: '18%',
-        kg: '14%',
-        rate: '14%',
+        no: '7%',
+        item: '37%',
+        qty: '15%',
+        kg: '10%',
+        rate: '13%',
         amount: '18%',
       }
     : isB6
@@ -175,9 +175,9 @@ export const BillTableCanvas: React.FC<BillTableCanvasProps> = ({
         amount: '20%',
       };
 
-  const tablePad = isB7 ? 'px-0.5 py-[1.5px]' : isB6 ? 'px-1 py-[2px]' : isA5 ? 'px-1 py-[2px]' : 'px-1.5 py-1';
-  const summaryCellPad = isB7 ? 'px-0.5 py-[1.5px]' : isB6 ? 'px-1 py-[2px]' : isA5 ? 'px-1 py-[2px]' : 'px-1.5 py-1';
-  const rowHeight = isB7 ? 'h-3.5' : isB6 ? 'h-4' : isA5 ? 'h-[18px]' : 'h-5';
+  const tablePad = isB7 ? 'px-[1.5px] py-[1px]' : isB6 ? 'px-1 py-[2px]' : isA5 ? 'px-1 py-[2px]' : 'px-1.5 py-1';
+  const summaryCellPad = isB7 ? 'px-[2px] py-[1px]' : isB6 ? 'px-1 py-[2px]' : isA5 ? 'px-1 py-[2px]' : 'px-1.5 py-1';
+  const rowHeight = isB7 ? 'h-[12.5px] leading-[1.1]' : isB6 ? 'h-4' : isA5 ? 'h-[18px]' : 'h-5';
   const tableHeadFont = isB7
     ? 'text-[8px] print:text-[9px]'
     : isB6
@@ -303,7 +303,7 @@ export const BillTableCanvas: React.FC<BillTableCanvasProps> = ({
       )}
 
       {/* Exact Table Format: No. | Item Name | Qty | KG | Rate | Amount */}
-      <table className={`w-full max-w-full table-fixed box-border border-collapse border border-black bill-items-table ${isB7 ? 'b7-bill-table' : isB6 ? 'b6-bill-table' : ''} ${tableBodyFont}`}>
+      <table className={`w-full max-w-full table-fixed box-border border-collapse border border-black bill-items-table ${isB7 ? 'b7-bill-table b7-single-line-table' : isB6 ? 'b6-bill-table' : ''} ${tableBodyFont}`}>
         <colgroup>
           <col style={{ width: colWidths.no }} />
           <col style={{ width: colWidths.item }} />
@@ -314,8 +314,8 @@ export const BillTableCanvas: React.FC<BillTableCanvasProps> = ({
         </colgroup>
         <thead>
           <tr className={`border-b border-black font-bold uppercase ${tableHeadFont} bg-slate-50 print:bg-transparent text-slate-950 print:text-black`}>
-            <th className={`border-r border-black px-0.5 ${isB7 ? 'py-[1.5px]' : isB6 || isA5 ? 'py-1' : 'py-1'} box-border text-center tracking-tight whitespace-nowrap`}>No.</th>
-            <th className={`border-r border-black pl-1.5 pr-1 ${isB7 ? 'py-[1.5px]' : 'py-1'} box-border text-left`}>ITEM NAME</th>
+            <th className={`border-r border-black ${isB7 ? 'px-[1px] py-[1px]' : 'px-0.5 py-1'} box-border text-center tracking-tight whitespace-nowrap`}>No.</th>
+            <th className={`border-r border-black ${isB7 ? 'pl-[3px] pr-[2px] py-[1px] whitespace-nowrap' : 'pl-1.5 pr-1 py-1'} box-border text-left`}>ITEM NAME</th>
             <th className={`border-r border-black ${tablePad} box-border text-right ${!isLivePreview ? 'bill-qty-col' : 'print:whitespace-nowrap'} whitespace-nowrap`}>QTY</th>
             <th className={`border-r border-black ${tablePad} box-border text-right ${isB7 ? 'tracking-tight' : ''} whitespace-nowrap`}>KG</th>
             <th className={`border-r border-black ${tablePad} box-border text-right whitespace-nowrap`}>RATE</th>
@@ -335,11 +335,11 @@ export const BillTableCanvas: React.FC<BillTableCanvasProps> = ({
                 key={it.id || idx}
                 className={`border-b border-black/40 print:text-black ${rowHeight}`}
               >
-                <td className={`border-r border-black px-0.5 ${isB7 ? 'py-[1.5px]' : isB6 || isA5 ? 'py-[2px]' : 'py-1'} box-border whitespace-nowrap tabular-nums text-center font-mono print:font-semibold print:text-black align-middle`}>
+                <td className={`border-r border-black ${isB7 ? 'px-[1px] py-[1px]' : `px-0.5 ${isB6 || isA5 ? 'py-[2px]' : 'py-1'}`} box-border whitespace-nowrap tabular-nums text-center font-mono print:font-semibold print:text-black align-middle`}>
                   {idx + 1}
                 </td>
                 <td
-                  className={`border-r border-black pl-1.5 pr-1 ${isB7 ? 'py-[1.5px]' : isB6 || isA5 ? 'py-[2px]' : 'py-1'} box-border font-semibold print:font-bold uppercase print:text-black align-middle overflow-hidden ${getBillItemNameCellClass(it.fruitName, pageSize)}`}
+                  className={`border-r border-black ${isB7 ? 'pl-[3px] pr-[2px] py-[1px]' : `pl-1.5 pr-1 ${isB6 || isA5 ? 'py-[2px]' : 'py-1'}`} box-border font-semibold print:font-bold uppercase print:text-black align-middle overflow-hidden ${getBillItemNameCellClass(it.fruitName, pageSize, saleType)}`}
                 >
                   {it.fruitName || 'ITEM'}
                 </td>
@@ -348,7 +348,7 @@ export const BillTableCanvas: React.FC<BillTableCanvasProps> = ({
                     !isLivePreview
                       ? `bill-qty-cell whitespace-nowrap ${
                           isB7
-                            ? 'text-[7px] print:text-[8px] tracking-tight print:px-0.5'
+                            ? 'text-[6.75px] print:text-[7.25px] tracking-tight'
                             : isB6
                             ? 'text-[9px] print:text-[10px] tracking-tight print:px-1'
                             : 'print:tracking-tight print:px-1'
@@ -360,13 +360,13 @@ export const BillTableCanvas: React.FC<BillTableCanvasProps> = ({
                     {formatBillQtyWithUnit(it.quantity, it.unit)}
                   </span>
                 </td>
-                <td className={`border-r border-black ${tablePad} box-border whitespace-nowrap tabular-nums text-right font-mono print:font-semibold print:text-black align-middle`}>
+                <td className={`border-r border-black ${tablePad} box-border whitespace-nowrap tabular-nums ${isB7 ? 'text-[7.5px] print:text-[8px] tracking-tight' : ''} text-right font-mono print:font-semibold print:text-black align-middle`}>
                   {lineKg > 0 ? lineKg : 0}
                 </td>
-                <td className={`border-r border-black ${tablePad} box-border whitespace-nowrap tabular-nums ${isB7 || isB6 ? 'tracking-tight' : ''} text-right font-mono print:font-semibold print:text-black align-middle`}>
+                <td className={`border-r border-black ${tablePad} box-border whitespace-nowrap tabular-nums ${isB7 ? 'text-[7.5px] print:text-[8px] tracking-tight' : isB6 ? 'tracking-tight' : ''} text-right font-mono print:font-semibold print:text-black align-middle`}>
                   {formatBillAmount(it.rate)}
                 </td>
-                <td className={`${tablePad} box-border whitespace-nowrap tabular-nums ${isB7 ? 'text-[7.5px] print:text-[8.5px] tracking-tight' : isB6 ? 'text-[9.5px] print:text-[10.5px] tracking-tight' : pageSize === 'compact' ? 'text-[10.5px] print:text-[11px] tracking-tight' : ''} text-right font-mono font-bold print:text-black align-middle`}>
+                <td className={`${tablePad} box-border whitespace-nowrap tabular-nums ${isB7 ? 'text-[7.25px] print:text-[8px] tracking-tight' : isB6 ? 'text-[9.5px] print:text-[10.5px] tracking-tight' : pageSize === 'compact' ? 'text-[10.5px] print:text-[11px] tracking-tight' : ''} text-right font-mono font-bold print:text-black align-middle`}>
                   {formatBillAmount(lineAmount)}
                 </td>
               </tr>
@@ -376,8 +376,8 @@ export const BillTableCanvas: React.FC<BillTableCanvasProps> = ({
           {/* Preserved Blank Rows for Mandi Balance */}
           {Array.from({ length: blankRowsCount }).map((_, bIdx) => (
             <tr key={`blank-${bIdx}`} className={`border-b border-black/20 ${rowHeight}`}>
-              <td className={`border-r border-black box-border px-0.5 ${isB7 ? 'py-[1.5px]' : 'py-[2px]'}`}>&nbsp;</td>
-              <td className={`border-r border-black box-border pl-1.5 pr-1 ${isB7 ? 'py-[1.5px]' : 'py-[2px]'}`}>&nbsp;</td>
+              <td className={`border-r border-black box-border ${isB7 ? 'px-[1px] py-[1px]' : 'px-0.5 py-[2px]'}`}>&nbsp;</td>
+              <td className={`border-r border-black box-border ${isB7 ? 'pl-[3px] pr-[2px] py-[1px]' : 'pl-1.5 pr-1 py-[2px]'}`}>&nbsp;</td>
               <td className={`border-r border-black box-border ${tablePad}`}>&nbsp;</td>
               <td className={`border-r border-black box-border ${tablePad}`}>&nbsp;</td>
               <td className={`border-r border-black box-border ${tablePad}`}>&nbsp;</td>
@@ -444,11 +444,11 @@ export const BillTableCanvas: React.FC<BillTableCanvasProps> = ({
             </tr>
           )}
           {isB7 ? (
-            /* B7 Compact Layout: 2 balanced half-spans to eliminate horizontal clipping and 2-line wraps */
+            /* B7 Compact Layout: 2 balanced sections (2+4 so summary gets 56% width and Balance Crate/Expenses get 44%) */
             <tr className="border-t border-black">
-              {/* Left Side (colSpan=3): Balance Crate & Expenses stacked */}
-              <td colSpan={3} className="border-r border-black p-1 align-top box-border">
-                <div className="text-[7.5px] print:text-[9px] font-mono leading-tight space-y-1">
+              {/* Left Side: Balance Crate & Expenses stacked */}
+              <td colSpan={2} className="border-r border-black p-[3px] align-top box-border">
+                <div className="text-[7px] print:text-[8px] leading-[1.15] space-y-0.5 font-mono">
                   <div>
                     <div className="font-bold text-slate-950 dark:text-slate-950 print:text-black">
                       Balance Crate: {crateMovements && crateMovements.length > 0
@@ -500,8 +500,8 @@ export const BillTableCanvas: React.FC<BillTableCanvasProps> = ({
                 </div>
               </td>
 
-              {/* Right Side (colSpan=3): Subtotal, Expenses, Net Total & Balances Table */}
-              <td colSpan={3} className="p-0 align-top box-border">
+              {/* Right Side: Subtotal, Expenses, Net Total & Balances Table */}
+              <td colSpan={4} className="p-0 align-top box-border">
                 <table className="w-full max-w-full table-fixed box-border border-collapse bill-summary-table">
                   <colgroup>
                     <col style={{ width: '48%' }} />

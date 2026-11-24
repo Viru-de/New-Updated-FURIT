@@ -79,11 +79,22 @@ async function run() {
     const longCls = getBillItemNameCellClass('ROYAL GALA IMPORTED PREMIUM SPECIAL APPLE 18KG', size);
     check(
       !shortCls.includes('whitespace-nowrap') && !longCls.includes('whitespace-nowrap'),
-      `${size.toUpperCase()}: item name never forces whitespace-nowrap overflow across column border`
+      `${size.toUpperCase()} (Tax Invoice default): item name preserves wrap-safe behavior`
     );
     check(
       longCls.includes('whitespace-normal') && longCls.includes('break-words') && longCls.includes('[overflow-wrap:anywhere]'),
-      `${size.toUpperCase()}: long item name wraps safely inside ITEM NAME column`
+      `${size.toUpperCase()} (Tax Invoice default): long item name wraps safely inside ITEM NAME column`
+    );
+  }
+  for (const kind of ['CREDIT SALE', 'CASH SALE', 'SALE PROCEED'] as const) {
+    const b7ShortCls = getBillItemNameCellClass('ALPHONSO MANGO', 'b7', kind);
+    const b7LongCls = getBillItemNameCellClass('RED DELICIOUS APPLE', 'b7', kind);
+    check(
+      b7ShortCls.includes('whitespace-nowrap') &&
+        b7LongCls.includes('whitespace-nowrap') &&
+        !b7LongCls.includes('whitespace-normal') &&
+        !b7LongCls.includes('[overflow-wrap:anywhere]'),
+      `B7 (${kind}): enforces single-line whitespace-nowrap with zero multi-line wrapping`
     );
   }
 
@@ -94,7 +105,7 @@ async function run() {
     a4: ['6%', '36%', '16%', '11%', '13%', '18%'],
     a5: ['7%', '32%', '17%', '12%', '13%', '19%'],
     b6: ['8%', '31%', '18%', '11%', '13%', '19%'],
-    b7: ['9%', '27%', '18%', '14%', '14%', '18%'],
+    b7: ['7%', '37%', '15%', '10%', '13%', '18%'],
   };
 
   // Approximate inner printable width in px at 96dpi per size
@@ -103,11 +114,12 @@ async function run() {
     a4: 748,      // ~198mm printable
     a5: 505,      // ~134mm printable
     b6: 430,      // ~114mm printable
-    b7: 284,      // ~75mm printable
+    b7: 306,      // ~81mm printable
   };
 
   for (const saleType of ['CREDIT SALE', 'CASH SALE'] as const) {
     for (const size of sizes) {
+      const isB7 = size === 'b7';
       const html = renderToStaticMarkup(
         React.createElement(BillTableCanvas, {
           saleType,
@@ -126,9 +138,10 @@ async function run() {
 
       const cols = extractMainColWidths(html);
       const sum = cols.reduce((acc, v) => acc + parseFloat(v), 0);
+      const targetCols = expectedColWidths[size];
       check(
-        JSON.stringify(cols) === JSON.stringify(expectedColWidths[size]) && sum === 100,
-        `${saleType} (${size.toUpperCase()}): main table colgroup = ${expectedColWidths[size].join('/')} (sum=100%)`,
+        JSON.stringify(cols) === JSON.stringify(targetCols) && sum === 100,
+        `${saleType} (${size.toUpperCase()}): main table colgroup = ${targetCols.join('/')} (sum=100%)`,
         JSON.stringify(cols)
       );
 
@@ -152,13 +165,24 @@ async function run() {
       );
 
       // Check NO. and ITEM NAME cell boundaries
-      check(
-        html.includes('px-0.5') &&
-          html.includes('pl-1.5 pr-1') &&
-          html.includes('overflow-hidden') &&
-          html.includes('[overflow-wrap:anywhere]'),
-        `${saleType} (${size.toUpperCase()}): enforces NO. padding (px-0.5), ITEM NAME padding (pl-1.5 pr-1), overflow-hidden, and anywhere wrap`
-      );
+      if (isB7) {
+        check(
+          html.includes('b7-single-line-table') &&
+            html.includes('px-[1px]') &&
+            html.includes('pl-[3px] pr-[2px]') &&
+            html.includes('overflow-hidden') &&
+            !html.includes('[overflow-wrap:anywhere]'),
+          `${saleType} (${size.toUpperCase()}): enforces b7-single-line-table single-line ITEM NAME with optimized padding`
+        );
+      } else {
+        check(
+          html.includes('px-0.5') &&
+            html.includes('pl-1.5 pr-1') &&
+            html.includes('overflow-hidden') &&
+            html.includes('[overflow-wrap:anywhere]'),
+          `${saleType} (${size.toUpperCase()}): enforces NO. padding (px-0.5), ITEM NAME padding (pl-1.5 pr-1), overflow-hidden, and anywhere wrap`
+        );
+      }
 
       // Check single-line large numeric values present without inner breaks
       check(
@@ -169,16 +193,19 @@ async function run() {
         `${saleType} (${size.toUpperCase()}): renders full numeric values (432100.00, 10000.00, 422650.00) cleanly`
       );
 
-      // Physical pixel budget checks (Compact NO. >= 30px, Amount >= 50px even on B7, Summary value >= 65px even on B7)
+      // Physical pixel budget checks
       const px = approxCanvasPx[size];
       const noWidthPx = (px * parseFloat(cols[0])) / 100;
       const itemWidthPx = (px * parseFloat(cols[1])) / 100;
       const amountWidthPx = (px * parseFloat(cols[5])) / 100;
-      const summaryShare = size === 'b7' ? (parseFloat(cols[3]) + parseFloat(cols[4]) + parseFloat(cols[5])) / 100 : (parseFloat(cols[4]) + parseFloat(cols[5])) / 100;
+      const summaryShare = isB7
+        ? (parseFloat(cols[2]) + parseFloat(cols[3]) + parseFloat(cols[4]) + parseFloat(cols[5])) / 100
+        : (parseFloat(cols[4]) + parseFloat(cols[5])) / 100;
       const summaryValPx = px * summaryShare * (parseFloat(expectedSummary[1]) / 100);
+      const minNoPx = isB7 ? 20 : 25;
 
       check(
-        noWidthPx >= 25 && itemWidthPx >= 76 && amountWidthPx >= 50 && summaryValPx >= 66,
+        noWidthPx >= minNoPx && itemWidthPx >= 76 && amountWidthPx >= 50 && summaryValPx >= 66,
         `${saleType} (${size.toUpperCase()}): pixel budgets NO=${noWidthPx.toFixed(1)}px, ITEM=${itemWidthPx.toFixed(1)}px, AMT=${amountWidthPx.toFixed(1)}px, SUM_VAL=${summaryValPx.toFixed(1)}px`
       );
     }
@@ -234,7 +261,7 @@ async function run() {
   const spA4Match = /no:\s*'6%',\s*item:\s*'36%',\s*qty:\s*'16%',\s*weight:\s*'11%',\s*price:\s*'13%',\s*amount:\s*'18%'/.test(spSrc);
   const spA5Match = /no:\s*'7%',\s*item:\s*'32%',\s*qty:\s*'17%',\s*weight:\s*'12%',\s*price:\s*'13%',\s*amount:\s*'19%'/.test(spSrc);
   const spB6Match = /no:\s*'8%',\s*item:\s*'31%',\s*qty:\s*'18%',\s*weight:\s*'11%',\s*price:\s*'13%',\s*amount:\s*'19%'/.test(spSrc);
-  const spB7Match = /no:\s*'9%',\s*item:\s*'27%',\s*qty:\s*'18%',\s*weight:\s*'14%',\s*price:\s*'14%',\s*amount:\s*'18%'/.test(spSrc);
+  const spB7Match = /no:\s*'7%',\s*item:\s*'36%',\s*qty:\s*'14%',\s*weight:\s*'12%',\s*price:\s*'13%',\s*amount:\s*'18%'/.test(spSrc);
   check(
     spCompactMatch && spA4Match && spA5Match && spB6Match && spB7Match,
     'SaleProceedPrintModal defines synced colWidths across Compact, A4, A5, B6, and B7'

@@ -615,6 +615,27 @@ input.no-spinners {
   word-break: break-word !important;
   line-height: 1.15 !important;
 }
+/* B7 Credit Sale, Cash Sale & Sale Proceeds: strictly force single-line fruit item names with optimized padding and zero border overlap */
+.print-bill-canvas table.b7-bill-table.b7-single-line-table > thead > tr > th,
+.print-bill-canvas table.b7-bill-table.b7-single-line-table > tbody > tr > td,
+[data-pdf-export="true"] table.b7-bill-table.b7-single-line-table > thead > tr > th,
+[data-pdf-export="true"] table.b7-bill-table.b7-single-line-table > tbody > tr > td {
+  padding-top: 1px !important;
+  padding-bottom: 1px !important;
+  line-height: 1.1 !important;
+}
+.print-bill-canvas table.b7-bill-table.b7-single-line-table > thead > tr > th:nth-child(2),
+.print-bill-canvas table.b7-bill-table.b7-single-line-table > tbody > tr > td:nth-child(2),
+[data-pdf-export="true"] table.b7-bill-table.b7-single-line-table > thead > tr > th:nth-child(2),
+[data-pdf-export="true"] table.b7-bill-table.b7-single-line-table > tbody > tr > td:nth-child(2) {
+  white-space: nowrap !important;
+  overflow-wrap: normal !important;
+  word-break: normal !important;
+  text-overflow: clip !important;
+  padding-left: 3px !important;
+  padding-right: 2px !important;
+  line-height: 1.1 !important;
+}
 
 /* B6 Bill Print Preview & PDF Export: lock fixed colgroup boundaries and prevent NO. / ITEM NAME border overlap */
 .print-bill-canvas table.b6-bill-table,
@@ -1713,6 +1734,31 @@ input.no-spinners {
     overflow-wrap: anywhere !important;
     word-break: break-word !important;
     line-height: 1.15 !important;
+  }
+  /* B7 Credit Sale, Cash Sale & Sale Proceeds Print: keep all fruit item names strictly on one single horizontal line */
+  table.b7-bill-table.b7-single-line-table > thead > tr > th,
+  table.b7-bill-table.b7-single-line-table > tbody > tr > td,
+  #mandi-print-area table.b7-bill-table.b7-single-line-table > thead > tr > th,
+  #mandi-print-area table.b7-bill-table.b7-single-line-table > tbody > tr > td,
+  #erp-isolated-print-mount table.b7-bill-table.b7-single-line-table > thead > tr > th,
+  #erp-isolated-print-mount table.b7-bill-table.b7-single-line-table > tbody > tr > td {
+    padding-top: 1px !important;
+    padding-bottom: 1px !important;
+    line-height: 1.1 !important;
+  }
+  table.b7-bill-table.b7-single-line-table > thead > tr > th:nth-child(2),
+  table.b7-bill-table.b7-single-line-table > tbody > tr > td:nth-child(2),
+  #mandi-print-area table.b7-bill-table.b7-single-line-table > thead > tr > th:nth-child(2),
+  #mandi-print-area table.b7-bill-table.b7-single-line-table > tbody > tr > td:nth-child(2),
+  #erp-isolated-print-mount table.b7-bill-table.b7-single-line-table > thead > tr > th:nth-child(2),
+  #erp-isolated-print-mount table.b7-bill-table.b7-single-line-table > tbody > tr > td:nth-child(2) {
+    white-space: nowrap !important;
+    overflow-wrap: normal !important;
+    word-break: normal !important;
+    text-overflow: clip !important;
+    padding-left: 3px !important;
+    padding-right: 2px !important;
+    line-height: 1.1 !important;
   }
 
   /* B6 Bill Print: lock fixed colgroup boundaries and prevent NO. / ITEM NAME border overlap */

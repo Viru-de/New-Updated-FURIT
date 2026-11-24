@@ -57,9 +57,20 @@ export function formatBillQtyWithUnit(quantity: number | string, unit?: string |
  */
 export function getBillItemNameCellClass(
   itemName: string | undefined | null,
-  pageSize: 'compact' | 'a4' | 'a5' | 'b6' | 'b7' = 'compact'
+  pageSize: 'compact' | 'a4' | 'a5' | 'b6' | 'b7' = 'compact',
+  saleType?: 'CREDIT SALE' | 'CASH SALE' | 'SALE PROCEED'
 ): string {
   const len = (itemName || '').trim().length;
+  if (
+    pageSize === 'b7' &&
+    (saleType === 'CREDIT SALE' || saleType === 'CASH SALE' || saleType === 'SALE PROCEED')
+  ) {
+    if (len <= 15) return 'text-[7.5px] print:text-[8px] leading-[1.1] whitespace-nowrap';
+    if (len <= 20) return 'text-[7px] print:text-[7.5px] tracking-tight leading-[1.1] whitespace-nowrap';
+    if (len <= 26) return 'text-[6px] print:text-[6.5px] tracking-tight leading-[1.1] whitespace-nowrap';
+    if (len <= 34) return 'text-[5.25px] print:text-[5.5px] tracking-[-0.02em] leading-[1.1] whitespace-nowrap';
+    return 'text-[4.5px] print:text-[4.75px] tracking-[-0.03em] leading-[1.1] whitespace-nowrap';
+  }
   if (pageSize === 'b7') {
     if (len <= 10) return 'text-[7.5px] print:text-[8.5px] leading-[1.15] whitespace-normal break-words [overflow-wrap:anywhere]';
     if (len <= 20) return 'text-[7px] print:text-[7.5px] tracking-tight leading-[1.15] whitespace-normal break-words [overflow-wrap:anywhere]';

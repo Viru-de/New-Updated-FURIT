@@ -91,11 +91,11 @@ export const SaleProceedPrintModal: React.FC<SaleProceedPrintModalProps> = ({
 
   const colWidths = isB7
     ? {
-        no: '9%',
-        item: '27%',
-        qty: '18%',
-        weight: '14%',
-        price: '14%',
+        no: '7%',
+        item: '36%',
+        qty: '14%',
+        weight: '12%',
+        price: '13%',
         amount: '18%',
       }
     : isB6
@@ -134,9 +134,9 @@ export const SaleProceedPrintModal: React.FC<SaleProceedPrintModalProps> = ({
         amount: '20%',
       };
 
-  const tablePad = isB7 ? 'px-0.5 py-0.5' : isB6 ? 'px-1 py-0.5' : isA5 ? 'px-1 py-[2px]' : 'px-1.5 py-1';
-  const totalsPad = isB7 ? 'px-0.5 py-0.5' : isB6 ? 'px-1 py-0.5' : isA5 ? 'px-1 py-[2px]' : 'px-1.5 py-1';
-  const rowHeight = isB7 ? 'h-3.5' : isB6 ? 'h-4' : isA5 ? 'h-[18px]' : 'h-6';
+  const tablePad = isB7 ? 'px-[1.5px] py-[1px]' : isB6 ? 'px-1 py-0.5' : isA5 ? 'px-1 py-[2px]' : 'px-1.5 py-1';
+  const totalsPad = isB7 ? 'px-[2px] py-[1px]' : isB6 ? 'px-1 py-0.5' : isA5 ? 'px-1 py-[2px]' : 'px-1.5 py-1';
+  const rowHeight = isB7 ? 'h-[12.5px] leading-[1.1]' : isB6 ? 'h-4' : isA5 ? 'h-[18px]' : 'h-6';
   const tableHeadFont = isB7
     ? 'text-[7.5px] print:text-[8.5px]'
     : isB6
@@ -283,7 +283,7 @@ export const SaleProceedPrintModal: React.FC<SaleProceedPrintModalProps> = ({
                 : pageSize === 'b6'
                 ? 'max-w-[430px] w-full text-[10px] pt-1 px-2.5 pb-1.5 sm:px-3'
                 : pageSize === 'b7'
-                ? 'max-w-[300px] w-full text-[8.5px] pt-0.5 px-1.5 pb-1'
+                ? 'max-w-[316px] w-full text-[8.5px] pt-0.5 px-1 pb-1'
                 : 'max-w-[490px] w-full text-[11px] pt-0.5 px-3 pb-2 sm:pt-1 sm:px-3.5 sm:pb-2.5'
             }`}
             style={{ fontFamily: "'Plus Jakarta Sans', 'Noto Sans Devanagari', Arial, sans-serif", boxSizing: 'border-box' }}
@@ -330,7 +330,7 @@ export const SaleProceedPrintModal: React.FC<SaleProceedPrintModalProps> = ({
             </div>
 
             {/* Item Table matching Reference 1 */}
-            <table className={`w-full max-w-full table-fixed box-border border-collapse border border-black bill-items-table ${isB7 ? 'b7-bill-table' : ''} ${isB6 ? 'b6-bill-table' : ''} ${tableBodyFont}`}>
+            <table className={`w-full max-w-full table-fixed box-border border-collapse border border-black bill-items-table ${isB7 ? 'b7-bill-table b7-single-line-table' : ''} ${isB6 ? 'b6-bill-table' : ''} ${tableBodyFont}`}>
               <colgroup>
                 <col style={{ width: colWidths.no }} />
                 <col style={{ width: colWidths.item }} />
@@ -341,10 +341,10 @@ export const SaleProceedPrintModal: React.FC<SaleProceedPrintModalProps> = ({
               </colgroup>
               <thead>
                 <tr className={`border-b border-black font-bold uppercase ${tableHeadFont} bg-slate-50 print:bg-transparent text-slate-950 dark:text-slate-950 print:text-black`}>
-                  <th className={`border-r border-black px-0.5 ${isB7 ? 'py-0.5' : 'py-1'} box-border text-center tracking-tight whitespace-nowrap`}>No.</th>
-                  <th className={`border-r border-black pl-1.5 pr-1 ${isB7 ? 'py-0.5' : 'py-1'} box-border text-left`}>ITEM NAME</th>
+                  <th className={`border-r border-black ${isB7 ? 'px-[1px] py-[1px]' : 'px-0.5 py-1'} box-border text-center tracking-tight whitespace-nowrap`}>No.</th>
+                  <th className={`border-r border-black ${isB7 ? 'pl-[3px] pr-[2px] py-[1px] whitespace-nowrap' : 'pl-1.5 pr-1 py-1'} box-border text-left`}>ITEM NAME</th>
                   <th className={`border-r border-black ${tablePad} box-border text-right bill-qty-col whitespace-nowrap`}>QTY</th>
-                  <th className={`border-r border-black ${tablePad} box-border text-right ${isB7 ? 'tracking-tight' : ''} whitespace-nowrap`}>WEIGHT</th>
+                  <th className={`border-r border-black ${tablePad} box-border text-right ${isB7 ? 'text-[6.5px] print:text-[7.5px] tracking-tighter' : ''} whitespace-nowrap`}>WEIGHT</th>
                   <th className={`border-r border-black ${tablePad} box-border text-right whitespace-nowrap`}>PRICE</th>
                   <th className={`${tablePad} box-border text-right whitespace-nowrap`}>AMOUNT</th>
                 </tr>
@@ -352,16 +352,16 @@ export const SaleProceedPrintModal: React.FC<SaleProceedPrintModalProps> = ({
               <tbody>
                 {items.map((it, idx) => (
                   <tr key={it.id || idx} className={`border-b border-black/40 text-slate-950 dark:text-slate-950 print:text-black ${rowHeight}`}>
-                    <td className={`border-r border-black px-0.5 ${isB7 || isB6 ? 'py-0.5' : 'py-[2px]'} box-border whitespace-nowrap tabular-nums text-center font-mono print:font-semibold align-middle`}>{idx + 1}</td>
+                    <td className={`border-r border-black ${isB7 ? 'px-[1px] py-[1px]' : isB6 ? 'px-0.5 py-0.5' : 'px-0.5 py-[2px]'} box-border whitespace-nowrap tabular-nums text-center font-mono print:font-semibold align-middle`}>{idx + 1}</td>
                     <td
-                      className={`border-r border-black pl-1.5 pr-1 ${isB7 || isB6 ? 'py-0.5' : 'py-[2px]'} box-border font-semibold print:font-bold uppercase align-middle overflow-hidden ${getBillItemNameCellClass(it.fruitName, pageSize)}`}
+                      className={`border-r border-black ${isB7 ? 'pl-[3px] pr-[2px] py-[1px]' : isB6 ? 'pl-1.5 pr-1 py-0.5' : 'pl-1.5 pr-1 py-[2px]'} box-border font-semibold print:font-bold uppercase align-middle overflow-hidden ${getBillItemNameCellClass(it.fruitName, pageSize, 'SALE PROCEED')}`}
                     >
                       {it.fruitName}
                     </td>
                     <td
                       className={`border-r border-black ${tablePad} box-border text-right font-mono tabular-nums print:font-semibold align-middle bill-qty-cell whitespace-nowrap ${
                         isB7
-                          ? 'text-[7px] print:text-[8px] tracking-tight'
+                          ? 'text-[6.75px] print:text-[7.25px] tracking-tight'
                           : isB6
                           ? 'text-[9px] print:text-[10px] tracking-tight'
                           : 'print:tracking-tight'
@@ -371,7 +371,7 @@ export const SaleProceedPrintModal: React.FC<SaleProceedPrintModalProps> = ({
                         {formatBillQtyWithUnit(it.quantity, it.unit || proceeds.unit)}
                       </span>
                     </td>
-                    <td className={`border-r border-black ${tablePad} box-border whitespace-nowrap tabular-nums text-right font-mono print:font-semibold align-middle`}>
+                    <td className={`border-r border-black ${tablePad} box-border whitespace-nowrap tabular-nums ${isB7 ? 'text-[7.5px] print:text-[8px] tracking-tight' : ''} text-right font-mono print:font-semibold align-middle`}>
                       {(() => {
                         const itemWeight = it.weight !== undefined && it.weight !== null
                           ? it.weight
@@ -390,10 +390,10 @@ export const SaleProceedPrintModal: React.FC<SaleProceedPrintModalProps> = ({
                         return '';
                       })()}
                     </td>
-                    <td className={`border-r border-black ${tablePad} box-border whitespace-nowrap tabular-nums ${isB7 || isB6 ? 'tracking-tight' : ''} text-right font-mono print:font-semibold align-middle`}>
+                    <td className={`border-r border-black ${tablePad} box-border whitespace-nowrap tabular-nums ${isB7 ? 'text-[7.5px] print:text-[8px] tracking-tight' : isB6 ? 'tracking-tight' : ''} text-right font-mono print:font-semibold align-middle`}>
                       {formatBillAmount(it.rate)}
                     </td>
-                    <td className={`${tablePad} box-border whitespace-nowrap tabular-nums ${isB7 ? 'text-[7.5px] print:text-[8.5px] tracking-tight' : isB6 ? 'text-[9.5px] print:text-[10.5px] tracking-tight' : pageSize === 'compact' ? 'text-[10.5px] print:text-[11px] tracking-tight' : ''} text-right font-mono font-bold align-middle`}>
+                    <td className={`${tablePad} box-border whitespace-nowrap tabular-nums ${isB7 ? 'text-[7.25px] print:text-[8px] tracking-tight' : isB6 ? 'text-[9.5px] print:text-[10.5px] tracking-tight' : pageSize === 'compact' ? 'text-[10.5px] print:text-[11px] tracking-tight' : ''} text-right font-mono font-bold align-middle`}>
                       {formatBillAmount(it.amount)}
                     </td>
                   </tr>
@@ -402,8 +402,8 @@ export const SaleProceedPrintModal: React.FC<SaleProceedPrintModalProps> = ({
                 {/* Preserved Blank Rows to maintain traditional wholesale bill spacing */}
                 {Array.from({ length: blankRowsCount }).map((_, bIdx) => (
                   <tr key={`blank-${bIdx}`} className={`border-b border-black/20 ${rowHeight}`}>
-                    <td className={`border-r border-black box-border px-0.5 ${isB7 || isB6 ? 'py-0.5' : 'py-[2px]'}`}>&nbsp;</td>
-                    <td className={`border-r border-black box-border pl-1.5 pr-1 ${isB7 || isB6 ? 'py-0.5' : 'py-[2px]'}`}>&nbsp;</td>
+                    <td className={`border-r border-black box-border ${isB7 ? 'px-[1px] py-[1px]' : isB6 ? 'px-0.5 py-0.5' : 'px-0.5 py-[2px]'}`}>&nbsp;</td>
+                    <td className={`border-r border-black box-border ${isB7 ? 'pl-[3px] pr-[2px] py-[1px]' : isB6 ? 'pl-1.5 pr-1 py-0.5' : 'pl-1.5 pr-1 py-[2px]'}`}>&nbsp;</td>
                     <td className={`border-r border-black box-border ${tablePad}`}>&nbsp;</td>
                     <td className={`border-r border-black box-border ${tablePad}`}>&nbsp;</td>
                     <td className={`border-r border-black box-border ${tablePad}`}>&nbsp;</td>
@@ -437,16 +437,16 @@ export const SaleProceedPrintModal: React.FC<SaleProceedPrintModalProps> = ({
                 </tr>
                 <tr className="border-t border-black">
                   {/* Left Bottom Section: E & O.E. + Expenses List */}
-                  <td colSpan={isB7 ? 3 : 4} className={`border-r border-black ${tablePad} align-top box-border`}>
-                    <div className={`flex flex-col justify-between h-full ${isB7 ? 'min-h-[28px] gap-0.5' : isB6 ? 'min-h-[34px] gap-0.5' : isA5 ? 'min-h-[34px] gap-0.5' : 'min-h-[50px] gap-1'}`}>
-                      <div className={`${isB7 ? 'text-[7.5px] print:text-[8.5px]' : isA5 ? 'text-[9px] print:text-[9px]' : 'text-[10px] print:text-[11px]'} font-bold text-slate-950 dark:text-slate-950 print:text-black`}>* E & O.E.</div>
+                  <td colSpan={isB7 ? 2 : 4} className={`border-r border-black ${isB7 ? 'p-[3px]' : tablePad} align-top box-border`}>
+                    <div className={`flex flex-col justify-between h-full ${isB7 ? 'min-h-[24px] gap-0.5' : isB6 ? 'min-h-[34px] gap-0.5' : isA5 ? 'min-h-[34px] gap-0.5' : 'min-h-[50px] gap-1'}`}>
+                      <div className={`${isB7 ? 'text-[7px] print:text-[8px]' : isA5 ? 'text-[9px] print:text-[9px]' : 'text-[10px] print:text-[11px]'} font-bold text-slate-950 dark:text-slate-950 print:text-black`}>* E & O.E.</div>
 
                       {/* Listed Individual Expenses */}
                       {proceeds.expenses && proceeds.expenses.length > 0 && (
-                        <div className={`self-end w-full text-right font-mono ${isB7 ? 'text-[7.5px] print:text-[8.5px]' : isB6 ? 'text-[9px] print:text-[10px]' : isA5 ? 'text-[9.5px] print:text-[9.5px] space-y-0' : 'text-[10.5px] print:text-[11.5px] space-y-0.5'} pr-1`}>
+                        <div className={`self-end w-full text-right font-mono ${isB7 ? 'text-[7px] print:text-[8px] leading-[1.15] space-y-0' : isB6 ? 'text-[9px] print:text-[10px]' : isA5 ? 'text-[9.5px] print:text-[9.5px] space-y-0' : 'text-[10.5px] print:text-[11.5px] space-y-0.5'} pr-0.5`}>
                           {proceeds.expenses.map((exp, expIdx) => (
-                            <div key={expIdx} className="flex justify-end items-baseline gap-2 sm:gap-3 text-slate-950 dark:text-slate-950 print:text-black">
-                              <span className="font-sans font-medium print:font-semibold text-slate-950 dark:text-slate-950 print:text-black break-words min-w-0">{exp.name}</span>
+                            <div key={expIdx} className="flex justify-between items-baseline gap-1 sm:gap-2 text-slate-950 dark:text-slate-950 print:text-black">
+                              <span className="font-sans font-medium print:font-semibold text-slate-950 dark:text-slate-950 print:text-black break-words min-w-0 text-left">{exp.name}</span>
                               <span className="font-bold whitespace-nowrap tabular-nums shrink-0 text-slate-950 dark:text-slate-950 print:text-black">{formatBillAmount(exp.amount)}</span>
                             </div>
                           ))}
@@ -456,7 +456,7 @@ export const SaleProceedPrintModal: React.FC<SaleProceedPrintModalProps> = ({
                   </td>
 
                   {/* Right Bottom Section: Sub Total, Expenses, Net Total */}
-                  <td colSpan={isB7 ? 3 : 2} className="p-0 align-top box-border">
+                  <td colSpan={isB7 ? 4 : 2} className="p-0 align-top box-border">
                     <table className={`w-full max-w-full table-fixed box-border border-collapse bill-summary-table ${footerFont}`}>
                       <colgroup>
                         <col style={{ width: '47%' }} />
