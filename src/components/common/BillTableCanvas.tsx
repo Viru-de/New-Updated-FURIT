@@ -108,14 +108,17 @@ export const BillTableCanvas: React.FC<BillTableCanvasProps> = ({
 
   const isCreditSale = saleType === 'CREDIT SALE';
 
-  // Minimum rows for clean mandi layout based on paper size
-  const minRows =
-    pageSize === 'b7' ? 2 : pageSize === 'b6' ? 4 : pageSize === 'a5' || pageSize === 'compact' ? 6 : 8;
-  const blankRowsCount = Math.max(0, minRows - items.length);
-
   const isB7 = pageSize === 'b7';
   const isB6 = pageSize === 'b6';
   const isA5 = pageSize === 'a5';
+
+  // Display at most 10 item rows on B7 bills (while keeping full totals calculated from all items)
+  const displayedItems = isB7 ? items.slice(0, 10) : items;
+
+  // Minimum rows for clean mandi layout based on paper size
+  const minRows =
+    pageSize === 'b7' ? 2 : pageSize === 'b6' ? 4 : pageSize === 'a5' || pageSize === 'compact' ? 6 : 8;
+  const blankRowsCount = Math.max(0, minRows - displayedItems.length);
 
   // Width & typography scaling for selected paper size
   const sizeClasses =
@@ -126,7 +129,7 @@ export const BillTableCanvas: React.FC<BillTableCanvasProps> = ({
       : pageSize === 'b6'
       ? 'max-w-[430px] w-full text-[10px] pt-1 px-2.5 pb-1.5 sm:px-3'
       : isB7
-      ? 'max-w-[397px] w-full text-[8.5px] pt-1 px-2 pb-1.5'
+      ? `max-w-[397px] w-full text-[9px] pt-1.5 px-2 pb-1.5${!isLivePreview ? ' min-h-[534px] flex flex-col justify-center' : ''}`
       : 'max-w-[490px] w-full text-[11px] pt-0.5 px-3 pb-2 sm:pt-1 sm:px-3.5 sm:pb-2.5';
 
   // Balanced percentage column widths with safe NO. separation and generous ITEM NAME / AMOUNT space
@@ -175,11 +178,11 @@ export const BillTableCanvas: React.FC<BillTableCanvasProps> = ({
         amount: '20%',
       };
 
-  const tablePad = isB7 ? 'px-[1.5px] py-[1px]' : isB6 ? 'px-1 py-[2px]' : isA5 ? 'px-1 py-[2px]' : 'px-1.5 py-1';
-  const summaryCellPad = isB7 ? 'px-[2px] py-[1px]' : isB6 ? 'px-1 py-[2px]' : isA5 ? 'px-1 py-[2px]' : 'px-1.5 py-1';
-  const rowHeight = isB7 ? 'h-[12.5px] leading-[1.1]' : isB6 ? 'h-4' : isA5 ? 'h-[18px]' : 'h-5';
+  const tablePad = isB7 ? 'px-[2px] py-[2px]' : isB6 ? 'px-1 py-[2px]' : isA5 ? 'px-1 py-[2px]' : 'px-1.5 py-1';
+  const summaryCellPad = isB7 ? 'px-[3px] py-[2px]' : isB6 ? 'px-1 py-[2px]' : isA5 ? 'px-1 py-[2px]' : 'px-1.5 py-1';
+  const rowHeight = isB7 ? 'h-[15.5px] leading-[1.15]' : isB6 ? 'h-4' : isA5 ? 'h-[18px]' : 'h-5';
   const tableHeadFont = isB7
-    ? 'text-[8px] print:text-[9px]'
+    ? 'text-[8.5px] print:text-[9px]'
     : isB6
     ? 'text-[9.5px] print:text-[11px]'
     : isA5
@@ -188,7 +191,7 @@ export const BillTableCanvas: React.FC<BillTableCanvasProps> = ({
     ? 'text-[11px] print:text-[11.5px]'
     : 'text-[10.5px] print:text-[11px]';
   const tableBodyFont = isB7
-    ? 'text-[8px] print:text-[9px]'
+    ? 'text-[8.5px] print:text-[9px]'
     : isB6
     ? 'text-[10px] print:text-[11px]'
     : isA5
@@ -197,7 +200,7 @@ export const BillTableCanvas: React.FC<BillTableCanvasProps> = ({
     ? 'text-xs print:text-[12.5px]'
     : 'text-[11px] print:text-[11.5px]';
   const footerFont = isB7
-    ? 'text-[7.5px] print:text-[8.5px]'
+    ? 'text-[8px] print:text-[8.5px]'
     : isB6
     ? 'text-[9px] print:text-[10px]'
     : isA5
@@ -206,7 +209,7 @@ export const BillTableCanvas: React.FC<BillTableCanvasProps> = ({
     ? 'text-[11px] print:text-[12px]'
     : 'text-[10px] print:text-[10.5px]';
   const summaryLabelFont = isB7
-    ? 'text-[7px] print:text-[8px] tracking-tight'
+    ? 'text-[7.5px] print:text-[8px] tracking-tight'
     : isB6
     ? 'text-[8.5px] print:text-[9.5px] tracking-tight'
     : isA5
@@ -215,7 +218,7 @@ export const BillTableCanvas: React.FC<BillTableCanvasProps> = ({
     ? 'text-[11px] print:text-[11.5px]'
     : 'text-[9.5px] print:text-[10px] tracking-tight';
   const summaryValueFont = isB7
-    ? 'text-[7.5px] print:text-[8.5px] tracking-tight'
+    ? 'text-[8px] print:text-[8.5px] tracking-tight'
     : isB6
     ? 'text-[9.5px] print:text-[10.5px] tracking-tight'
     : isA5
@@ -224,7 +227,7 @@ export const BillTableCanvas: React.FC<BillTableCanvasProps> = ({
     ? 'text-[11.5px] print:text-[12.5px]'
     : 'text-[10.5px] print:text-[11px] tracking-tight';
   const totalQtyRowFont = isB7
-    ? 'text-[7.5px] print:text-[8.5px]'
+    ? 'text-[8px] print:text-[8.5px]'
     : isB6
     ? 'text-[9.5px] print:text-[10.5px]'
     : isA5
@@ -253,8 +256,8 @@ export const BillTableCanvas: React.FC<BillTableCanvasProps> = ({
       />
 
       {/* Sale Document Title: CREDIT SALE or CASH SALE */}
-      <div className={`text-center ${isB7 || isB6 || isA5 ? 'my-0.5' : 'my-1'} flex items-center justify-center gap-2`}>
-        <span className={`font-bold uppercase tracking-widest border-b border-black pb-0.5 ${isB7 ? 'text-[9px]' : isA5 ? 'text-[11px] sm:text-xs print:text-[11.5px]' : 'text-xs sm:text-sm'}`}>
+      <div className={`text-center ${isB7 ? 'my-1' : isB6 || isA5 ? 'my-0.5' : 'my-1'} flex items-center justify-center gap-2`}>
+        <span className={`font-bold uppercase tracking-widest border-b border-black pb-0.5 ${isB7 ? 'text-[9.5px]' : isA5 ? 'text-[11px] sm:text-xs print:text-[11.5px]' : 'text-xs sm:text-sm'}`}>
           {saleType}
         </span>
         {saleType === 'CASH SALE' && paymentMode && (
@@ -270,7 +273,7 @@ export const BillTableCanvas: React.FC<BillTableCanvasProps> = ({
       </div>
 
       {/* Customer and Metadata Section (Customer Name on Left, Bill No. & Date on Right) */}
-      <div className={`flex justify-between items-start gap-2 ${isB7 ? 'text-[8.5px] mb-0.5 pb-0.5' : isB6 ? 'text-xs mb-0.5 pb-0.5' : isA5 ? 'text-[10.5px] mb-1 pb-0.5' : 'text-xs mb-1 pb-1'} pt-0 font-medium border-b border-black/40`}>
+      <div className={`flex justify-between items-start gap-2 ${isB7 ? 'text-[8.5px] mb-1 pb-1' : isB6 ? 'text-xs mb-0.5 pb-0.5' : isA5 ? 'text-[10.5px] mb-1 pb-0.5' : 'text-xs mb-1 pb-1'} pt-0 font-medium border-b border-black/40`}>
         {/* Left Side: M/s: Customer Name only */}
         <div className={`min-w-0 max-w-[62%] break-words ${isB7 ? 'min-h-[12px]' : isB6 ? 'min-h-[14px]' : isA5 ? 'min-h-[16px]' : 'min-h-[22px]'}`}>
           {saleType === 'CASH SALE' && !customerName?.trim() ? (
@@ -315,8 +318,8 @@ export const BillTableCanvas: React.FC<BillTableCanvasProps> = ({
         </colgroup>
         <thead>
           <tr className={`border-b border-black font-bold uppercase ${tableHeadFont} bg-slate-50 print:bg-transparent text-slate-950 print:text-black`}>
-            <th className={`border-r border-black ${isB7 ? 'px-[1px] py-[1px]' : 'px-0.5 py-1'} box-border text-center tracking-tight whitespace-nowrap`}>No.</th>
-            <th className={`border-r border-black ${isB7 ? 'pl-[3px] pr-[2px] py-[1px] whitespace-nowrap' : 'pl-1.5 pr-1 py-1'} box-border text-left`}>ITEM NAME</th>
+            <th className={`border-r border-black ${isB7 ? 'px-[1px] py-[2px]' : 'px-0.5 py-1'} box-border text-center tracking-tight whitespace-nowrap`}>No.</th>
+            <th className={`border-r border-black ${isB7 ? 'pl-[3px] pr-[2px] py-[2px] whitespace-nowrap' : 'pl-1.5 pr-1 py-1'} box-border text-left`}>ITEM NAME</th>
             <th className={`border-r border-black ${tablePad} box-border text-right ${!isLivePreview ? 'bill-qty-col' : 'print:whitespace-nowrap'} whitespace-nowrap`}>QTY</th>
             <th className={`border-r border-black ${tablePad} box-border text-right ${isB7 ? 'tracking-tight' : ''} whitespace-nowrap`}>KG</th>
             <th className={`border-r border-black ${tablePad} box-border text-right whitespace-nowrap`}>RATE</th>
@@ -324,7 +327,7 @@ export const BillTableCanvas: React.FC<BillTableCanvasProps> = ({
           </tr>
         </thead>
         <tbody>
-          {items.map((it, idx) => {
+          {displayedItems.map((it, idx) => {
             const lineKg = Number((it as any).weight ?? it.kg) || 0;
             const lineAmount =
               it.amount !== undefined
@@ -336,11 +339,11 @@ export const BillTableCanvas: React.FC<BillTableCanvasProps> = ({
                 key={it.id || idx}
                 className={`border-b border-black/40 print:text-black ${rowHeight}`}
               >
-                <td className={`border-r border-black ${isB7 ? 'px-[1px] py-[1px]' : `px-0.5 ${isB6 || isA5 ? 'py-[2px]' : 'py-1'}`} box-border whitespace-nowrap tabular-nums text-center font-mono print:font-semibold print:text-black align-middle`}>
+                <td className={`border-r border-black ${isB7 ? 'px-[1px] py-[2px]' : `px-0.5 ${isB6 || isA5 ? 'py-[2px]' : 'py-1'}`} box-border whitespace-nowrap tabular-nums text-center font-mono print:font-semibold print:text-black align-middle`}>
                   {idx + 1}
                 </td>
                 <td
-                  className={`border-r border-black ${isB7 ? 'pl-[3px] pr-[2px] py-[1px]' : `pl-1.5 pr-1 ${isB6 || isA5 ? 'py-[2px]' : 'py-1'}`} box-border font-semibold print:font-bold uppercase print:text-black align-middle overflow-hidden ${getBillItemNameCellClass(it.fruitName, pageSize, saleType)}`}
+                  className={`border-r border-black ${isB7 ? 'pl-[3px] pr-[2px] py-[2px]' : `pl-1.5 pr-1 ${isB6 || isA5 ? 'py-[2px]' : 'py-1'}`} box-border font-semibold print:font-bold uppercase print:text-black align-middle overflow-hidden ${getBillItemNameCellClass(it.fruitName, pageSize, saleType)}`}
                 >
                   {it.fruitName || 'ITEM'}
                 </td>
@@ -701,7 +704,7 @@ export const BillTableCanvas: React.FC<BillTableCanvasProps> = ({
         className="bill-bottom-footer"
         style={{ breakInside: 'avoid', pageBreakInside: 'avoid' }}
       >
-        <div className={`${isB7 || isB6 || isA5 ? 'mt-0.5 pt-0.5' : 'mt-1.5 pt-1'} flex justify-between items-end ${isB7 ? 'text-[7.5px] print:text-[8.5px]' : isB6 ? 'text-[9.5px] print:text-[10.5px]' : isA5 ? 'text-[9.5px] print:text-[9.5px]' : 'text-xs print:text-[12px]'} border-t border-slate-100 print:border-none text-slate-950 dark:text-slate-950 print:text-black`}>
+        <div className={`${isB7 ? 'mt-1.5 pt-1' : isB6 || isA5 ? 'mt-0.5 pt-0.5' : 'mt-1.5 pt-1'} flex justify-between items-end ${isB7 ? 'text-[8px] print:text-[8.5px]' : isB6 ? 'text-[9.5px] print:text-[10.5px]' : isA5 ? 'text-[9.5px] print:text-[9.5px]' : 'text-xs print:text-[12px]'} border-t border-slate-100 print:border-none text-slate-950 dark:text-slate-950 print:text-black`}>
           <div className="font-bold italic max-w-[60%] leading-tight text-slate-950 dark:text-slate-950 print:text-black">
             {words}
           </div>
@@ -711,7 +714,7 @@ export const BillTableCanvas: React.FC<BillTableCanvasProps> = ({
         </div>
 
         {/* Software footer */}
-        <div className={`${isB7 || isB6 || isA5 ? `mt-0.5 pt-0.5 ${isB7 ? 'text-[7px]' : 'text-[7.5px] print:text-[8px]'}` : 'mt-1.5 pt-0.5 text-[8px] sm:text-[8.5px]'} border-t border-dotted border-slate-300 print:border-black/30 text-left text-slate-700 dark:text-slate-700 print:text-black font-mono`}>
+        <div className={`${isB7 ? 'mt-1 pt-0.5 text-[7.5px]' : isB6 || isA5 ? 'mt-0.5 pt-0.5 text-[7.5px] print:text-[8px]' : 'mt-1.5 pt-0.5 text-[8px] sm:text-[8.5px]'} border-t border-dotted border-slate-300 print:border-black/30 text-left text-slate-700 dark:text-slate-700 print:text-black font-mono`}>
           Software Developed by: {currentProfile.softwareDevelopedBy || 'Klyia Technology'}
         </div>
       </div>

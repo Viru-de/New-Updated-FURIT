@@ -176,6 +176,189 @@ let isPreparingPrint = false;
 let activePrintCleanup: (() => void) | null = null;
 
 /**
+ * Stamps dynamic "Page X of Y" footer on every page of a jsPDF document.
+ */
+export function stampPdfDynamicPageNumbers(
+  doc: jsPDF,
+  pageCount: number,
+  pageWidthMm: number,
+  pageHeightMm: number,
+  footerLeftText = ''
+): void {
+  const total = Math.max(1, pageCount);
+  for (let p = 1; p <= total; p++) {
+    doc.setPage(p);
+    const footerLineY = pageHeightMm - 8.5;
+    const footerTextY = pageHeightMm - 4.2;
+    doc.setDrawColor(148, 163, 184);
+    doc.setLineWidth(0.2);
+    doc.line(6, footerLineY, pageWidthMm - 6, footerLineY);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8.5);
+    doc.setTextColor(30, 41, 59);
+    if (footerLeftText) {
+      doc.text(footerLeftText, 6, footerTextY);
+    }
+    doc.setFont('helvetica', 'bold');
+    doc.text(`Page ${p} of ${total}`, pageWidthMm - 6, footerTextY, { align: 'right' });
+  }
+}
+
+/**
+ * Splits a dynamic-page-numbered ledger clone into printable A4 pages before window.print()
+ * so each printed page receives a bottom footer with exact "Page X of Y".
+ */
+function paginateDynamicLedgerCloneForPrint(
+  clone: HTMLElement,
+  mountEl: HTMLElement,
+  spec: PaperSizeSpec
+): void {
+  const footerTemplate = clone.querySelector('[data-sp-page-footer="true"]') as HTMLElement | null;
+  const table = clone.querySelector('table') as HTMLTableElement | null;
+  const tbody = table?.querySelector('tbody') as HTMLTableSectionElement | null;
+  if (!footerTemplate || !table || !tbody) return;
+
+  const thead = table.querySelector('thead') as HTMLTableSectionElement | null;
+  const tfoot = table.querySelector('tfoot') as HTMLTableSectionElement | null;
+  const colgroup = table.querySelector('colgroup') as HTMLTableColElement | null;
+  const tbodyRows = Array.from(tbody.querySelectorAll(':scope > tr')) as HTMLTableRowElement[];
+
+  // Identify document header elements appearing before the table container
+  const cloneChildren = Array.from(clone.children) as HTMLElement[];
+  const tableContainerIndex = cloneChildren.findIndex(
+    (child) => child === table || child.contains(table)
+  );
+  const docHeaderNodes =
+    tableContainerIndex > 0 ? cloneChildren.slice(0, tableContainerIndex) : [];
+
+  const prevMountCssText = mountEl.style.cssText;
+  try {
+    // Temporarily render offscreen at printable width to measure exact row heights
+    mountEl.style.cssText =
+      'display: block !important; position: fixed !important; left: -99999px !important; top: 0 !important; width: 198mm !important; visibility: hidden !important; background-color: #ffffff !important; color: #000000 !important; color-scheme: light !important;';
+
+    const docHeaderH = docHeaderNodes.reduce(
+      (sum, el) => sum + (el.getBoundingClientRect?.().height || 0),
+      0
+    );
+    const theadH = thead?.getBoundingClientRect?.().height || 0;
+    const tfootH = tfoot?.getBoundingClientRect?.().height || 0;
+    const footerH = footerTemplate.getBoundingClientRect?.().height || 24;
+    const rowHeights = tbodyRows.map((tr) => tr.getBoundingClientRect?.().height || 0);
+
+    const canMeasure =
+      spec.heightMm > 0 && tbodyRows.length > 0 && rowHeights.some((h) => h > 0);
+    if (!canMeasure) {
+      const numEl = footerTemplate.querySelector('[data-sp-page-number="true"]');
+      if (numEl) numEl.textContent = 'Page 1 of 1';
+      return;
+    }
+
+    const pageUsableHeightPx = Math.floor((spec.heightMm - 18) * 3.7795);
+    const footerReservePx = Math.max(24, footerH + 8);
+
+    interface PrintPageSlice {
+      includeDocHeader: boolean;
+      rows: HTMLTableRowElement[];
+      includeTfoot: boolean;
+    }
+
+    const pages: PrintPageSlice[] = [];
+    let currentRows: HTMLTableRowElement[] = [];
+    let isFirstPage = true;
+    let usedPx = docHeaderH + theadH + footerReservePx;
+
+    for (let i = 0; i < tbodyRows.length; i++) {
+      const rH = rowHeights[i] || 0;
+      if (currentRows.length > 0 && usedPx + rH > pageUsableHeightPx) {
+        pages.push({ includeDocHeader: isFirstPage, rows: currentRows, includeTfoot: false });
+        isFirstPage = false;
+        currentRows = [];
+        usedPx = theadH + footerReservePx;
+      }
+      currentRows.push(tbodyRows[i]);
+      usedPx += rH;
+    }
+
+    if (currentRows.length > 0 || pages.length === 0) {
+      if (tfoot && tfootH > 0 && usedPx + tfootH > pageUsableHeightPx && currentRows.length > 1) {
+        const lastRow = currentRows.pop()!;
+        pages.push({ includeDocHeader: isFirstPage, rows: currentRows, includeTfoot: false });
+        pages.push({ includeDocHeader: false, rows: [lastRow], includeTfoot: true });
+      } else if (tfoot && tfootH > 0 && usedPx + tfootH > pageUsableHeightPx && currentRows.length > 0) {
+        pages.push({ includeDocHeader: isFirstPage, rows: currentRows, includeTfoot: false });
+        pages.push({ includeDocHeader: false, rows: [], includeTfoot: true });
+      } else {
+        pages.push({ includeDocHeader: isFirstPage, rows: currentRows, includeTfoot: Boolean(tfoot) });
+      }
+    }
+
+    const totalPages = Math.max(1, pages.length);
+    const tableClass = table.className;
+    const tableStyle = table.getAttribute('style') || '';
+    const tbodyClass = tbody.className;
+
+    clone.innerHTML = '';
+
+    pages.forEach((page, pIdx) => {
+      const pageDiv = document.createElement('div');
+      pageDiv.className = 'sp-print-page';
+      pageDiv.style.display = 'flex';
+      pageDiv.style.flexDirection = 'column';
+      pageDiv.style.justifyContent = 'space-between';
+      pageDiv.style.minHeight = `${Math.max(100, spec.heightMm - 20)}mm`;
+      pageDiv.style.boxSizing = 'border-box';
+      if (pIdx < totalPages - 1) {
+        pageDiv.style.pageBreakAfter = 'always';
+        (pageDiv.style as any).breakAfter = 'page';
+      } else {
+        pageDiv.style.pageBreakAfter = 'auto';
+        (pageDiv.style as any).breakAfter = 'auto';
+      }
+
+      const topBlock = document.createElement('div');
+      if (page.includeDocHeader) {
+        docHeaderNodes.forEach((node) => {
+          topBlock.appendChild(node.cloneNode(true));
+        });
+      }
+
+      const pageTable = document.createElement('table');
+      pageTable.className = tableClass;
+      if (tableStyle) pageTable.setAttribute('style', tableStyle);
+      if (colgroup) pageTable.appendChild(colgroup.cloneNode(true));
+      if (thead) pageTable.appendChild(thead.cloneNode(true));
+
+      const pageTbody = document.createElement('tbody');
+      pageTbody.className = tbodyClass;
+      page.rows.forEach((tr) => {
+        pageTbody.appendChild(tr.cloneNode(true));
+      });
+      pageTable.appendChild(pageTbody);
+
+      if (page.includeTfoot && tfoot) {
+        pageTable.appendChild(tfoot.cloneNode(true));
+      }
+
+      topBlock.appendChild(pageTable);
+      pageDiv.appendChild(topBlock);
+
+      const pageFooter = footerTemplate.cloneNode(true) as HTMLElement;
+      pageFooter.style.display = 'flex';
+      const numEl = pageFooter.querySelector('[data-sp-page-number="true"]');
+      if (numEl) {
+        numEl.textContent = `Page ${pIdx + 1} of ${totalPages}`;
+      }
+      pageDiv.appendChild(pageFooter);
+      clone.appendChild(pageDiv);
+    });
+  } finally {
+    mountEl.style.cssText = prevMountCssText;
+    mountEl.style.colorScheme = 'light';
+  }
+}
+
+/**
  * Safely trigger browser print using an isolated print mount outside #root.
  * This completely avoids blank screen issues caused by modal backdrops,
  * overflow clipping, parent scroll containers, and dark theme bleed-through.
@@ -278,16 +461,23 @@ export async function triggerPrint(
   // 4. Deep-clone the target printable node
   const clone = targetEl.cloneNode(true) as HTMLElement;
 
+  const isCompat105 = clone.getAttribute('data-compat-105') === 'true';
+
   // 5. Sanitize and prepare clone for pristine white-background print
   clone.classList.remove('hidden');
-  clone.style.display = 'block';
+  clone.style.display = isCompat105 ? 'flex' : 'block';
+  if (isCompat105) {
+    clone.style.flexDirection = 'column';
+    clone.style.justifyContent = 'center';
+    clone.style.alignItems = 'stretch';
+  }
   clone.style.visibility = 'visible';
   clone.style.position = 'static';
   clone.style.boxSizing = 'border-box';
   clone.style.width = '100%';
   clone.style.maxWidth = '100%';
   clone.style.height = 'auto';
-  clone.style.minHeight = '0';
+  clone.style.minHeight = isCompat105 ? '141mm' : '0';
   clone.style.maxHeight = 'none';
   clone.style.margin = '0 auto';
   // Provide print-safe internal padding so content never cuts at physical sheet boundaries
@@ -363,6 +553,11 @@ export async function triggerPrint(
   });
 
   mountEl.appendChild(clone);
+
+  if (clone.getAttribute('data-dynamic-page-numbers') === 'true') {
+    const spec = resolvePaperSizeSpec(chosenSize, targetEl);
+    paginateDynamicLedgerCloneForPrint(clone, mountEl, spec);
+  }
 
   // Set print state on body
   document.body.classList.add('has-print-mount');
@@ -517,6 +712,8 @@ export async function generatePdfDoc(
   };
   let clonedScrollHeight = 0;
 
+  const hasDynamicPageNumbers = element.getAttribute('data-dynamic-page-numbers') === 'true';
+
   try {
     // Generate canvas with 2x resolution for clean text rendering
     // Ensure dark mode NEVER affects PDF output by enforcing light mode on the cloned DOM
@@ -527,9 +724,16 @@ export async function generatePdfDoc(
       logging: false,
       windowWidth: targetPxWidth,
       onclone: (clonedDoc, clonedElement) => {
+        const isCompat105Clone = clonedElement.getAttribute('data-compat-105') === 'true';
         // Ensure root element is visible in clone and matches paper size width
         clonedElement.setAttribute('data-pdf-export', 'true');
-        clonedElement.style.display = 'block';
+        clonedElement.style.display = isCompat105Clone ? 'flex' : 'block';
+        if (isCompat105Clone) {
+          clonedElement.style.flexDirection = 'column';
+          clonedElement.style.justifyContent = 'center';
+          clonedElement.style.alignItems = 'stretch';
+          clonedElement.style.minHeight = '542px';
+        }
         clonedElement.style.visibility = 'visible';
         clonedElement.style.position = 'static';
         clonedElement.classList.remove('hidden');
@@ -597,6 +801,14 @@ export async function generatePdfDoc(
         noPrints.forEach((el) => {
           (el as HTMLElement).style.display = 'none';
         });
+
+        // Hide DOM page footer during canvas capture when dynamic PDF page numbers are stamped per page
+        if (hasDynamicPageNumbers) {
+          const domFooters = clonedElement.querySelectorAll('[data-sp-page-footer="true"]');
+          domFooters.forEach((el) => {
+            (el as HTMLElement).style.display = 'none';
+          });
+        }
 
         // 3. Guarantee crystal-clear normal unslashed zero and Hindi Devanagari typography in PDF output
         const allElements = clonedElement.querySelectorAll('*');
@@ -670,10 +882,11 @@ export async function generatePdfDoc(
 
     let pageCount = 1;
 
-    // Case 1: Fits cleanly on a single page (allow minor sub-pixel tolerance without distorting layout)
+    // Case 1: Fits cleanly on a single page (reserve bottom margin when dynamic footer is stamped)
     const singlePageTolerance = paperSize === 'b7' || paperSize === 'b6' ? 1.03 : 1.04;
-    if (totalContentHeightMm <= pageHeightMm * singlePageTolerance) {
-      const fitHeightMm = Math.min(totalContentHeightMm, pageHeightMm);
+    const effectiveSinglePageHeightMm = hasDynamicPageNumbers ? pageHeightMm - 10 : pageHeightMm;
+    if (totalContentHeightMm <= effectiveSinglePageHeightMm * singlePageTolerance) {
+      const fitHeightMm = Math.min(totalContentHeightMm, effectiveSinglePageHeightMm);
       const imgData = canvas.toDataURL('image/jpeg', 0.95);
       doc.addImage(imgData, 'JPEG', 0, 0, pageWidthMm, fitHeightMm, undefined, 'FAST');
     } else {
@@ -695,9 +908,9 @@ export async function generatePdfDoc(
           ? Math.floor(tableMeasure.tfootCssTop * canvasScaleY)
           : null;
 
-      const page1BottomMarginMm = 6;
+      const page1BottomMarginMm = hasDynamicPageNumbers ? 11 : 6;
       const continuationTopMarginMm = 6;
-      const continuationBottomMarginMm = 7;
+      const continuationBottomMarginMm = hasDynamicPageNumbers ? 11 : 7;
 
       const pxPerPage1 = Math.floor(
         ((pageHeightMm - page1BottomMarginMm) / pageWidthMm) * canvas.width
@@ -823,6 +1036,12 @@ export async function generatePdfDoc(
         startY = endY;
       }
       pageCount = actualPages;
+    }
+
+    if (hasDynamicPageNumbers) {
+      const footerLeftText =
+        element.querySelector('[data-sp-page-footer="true"]')?.firstElementChild?.textContent?.trim() || '';
+      stampPdfDynamicPageNumbers(doc, pageCount, pageWidthMm, pageHeightMm, footerLeftText);
     }
 
     return { doc, canvas, pageCount };

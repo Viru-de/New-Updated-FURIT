@@ -777,6 +777,24 @@ input.no-spinners {
   padding-right: 2px !important;
   line-height: 1.1 !important;
 }
+[data-compat-105="true"] table.b7-bill-table.b7-single-line-table > thead > tr > th,
+[data-compat-105="true"] table.b7-bill-table.b7-single-line-table > tbody > tr > td,
+[data-pdf-export="true"][data-compat-105="true"] table.b7-bill-table.b7-single-line-table > thead > tr > th,
+[data-pdf-export="true"][data-compat-105="true"] table.b7-bill-table.b7-single-line-table > tbody > tr > td {
+  padding-top: 2px !important;
+  padding-bottom: 2px !important;
+  line-height: 1.15 !important;
+}
+[data-pdf-export="true"]#mandi-print-area[data-paper-size="b7"][data-compat-105="true"] {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  align-items: stretch !important;
+  min-height: 542px !important;
+  width: 397px !important;
+  max-width: 397px !important;
+  margin: 0 auto !important;
+}
 
 /* B6 Bill Print Preview & PDF Export: lock fixed colgroup boundaries and prevent NO. / ITEM NAME border overlap */
 .print-bill-canvas table.b6-bill-table,
@@ -857,7 +875,44 @@ input.no-spinners {
   padding-top: 2px !important;
 }
 
-/* CSS-only bold & readable product transaction/particulars lines in Sale Proceed & Customer Ledger Detailed + Short Prints (PDF export & canvas) */
+/* Standardized uniform font family & readable 12px sizing across Sale Proceeds & Customer Ledger Detailed + Short Prints (PDF export & canvas) */
+.sp-ledger-uniform-font,
+.sp-ledger-uniform-font *,
+#sale-proceeds-print-area,
+#sale-proceeds-print-area *,
+#sale-proceeds-short-print-area,
+#sale-proceeds-short-print-area *,
+#customer-ledger-detailed-print-area,
+#customer-ledger-detailed-print-area *,
+#customer-ledger-short-print-area,
+#customer-ledger-short-print-area * {
+  font-family: 'Plus Jakarta Sans', 'Noto Sans Devanagari', Arial, sans-serif !important;
+  font-variant-numeric: tabular-nums !important;
+}
+.sp-ledger-uniform-font table td,
+.sp-ledger-uniform-font table th {
+  font-size: 12px !important;
+  line-height: 1.35 !important;
+}
+#sale-proceeds-print-area tbody > tr > td:nth-child(1),
+#sale-proceeds-print-area tbody > tr > td:nth-child(3),
+#sale-proceeds-print-area tbody > tr > td:nth-child(4),
+#sale-proceeds-print-area tbody > tr > td:nth-child(5),
+#sale-proceeds-short-print-area tbody > tr > td:nth-child(1),
+#sale-proceeds-short-print-area tbody > tr > td:nth-child(3),
+#sale-proceeds-short-print-area tbody > tr > td:nth-child(4),
+#sale-proceeds-short-print-area tbody > tr > td:nth-child(5),
+#customer-ledger-detailed-print-area tbody > tr > td:nth-child(1),
+#customer-ledger-detailed-print-area tbody > tr > td:nth-child(3),
+#customer-ledger-detailed-print-area tbody > tr > td:nth-child(4),
+#customer-ledger-detailed-print-area tbody > tr > td:nth-child(5),
+#customer-ledger-short-print-area tbody > tr > td:nth-child(1),
+#customer-ledger-short-print-area tbody > tr > td:nth-child(3),
+#customer-ledger-short-print-area tbody > tr > td:nth-child(4),
+#customer-ledger-short-print-area tbody > tr > td:nth-child(5) {
+  font-size: 12px !important;
+  color: #000000 !important;
+}
 #sale-proceeds-print-area tbody > tr > td:nth-child(2) .sp-detail-line,
 #sale-proceeds-print-area tbody > tr > td:nth-child(2) .sp-detail-line *,
 #customer-ledger-detailed-print-area tbody > tr > td:nth-child(2) .sp-detail-line,
@@ -868,10 +923,6 @@ input.no-spinners {
 #customer-ledger-detailed-print-area tbody > tr > td:nth-child(2) > div > div:first-child > span,
 #customer-ledger-detailed-print-area tbody > tr > td:nth-child(2) > div > div:first-child > div,
 #customer-ledger-detailed-print-area tbody > tr > td:nth-child(2) > div > div:first-child > div *,
-#sale-proceeds-print-area tbody > tr > td:nth-child(2) > div > div.font-mono:not([class*="10.5"]),
-#sale-proceeds-print-area tbody > tr > td:nth-child(2) > div > div.font-mono:not([class*="10.5"]) *,
-#customer-ledger-detailed-print-area tbody > tr > td:nth-child(2) > div > div.font-mono:not([class*="10.5"]),
-#customer-ledger-detailed-print-area tbody > tr > td:nth-child(2) > div > div.font-mono:not([class*="10.5"]) *,
 #sale-proceeds-print-area tbody > tr > td:nth-child(2) > div.uppercase,
 #customer-ledger-detailed-print-area tbody > tr > td:nth-child(2) > div.uppercase,
 #sale-proceeds-short-print-area tbody > tr > td:nth-child(2) > div,
@@ -884,6 +935,16 @@ input.no-spinners {
   color: #000000 !important;
   font-size: 12px !important;
   letter-spacing: 0.01em !important;
+}
+#sale-proceeds-print-area tbody > tr > td:nth-child(2) .sp-detail-line,
+#sale-proceeds-print-area tbody > tr > td:nth-child(2) .sp-detail-line *,
+#customer-ledger-detailed-print-area tbody > tr > td:nth-child(2) .sp-detail-line,
+#customer-ledger-detailed-print-area tbody > tr > td:nth-child(2) .sp-detail-line *,
+#sale-proceeds-print-area tbody > tr > td:nth-child(2) > div > div:not(:first-child),
+#customer-ledger-detailed-print-area tbody > tr > td:nth-child(2) > div > div:not(:first-child) {
+  font-weight: 500 !important;
+  color: #000000 !important;
+  font-size: 12px !important;
 }
 
 /* Screen mode: hide isolated print mount completely */
@@ -1337,6 +1398,11 @@ input.no-spinners {
 
   #mandi-print-area[data-paper-size="b7"][data-compat-105="true"],
   #erp-isolated-print-mount #mandi-print-area[data-paper-size="b7"][data-compat-105="true"] {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    align-items: stretch !important;
+    min-height: 141mm !important;
     padding: 1mm 1.5mm 1mm 1.5mm !important;
     margin: 0 auto !important;
     width: 100% !important;
@@ -1909,6 +1975,14 @@ input.no-spinners {
     padding-right: 2px !important;
     line-height: 1.1 !important;
   }
+  #mandi-print-area[data-compat-105="true"] table.b7-bill-table.b7-single-line-table > thead > tr > th,
+  #mandi-print-area[data-compat-105="true"] table.b7-bill-table.b7-single-line-table > tbody > tr > td,
+  #erp-isolated-print-mount #mandi-print-area[data-compat-105="true"] table.b7-bill-table.b7-single-line-table > thead > tr > th,
+  #erp-isolated-print-mount #mandi-print-area[data-compat-105="true"] table.b7-bill-table.b7-single-line-table > tbody > tr > td {
+    padding-top: 2px !important;
+    padding-bottom: 2px !important;
+    line-height: 1.15 !important;
+  }
 
   /* B6 Bill Print: lock fixed colgroup boundaries and prevent NO. / ITEM NAME border overlap */
   table.b6-bill-table,
@@ -2362,36 +2436,58 @@ input.no-spinners {
     padding-top: 2px !important;
   }
 
-  /* Customer Ledger Detailed + Short Print: preserve crisp 12px print typography */
-  #customer-ledger-detailed-print-area tbody > tr > td:nth-child(2) .sp-detail-line,
-  #customer-ledger-detailed-print-area tbody > tr > td:nth-child(2) .sp-detail-line *,
-  #erp-isolated-print-mount #customer-ledger-detailed-print-area tbody > tr > td:nth-child(2) .sp-detail-line,
-  #erp-isolated-print-mount #customer-ledger-detailed-print-area tbody > tr > td:nth-child(2) .sp-detail-line *,
-  #customer-ledger-detailed-print-area tbody > tr > td:nth-child(2) > div > div:first-child > span,
-  #customer-ledger-detailed-print-area tbody > tr > td:nth-child(2) > div > div:first-child > div,
-  #customer-ledger-detailed-print-area tbody > tr > td:nth-child(2) > div > div:first-child > div *,
-  #erp-isolated-print-mount #customer-ledger-detailed-print-area tbody > tr > td:nth-child(2) > div > div:first-child > span,
-  #erp-isolated-print-mount #customer-ledger-detailed-print-area tbody > tr > td:nth-child(2) > div > div:first-child > div,
-  #erp-isolated-print-mount #customer-ledger-detailed-print-area tbody > tr > td:nth-child(2) > div > div:first-child > div *,
-  #customer-ledger-detailed-print-area tbody > tr > td:nth-child(2) > div > div.font-mono:not([class*="10.5"]),
-  #customer-ledger-detailed-print-area tbody > tr > td:nth-child(2) > div > div.font-mono:not([class*="10.5"]) *,
-  #erp-isolated-print-mount #customer-ledger-detailed-print-area tbody > tr > td:nth-child(2) > div > div.font-mono:not([class*="10.5"]),
-  #erp-isolated-print-mount #customer-ledger-detailed-print-area tbody > tr > td:nth-child(2) > div > div.font-mono:not([class*="10.5"]) *,
-  #customer-ledger-detailed-print-area tbody > tr > td:nth-child(2) > div.uppercase,
-  #erp-isolated-print-mount #customer-ledger-detailed-print-area tbody > tr > td:nth-child(2) > div.uppercase,
-  #customer-ledger-short-print-area tbody > tr > td:nth-child(2) > div,
-  #customer-ledger-short-print-area tbody > tr > td:nth-child(2) > div *,
-  #customer-ledger-short-print-area tbody > tr > td:nth-child(2) > span,
-  #erp-isolated-print-mount #customer-ledger-short-print-area tbody > tr > td:nth-child(2) > div,
-  #erp-isolated-print-mount #customer-ledger-short-print-area tbody > tr > td:nth-child(2) > div *,
-  #erp-isolated-print-mount #customer-ledger-short-print-area tbody > tr > td:nth-child(2) > span {
-    font-weight: 700 !important;
-    color: #000000 !important;
-    font-size: 12px !important;
-    letter-spacing: 0.01em !important;
+  /* Standardized uniform font family & 12px print typography across Sale Proceeds & Customer Ledger (Detailed + Short) */
+  .sp-ledger-uniform-font,
+  .sp-ledger-uniform-font *,
+  #sale-proceeds-print-area,
+  #sale-proceeds-print-area *,
+  #sale-proceeds-short-print-area,
+  #sale-proceeds-short-print-area *,
+  #customer-ledger-detailed-print-area,
+  #customer-ledger-detailed-print-area *,
+  #customer-ledger-short-print-area,
+  #customer-ledger-short-print-area *,
+  #erp-isolated-print-mount .sp-ledger-uniform-font,
+  #erp-isolated-print-mount .sp-ledger-uniform-font * {
+    font-family: 'Plus Jakarta Sans', 'Noto Sans Devanagari', Arial, sans-serif !important;
+    font-variant-numeric: tabular-nums !important;
   }
 
-  /* Sale Proceeds Ledger Detailed + Short Print: enhanced 13px print readability without wrapping numeric columns */
+  .sp-print-page {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    box-sizing: border-box !important;
+  }
+
+  .sp-page-footer {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    font-size: 10.5px !important;
+    font-weight: 500 !important;
+    color: #000000 !important;
+    border-top: 1px solid #cbd5e1 !important;
+    padding-top: 4px !important;
+    margin-top: 8px !important;
+  }
+
+  #customer-ledger-detailed-print-area tbody > tr > td:nth-child(1),
+  #customer-ledger-detailed-print-area tbody > tr > td:nth-child(3),
+  #customer-ledger-detailed-print-area tbody > tr > td:nth-child(4),
+  #customer-ledger-detailed-print-area tbody > tr > td:nth-child(5),
+  #erp-isolated-print-mount #customer-ledger-detailed-print-area tbody > tr > td:nth-child(1),
+  #erp-isolated-print-mount #customer-ledger-detailed-print-area tbody > tr > td:nth-child(3),
+  #erp-isolated-print-mount #customer-ledger-detailed-print-area tbody > tr > td:nth-child(4),
+  #erp-isolated-print-mount #customer-ledger-detailed-print-area tbody > tr > td:nth-child(5),
+  #customer-ledger-short-print-area tbody > tr > td:nth-child(1),
+  #customer-ledger-short-print-area tbody > tr > td:nth-child(3),
+  #customer-ledger-short-print-area tbody > tr > td:nth-child(4),
+  #customer-ledger-short-print-area tbody > tr > td:nth-child(5),
+  #erp-isolated-print-mount #customer-ledger-short-print-area tbody > tr > td:nth-child(1),
+  #erp-isolated-print-mount #customer-ledger-short-print-area tbody > tr > td:nth-child(3),
+  #erp-isolated-print-mount #customer-ledger-short-print-area tbody > tr > td:nth-child(4),
+  #erp-isolated-print-mount #customer-ledger-short-print-area tbody > tr > td:nth-child(5),
   #sale-proceeds-print-area tbody > tr > td:nth-child(1),
   #sale-proceeds-print-area tbody > tr > td:nth-child(3),
   #sale-proceeds-print-area tbody > tr > td:nth-child(4),
@@ -2407,21 +2503,32 @@ input.no-spinners {
   #erp-isolated-print-mount #sale-proceeds-short-print-area tbody > tr > td:nth-child(1),
   #erp-isolated-print-mount #sale-proceeds-short-print-area tbody > tr > td:nth-child(3),
   #erp-isolated-print-mount #sale-proceeds-short-print-area tbody > tr > td:nth-child(4),
-  #erp-isolated-print-mount #sale-proceeds-short-print-area tbody > tr > td:nth-child(5),
-  #sale-proceeds-print-area tbody > tr > td:nth-child(2) .sp-detail-line,
-  #sale-proceeds-print-area tbody > tr > td:nth-child(2) .sp-detail-line *,
-  #erp-isolated-print-mount #sale-proceeds-print-area tbody > tr > td:nth-child(2) .sp-detail-line,
-  #erp-isolated-print-mount #sale-proceeds-print-area tbody > tr > td:nth-child(2) .sp-detail-line *,
+  #erp-isolated-print-mount #sale-proceeds-short-print-area tbody > tr > td:nth-child(5) {
+    color: #000000 !important;
+    font-size: 12px !important;
+    line-height: 1.35 !important;
+  }
+
+  #customer-ledger-detailed-print-area tbody > tr > td:nth-child(2) > div > div:first-child > span,
+  #customer-ledger-detailed-print-area tbody > tr > td:nth-child(2) > div > div:first-child > div,
+  #customer-ledger-detailed-print-area tbody > tr > td:nth-child(2) > div > div:first-child > div *,
+  #erp-isolated-print-mount #customer-ledger-detailed-print-area tbody > tr > td:nth-child(2) > div > div:first-child > span,
+  #erp-isolated-print-mount #customer-ledger-detailed-print-area tbody > tr > td:nth-child(2) > div > div:first-child > div,
+  #erp-isolated-print-mount #customer-ledger-detailed-print-area tbody > tr > td:nth-child(2) > div > div:first-child > div *,
+  #customer-ledger-detailed-print-area tbody > tr > td:nth-child(2) > div.uppercase,
+  #erp-isolated-print-mount #customer-ledger-detailed-print-area tbody > tr > td:nth-child(2) > div.uppercase,
+  #customer-ledger-short-print-area tbody > tr > td:nth-child(2) > div,
+  #customer-ledger-short-print-area tbody > tr > td:nth-child(2) > div *,
+  #customer-ledger-short-print-area tbody > tr > td:nth-child(2) > span,
+  #erp-isolated-print-mount #customer-ledger-short-print-area tbody > tr > td:nth-child(2) > div,
+  #erp-isolated-print-mount #customer-ledger-short-print-area tbody > tr > td:nth-child(2) > div *,
+  #erp-isolated-print-mount #customer-ledger-short-print-area tbody > tr > td:nth-child(2) > span,
   #sale-proceeds-print-area tbody > tr > td:nth-child(2) > div > div:first-child > span,
   #sale-proceeds-print-area tbody > tr > td:nth-child(2) > div > div:first-child > div,
   #sale-proceeds-print-area tbody > tr > td:nth-child(2) > div > div:first-child > div *,
   #erp-isolated-print-mount #sale-proceeds-print-area tbody > tr > td:nth-child(2) > div > div:first-child > span,
   #erp-isolated-print-mount #sale-proceeds-print-area tbody > tr > td:nth-child(2) > div > div:first-child > div,
   #erp-isolated-print-mount #sale-proceeds-print-area tbody > tr > td:nth-child(2) > div > div:first-child > div *,
-  #sale-proceeds-print-area tbody > tr > td:nth-child(2) > div > div.font-mono:not([class*="10.5"]),
-  #sale-proceeds-print-area tbody > tr > td:nth-child(2) > div > div.font-mono:not([class*="10.5"]) *,
-  #erp-isolated-print-mount #sale-proceeds-print-area tbody > tr > td:nth-child(2) > div > div.font-mono:not([class*="10.5"]),
-  #erp-isolated-print-mount #sale-proceeds-print-area tbody > tr > td:nth-child(2) > div > div.font-mono:not([class*="10.5"]) *,
   #sale-proceeds-print-area tbody > tr > td:nth-child(2) > div.uppercase,
   #erp-isolated-print-mount #sale-proceeds-print-area tbody > tr > td:nth-child(2) > div.uppercase,
   #sale-proceeds-short-print-area tbody > tr > td:nth-child(2) > div,
@@ -2432,7 +2539,25 @@ input.no-spinners {
   #erp-isolated-print-mount #sale-proceeds-short-print-area tbody > tr > td:nth-child(2) > span {
     font-weight: 700 !important;
     color: #000000 !important;
-    font-size: 13px !important;
+    font-size: 12px !important;
     letter-spacing: 0.01em !important;
+  }
+
+  #customer-ledger-detailed-print-area tbody > tr > td:nth-child(2) .sp-detail-line,
+  #customer-ledger-detailed-print-area tbody > tr > td:nth-child(2) .sp-detail-line *,
+  #erp-isolated-print-mount #customer-ledger-detailed-print-area tbody > tr > td:nth-child(2) .sp-detail-line,
+  #erp-isolated-print-mount #customer-ledger-detailed-print-area tbody > tr > td:nth-child(2) .sp-detail-line *,
+  #sale-proceeds-print-area tbody > tr > td:nth-child(2) .sp-detail-line,
+  #sale-proceeds-print-area tbody > tr > td:nth-child(2) .sp-detail-line *,
+  #erp-isolated-print-mount #sale-proceeds-print-area tbody > tr > td:nth-child(2) .sp-detail-line,
+  #erp-isolated-print-mount #sale-proceeds-print-area tbody > tr > td:nth-child(2) .sp-detail-line *,
+  #customer-ledger-detailed-print-area tbody > tr > td:nth-child(2) > div > div:not(:first-child),
+  #erp-isolated-print-mount #customer-ledger-detailed-print-area tbody > tr > td:nth-child(2) > div > div:not(:first-child),
+  #sale-proceeds-print-area tbody > tr > td:nth-child(2) > div > div:not(:first-child),
+  #erp-isolated-print-mount #sale-proceeds-print-area tbody > tr > td:nth-child(2) > div > div:not(:first-child) {
+    font-weight: 500 !important;
+    color: #000000 !important;
+    font-size: 12px !important;
+    line-height: 1.35 !important;
   }
 }

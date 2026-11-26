@@ -88,6 +88,34 @@ export function sanitizeOpeningBalanceLabel(raw?: string | null): string {
 }
 
 /**
+ * Strips crate direction words ("IN" / "OUT") from printed ledger particulars and crate details
+ * without modifying quantities, balances, or stored database records.
+ * Examples:
+ * - "6 Out" -> "6"
+ * - "10 In" -> "10"
+ * - "Out, 6 In (Bal: 31)" -> "6 (Bal: 31)"
+ */
+export function stripLedgerCrateInOut(raw?: string | null): string {
+  if (!raw) return '';
+  let text = String(raw);
+  // 1. "<number> Out" or "<number> In" -> "<number>"
+  text = text.replace(/\b(\d+(?:\.\d+)?)\s+(?:Out|In)\b/gi, '$1');
+  // 2. Prefix tags like "Crates OUT:" / "OUT:" / "IN:" -> ""
+  text = text.replace(/\b(?:Crates?\s+)?(?:OUT|IN)\s*:\s*/gi, '');
+  // 3. Orphaned "Out," / "In," or "Out" / "In" right before "(Bal" or separators
+  text = text.replace(/(^|[,;|(\[]\s*|\s+)(?:Out|In)\s*,\s*/gi, '$1');
+  text = text.replace(/(^|[,;|(\[]\s*|\s+)(?:Out|In)(?=\s*(?:\(Bal\b|[,;|)\]]|$))/gi, '$1');
+  // 4. Clean up redundant whitespace and stray delimiters
+  text = text
+    .replace(/\s{2,}/g, ' ')
+    .replace(/\s+([,;|)])/g, '$1')
+    .replace(/([(|])\s+/g, '$1')
+    .replace(/^[,\s;|]+|[,\s;|]+$/g, '')
+    .trim();
+  return text;
+}
+
+/**
  * Computes actual numeric transaction quantity for Short Print (0 for Opening Balance / Receipt).
  */
 export function computeShortPrintQty(
