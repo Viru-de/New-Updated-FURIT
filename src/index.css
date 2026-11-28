@@ -1590,6 +1590,92 @@ input.no-spinners {
   text-align: left !important;
 }
 
+/* Individual Crate Return / Adjustment Statement PDF Export Styles */
+[data-pdf-export="true"]#crate-adjustment-print-area.crate-adjustment-modern-print,
+[data-pdf-export="true"]#crate-adjustment-print-area.crate-adjustment-modern-print * {
+  font-family: 'Plus Jakarta Sans', 'Noto Sans Devanagari', Arial, sans-serif !important;
+  font-variant-numeric: tabular-nums !important;
+  color: #000000 !important;
+  box-shadow: none !important;
+}
+[data-pdf-export="true"]#crate-adjustment-print-area.crate-adjustment-modern-print {
+  border: none !important;
+  border-radius: 0 !important;
+  background-color: #ffffff !important;
+}
+[data-pdf-export="true"]#crate-adjustment-print-area.crate-adjustment-modern-print .crate-adj-business-header {
+  border-bottom: 1.5px solid #000000 !important;
+}
+[data-pdf-export="true"]#crate-adjustment-print-area.crate-adjustment-modern-print .crate-adj-header-logo {
+  display: block !important;
+}
+[data-pdf-export="true"]#crate-adjustment-print-area.crate-adjustment-modern-print .crate-stmt-title-band {
+  background-color: #f1f5f9 !important;
+  border-top: 1.5px solid #000000 !important;
+  border-bottom: 1.5px solid #000000 !important;
+}
+[data-pdf-export="true"]#crate-adjustment-print-area.crate-adjustment-modern-print .crate-stmt-info-grid {
+  border: 1px solid #94a3b8 !important;
+  background-color: #ffffff !important;
+}
+[data-pdf-export="true"]#crate-adjustment-print-area.crate-adjustment-modern-print .crate-stmt-summary-col {
+  background-color: #f8fafc !important;
+  border-left: 1px solid #cbd5e1 !important;
+}
+[data-pdf-export="true"]#crate-adjustment-print-area.crate-adjustment-modern-print table.crate-adj-table {
+  table-layout: fixed !important;
+  width: 100% !important;
+  border-collapse: collapse !important;
+  border: 1.5px solid #000000 !important;
+  box-sizing: border-box !important;
+}
+[data-pdf-export="true"]#crate-adjustment-print-area.crate-adjustment-modern-print table.crate-adj-table th,
+[data-pdf-export="true"]#crate-adjustment-print-area.crate-adjustment-modern-print table.crate-adj-table td {
+  box-sizing: border-box !important;
+}
+[data-pdf-export="true"]#crate-adjustment-print-area.crate-adjustment-modern-print table.crate-adj-table thead th {
+  background-color: #f1f5f9 !important;
+  border-bottom: 1.5px solid #000000 !important;
+  border-right: 1px solid #64748b !important;
+  text-align: center !important;
+  vertical-align: middle !important;
+}
+[data-pdf-export="true"]#crate-adjustment-print-area.crate-adjustment-modern-print table.crate-adj-table thead th:last-child {
+  border-right: none !important;
+}
+[data-pdf-export="true"]#crate-adjustment-print-area.crate-adjustment-modern-print table.crate-adj-table tbody td {
+  background-color: #ffffff !important;
+  border-bottom: 1px solid #94a3b8 !important;
+  border-right: 1px solid #94a3b8 !important;
+  vertical-align: middle !important;
+}
+[data-pdf-export="true"]#crate-adjustment-print-area.crate-adjustment-modern-print table.crate-adj-table tbody tr:last-child td {
+  border-bottom: none !important;
+}
+[data-pdf-export="true"]#crate-adjustment-print-area.crate-adjustment-modern-print table.crate-adj-table tbody td:last-child {
+  border-right: none !important;
+}
+[data-pdf-export="true"]#crate-adjustment-print-area.crate-adjustment-modern-print .crate-stmt-closing-card {
+  background-color: #f8fafc !important;
+  border: 1px solid #94a3b8 !important;
+}
+[data-pdf-export="true"]#crate-adjustment-print-area.crate-adjustment-modern-print .crate-stmt-closing-totals {
+  border-left: 1px solid #cbd5e1 !important;
+}
+[data-pdf-export="true"]#crate-adjustment-print-area.crate-adjustment-modern-print[data-paper-size="b7"] .crate-stmt-info-grid,
+[data-pdf-export="true"]#crate-adjustment-print-area.crate-adjustment-modern-print[data-paper-size="b7"] .crate-stmt-closing-card {
+  display: block !important;
+}
+[data-pdf-export="true"]#crate-adjustment-print-area.crate-adjustment-modern-print[data-paper-size="b7"] .crate-stmt-summary-col,
+[data-pdf-export="true"]#crate-adjustment-print-area.crate-adjustment-modern-print[data-paper-size="b7"] .crate-stmt-closing-totals {
+  border-left: none !important;
+  border-top: 1px solid #cbd5e1 !important;
+  padding-left: 8px !important;
+  margin-top: 4px !important;
+  padding-top: 4px !important;
+  text-align: left !important;
+}
+
 /* Screen mode: hide isolated print mount completely */
 #erp-isolated-print-mount {
   display: none !important;
@@ -1833,6 +1919,7 @@ input.no-spinners {
   #mandi-print-area,
   #receipt-print-area,
   #crate-receipt-print-area,
+  #crate-adjustment-print-area,
   #sale-proceeds-print-area {
     display: block !important;
     visibility: visible !important;
@@ -2025,11 +2112,13 @@ input.no-spinners {
   #mandi-print-area,
   #receipt-print-area,
   #crate-receipt-print-area,
+  #crate-adjustment-print-area,
   #mandi-print-area.bill-outer-frame,
   #erp-isolated-print-mount #mandi-print-area.bill-outer-frame,
   #erp-isolated-print-mount #mandi-print-area,
   #erp-isolated-print-mount #receipt-print-area,
-  #erp-isolated-print-mount #crate-receipt-print-area {
+  #erp-isolated-print-mount #crate-receipt-print-area,
+  #erp-isolated-print-mount #crate-adjustment-print-area {
     border: none !important;
     margin-top: 0 !important;
     padding: 1mm 2mm 1mm 2mm !important;
@@ -2038,9 +2127,11 @@ input.no-spinners {
   #mandi-print-area[data-paper-size="b7"],
   #receipt-print-area[data-paper-size="b7"],
   #crate-receipt-print-area[data-paper-size="b7"],
+  #crate-adjustment-print-area[data-paper-size="b7"],
   #erp-isolated-print-mount #mandi-print-area[data-paper-size="b7"],
   #erp-isolated-print-mount #receipt-print-area[data-paper-size="b7"],
-  #erp-isolated-print-mount #crate-receipt-print-area[data-paper-size="b7"] {
+  #erp-isolated-print-mount #crate-receipt-print-area[data-paper-size="b7"],
+  #erp-isolated-print-mount #crate-adjustment-print-area[data-paper-size="b7"] {
     padding: 0.5mm 1mm 0.5mm 1mm !important;
   }
 
@@ -2080,9 +2171,11 @@ input.no-spinners {
   #mandi-print-area[data-paper-size="b6"],
   #receipt-print-area[data-paper-size="b6"],
   #crate-receipt-print-area[data-paper-size="b6"],
+  #crate-adjustment-print-area[data-paper-size="b6"],
   #erp-isolated-print-mount #mandi-print-area[data-paper-size="b6"],
   #erp-isolated-print-mount #receipt-print-area[data-paper-size="b6"],
-  #erp-isolated-print-mount #crate-receipt-print-area[data-paper-size="b6"] {
+  #erp-isolated-print-mount #crate-receipt-print-area[data-paper-size="b6"],
+  #erp-isolated-print-mount #crate-adjustment-print-area[data-paper-size="b6"] {
     padding: 0.5mm 1.5mm 1mm 1.5mm !important;
   }
 
@@ -3935,6 +4028,175 @@ input.no-spinners {
   }
   #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print[data-paper-size="b7"] .crate-stmt-summary-col,
   #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print[data-paper-size="b7"] .crate-stmt-closing-totals {
+    border-left: none !important;
+    border-top: 1px solid #cbd5e1 !important;
+    padding-left: 8px !important;
+    margin-top: 4px !important;
+    padding-top: 4px !important;
+    text-align: left !important;
+  }
+
+  /* =========================================================================
+     INDIVIDUAL CRATE RETURN / ADJUSTMENT STATEMENT — PRINT STYLING
+     ========================================================================= */
+  #crate-adjustment-print-area.crate-adjustment-modern-print,
+  #crate-adjustment-print-area.crate-adjustment-modern-print *,
+  #erp-isolated-print-mount #crate-adjustment-print-area.crate-adjustment-modern-print,
+  #erp-isolated-print-mount #crate-adjustment-print-area.crate-adjustment-modern-print * {
+    font-family: 'Plus Jakarta Sans', 'Noto Sans Devanagari', Arial, sans-serif !important;
+    font-variant-numeric: tabular-nums !important;
+    color: #000000 !important;
+    box-shadow: none !important;
+  }
+
+  #crate-adjustment-print-area.crate-adjustment-modern-print,
+  #erp-isolated-print-mount #crate-adjustment-print-area.crate-adjustment-modern-print {
+    border: none !important;
+    border-radius: 0 !important;
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+  }
+
+  #crate-adjustment-print-area.crate-adjustment-modern-print .crate-adj-business-header,
+  #erp-isolated-print-mount #crate-adjustment-print-area.crate-adjustment-modern-print .crate-adj-business-header {
+    border-bottom: 1.5px solid #000000 !important;
+    padding-bottom: 6px !important;
+    margin-bottom: 8px !important;
+    background: transparent !important;
+  }
+
+  #crate-adjustment-print-area.crate-adjustment-modern-print .crate-adj-header-logo,
+  #erp-isolated-print-mount #crate-adjustment-print-area.crate-adjustment-modern-print .crate-adj-header-logo {
+    display: block !important;
+  }
+
+  #crate-adjustment-print-area.crate-adjustment-modern-print .crate-stmt-title-band,
+  #erp-isolated-print-mount #crate-adjustment-print-area.crate-adjustment-modern-print .crate-stmt-title-band {
+    background-color: #f1f5f9 !important;
+    background: #f1f5f9 !important;
+    border-top: 1.5px solid #000000 !important;
+    border-bottom: 1.5px solid #000000 !important;
+    border-left: none !important;
+    border-right: none !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  #crate-adjustment-print-area.crate-adjustment-modern-print .crate-stmt-info-grid,
+  #erp-isolated-print-mount #crate-adjustment-print-area.crate-adjustment-modern-print .crate-stmt-info-grid {
+    border: 1px solid #94a3b8 !important;
+    border-radius: 5px !important;
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+  }
+
+  #crate-adjustment-print-area.crate-adjustment-modern-print .crate-stmt-customer-col,
+  #erp-isolated-print-mount #crate-adjustment-print-area.crate-adjustment-modern-print .crate-stmt-customer-col {
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+    border: none !important;
+  }
+
+  #crate-adjustment-print-area.crate-adjustment-modern-print .crate-stmt-summary-col,
+  #erp-isolated-print-mount #crate-adjustment-print-area.crate-adjustment-modern-print .crate-stmt-summary-col {
+    background-color: #f8fafc !important;
+    background: #f8fafc !important;
+    border-left: 1px solid #cbd5e1 !important;
+    border-top: none !important;
+    border-right: none !important;
+    border-bottom: none !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  #crate-adjustment-print-area.crate-adjustment-modern-print .crate-stmt-summary-row,
+  #erp-isolated-print-mount #crate-adjustment-print-area.crate-adjustment-modern-print .crate-stmt-summary-row {
+    background: transparent !important;
+    border-color: #cbd5e1 !important;
+  }
+
+  #crate-adjustment-print-area.crate-adjustment-modern-print table.crate-adj-table,
+  #erp-isolated-print-mount #crate-adjustment-print-area.crate-adjustment-modern-print table.crate-adj-table {
+    table-layout: fixed !important;
+    width: 100% !important;
+    border-collapse: collapse !important;
+    border: 1.5px solid #000000 !important;
+    background-color: #ffffff !important;
+    box-sizing: border-box !important;
+  }
+
+  #crate-adjustment-print-area.crate-adjustment-modern-print table.crate-adj-table thead th,
+  #erp-isolated-print-mount #crate-adjustment-print-area.crate-adjustment-modern-print table.crate-adj-table thead th {
+    background-color: #f1f5f9 !important;
+    background: #f1f5f9 !important;
+    color: #000000 !important;
+    border-bottom: 1.5px solid #000000 !important;
+    border-right: 1px solid #64748b !important;
+    text-align: center !important;
+    vertical-align: middle !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  #crate-adjustment-print-area.crate-adjustment-modern-print table.crate-adj-table thead th:last-child,
+  #erp-isolated-print-mount #crate-adjustment-print-area.crate-adjustment-modern-print table.crate-adj-table thead th:last-child {
+    border-right: none !important;
+  }
+
+  #crate-adjustment-print-area.crate-adjustment-modern-print table.crate-adj-table tbody td,
+  #erp-isolated-print-mount #crate-adjustment-print-area.crate-adjustment-modern-print table.crate-adj-table tbody td {
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    border-bottom: 1px solid #94a3b8 !important;
+    border-right: 1px solid #94a3b8 !important;
+    vertical-align: middle !important;
+  }
+
+  #crate-adjustment-print-area.crate-adjustment-modern-print table.crate-adj-table tbody tr:last-child td,
+  #erp-isolated-print-mount #crate-adjustment-print-area.crate-adjustment-modern-print table.crate-adj-table tbody tr:last-child td {
+    border-bottom: none !important;
+  }
+
+  #crate-adjustment-print-area.crate-adjustment-modern-print table.crate-adj-table tbody td:last-child,
+  #erp-isolated-print-mount #crate-adjustment-print-area.crate-adjustment-modern-print table.crate-adj-table tbody td:last-child {
+    border-right: none !important;
+  }
+
+  #crate-adjustment-print-area.crate-adjustment-modern-print .crate-stmt-closing-card,
+  #erp-isolated-print-mount #crate-adjustment-print-area.crate-adjustment-modern-print .crate-stmt-closing-card {
+    background-color: #f8fafc !important;
+    background: #f8fafc !important;
+    border: 1px solid #94a3b8 !important;
+    border-radius: 5px !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  #crate-adjustment-print-area.crate-adjustment-modern-print .crate-stmt-closing-card > div,
+  #erp-isolated-print-mount #crate-adjustment-print-area.crate-adjustment-modern-print .crate-stmt-closing-card > div {
+    background: transparent !important;
+  }
+
+  #crate-adjustment-print-area.crate-adjustment-modern-print .crate-stmt-closing-totals,
+  #erp-isolated-print-mount #crate-adjustment-print-area.crate-adjustment-modern-print .crate-stmt-closing-totals {
+    border-left: 1px solid #cbd5e1 !important;
+  }
+
+  #crate-adjustment-print-area.crate-adjustment-modern-print .crate-stmt-signatory-row,
+  #crate-adjustment-print-area.crate-adjustment-modern-print .crate-stmt-signatory-row *,
+  #erp-isolated-print-mount #crate-adjustment-print-area.crate-adjustment-modern-print .crate-stmt-signatory-row,
+  #erp-isolated-print-mount #crate-adjustment-print-area.crate-adjustment-modern-print .crate-stmt-signatory-row * {
+    background: transparent !important;
+    border: none !important;
+  }
+
+  #erp-isolated-print-mount #crate-adjustment-print-area.crate-adjustment-modern-print[data-paper-size="b7"] .crate-stmt-info-grid,
+  #erp-isolated-print-mount #crate-adjustment-print-area.crate-adjustment-modern-print[data-paper-size="b7"] .crate-stmt-closing-card {
+    display: block !important;
+  }
+  #erp-isolated-print-mount #crate-adjustment-print-area.crate-adjustment-modern-print[data-paper-size="b7"] .crate-stmt-summary-col,
+  #erp-isolated-print-mount #crate-adjustment-print-area.crate-adjustment-modern-print[data-paper-size="b7"] .crate-stmt-closing-totals {
     border-left: none !important;
     border-top: 1px solid #cbd5e1 !important;
     padding-left: 8px !important;

@@ -3,7 +3,7 @@ import { db } from '../../services/db';
 import { getCustomerCrateStatement, getCustomerCrateBalanceByType } from '../../services/accounting';
 import { formatDate, toIsoDate, getTodayIso, formatCompanySignature } from '../../utils/formatters';
 import { DatePickerInput } from '../common/DatePickerInput';
-import { CrateTransaction } from '../../types';
+import { CrateTransaction, CrateLedgerEntry } from '../../types';
 import { Box, Download, Printer, Plus, ArrowDownLeft, ArrowUpRight, Building2, AlertTriangle } from 'lucide-react';
 import { exportCrateStatement } from '../../utils/excelEngine';
 import { BillShareButtons } from '../common/BillShareButtons';
@@ -14,6 +14,7 @@ import { CustomerAutocomplete } from '../common/CustomerAutocomplete';
 import { QuantityInput } from '../common/QuantityInput';
 import { formatCustomerContactsInline } from '../../utils/customerContactUtils';
 import { stripLedgerCrateInOut } from '../../utils/shortPrintUtils';
+import { CrateAdjustmentPrintModal } from '../print/CrateAdjustmentPrintModal';
 
 interface CrateStatementViewProps {
   initialCustomerId?: string;
@@ -58,8 +59,25 @@ export const CrateStatementView: React.FC<CrateStatementViewProps> = ({
   const [outQty, setOutQty] = useState<number | ''>(0);
   const [adjustNotes, setAdjustNotes] = useState('');
   const [validationError, setValidationError] = useState<string | null>(null);
+  const [printingCrateTx, setPrintingCrateTx] = useState<{
+    tx: CrateTransaction;
+    entry: CrateLedgerEntry;
+  } | null>(null);
 
   const activeCustomer = customers.find((c) => c.id === selectedCustomerId) || customers[0];
+
+  const manualCrateTxById = new Map<string, CrateTransaction>(
+    selectedCustomerId
+      ? db
+          .getCrateTransactions()
+          .filter(
+            (tx) =>
+              tx.customerId === selectedCustomerId &&
+              (tx.referenceType === 'Return' || tx.referenceType === 'Manual Adjustment')
+          )
+          .map((tx) => [tx.id, tx] as [string, CrateTransaction])
+      : []
+  );
 
   const statement = selectedCustomerId
     ? getCustomerCrateStatement(selectedCustomerId, {
@@ -482,6 +500,7 @@ export const CrateStatementView: React.FC<CrateStatementViewProps> = ({
                   const isOb =
                     entry.id.startsWith('ob-') ||
                     entry.particulars.startsWith('Opening Crate Balance');
+                  const manualTx = !isOb ? manualCrateTxById.get(entry.id) : undefined;
                   return (
                     <tr
                       key={entry.id}
@@ -503,9 +522,29 @@ export const CrateStatementView: React.FC<CrateStatementViewProps> = ({
                             {stripLedgerCrateInOut(entry.particulars) || entry.particulars}
                           </span>
                         </div>
-                        {entry.referenceNo && entry.referenceNo !== 'OB' && (
-                          <div className="crate-stmt-ref text-[11px] text-slate-500 font-mono mt-0.5">
-                            Ref: {entry.referenceNo}
+                        {((entry.referenceNo && entry.referenceNo !== 'OB') || manualTx) && (
+                          <div className="mt-1 flex flex-wrap items-center gap-2">
+                            {entry.referenceNo && entry.referenceNo !== 'OB' && (
+                              <span className="crate-stmt-ref text-[11px] text-slate-500 font-mono">
+                                Ref: {entry.referenceNo}
+                              </span>
+                            )}
+                            {manualTx && (
+                              <button
+                                type="button"
+                                data-crate-tx-print-id={manualTx.id}
+                                onClick={() => setPrintingCrateTx({ tx: manualTx, entry })}
+                                title={`Print individual ${
+                                  manualTx.referenceType === 'Return'
+                                    ? 'Crate Return'
+                                    : 'Crate Adjustment'
+                                } statement`}
+                                className="print:hidden no-print inline-flex items-center gap-1 rounded-md border border-sky-300 bg-sky-50 px-2 py-0.5 text-[11px] font-semibold text-sky-800 hover:bg-sky-100 hover:border-sky-400 dark:border-sky-700 dark:bg-sky-950/60 dark:text-sky-200 dark:hover:bg-sky-900/70 transition-colors cursor-pointer shrink-0"
+                              >
+                                <Printer className="h-3 w-3" />
+                                <span>Print</span>
+                              </button>
+                            )}
                           </div>
                         )}
                       </td>
@@ -855,6 +894,18 @@ export const CrateStatementView: React.FC<CrateStatementViewProps> = ({
             </form>
           </div>
         </div>
+      )}
+
+      {/* Individual Crate Return / Adjustment Statement Print Modal */}
+      {printingCrateTx && (
+        <CrateAdjustmentPrintModal
+          isOpen={Boolean(printingCrateTx)}
+          onClose={() => setPrintingCrateTx(null)}
+          transaction={printingCrateTx.tx}
+          entry={printingCrateTx.entry}
+          customer={activeCustomer}
+          initialProfileId={selectedProfileId}
+        />
       )}
     </div>
   );
