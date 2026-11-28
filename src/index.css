@@ -1407,6 +1407,11 @@ input.no-spinners {
   width: 100% !important;
   border-collapse: collapse !important;
   border: none !important;
+  box-sizing: border-box !important;
+}
+[data-pdf-export="true"]#crate-statement-print-area.crate-statement-modern-print table.crate-stmt-table th,
+[data-pdf-export="true"]#crate-statement-print-area.crate-statement-modern-print table.crate-stmt-table td {
+  box-sizing: border-box !important;
 }
 [data-pdf-export="true"]#crate-statement-print-area.crate-statement-modern-print table.crate-stmt-table thead th {
   background-color: #f1f5f9 !important;
@@ -1418,6 +1423,12 @@ input.no-spinners {
   font-weight: 800 !important;
   padding: 7px 6px !important;
   line-height: 1.25 !important;
+  text-align: center !important;
+  vertical-align: middle !important;
+}
+[data-pdf-export="true"]#crate-statement-print-area.crate-statement-modern-print table.crate-stmt-table thead th:nth-child(4),
+[data-pdf-export="true"]#crate-statement-print-area.crate-statement-modern-print table.crate-stmt-table thead th:nth-child(5) {
+  padding: 7px 4px !important;
 }
 [data-pdf-export="true"]#crate-statement-print-area.crate-statement-modern-print table.crate-stmt-table thead th:last-child {
   border-right: none !important;
@@ -1432,6 +1443,28 @@ input.no-spinners {
   font-weight: 700 !important;
   padding: 6px 6px !important;
   line-height: 1.32 !important;
+  vertical-align: middle !important;
+}
+[data-pdf-export="true"]#crate-statement-print-area.crate-statement-modern-print table.crate-stmt-table tbody td.crate-stmt-issued-cell,
+[data-pdf-export="true"]#crate-statement-print-area.crate-statement-modern-print table.crate-stmt-table tbody td.crate-stmt-returned-cell {
+  text-align: center !important;
+  padding: 6px 6px !important;
+  white-space: nowrap !important;
+}
+[data-pdf-export="true"]#crate-statement-print-area.crate-statement-modern-print table.crate-stmt-table tbody td .crate-stmt-qty-badge {
+  display: flex !important;
+  width: 100% !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 3px !important;
+  line-height: 1 !important;
+  margin: 0 auto !important;
+}
+[data-pdf-export="true"]#crate-statement-print-area.crate-statement-modern-print table.crate-stmt-table tbody td .crate-stmt-dir-icon {
+  width: 11px !important;
+  height: 11px !important;
+  flex-shrink: 0 !important;
+  display: inline-block !important;
 }
 [data-pdf-export="true"]#crate-statement-print-area.crate-statement-modern-print table.crate-stmt-table tbody td:last-child {
   border-right: none !important;
@@ -1455,6 +1488,7 @@ input.no-spinners {
   font-size: 12.5px !important;
   font-weight: 800 !important;
   padding: 7px 6px !important;
+  vertical-align: middle !important;
 }
 [data-pdf-export="true"]#crate-statement-print-area.crate-statement-modern-print table.crate-stmt-table tfoot tr.crate-stmt-total-row td:last-child {
   border-right: none !important;
@@ -1469,20 +1503,24 @@ input.no-spinners {
   border: 1px solid #94a3b8 !important;
 }
 [data-pdf-export="true"]#crate-statement-print-area.crate-statement-modern-print[data-paper-size="a5"] table.crate-stmt-table thead th {
-  font-size: 10.5px !important;
-  padding: 5px 4px !important;
+  font-size: 10px !important;
+  padding: 5px 3px !important;
 }
 [data-pdf-export="true"]#crate-statement-print-area.crate-statement-modern-print[data-paper-size="a5"] table.crate-stmt-table tbody td,
 [data-pdf-export="true"]#crate-statement-print-area.crate-statement-modern-print[data-paper-size="a5"] table.crate-stmt-table tbody td .crate-stmt-type-pill {
   font-size: 10px !important;
   padding: 4px 4px !important;
 }
+[data-pdf-export="true"]#crate-statement-print-area.crate-statement-modern-print[data-paper-size="a5"] table.crate-stmt-table tbody td .crate-stmt-dir-icon {
+  width: 9.5px !important;
+  height: 9.5px !important;
+}
 [data-pdf-export="true"]#crate-statement-print-area.crate-statement-modern-print[data-paper-size="a5"] table.crate-stmt-table tfoot tr.crate-stmt-total-row td {
   font-size: 10.5px !important;
   padding: 5px 4px !important;
 }
 [data-pdf-export="true"]#crate-statement-print-area.crate-statement-modern-print[data-paper-size="compact"] table.crate-stmt-table thead th {
-  font-size: 10px !important;
+  font-size: 9.5px !important;
   padding: 4px 3px !important;
 }
 [data-pdf-export="true"]#crate-statement-print-area.crate-statement-modern-print[data-paper-size="compact"] table.crate-stmt-table tbody td,
@@ -1490,12 +1528,16 @@ input.no-spinners {
   font-size: 9.5px !important;
   padding: 3.5px 3px !important;
 }
+[data-pdf-export="true"]#crate-statement-print-area.crate-statement-modern-print[data-paper-size="compact"] table.crate-stmt-table tbody td .crate-stmt-dir-icon {
+  width: 9px !important;
+  height: 9px !important;
+}
 [data-pdf-export="true"]#crate-statement-print-area.crate-statement-modern-print[data-paper-size="compact"] table.crate-stmt-table tfoot tr.crate-stmt-total-row td {
   font-size: 10px !important;
   padding: 4px 3px !important;
 }
 [data-pdf-export="true"]#crate-statement-print-area.crate-statement-modern-print[data-paper-size="b6"] table.crate-stmt-table thead th {
-  font-size: 9px !important;
+  font-size: 8.5px !important;
   padding: 3.5px 2px !important;
 }
 [data-pdf-export="true"]#crate-statement-print-area.crate-statement-modern-print[data-paper-size="b6"] table.crate-stmt-table tbody td,
@@ -1503,21 +1545,35 @@ input.no-spinners {
   font-size: 8.5px !important;
   padding: 3px 2px !important;
 }
+[data-pdf-export="true"]#crate-statement-print-area.crate-statement-modern-print[data-paper-size="b6"] table.crate-stmt-table tbody td .crate-stmt-qty-badge {
+  gap: 2px !important;
+}
+[data-pdf-export="true"]#crate-statement-print-area.crate-statement-modern-print[data-paper-size="b6"] table.crate-stmt-table tbody td .crate-stmt-dir-icon {
+  width: 8px !important;
+  height: 8px !important;
+}
 [data-pdf-export="true"]#crate-statement-print-area.crate-statement-modern-print[data-paper-size="b6"] table.crate-stmt-table tfoot tr.crate-stmt-total-row td {
   font-size: 9px !important;
   padding: 3.5px 2px !important;
 }
 [data-pdf-export="true"]#crate-statement-print-area.crate-statement-modern-print[data-paper-size="b7"] table.crate-stmt-table thead th {
-  font-size: 7.5px !important;
-  padding: 2.5px 1.5px !important;
+  font-size: 7px !important;
+  padding: 2.5px 1px !important;
 }
 [data-pdf-export="true"]#crate-statement-print-area.crate-statement-modern-print[data-paper-size="b7"] table.crate-stmt-table tbody td,
 [data-pdf-export="true"]#crate-statement-print-area.crate-statement-modern-print[data-paper-size="b7"] table.crate-stmt-table tbody td .crate-stmt-type-pill {
-  font-size: 7px !important;
+  font-size: 6.5px !important;
   padding: 2px 1.5px !important;
 }
+[data-pdf-export="true"]#crate-statement-print-area.crate-statement-modern-print[data-paper-size="b7"] table.crate-stmt-table tbody td .crate-stmt-qty-badge {
+  gap: 1.5px !important;
+}
+[data-pdf-export="true"]#crate-statement-print-area.crate-statement-modern-print[data-paper-size="b7"] table.crate-stmt-table tbody td .crate-stmt-dir-icon {
+  width: 6.5px !important;
+  height: 6.5px !important;
+}
 [data-pdf-export="true"]#crate-statement-print-area.crate-statement-modern-print[data-paper-size="b7"] table.crate-stmt-table tfoot tr.crate-stmt-total-row td {
-  font-size: 7.5px !important;
+  font-size: 7px !important;
   padding: 2.5px 1.5px !important;
 }
 [data-pdf-export="true"]#crate-statement-print-area.crate-statement-modern-print[data-paper-size="b7"] .crate-stmt-info-grid,
@@ -3597,6 +3653,14 @@ input.no-spinners {
     border-collapse: collapse !important;
     border: none !important;
     background-color: #ffffff !important;
+    box-sizing: border-box !important;
+  }
+
+  #crate-statement-print-area.crate-statement-modern-print table.crate-stmt-table th,
+  #crate-statement-print-area.crate-statement-modern-print table.crate-stmt-table td,
+  #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print table.crate-stmt-table th,
+  #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print table.crate-stmt-table td {
+    box-sizing: border-box !important;
   }
 
   #crate-statement-print-area.crate-statement-modern-print table.crate-stmt-table thead tr,
@@ -3622,8 +3686,17 @@ input.no-spinners {
     padding: 7px 6px !important;
     line-height: 1.25 !important;
     letter-spacing: 0.02em !important;
+    text-align: center !important;
+    vertical-align: middle !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
+  }
+
+  #crate-statement-print-area.crate-statement-modern-print table.crate-stmt-table thead th:nth-child(4),
+  #crate-statement-print-area.crate-statement-modern-print table.crate-stmt-table thead th:nth-child(5),
+  #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print table.crate-stmt-table thead th:nth-child(4),
+  #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print table.crate-stmt-table thead th:nth-child(5) {
+    padding: 7px 4px !important;
   }
 
   #crate-statement-print-area.crate-statement-modern-print table.crate-stmt-table thead th:last-child,
@@ -3644,6 +3717,35 @@ input.no-spinners {
     font-weight: 700 !important;
     padding: 6px 6px !important;
     line-height: 1.32 !important;
+    vertical-align: middle !important;
+  }
+
+  #crate-statement-print-area.crate-statement-modern-print table.crate-stmt-table tbody td.crate-stmt-issued-cell,
+  #crate-statement-print-area.crate-statement-modern-print table.crate-stmt-table tbody td.crate-stmt-returned-cell,
+  #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print table.crate-stmt-table tbody td.crate-stmt-issued-cell,
+  #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print table.crate-stmt-table tbody td.crate-stmt-returned-cell {
+    text-align: center !important;
+    padding: 6px 6px !important;
+    white-space: nowrap !important;
+  }
+
+  #crate-statement-print-area.crate-statement-modern-print table.crate-stmt-table tbody td .crate-stmt-qty-badge,
+  #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print table.crate-stmt-table tbody td .crate-stmt-qty-badge {
+    display: flex !important;
+    width: 100% !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 3px !important;
+    line-height: 1 !important;
+    margin: 0 auto !important;
+  }
+
+  #crate-statement-print-area.crate-statement-modern-print table.crate-stmt-table tbody td .crate-stmt-dir-icon,
+  #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print table.crate-stmt-table tbody td .crate-stmt-dir-icon {
+    width: 11px !important;
+    height: 11px !important;
+    flex-shrink: 0 !important;
+    display: inline-block !important;
   }
 
   #crate-statement-print-area.crate-statement-modern-print table.crate-stmt-table tbody td:last-child,
@@ -3699,6 +3801,7 @@ input.no-spinners {
     font-size: 12.5px !important;
     font-weight: 800 !important;
     padding: 7px 6px !important;
+    vertical-align: middle !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
@@ -3749,8 +3852,8 @@ input.no-spinners {
 
   /* Responsive sizing for smaller paper presets (A5, Compact, B6, B7) */
   #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print[data-paper-size="a5"] table.crate-stmt-table thead th {
-    font-size: 10.5px !important;
-    padding: 5px 4px !important;
+    font-size: 10px !important;
+    padding: 5px 3px !important;
   }
   #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print[data-paper-size="a5"] table.crate-stmt-table tbody td,
   #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print[data-paper-size="a5"] table.crate-stmt-table tbody td .crate-stmt-particulars,
@@ -3758,12 +3861,16 @@ input.no-spinners {
     font-size: 10px !important;
     padding: 4px 4px !important;
   }
+  #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print[data-paper-size="a5"] table.crate-stmt-table tbody td .crate-stmt-dir-icon {
+    width: 9.5px !important;
+    height: 9.5px !important;
+  }
   #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print[data-paper-size="a5"] table.crate-stmt-table tfoot tr.crate-stmt-total-row td {
     font-size: 10.5px !important;
     padding: 5px 4px !important;
   }
   #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print[data-paper-size="compact"] table.crate-stmt-table thead th {
-    font-size: 10px !important;
+    font-size: 9.5px !important;
     padding: 4px 3px !important;
   }
   #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print[data-paper-size="compact"] table.crate-stmt-table tbody td,
@@ -3772,12 +3879,16 @@ input.no-spinners {
     font-size: 9.5px !important;
     padding: 3.5px 3px !important;
   }
+  #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print[data-paper-size="compact"] table.crate-stmt-table tbody td .crate-stmt-dir-icon {
+    width: 9px !important;
+    height: 9px !important;
+  }
   #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print[data-paper-size="compact"] table.crate-stmt-table tfoot tr.crate-stmt-total-row td {
     font-size: 10px !important;
     padding: 4px 3px !important;
   }
   #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print[data-paper-size="b6"] table.crate-stmt-table thead th {
-    font-size: 9px !important;
+    font-size: 8.5px !important;
     padding: 3.5px 2px !important;
   }
   #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print[data-paper-size="b6"] table.crate-stmt-table tbody td,
@@ -3786,22 +3897,36 @@ input.no-spinners {
     font-size: 8.5px !important;
     padding: 3px 2px !important;
   }
+  #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print[data-paper-size="b6"] table.crate-stmt-table tbody td .crate-stmt-qty-badge {
+    gap: 2px !important;
+  }
+  #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print[data-paper-size="b6"] table.crate-stmt-table tbody td .crate-stmt-dir-icon {
+    width: 8px !important;
+    height: 8px !important;
+  }
   #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print[data-paper-size="b6"] table.crate-stmt-table tfoot tr.crate-stmt-total-row td {
     font-size: 9px !important;
     padding: 3.5px 2px !important;
   }
   #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print[data-paper-size="b7"] table.crate-stmt-table thead th {
-    font-size: 7.5px !important;
-    padding: 2.5px 1.5px !important;
+    font-size: 7px !important;
+    padding: 2.5px 1px !important;
   }
   #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print[data-paper-size="b7"] table.crate-stmt-table tbody td,
   #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print[data-paper-size="b7"] table.crate-stmt-table tbody td .crate-stmt-particulars,
   #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print[data-paper-size="b7"] table.crate-stmt-table tbody td .crate-stmt-type-pill {
-    font-size: 7px !important;
+    font-size: 6.5px !important;
     padding: 2px 1.5px !important;
   }
+  #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print[data-paper-size="b7"] table.crate-stmt-table tbody td .crate-stmt-qty-badge {
+    gap: 1.5px !important;
+  }
+  #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print[data-paper-size="b7"] table.crate-stmt-table tbody td .crate-stmt-dir-icon {
+    width: 6.5px !important;
+    height: 6.5px !important;
+  }
   #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print[data-paper-size="b7"] table.crate-stmt-table tfoot tr.crate-stmt-total-row td {
-    font-size: 7.5px !important;
+    font-size: 7px !important;
     padding: 2.5px 1.5px !important;
   }
   #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print[data-paper-size="b7"] .crate-stmt-info-grid,

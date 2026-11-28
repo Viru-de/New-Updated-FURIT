@@ -443,31 +443,31 @@ export const CrateStatementView: React.FC<CrateStatementViewProps> = ({
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm border-collapse crate-stmt-table">
             <colgroup>
-              <col style={{ width: '11%' }} />
-              <col style={{ width: '28%' }} />
-              <col style={{ width: '14%' }} />
-              <col style={{ width: '8%' }} />
-              <col style={{ width: '8%' }} />
+              <col style={{ width: '12%' }} />
+              <col style={{ width: '22%' }} />
+              <col style={{ width: '12.5%' }} />
               <col style={{ width: '10%' }} />
-              <col style={{ width: '11%' }} />
+              <col style={{ width: '11.5%' }} />
+              <col style={{ width: '10.5%' }} />
+              <col style={{ width: '11.5%' }} />
               <col style={{ width: '10%' }} />
             </colgroup>
             <thead>
               <tr className="border-b border-slate-200 bg-slate-100 text-[11px] font-bold uppercase tracking-wider text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">
-                <th className="px-4 py-3.5">Date</th>
-                <th className="px-4 py-3.5">Particulars / Reference</th>
-                <th className="px-4 py-3.5 text-center">Crate Type</th>
-                <th className="px-4 py-3.5 text-center">
+                <th className="px-3 py-3.5 text-center align-middle">Date</th>
+                <th className="px-3 py-3.5 text-center align-middle">Particulars / Reference</th>
+                <th className="px-3 py-3.5 text-center align-middle">Crate Type</th>
+                <th className="px-2.5 py-3.5 text-center align-middle">
                   <span className="print:hidden">OUT (Issued)</span>
                   <span className="hidden print:inline">Issued</span>
                 </th>
-                <th className="px-4 py-3.5 text-center">
+                <th className="px-2.5 py-3.5 text-center align-middle">
                   <span className="print:hidden">IN (Returned)</span>
                   <span className="hidden print:inline">Returned</span>
                 </th>
-                <th className="px-4 py-3.5 text-right">Type Balance</th>
-                <th className="px-4 py-3.5 text-right">Total Balance</th>
-                <th className="px-4 py-3.5 text-right">Total KG</th>
+                <th className="px-2.5 py-3.5 text-center align-middle">Type Balance</th>
+                <th className="px-3 py-3.5 text-center align-middle">Total Balance</th>
+                <th className="px-3 py-3.5 text-center align-middle">Total KG</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -489,10 +489,10 @@ export const CrateStatementView: React.FC<CrateStatementViewProps> = ({
                         isOb ? 'crate-stmt-ob-row bg-sky-50/40 font-medium dark:bg-sky-950/30' : ''
                       }`}
                     >
-                      <td className="px-4 py-3 font-mono-numbers text-xs text-slate-700 dark:text-slate-300 whitespace-nowrap align-top">
+                      <td className="px-3 py-3 font-mono-numbers text-xs text-slate-700 dark:text-slate-300 whitespace-nowrap align-middle">
                         {formatDate(entry.date)}
                       </td>
-                      <td className="px-4 py-3 text-slate-900 dark:text-slate-100 align-top">
+                      <td className="px-3 py-3 text-slate-900 dark:text-slate-100 align-middle">
                         <div
                           className={`crate-stmt-particulars font-bold text-sm tracking-tight leading-snug ${
                             isOb ? 'text-sky-900 dark:text-sky-200 font-bold' : 'text-slate-950 dark:text-slate-100'
@@ -509,41 +509,43 @@ export const CrateStatementView: React.FC<CrateStatementViewProps> = ({
                           </div>
                         )}
                       </td>
-                      <td className="px-4 py-3 text-center align-top">
+                      <td className="px-3 py-3 text-center align-middle">
                         <span className="crate-stmt-type-pill inline-flex items-center rounded-md px-2 py-0.5 text-xs font-bold font-mono bg-sky-50 text-sky-900 dark:bg-sky-950/70 dark:text-sky-200 border border-sky-300 dark:border-sky-800">
                           {entry.crateName || 'Crate'}
                         </span>
                       </td>
                       {/* Issued */}
-                      <td className="px-4 py-3 text-center font-mono-numbers text-xs sm:text-sm font-semibold text-amber-600 dark:text-amber-400 align-top whitespace-nowrap">
+                      <td className="crate-stmt-issued-cell px-2.5 py-3 text-center font-mono-numbers text-xs sm:text-sm font-semibold text-amber-600 dark:text-amber-400 align-middle whitespace-nowrap">
                         {entry.outQuantity > 0 ? (
-                          <span className="inline-flex items-center gap-1 font-bold">
-                            <ArrowUpRight className="h-3 w-3 print:hidden" /> {entry.outQuantity}
+                          <span className="crate-stmt-qty-badge inline-flex w-full items-center justify-center gap-1 font-bold leading-none">
+                            <ArrowUpRight className="crate-stmt-dir-icon h-3 w-3 shrink-0" />
+                            <span>{entry.outQuantity}</span>
                           </span>
                         ) : (
                           '-'
                         )}
                       </td>
                       {/* Returned */}
-                      <td className="px-4 py-3 text-center font-mono-numbers text-xs sm:text-sm font-semibold text-emerald-600 dark:text-emerald-400 align-top whitespace-nowrap">
+                      <td className="crate-stmt-returned-cell px-2.5 py-3 text-center font-mono-numbers text-xs sm:text-sm font-semibold text-emerald-600 dark:text-emerald-400 align-middle whitespace-nowrap">
                         {entry.inQuantity > 0 ? (
-                          <span className="inline-flex items-center gap-1 font-bold">
-                            <ArrowDownLeft className="h-3 w-3 print:hidden" /> {entry.inQuantity}
+                          <span className="crate-stmt-qty-badge inline-flex w-full items-center justify-center gap-1 font-bold leading-none">
+                            <ArrowDownLeft className="crate-stmt-dir-icon h-3 w-3 shrink-0" />
+                            <span>{entry.inQuantity}</span>
                           </span>
                         ) : (
                           '-'
                         )}
                       </td>
                       {/* Type Balance */}
-                      <td className="px-4 py-3 text-right font-mono-numbers text-xs sm:text-sm font-bold text-sky-800 dark:text-sky-300 align-top whitespace-nowrap">
+                      <td className="px-2.5 py-3 text-right font-mono-numbers text-xs sm:text-sm font-bold text-sky-800 dark:text-sky-300 align-middle whitespace-nowrap">
                         {entry.typeBalance !== undefined ? `${entry.typeBalance}` : `${entry.balance}`}
                       </td>
                       {/* Total Balance (Crates) */}
-                      <td className="px-4 py-3 text-right font-mono-numbers text-xs sm:text-sm font-bold text-slate-900 dark:text-white align-top whitespace-nowrap">
+                      <td className="px-3 py-3 text-right font-mono-numbers text-xs sm:text-sm font-bold text-slate-900 dark:text-white align-middle whitespace-nowrap">
                         {entry.balance} {entry.balance === 1 ? 'Crate' : 'Crates'}
                       </td>
                       {/* Total KG */}
-                      <td className="px-4 py-3 text-right font-mono-numbers text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-400 align-top whitespace-nowrap">
+                      <td className="px-3 py-3 text-right font-mono-numbers text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-400 align-middle whitespace-nowrap">
                         {entry.totalKg} KG
                       </td>
                     </tr>
@@ -553,7 +555,7 @@ export const CrateStatementView: React.FC<CrateStatementViewProps> = ({
             </tbody>
             <tfoot>
               <tr className="crate-stmt-total-row border-t-2 border-slate-300 bg-slate-50/90 font-bold dark:border-slate-700 dark:bg-slate-800/80">
-                <td colSpan={3} className="px-4 py-3 text-xs uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                <td colSpan={3} className="px-3 py-3 text-xs uppercase tracking-wider text-slate-700 dark:text-slate-300 align-middle">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                     <span className="font-extrabold">Closing Crate Summary</span>
                     <div className="print:hidden flex flex-wrap gap-2 font-mono text-xs normal-case">
@@ -568,20 +570,20 @@ export const CrateStatementView: React.FC<CrateStatementViewProps> = ({
                     </div>
                   </div>
                 </td>
-                <td className="px-4 py-3 text-center font-mono-numbers text-sm font-extrabold text-slate-900 dark:text-white whitespace-nowrap">
+                <td className="px-2.5 py-3 text-center font-mono-numbers text-sm font-extrabold text-slate-900 dark:text-white align-middle whitespace-nowrap">
                   {totalIssued > 0 ? totalIssued : '-'}
                 </td>
-                <td className="px-4 py-3 text-center font-mono-numbers text-sm font-extrabold text-slate-900 dark:text-white whitespace-nowrap">
+                <td className="px-2.5 py-3 text-center font-mono-numbers text-sm font-extrabold text-slate-900 dark:text-white align-middle whitespace-nowrap">
                   {totalReturned > 0 ? totalReturned : '-'}
                 </td>
-                <td className="px-4 py-3 text-right text-xs font-extrabold uppercase tracking-wide text-slate-600 dark:text-slate-300 whitespace-nowrap">
+                <td className="px-2.5 py-3 text-right text-xs font-extrabold uppercase tracking-wide text-slate-600 dark:text-slate-300 align-middle whitespace-nowrap">
                   <span className="hidden print:inline">Closing</span>
                   <span className="print:hidden">-</span>
                 </td>
-                <td className="px-4 py-3 text-right font-mono-numbers text-base font-black text-slate-900 dark:text-white whitespace-nowrap">
+                <td className="px-3 py-3 text-right font-mono-numbers text-base font-black text-slate-900 dark:text-white align-middle whitespace-nowrap">
                   {statement.closingCrates} {statement.closingCrates === 1 ? 'Crate' : 'Crates'}
                 </td>
-                <td className="px-4 py-3 text-right font-mono-numbers text-base font-black text-sky-700 dark:text-sky-300 whitespace-nowrap">
+                <td className="px-3 py-3 text-right font-mono-numbers text-base font-black text-sky-700 dark:text-sky-300 align-middle whitespace-nowrap">
                   {statement.closingTotalKg} KG
                 </td>
               </tr>
