@@ -61,22 +61,30 @@ export const CrateStatementView: React.FC<CrateStatementViewProps> = ({
   const [validationError, setValidationError] = useState<string | null>(null);
   const [printingCrateTx, setPrintingCrateTx] = useState<{
     tx: CrateTransaction;
-    entry: CrateLedgerEntry;
+    entry?: CrateLedgerEntry;
   } | null>(null);
+  const [selectedModalTxId, setSelectedModalTxId] = useState<string>('');
 
   const activeCustomer = customers.find((c) => c.id === selectedCustomerId) || customers[0];
 
+  const manualCrateTransactions = selectedCustomerId
+    ? db
+        .getCrateTransactions()
+        .filter(
+          (tx) =>
+            tx.customerId === selectedCustomerId &&
+            (tx.referenceType === 'Return' || tx.referenceType === 'Manual Adjustment')
+        )
+    : [];
+
+  const sortedManualCrateTxs = [...manualCrateTransactions].sort(
+    (a, b) =>
+      (b.date || '').localeCompare(a.date || '') ||
+      (b.createdAt || '').localeCompare(a.createdAt || '')
+  );
+
   const manualCrateTxById = new Map<string, CrateTransaction>(
-    selectedCustomerId
-      ? db
-          .getCrateTransactions()
-          .filter(
-            (tx) =>
-              tx.customerId === selectedCustomerId &&
-              (tx.referenceType === 'Return' || tx.referenceType === 'Manual Adjustment')
-          )
-          .map((tx) => [tx.id, tx] as [string, CrateTransaction])
-      : []
+    manualCrateTransactions.map((tx) => [tx.id, tx] as [string, CrateTransaction])
   );
 
   const statement = selectedCustomerId
@@ -126,7 +134,76 @@ export const CrateStatementView: React.FC<CrateStatementViewProps> = ({
     setOutQty(0);
     setAdjustNotes('');
     setValidationError(null);
+    setSelectedModalTxId('');
     setIsAdjustmentModalOpen(true);
+  };
+
+  const selectedModalTx = selectedModalTxId
+    ? manualCrateTxById.get(selectedModalTxId)
+    : undefined;
+
+  const hasFormDraftQty = (Number(inQty) || 0) > 0 || (Number(outQty) || 0) > 0;
+  const canPrintInModal = Boolean(
+    selectedModalTx || hasFormDraftQty || sortedManualCrateTxs.length > 0
+  );
+
+  const handlePrintFromAdjustmentModal = (explicitSavedTx?: CrateTransaction) => {
+    if (!selectedCustomerId) return;
+
+    const targetSavedTx = explicitSavedTx || selectedModalTx;
+    if (targetSavedTx) {
+      const matchedEntry = statement.entries.find((e) => e.id === targetSavedTx.id);
+      setPrintingCrateTx({ tx: targetSavedTx, entry: matchedEntry });
+      return;
+    }
+
+    const returnVal = Number(inQty) || 0;
+    const issueVal = Number(outQty) || 0;
+    if (returnVal > 0 || issueVal > 0) {
+      const ct = selectedAdjustCrateType;
+      const weightKg = ct?.defaultWeightKg || 20;
+      const projectedTotalBalance = statement.closingCrates + issueVal - returnVal;
+      const projectedTypeBalance = currentTypeBalance + issueVal - returnVal;
+      const draftTx: CrateTransaction = {
+        id: `preview-draft-${Date.now()}`,
+        customerId: selectedCustomerId,
+        customerName: activeCustomer ? activeCustomer.name : '',
+        date: adjustDate,
+        referenceType: adjustType,
+        referenceNo: '',
+        crateTypeId: ct?.id || 'ct_20',
+        crateName: ct?.name || 'Standard Crate',
+        inQuantity: returnVal,
+        outQuantity: issueVal,
+        balanceQuantity: projectedTotalBalance,
+        weightKgPerCrate: weightKg,
+        totalKg: projectedTotalBalance * weightKg,
+        notes: adjustNotes.trim(),
+        createdAt: new Date().toISOString(),
+      };
+      const draftEntry: CrateLedgerEntry = {
+        id: draftTx.id,
+        date: draftTx.date,
+        particulars: `${adjustType}: ${draftTx.notes}`.trim(),
+        referenceNo: '',
+        crateTypeId: draftTx.crateTypeId,
+        crateName: draftTx.crateName || 'Crate',
+        inQuantity: returnVal,
+        outQuantity: issueVal,
+        balance: projectedTotalBalance,
+        typeBalance: projectedTypeBalance,
+        weightKg,
+        totalKg: projectedTotalBalance * weightKg,
+      };
+      setPrintingCrateTx({ tx: draftTx, entry: draftEntry });
+      return;
+    }
+
+    if (sortedManualCrateTxs[0]) {
+      const latestTx = sortedManualCrateTxs[0];
+      const matchedEntry = statement.entries.find((e) => e.id === latestTx.id);
+      setPrintingCrateTx({ tx: latestTx, entry: matchedEntry });
+    }
   };
 
   const handlePrint = () => {
@@ -720,7 +797,7 @@ export const CrateStatementView: React.FC<CrateStatementViewProps> = ({
       {/* Manual Crate Adjustment Modal */}
       {isAdjustmentModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-xs">
-          <div className="w-full max-w-md rounded-xl border border-slate-200 bg-white shadow-xl dark:border-slate-800 dark:bg-slate-900">
+          <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-xl border border-slate-200 bg-white shadow-xl dark:border-slate-800 dark:bg-slate-900">
             <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4 dark:border-slate-800">
               <h3 className="text-base font-semibold text-slate-900 dark:text-white">
                 Record Crate Return or Adjustment
@@ -728,7 +805,7 @@ export const CrateStatementView: React.FC<CrateStatementViewProps> = ({
               <button
                 type="button"
                 onClick={() => setIsAdjustmentModalOpen(false)}
-                className="text-slate-400 hover:text-slate-600"
+                className="text-slate-400 hover:text-slate-600 cursor-pointer"
               >
                 ✕
               </button>
@@ -743,6 +820,81 @@ export const CrateStatementView: React.FC<CrateStatementViewProps> = ({
                   {activeCustomer?.name}
                 </div>
               </div>
+
+              {sortedManualCrateTxs.length > 0 && (
+                <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-800/60 space-y-2">
+                  <div className="flex items-center justify-between gap-2">
+                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-200">
+                      Saved Crate Return / Adjustment Transaction
+                    </label>
+                    <button
+                      type="button"
+                      data-crate-adj-saved-print="true"
+                      onClick={() =>
+                        handlePrintFromAdjustmentModal(
+                          selectedModalTx || sortedManualCrateTxs[0]
+                        )
+                      }
+                      className="inline-flex items-center gap-1 rounded-md border border-sky-300 bg-sky-50 px-2.5 py-1 text-xs font-semibold text-sky-800 hover:bg-sky-100 dark:border-sky-700 dark:bg-sky-950/60 dark:text-sky-200 dark:hover:bg-sky-900/70 cursor-pointer shrink-0"
+                    >
+                      <Printer className="h-3.5 w-3.5" />
+                      <span>Print</span>
+                    </button>
+                  </div>
+                  <select
+                    value={selectedModalTxId}
+                    onChange={(e) => setSelectedModalTxId(e.target.value)}
+                    className="w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-900 outline-none focus:border-sky-500 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+                  >
+                    <option value="">
+                      Current Form Entry (or Latest Saved:{' '}
+                      {formatDate(sortedManualCrateTxs[0].date)} ·{' '}
+                      {sortedManualCrateTxs[0].referenceNo || 'CR'})
+                    </option>
+                    {sortedManualCrateTxs.map((tx) => {
+                      const txQty =
+                        tx.inQuantity > 0
+                          ? `${tx.inQuantity} Returned`
+                          : `${tx.outQuantity} Adjusted`;
+                      const txLabel =
+                        tx.referenceType === 'Return'
+                          ? 'Crate Return'
+                          : 'Crate Adjustment';
+                      return (
+                        <option key={tx.id} value={tx.id}>
+                          {formatDate(tx.date)} — {txLabel} —{' '}
+                          {tx.crateName || 'Crate'} ({txQty})
+                          {tx.referenceNo ? ` — Ref: ${tx.referenceNo}` : ''}
+                        </option>
+                      );
+                    })}
+                  </select>
+                  {selectedModalTx && (
+                    <div className="text-[11px] text-slate-600 dark:text-slate-300 flex flex-wrap items-center gap-x-3 gap-y-0.5 pt-0.5">
+                      <span>
+                        <strong>Type:</strong>{' '}
+                        {selectedModalTx.referenceType === 'Return'
+                          ? 'Crate Return'
+                          : 'Crate Adjustment'}
+                      </span>
+                      <span>
+                        <strong>Crate:</strong> {selectedModalTx.crateName || 'Crate'}
+                      </span>
+                      <span>
+                        <strong>Qty:</strong>{' '}
+                        {selectedModalTx.inQuantity > 0
+                          ? `${selectedModalTx.inQuantity} Returned`
+                          : `${selectedModalTx.outQuantity} Adjusted`}
+                      </span>
+                      {selectedModalTx.referenceNo && (
+                        <span>
+                          <strong>Ref:</strong> {selectedModalTx.referenceNo}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Crate Type Selection with Live Type Balance */}
               <div>
@@ -871,25 +1023,46 @@ export const CrateStatementView: React.FC<CrateStatementViewProps> = ({
                 />
               </div>
 
-              <div className="flex justify-end gap-2 pt-2">
+              <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
                 <button
                   type="button"
-                  onClick={() => setIsAdjustmentModalOpen(false)}
-                  className="rounded-lg border border-slate-300 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isExcessReturn}
-                  className={`rounded-lg px-4 py-2 text-xs font-semibold text-white ${
-                    isExcessReturn
-                      ? 'bg-slate-400 cursor-not-allowed opacity-60'
-                      : 'bg-sky-600 hover:bg-sky-700'
+                  data-crate-adj-modal-print="true"
+                  disabled={!canPrintInModal}
+                  onClick={() => handlePrintFromAdjustmentModal()}
+                  title={
+                    canPrintInModal
+                      ? 'Print individual Crate Return or Adjustment statement'
+                      : 'Enter crate quantity or select a saved entry to print'
+                  }
+                  className={`inline-flex items-center gap-1.5 rounded-lg border px-3.5 py-2 text-xs font-semibold transition-colors ${
+                    canPrintInModal
+                      ? 'border-slate-300 bg-white text-slate-800 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700 cursor-pointer'
+                      : 'border-slate-200 bg-slate-100 text-slate-400 dark:border-slate-700 dark:bg-slate-800/50 dark:text-slate-500 cursor-not-allowed'
                   }`}
                 >
-                  Save Crate Entry
+                  <Printer className="h-3.5 w-3.5 text-sky-600" />
+                  <span>Print</span>
                 </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsAdjustmentModalOpen(false)}
+                    className="rounded-lg border border-slate-300 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isExcessReturn}
+                    className={`rounded-lg px-4 py-2 text-xs font-semibold text-white ${
+                      isExcessReturn
+                        ? 'bg-slate-400 cursor-not-allowed opacity-60'
+                        : 'bg-sky-600 hover:bg-sky-700 cursor-pointer'
+                    }`}
+                  >
+                    Save Crate Entry
+                  </button>
+                </div>
               </div>
             </form>
           </div>

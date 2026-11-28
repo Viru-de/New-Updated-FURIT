@@ -257,7 +257,71 @@ function runTests() {
     'Printing individual Crate Return / Adjustment entries creates zero duplicate transactions and preserves balances'
   );
 
-  // 5. Verify CSS rules exist for both PDF export and Print
+  // 5. Verify Record Crate Return or Adjustment modal in CrateStatementView.tsx contains dedicated Print controls
+  const crateViewSource = fs.readFileSync(
+    path.join(process.cwd(), 'src/components/accounts/CrateStatementView.tsx'),
+    'utf-8'
+  );
+  const modalIdx = crateViewSource.indexOf('Record Crate Return or Adjustment');
+  check(modalIdx !== -1, 'CrateStatementView contains Record Crate Return or Adjustment modal');
+  const modalSourceSlice = crateViewSource.slice(modalIdx);
+  check(
+    modalSourceSlice.includes('data-crate-adj-modal-print="true"') &&
+      modalSourceSlice.includes('data-crate-adj-saved-print="true"') &&
+      modalSourceSlice.includes('handlePrintFromAdjustmentModal') &&
+      modalSourceSlice.includes('Save Crate Entry'),
+    'Record Crate Return or Adjustment modal includes Print buttons alongside saved transaction details and action controls'
+  );
+
+  // 6. Verify draft preview inside adjustment modal prints cleanly without modifying DB
+  const draftTx: CrateTransaction = {
+    id: 'preview-draft-999',
+    customerId: custAId,
+    customerName: 'Narmada Fruit Agencies',
+    date: '2026-06-08',
+    referenceType: 'Return',
+    referenceNo: '',
+    crateTypeId: 'ct_20',
+    crateName: '20kg Crate',
+    inQuantity: 2,
+    outQuantity: 0,
+    balanceQuantity: 16,
+    weightKgPerCrate: 20,
+    totalKg: 320,
+    notes: 'Draft return slip check',
+    createdAt: '2026-06-08T10:00:00.000Z',
+  };
+  const draftModalHtml = renderToStaticMarkup(
+    React.createElement(CrateAdjustmentPrintModal, {
+      isOpen: true,
+      onClose: () => {},
+      transaction: draftTx,
+      entry: {
+        id: draftTx.id,
+        date: draftTx.date,
+        particulars: 'Return: Draft return slip check',
+        referenceNo: '',
+        crateTypeId: 'ct_20',
+        crateName: '20kg Crate',
+        inQuantity: 2,
+        outQuantity: 0,
+        balance: 16,
+        typeBalance: 10,
+        weightKg: 20,
+        totalKg: 320,
+      },
+    })
+  );
+  check(
+    draftModalHtml.includes('CRATE RETURN STATEMENT') &&
+      draftModalHtml.includes('2 Crates') &&
+      draftModalHtml.includes('16 Crates') &&
+      draftModalHtml.includes('Draft return slip check') &&
+      db.getCrateTransactions().length === txCountAfter,
+    'Draft print preview from adjustment modal renders updated balance (16 Crates) without creating duplicate DB records'
+  );
+
+  // 7. Verify CSS rules exist for both PDF export and Print
   const css = fs.readFileSync(path.join(process.cwd(), 'src/index.css'), 'utf-8');
   check(
     css.includes('[data-pdf-export="true"]#crate-adjustment-print-area') &&

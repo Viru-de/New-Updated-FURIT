@@ -192,8 +192,10 @@ export const CrateAdjustmentPrintModal: React.FC<
     .filter(Boolean)
     .join('\n');
 
+  const isDraftPreview = transaction.id.startsWith('preview-draft-');
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/70 p-2 sm:p-4 md:p-6 backdrop-blur-xs overflow-hidden">
+    <div className="fixed inset-0 z-[55] flex items-center justify-center bg-slate-900/70 p-2 sm:p-4 md:p-6 backdrop-blur-xs overflow-hidden">
       <div className="flex flex-col w-full max-w-3xl max-h-[90vh] max-h-[90dvh] rounded-xl sm:rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-800 dark:bg-slate-900 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
         {/* Preview Controls Bar (Hidden on Print & PDF) */}
         <div className="shrink-0 flex flex-wrap items-center justify-between border-b border-slate-200 px-4 sm:px-6 py-2.5 sm:py-3 no-print bg-slate-50 dark:border-slate-800 dark:bg-slate-800/80 gap-2 sm:gap-3 z-10">
@@ -661,7 +663,8 @@ export const CrateAdjustmentPrintModal: React.FC<
                       {updatedTypeBalance === 1 ? 'Crate' : 'Crates'}
                     </div>
                   )}
-                  {selectedTypeBalance &&
+                  {!isDraftPreview &&
+                    selectedTypeBalance &&
                     fullStatement &&
                     fullStatement.closingCrates !== updatedTotalBalance && (
                       <div
