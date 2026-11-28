@@ -63,13 +63,20 @@ export function getBillItemNameCellClass(
   const len = (itemName || '').trim().length;
   if (
     pageSize === 'b7' &&
-    (saleType === 'CREDIT SALE' || saleType === 'CASH SALE' || saleType === 'SALE PROCEED')
+    (saleType === 'CREDIT SALE' || saleType === 'CASH SALE')
   ) {
-    if (len <= 15) return 'text-[7.5px] print:text-[8px] leading-[1.1] whitespace-nowrap';
-    if (len <= 20) return 'text-[7px] print:text-[7.5px] tracking-tight leading-[1.1] whitespace-nowrap';
-    if (len <= 26) return 'text-[6px] print:text-[6.5px] tracking-tight leading-[1.1] whitespace-nowrap';
-    if (len <= 34) return 'text-[5.25px] print:text-[5.5px] tracking-[-0.02em] leading-[1.1] whitespace-nowrap';
-    return 'text-[4.5px] print:text-[4.75px] tracking-[-0.03em] leading-[1.1] whitespace-nowrap';
+    if (len <= 16) return 'text-[10.5px] print:text-[11px] font-bold leading-[1.15] whitespace-nowrap';
+    if (len <= 21) return 'text-[9.5px] print:text-[10px] font-bold tracking-tight leading-[1.15] whitespace-nowrap';
+    if (len <= 27) return 'text-[8.5px] print:text-[9px] font-bold tracking-tight leading-[1.15] whitespace-nowrap';
+    if (len <= 35) return 'text-[7.5px] print:text-[8px] font-bold tracking-[-0.02em] leading-[1.15] whitespace-nowrap';
+    return 'text-[6.5px] print:text-[7px] font-bold tracking-[-0.03em] leading-[1.15] whitespace-nowrap';
+  }
+  if (pageSize === 'b7' && saleType === 'SALE PROCEED') {
+    if (len <= 16) return 'text-[10.5px] print:text-[11px] font-bold leading-[1.15] whitespace-nowrap';
+    if (len <= 21) return 'text-[9.5px] print:text-[10px] font-bold tracking-tight leading-[1.15] whitespace-nowrap';
+    if (len <= 27) return 'text-[8.5px] print:text-[9px] font-bold tracking-tight leading-[1.15] whitespace-nowrap';
+    if (len <= 35) return 'text-[7.5px] print:text-[8px] font-bold tracking-[-0.02em] leading-[1.15] whitespace-nowrap';
+    return 'text-[6.5px] print:text-[7px] font-bold tracking-[-0.03em] leading-[1.15] whitespace-nowrap';
   }
   if (pageSize === 'b7') {
     if (len <= 10) return 'text-[7.5px] print:text-[8.5px] leading-[1.15] whitespace-normal break-words [overflow-wrap:anywhere]';

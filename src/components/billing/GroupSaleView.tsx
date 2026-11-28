@@ -1245,6 +1245,7 @@ export const GroupSaleView: React.FC<GroupSaleViewProps> = ({
                           valueCustomerId={row.customerId}
                           onChange={(cust) => handleCustomerSelect(row.rowId, cust)}
                           hasError={!!row.errors?.customer}
+                          customerType="credit_sale"
                           placeholder="Select customer..."
                         />
                         {row.errors?.customer && (

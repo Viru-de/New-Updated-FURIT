@@ -3,7 +3,7 @@ import { Bill, Customer, ExpenseItem, Fruit, SaleProceeds, SaleProceedsItem } fr
 import { db } from '../../services/db';
 import { formatCurrency, formatSequence, getTodayIso } from '../../utils/formatters';
 import { getFruitEffectivePrice, getFruitSavedCrateType } from '../../utils/fruitUtils';
-import { getCustomerLedger } from '../../services/accounting';
+import { getSaleProceedsLedger } from '../../services/accounting';
 import { DatePickerInput } from '../common/DatePickerInput';
 import { AddFruitModal } from '../modals/AddFruitModal';
 import { AddCustomerModal } from '../modals/AddCustomerModal';
@@ -747,7 +747,8 @@ export const SaleProceedsModal: React.FC<SaleProceedsModalProps> = ({
                         setGenerateCustomerBill(true);
                       }
                     }}
-                    placeholder="Select customer for billing & ledger..."
+                    customerType="sale_proceeds"
+                    placeholder="Select Sale Proceeds customer for billing & profile..."
                   />
                 </div>
               </div>
@@ -756,12 +757,12 @@ export const SaleProceedsModal: React.FC<SaleProceedsModalProps> = ({
               {customerId && (
                 (() => {
                   const cust = customers.find((c) => c.id === customerId);
-                  const ledger = cust ? getCustomerLedger(cust.id) : null;
+                  const spLedger = cust ? getSaleProceedsLedger({ customerId: cust.id }) : null;
                   return (
                     <div className="erp-dark-card mt-2 rounded-lg border border-emerald-100 bg-emerald-50/60 p-3 dark:border-emerald-800/60">
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
                         <div className="flex items-center gap-3">
-                          <CustomerAvatar name={cust?.name || 'Customer'} size="md" />
+                          <CustomerAvatar photo={cust?.photo} name={cust?.name || 'Customer'} size="md" />
                           <div>
                             <div className="flex items-center gap-2">
                               <span className="font-bold text-sm text-slate-900 dark:text-white">
@@ -791,13 +792,13 @@ export const SaleProceedsModal: React.FC<SaleProceedsModalProps> = ({
                           </div>
                         </div>
 
-                        {ledger && (
+                        {spLedger && (
                           <div className="text-right sm:border-l sm:border-emerald-200 sm:pl-3 dark:border-emerald-800">
                             <span className="text-[10px] uppercase font-bold text-slate-500 block">
-                              Outstanding Balance
+                              Sale Proceeds Balance
                             </span>
-                            <span className={`text-sm font-bold font-mono-numbers ${ledger.closingBalance > 0 ? 'text-amber-700 dark:text-amber-400' : 'text-slate-700 dark:text-slate-300'}`}>
-                              {formatCurrency(ledger.closingBalance)}
+                            <span className={`text-sm font-bold font-mono-numbers ${spLedger.closingBalance > 0 ? 'text-emerald-700 dark:text-emerald-400' : 'text-slate-700 dark:text-slate-300'}`}>
+                              {formatCurrency(spLedger.closingBalance)}
                             </span>
                           </div>
                         )}
@@ -1222,6 +1223,7 @@ export const SaleProceedsModal: React.FC<SaleProceedsModalProps> = ({
       <AddCustomerModal
         isOpen={isAddCustomerOpen}
         onClose={() => setIsAddCustomerOpen(false)}
+        defaultCustomerTypes={['sale_proceeds']}
         onCustomerCreated={(newCust) => {
           setCustomerId(newCust.id);
           setGenerateCustomerBill(true);

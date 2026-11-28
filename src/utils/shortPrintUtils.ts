@@ -102,17 +102,42 @@ export function stripLedgerCrateInOut(raw?: string | null): string {
   text = text.replace(/\b(\d+(?:\.\d+)?)\s+(?:Out|In)\b/gi, '$1');
   // 2. Prefix tags like "Crates OUT:" / "OUT:" / "IN:" -> ""
   text = text.replace(/\b(?:Crates?\s+)?(?:OUT|IN)\s*:\s*/gi, '');
-  // 3. Orphaned "Out," / "In," or "Out" / "In" right before "(Bal" or separators
+  // 3. Uppercase "OUT 10" / "IN 4" or "Crate(s) Out/In" -> remove direction word
+  text = text.replace(/\b(?:Crates?\s+)?(?:OUT|IN)\s+(?=\d)/g, '');
+  text = text.replace(/\b(Crates?\s+)(?:Out|In)\b/gi, '$1');
+  // 4. Orphaned "Out," / "In," or "Out" / "In" right before "(Bal" or separators or inside parens "(IN)"/"(OUT)"
   text = text.replace(/(^|[,;|(\[]\s*|\s+)(?:Out|In)\s*,\s*/gi, '$1');
   text = text.replace(/(^|[,;|(\[]\s*|\s+)(?:Out|In)(?=\s*(?:\(Bal\b|[,;|)\]]|$))/gi, '$1');
-  // 4. Clean up redundant whitespace and stray delimiters
+  text = text.replace(/\(\s*(?:IN|OUT)\s*\)/gi, '');
+  // 5. Clean up redundant whitespace, empty parens, and stray delimiters
   text = text
+    .replace(/\(\s*\)/g, '')
     .replace(/\s{2,}/g, ' ')
     .replace(/\s+([,;|)])/g, '$1')
     .replace(/([(|])\s+/g, '$1')
     .replace(/^[,\s;|]+|[,\s;|]+$/g, '')
     .trim();
   return text;
+}
+
+/**
+ * Formats a bill crate movement line without "IN" or "OUT" labels,
+ * preserving crate name, quantities, and remaining crate balance.
+ */
+export function formatBillCrateMovementText(movement: {
+  crateName: string;
+  outQuantity?: number;
+  inQuantity?: number;
+}): string {
+  const cleanName = stripLedgerCrateInOut(movement.crateName) || movement.crateName;
+  const outQty = Number(movement.outQuantity) || 0;
+  const inQty = Number(movement.inQuantity) || 0;
+  const bal = Math.max(0, outQty - inQty);
+  const qtyParts: number[] = [];
+  if (outQty > 0) qtyParts.push(outQty);
+  if (inQty > 0) qtyParts.push(inQty);
+  const qtyStr = qtyParts.length > 0 ? qtyParts.join(', ') : '0';
+  return `${cleanName}: ${qtyStr} (${bal} Bal)`;
 }
 
 /**

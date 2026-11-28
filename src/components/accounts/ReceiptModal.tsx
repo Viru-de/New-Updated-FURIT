@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { Customer, Receipt } from '../../types';
 import { db } from '../../services/db';
-import { getCustomerLedger } from '../../services/accounting';
+import { getCustomerLedger, getCustomerCrateStatement, getCustomerCrateBalanceByType } from '../../services/accounting';
 import { formatCurrency, formatSequence, getTodayIso } from '../../utils/formatters';
 import { DatePickerInput } from '../common/DatePickerInput';
 import { AddCustomerModal } from '../modals/AddCustomerModal';
 import { ReceiptPrintModal } from '../print/ReceiptPrintModal';
+import { CrateReceiptPrintModal, CrateReceiptTxType } from '../print/CrateReceiptPrintModal';
 import { CustomerAvatar } from '../common/CustomerAvatar';
 import { CustomerAutocomplete } from '../common/CustomerAutocomplete';
 import { QuantityInput } from '../common/QuantityInput';
-import { X, UserPlus, CreditCard, ArrowDownRight, Printer } from 'lucide-react';
+import { customerHasType } from '../../utils/customerTypeUtils';
+import { X, UserPlus, CreditCard, ArrowDownRight, Printer, Box } from 'lucide-react';
 
 interface ReceiptModalProps {
   isOpen: boolean;
@@ -29,6 +31,8 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
   onSaveAndPrint,
 }) => {
   const customers = db.getCustomers();
+  const crateTypes = db.getCrateTypes();
+  const creditSaleCustomers = customers.filter((c) => customerHasType(c, 'credit_sale'));
 
   const [customerId, setCustomerId] = useState('');
   const [date, setDate] = useState(getTodayIso());
@@ -36,6 +40,13 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
   const [amount, setAmount] = useState<number | ''>(10000);
   const [notes, setNotes] = useState('');
   const [isPrintOpen, setIsPrintOpen] = useState(false);
+
+  // Crate-Only Print option state (does not alter cash receipt posting or crate calculations)
+  const [crateTxType, setCrateTxType] = useState<'none' | CrateReceiptTxType>('none');
+  const [crateTypeId, setCrateTypeId] = useState<string>('');
+  const [crateQty, setCrateQty] = useState<number | ''>(1);
+  const [crateRemarks, setCrateRemarks] = useState('');
+  const [isCratePrintOpen, setIsCratePrintOpen] = useState(false);
 
   const [isAddCustomerOpen, setIsAddCustomerOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -48,12 +59,17 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
       setAmount(editItem.amount);
       setNotes(editItem.notes || '');
     } else {
-      setCustomerId(preselectedCustomerId || customers[0]?.id || '');
+      setCustomerId(preselectedCustomerId || creditSaleCustomers[0]?.id || '');
       setDate(getTodayIso());
       setPaymentMode('Cash');
       setAmount(10000);
       setNotes('');
     }
+    setCrateTxType('none');
+    setCrateTypeId('');
+    setCrateQty(1);
+    setCrateRemarks('');
+    setIsCratePrintOpen(false);
   }, [editItem, isOpen, preselectedCustomerId]);
 
   if (!isOpen) return null;
@@ -63,6 +79,15 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
   const currentOutstanding = currentLedger ? currentLedger.closingBalance : 0;
   const numAmount = Number(amount) || 0;
   const newProjectedOutstanding = currentOutstanding - numAmount;
+
+  const effectiveCrateTypeId = crateTypeId || selectedCustomer?.crateTypeId || crateTypes[0]?.id || '';
+  const selectedCrateType = crateTypes.find((ct) => ct.id === effectiveCrateTypeId) || crateTypes[0];
+  const numCrateQty = Number(crateQty) || 0;
+  const crateStatement = customerId ? getCustomerCrateStatement(customerId) : null;
+  const currentCrateTypeBalance =
+    customerId && effectiveCrateTypeId
+      ? getCustomerCrateBalanceByType(customerId, effectiveCrateTypeId).balance
+      : 0;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -173,7 +198,8 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
               <CustomerAutocomplete
                 valueCustomerId={customerId}
                 onChange={(c) => setCustomerId(c ? c.id : '')}
-                placeholder="Search customer name, mobile or city..."
+                customerType="credit_sale"
+                placeholder="Search Credit Sale customer name, mobile or city..."
               />
             </div>
 
@@ -263,6 +289,126 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
               />
             </div>
 
+            {/* Dedicated Crate-Only Print Option (Crate Received / Crate Out) */}
+            <div className="rounded-xl border border-sky-200 bg-sky-50/70 p-3.5 dark:border-sky-800/60 dark:bg-sky-950/30">
+              <div className="flex flex-wrap items-center justify-between gap-2 mb-2.5">
+                <div className="flex items-center gap-1.5">
+                  <Box className="h-4 w-4 text-sky-600 dark:text-sky-400 shrink-0" />
+                  <span className="text-xs font-bold text-slate-900 dark:text-white">
+                    Crate Print Option
+                  </span>
+                </div>
+                {crateTxType !== 'none' && (
+                  <button
+                    type="button"
+                    onClick={() => setCrateTxType('none')}
+                    className="text-[11px] font-medium text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 cursor-pointer"
+                  >
+                    Clear Selection
+                  </button>
+                )}
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setCrateTxType((prev) => (prev === 'Crate Received' ? 'none' : 'Crate Received'))
+                  }
+                  className={`rounded-lg border px-3 py-2 text-xs font-bold transition-colors cursor-pointer ${
+                    crateTxType === 'Crate Received'
+                      ? 'border-emerald-600 bg-emerald-600 text-white shadow-2xs'
+                      : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200'
+                  }`}
+                >
+                  Crate Received
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setCrateTxType((prev) => (prev === 'Crate Out' ? 'none' : 'Crate Out'))
+                  }
+                  className={`rounded-lg border px-3 py-2 text-xs font-bold transition-colors cursor-pointer ${
+                    crateTxType === 'Crate Out'
+                      ? 'border-amber-600 bg-amber-600 text-white shadow-2xs'
+                      : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200'
+                  }`}
+                >
+                  Crate Out
+                </button>
+              </div>
+
+              {crateTxType !== 'none' && (
+                <div className="mt-3 space-y-2.5 pt-2.5 border-t border-sky-200/80 dark:border-sky-800/50">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    <div>
+                      <label className="mb-1 block text-[11px] font-semibold text-slate-700 dark:text-slate-300">
+                        Crate Type
+                      </label>
+                      <select
+                        value={effectiveCrateTypeId}
+                        onChange={(e) => setCrateTypeId(e.target.value)}
+                        className="w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-900 outline-none focus:border-sky-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                      >
+                        {crateTypes.map((ct) => (
+                          <option key={ct.id} value={ct.id}>
+                            {ct.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="mb-1 block text-[11px] font-semibold text-slate-700 dark:text-slate-300">
+                        Number of Crates
+                      </label>
+                      <QuantityInput
+                        min={1}
+                        step="any"
+                        placeholder="0"
+                        value={crateQty}
+                        onChange={(val) => setCrateQty(val)}
+                        className="w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-bold font-mono-numbers text-slate-900 outline-none focus:border-sky-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="mb-1 block text-[11px] font-semibold text-slate-700 dark:text-slate-300">
+                      Crate Reference / Remarks
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Empty crates returned / Tempo No. (optional)"
+                      value={crateRemarks}
+                      onChange={(e) => setCrateRemarks(e.target.value)}
+                      className="w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-900 outline-none focus:border-sky-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                    />
+                  </div>
+
+                  {selectedCustomer && crateStatement && (
+                    <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-sky-200 bg-white/90 px-2.5 py-1.5 text-[11px] dark:border-sky-800/60 dark:bg-slate-900/70">
+                      <span className="text-slate-600 dark:text-slate-300 font-medium">
+                        Closing Crate Balance ({selectedCrateType?.name || 'All'}):
+                      </span>
+                      <span className="font-mono-numbers font-bold text-slate-900 dark:text-white">
+                        {crateStatement.closingCrates} Total Crates ({currentCrateTypeBalance} {selectedCrateType?.name || 'Crate'})
+                      </span>
+                    </div>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={() => setIsCratePrintOpen(true)}
+                    disabled={!customerId || numCrateQty <= 0}
+                    className="w-full flex items-center justify-center gap-1.5 rounded-lg bg-sky-600 px-4 py-2 text-xs font-bold text-white shadow-xs hover:bg-sky-700 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                  >
+                    <Printer className="h-3.5 w-3.5" />
+                    Crate Print ({crateTxType})
+                  </button>
+                </div>
+              )}
+            </div>
+
             <div className="flex items-center justify-between gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
               <button
                 type="button"
@@ -307,6 +453,7 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
       <AddCustomerModal
         isOpen={isAddCustomerOpen}
         onClose={() => setIsAddCustomerOpen(false)}
+        defaultCustomerTypes={['credit_sale']}
         onCustomerCreated={(c) => setCustomerId(c.id)}
       />
 
@@ -327,6 +474,25 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
             amount: numAmount,
             notes: notes.trim() || undefined,
             createdAt: editItem ? editItem.createdAt : new Date().toISOString(),
+          }}
+        />
+      )}
+
+      {isCratePrintOpen && crateTxType !== 'none' && (
+        <CrateReceiptPrintModal
+          isOpen={isCratePrintOpen}
+          onClose={() => setIsCratePrintOpen(false)}
+          crateReceipt={{
+            id: editItem ? `${editItem.id}-crate` : 'preview-crate-receipt',
+            receiptRefNo: editItem ? editItem.receiptNo : undefined,
+            customerId,
+            customerName: selectedCustomer ? selectedCustomer.name : 'Customer',
+            date,
+            transactionType: crateTxType,
+            crateTypeId: effectiveCrateTypeId,
+            crateName: selectedCrateType?.name || 'Standard Crate',
+            quantity: numCrateQty,
+            remarks: crateRemarks.trim() || notes.trim() || undefined,
           }}
         />
       )}

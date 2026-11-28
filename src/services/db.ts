@@ -6,6 +6,7 @@ import {
   CrateType,
   CreditSale,
   Customer,
+  CustomerType,
   Fruit,
   GeneralSettings,
   Receipt,
@@ -16,6 +17,10 @@ import {
   Vendor,
   TrashItem,
 } from '../types';
+import {
+  normalizeCustomerTypes,
+  customerHasType,
+} from '../utils/customerTypeUtils';
 
 const STORAGE_KEYS = {
   CUSTOMERS: 'hk_erp_customers',
@@ -447,6 +452,7 @@ const INITIAL_CUSTOMERS: Customer[] = [
   {
     id: 'c1',
     name: 'ABC Customer',
+    customerTypes: ['credit_sale', 'sale_proceeds'],
     mobile: '9876543210',
     altMobile: '9876500000',
     address: 'Shop 8, Vegetable & Fruit Market',
@@ -464,6 +470,7 @@ const INITIAL_CUSTOMERS: Customer[] = [
   {
     id: 'c2',
     name: 'Shree Ganesh Fruit Mart',
+    customerTypes: ['cash_sale', 'credit_sale', 'sale_proceeds'],
     mobile: '9819001122',
     address: 'Station Road, Dadar',
     city: 'Mumbai',
@@ -479,6 +486,7 @@ const INITIAL_CUSTOMERS: Customer[] = [
   {
     id: 'c3',
     name: 'Royal Fruit Palace',
+    customerTypes: ['credit_sale'],
     mobile: '9822334455',
     address: 'Kalyan APMC Yard',
     city: 'Thane',
@@ -1066,7 +1074,60 @@ export const db = {
 
   // Customers
   getCustomers(): Customer[] {
-    return getItem<Customer[]>(STORAGE_KEYS.CUSTOMERS, INITIAL_CUSTOMERS);
+    const rawList = getItem<Customer[]>(STORAGE_KEYS.CUSTOMERS, INITIAL_CUSTOMERS);
+    const needsMigration = rawList.some((c) => !Array.isArray(c.customerTypes));
+    if (!needsMigration) {
+      return rawList;
+    }
+
+    const creditSales = getItem<CreditSale[]>(STORAGE_KEYS.CREDIT_SALES, INITIAL_CREDIT_SALES);
+    const cashSales = getItem<CashSale[]>(STORAGE_KEYS.CASH_SALES, INITIAL_CASH_SALES);
+    const saleProceeds = getItem<SaleProceeds[]>(STORAGE_KEYS.SALE_PROCEEDS, INITIAL_SALE_PROCEEDS);
+    const receipts = getItem<Receipt[]>(STORAGE_KEYS.RECEIPTS, INITIAL_RECEIPTS);
+
+    const creditCustIds = new Set([
+      ...creditSales.map((s) => s.customerId),
+      ...receipts.map((r) => r.customerId),
+    ]);
+    const cashCustIds = new Set(cashSales.map((s) => s.customerId).filter(Boolean) as string[]);
+    const spCustIds = new Set(saleProceeds.map((s) => s.customerId).filter(Boolean) as string[]);
+
+    const migrated = rawList.map((c) => {
+      if (Array.isArray(c.customerTypes)) {
+        return {
+          ...c,
+          customerTypes: normalizeCustomerTypes(c.customerTypes),
+        };
+      }
+      const initialMatch = INITIAL_CUSTOMERS.find((ic) => ic.id === c.id);
+      if (initialMatch?.customerTypes) {
+        return {
+          ...c,
+          customerTypes: [...initialMatch.customerTypes],
+        };
+      }
+      const inferred = new Set<CustomerType>();
+      if (cashCustIds.has(c.id)) inferred.add('cash_sale');
+      if (creditCustIds.has(c.id) || (c.openingBalance && c.openingBalance !== 0)) {
+        inferred.add('credit_sale');
+      }
+      if (spCustIds.has(c.id)) inferred.add('sale_proceeds');
+      if (inferred.size === 0) {
+        inferred.add('credit_sale');
+      }
+      return {
+        ...c,
+        customerTypes: normalizeCustomerTypes(Array.from(inferred)),
+      };
+    });
+
+    setItem(STORAGE_KEYS.CUSTOMERS, migrated);
+    return migrated;
+  },
+  getCustomersByType(requiredType?: CustomerType | CustomerType[]): Customer[] {
+    const all = this.getCustomers();
+    if (!requiredType) return all;
+    return all.filter((c) => customerHasType(c, requiredType));
   },
   getCustomerById(id: string): Customer | undefined {
     return this.getCustomers().find((c) => c.id === id);
@@ -1074,10 +1135,22 @@ export const db = {
   saveCustomer(customer: Customer): void {
     const list = this.getCustomers();
     const idx = list.findIndex((c) => c.id === customer.id);
+    const existing = idx >= 0 ? list[idx] : undefined;
+    const normalizedTypes = Array.isArray(customer.customerTypes)
+      ? normalizeCustomerTypes(customer.customerTypes)
+      : existing?.customerTypes
+      ? normalizeCustomerTypes(existing.customerTypes)
+      : (['credit_sale'] as CustomerType[]);
+
+    const toSave: Customer = {
+      ...customer,
+      customerTypes: normalizedTypes.length > 0 ? normalizedTypes : ['credit_sale'],
+    };
+
     if (idx >= 0) {
-      list[idx] = customer;
+      list[idx] = toSave;
     } else {
-      list.push(customer);
+      list.push(toSave);
     }
     setItem(STORAGE_KEYS.CUSTOMERS, list);
   },

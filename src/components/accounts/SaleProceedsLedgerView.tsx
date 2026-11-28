@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { db } from '../../services/db';
 import { getSaleProceedsLedger, getCustomerCrateStatement } from '../../services/accounting';
 import { formatCurrency, formatDate, toIsoDate, getTodayIso, formatCompanySignature } from '../../utils/formatters';
@@ -6,8 +6,29 @@ import { DatePickerInput } from '../common/DatePickerInput';
 import { Customer, LedgerEntry, SaleProceeds, SaleProceedsOpeningBalance } from '../../types';
 import { SaleProceedsModal } from './SaleProceedsModal';
 import { SearchCustomerModal } from '../modals/SearchCustomerModal';
-import { CustomerAvatar } from '../common/CustomerAvatar';
-import { Edit2, Download, Printer, Filter, Calendar, Building2, Search, X, Users } from 'lucide-react';
+import { CustomerAvatar, getCustomerInitials } from '../common/CustomerAvatar';
+import { CustomerAutocomplete } from '../common/CustomerAutocomplete';
+import {
+  customerHasType,
+  getEffectiveCustomerTypes,
+  getCustomerTypeMeta,
+} from '../../utils/customerTypeUtils';
+import {
+  Edit2,
+  Download,
+  Printer,
+  Filter,
+  Calendar,
+  Building2,
+  Search,
+  X,
+  Users,
+  Phone,
+  MapPin,
+  CreditCard,
+  Box,
+  Wallet,
+} from 'lucide-react';
 import { exportSaleProceedsLedger, exportSaleProceedsCustomerLedger } from '../../utils/excelEngine';
 import { BillShareButtons } from '../common/BillShareButtons';
 import { triggerPrint } from '../../utils/pdfAndShareEngine';
@@ -30,6 +51,22 @@ export const SaleProceedsLedgerView: React.FC<SaleProceedsLedgerViewProps> = ({
   // Customer search & filter state
   const [selectedCustomerId, setSelectedCustomerId] = useState<string>(initialCustomerId || '');
   const [isSearchCustomerOpen, setIsSearchCustomerOpen] = useState(false);
+
+  useEffect(() => {
+    if (initialCustomerId !== undefined) {
+      setSelectedCustomerId(initialCustomerId || '');
+    }
+  }, [initialCustomerId]);
+
+  useEffect(() => {
+    return db.subscribe(() => setRefreshKey((k) => k + 1));
+  }, []);
+
+  const allCustomers = useMemo(() => db.getCustomers(), [refreshKey]);
+  const saleProceedsCustomers = useMemo(
+    () => allCustomers.filter((c) => customerHasType(c, 'sale_proceeds')),
+    [allCustomers]
+  );
   const selectedCustomer = selectedCustomerId ? db.getCustomerById(selectedCustomerId) : null;
 
   const currentOb = db.getSaleProceedsOpeningBalance();
@@ -367,11 +404,21 @@ export const SaleProceedsLedgerView: React.FC<SaleProceedsLedgerViewProps> = ({
       {/* Date & Customer Filter Bar */}
       <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-2xs dark:border-slate-800 dark:bg-slate-900 no-print">
         <div className="flex flex-wrap items-end gap-3">
+          {/* Sale Proceeds Customer Autocomplete */}
+          <div className="w-full sm:w-64">
+            <label className="mb-1 block text-xs font-semibold text-slate-700 dark:text-slate-200">
+              Sale Proceeds Customer
+            </label>
+            <CustomerAutocomplete
+              valueCustomerId={selectedCustomerId}
+              customerType="sale_proceeds"
+              onChange={(cust) => setSelectedCustomerId(cust ? cust.id : '')}
+              placeholder="Select Sale Proceeds customer..."
+            />
+          </div>
+
           {/* Prominent Search Customer Button */}
           <div>
-            <label className="mb-1 block text-xs font-semibold text-slate-700 dark:text-slate-200">
-              Customer Filter
-            </label>
             <button
               type="button"
               onClick={() => setIsSearchCustomerOpen(true)}
@@ -382,52 +429,21 @@ export const SaleProceedsLedgerView: React.FC<SaleProceedsLedgerViewProps> = ({
             </button>
           </div>
 
-          {/* Active Customer Indicator with Clear Search / All Customers option */}
-          {selectedCustomer ? (
-            <div className="flex items-center gap-2.5 rounded-lg border border-emerald-300 bg-emerald-50/90 px-3 py-1.5 text-xs dark:border-emerald-700 dark:bg-emerald-950/60">
-              <CustomerAvatar photo={selectedCustomer.photo} name={selectedCustomer.name} size="xs" />
-              <div className="min-w-0">
-                <div className="flex items-center gap-1.5">
-                  <span className="font-bold text-emerald-950 dark:text-emerald-100 truncate">
-                    {selectedCustomer.name}
-                  </span>
-                  {selectedCustomer.city && (
-                    <span className="text-[10px] font-semibold text-emerald-700 dark:text-emerald-200 bg-emerald-100/90 dark:bg-emerald-900/80 px-1.5 py-0.2 rounded">
-                      {selectedCustomer.city}
-                    </span>
-                  )}
-                </div>
-                {selectedCustomer.mobile && (
-                  <div className="text-[11px] text-emerald-800 dark:text-emerald-300 font-mono">
-                    Mob: {selectedCustomer.mobile}
-                  </div>
-                )}
-              </div>
-              <button
-                type="button"
-                onClick={() => setSelectedCustomerId('')}
-                className="ml-1 rounded p-1 text-emerald-700 hover:bg-emerald-200 hover:text-rose-600 dark:text-emerald-300 dark:hover:bg-emerald-900 dark:hover:text-rose-300 cursor-pointer transition-colors"
-                title="Clear Search / Show All Customers"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-          ) : (
-            <div className="hidden sm:flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 erp-dark-panel px-3 py-2 text-xs font-medium text-slate-700">
-              <Users className="h-4 w-4 text-emerald-600 dark:text-emerald-300" />
-              <span>All Customers (Complete Ledger)</span>
-            </div>
-          )}
-
           {/* All Customers / Clear Search button when filtered */}
-          {selectedCustomerId && (
+          {selectedCustomerId ? (
             <button
               type="button"
               onClick={() => setSelectedCustomerId('')}
-              className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700 cursor-pointer shadow-2xs transition-colors"
+              className="flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700 cursor-pointer shadow-2xs transition-colors"
             >
-              All Customers (Clear Search)
+              <X className="h-3.5 w-3.5 text-rose-500" />
+              <span>All Customers</span>
             </button>
+          ) : (
+            <div className="hidden sm:flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 erp-dark-panel px-3 py-2 text-xs font-medium text-slate-700">
+              <Users className="h-4 w-4 text-emerald-600 dark:text-emerald-300" />
+              <span>All Customers ({saleProceedsCustomers.length} profiles)</span>
+            </div>
           )}
 
           <div className="w-36 sm:w-44">
@@ -464,12 +480,338 @@ export const SaleProceedsLedgerView: React.FC<SaleProceedsLedgerViewProps> = ({
             </div>
             {crateSummary.typeBalances.map((tb, idx) => (
               <div key={idx} className="font-semibold text-slate-700 dark:text-slate-200">
-                {tb.crateName}: {tb.issued} Out ({tb.balance} Bal)
+                {tb.crateName}: {tb.issued} ({tb.balance} Bal)
               </div>
             ))}
           </div>
         </div>
       </div>
+
+      {/* Sale Proceeds Customer Profile Card (Isolated from Credit Sale Customer Ledger) */}
+      {selectedCustomer ? (() => {
+        const custTypes = getEffectiveCustomerTypes(selectedCustomer);
+        const hasSpOb =
+          selectedCustomer.saleProceedsOpeningBalance !== undefined &&
+          selectedCustomer.saleProceedsOpeningBalance !== 0;
+        const usesFallbackOb =
+          !hasSpOb &&
+          !customerHasType(selectedCustomer, 'credit_sale') &&
+          selectedCustomer.openingBalance !== 0;
+        const spObAmount = hasSpOb
+          ? selectedCustomer.saleProceedsOpeningBalance || 0
+          : usesFallbackOb
+          ? selectedCustomer.openingBalance || 0
+          : 0;
+        const spObType = hasSpOb
+          ? selectedCustomer.saleProceedsOpeningBalanceType || 'credit'
+          : usesFallbackOb
+          ? selectedCustomer.openingBalanceType || 'credit'
+          : 'credit';
+
+        return (
+          <div
+            id="sale-proceeds-customer-profile"
+            className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 sm:p-6 shadow-xs relative overflow-hidden transition-all no-print"
+          >
+            {/* Top border accent line */}
+            <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-emerald-500 via-teal-500 to-blue-600" />
+
+            <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-5 sm:gap-6 pt-1">
+              {/* Left Section: Large Photo + Customer Details */}
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5 sm:gap-6 min-w-0 flex-1">
+                <div className="relative shrink-0">
+                  <div className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-2xl border-2 border-emerald-500/40 dark:border-emerald-500/30 shadow-md overflow-hidden bg-slate-100 dark:bg-slate-800 flex items-center justify-center select-none ring-4 ring-emerald-50 dark:ring-emerald-950/40">
+                    {selectedCustomer.photo ? (
+                      <img
+                        src={selectedCustomer.photo}
+                        alt={selectedCustomer.name}
+                        className="w-full h-full object-cover"
+                        loading="eager"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-emerald-50 to-teal-100/70 dark:from-slate-800 dark:to-emerald-950/50 text-emerald-800 dark:text-emerald-200">
+                        <span className="font-mono-numbers text-3xl sm:text-4xl font-extrabold tracking-tight">
+                          {getCustomerInitials(selectedCustomer.name)}
+                        </span>
+                        <span className="text-[10px] font-semibold text-emerald-700/80 dark:text-emerald-300/80 uppercase tracking-wider mt-1">
+                          No Photo
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  {selectedCustomer.active && (
+                    <span
+                      className="absolute -bottom-1 -right-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-600 text-white shadow-xs border-2 border-white dark:border-slate-900"
+                      title="Active Sale Proceeds Customer"
+                    >
+                      Active
+                    </span>
+                  )}
+                </div>
+
+                {/* Customer Details Content */}
+                <div className="min-w-0 space-y-2.5 flex-1">
+                  <div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h3 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight leading-tight">
+                        {selectedCustomer.name}
+                      </h3>
+                      <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                        Sale Proceeds Customer
+                      </span>
+                      {custTypes
+                        .filter((t) => t !== 'sale_proceeds')
+                        .map((t) => {
+                          const meta = getCustomerTypeMeta(t);
+                          return (
+                            <span
+                              key={t}
+                              className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${meta.badgeClass}`}
+                            >
+                              {meta.shortLabel}
+                            </span>
+                          );
+                        })}
+                    </div>
+
+                    {(selectedCustomer.notes?.trim() || selectedCustomer.description?.trim()) && (
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 italic">
+                        &ldquo;{selectedCustomer.notes?.trim() || selectedCustomer.description?.trim()}&rdquo;
+                      </p>
+                    )}
+
+                    {selectedCustomer.contactPerson && selectedCustomer.contactPerson.trim() && (
+                      <p className="text-xs text-slate-600 dark:text-slate-300 mt-0.5 font-medium">
+                        <span className="text-slate-400">Contact:</span> {selectedCustomer.contactPerson.trim()}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Info Grid */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-2 text-xs text-slate-600 dark:text-slate-300">
+                    {selectedCustomer.mobile && selectedCustomer.mobile.trim() ? (
+                      <div className="flex items-center gap-2.5">
+                        <span className="flex items-center justify-center w-7 h-7 rounded-lg bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 shrink-0">
+                          <Phone className="h-4 w-4" />
+                        </span>
+                        <div>
+                          <span className="text-[10px] uppercase font-bold text-slate-400 block leading-3">
+                            Phone / Mobile
+                          </span>
+                          <span className="font-semibold text-slate-900 dark:text-white font-mono-numbers text-xs sm:text-sm">
+                            <a href={`tel:${selectedCustomer.mobile.trim()}`} className="hover:underline">
+                              {selectedCustomer.mobile.trim()}
+                            </a>
+                          </span>
+                          {selectedCustomer.altMobile && selectedCustomer.altMobile.trim() && (
+                            <span className="text-slate-400 text-xs font-mono-numbers ml-1">
+                              / {selectedCustomer.altMobile.trim()}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    ) : selectedCustomer.altMobile && selectedCustomer.altMobile.trim() ? (
+                      <div className="flex items-center gap-2.5">
+                        <span className="flex items-center justify-center w-7 h-7 rounded-lg bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 shrink-0">
+                          <Phone className="h-4 w-4" />
+                        </span>
+                        <div>
+                          <span className="text-[10px] uppercase font-bold text-slate-400 block leading-3">
+                            Alternate Mobile
+                          </span>
+                          <span className="font-semibold text-slate-900 dark:text-white font-mono-numbers text-xs sm:text-sm">
+                            <a href={`tel:${selectedCustomer.altMobile.trim()}`} className="hover:underline">
+                              {selectedCustomer.altMobile.trim()}
+                            </a>
+                          </span>
+                        </div>
+                      </div>
+                    ) : null}
+
+                    {Boolean(
+                      selectedCustomer.address?.trim() ||
+                        selectedCustomer.city?.trim() ||
+                        selectedCustomer.state?.trim()
+                    ) && (
+                      <div className="flex items-center gap-2.5">
+                        <span className="flex items-center justify-center w-7 h-7 rounded-lg bg-blue-50 dark:bg-blue-950/50 text-blue-600 shrink-0">
+                          <MapPin className="h-4 w-4" />
+                        </span>
+                        <div className="min-w-0">
+                          <span className="text-[10px] uppercase font-bold text-slate-400 block leading-3">
+                            Address &amp; City
+                          </span>
+                          <span className="font-semibold text-slate-900 dark:text-white truncate block text-xs sm:text-sm">
+                            {[
+                              selectedCustomer.address?.trim(),
+                              selectedCustomer.city?.trim(),
+                              selectedCustomer.state?.trim(),
+                            ]
+                              .filter(Boolean)
+                              .join(', ')}
+                          </span>
+                        </div>
+                      </div>
+                    )}
+
+                    {selectedCustomer.aadhaarNo && selectedCustomer.aadhaarNo.trim() && (
+                      <div className="flex items-center gap-2.5">
+                        <span className="flex items-center justify-center w-7 h-7 rounded-lg bg-purple-50 dark:bg-purple-950/50 text-purple-600 shrink-0">
+                          <CreditCard className="h-4 w-4" />
+                        </span>
+                        <div>
+                          <span className="text-[10px] uppercase font-bold text-slate-400 block leading-3">
+                            Aadhaar Number
+                          </span>
+                          <span className="font-semibold text-slate-800 dark:text-slate-200 font-mono-numbers text-xs">
+                            {selectedCustomer.aadhaarNo.trim()}
+                          </span>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="flex items-center gap-2.5">
+                      <span className="flex items-center justify-center w-7 h-7 rounded-lg bg-amber-50 dark:bg-amber-950/50 text-amber-600 shrink-0">
+                        <Wallet className="h-4 w-4" />
+                      </span>
+                      <div>
+                        <span className="text-[10px] uppercase font-bold text-slate-400 block leading-3">
+                          Opening Balance (SP)
+                        </span>
+                        <span className="font-semibold text-slate-800 dark:text-slate-200 font-mono-numbers text-xs">
+                          {formatCurrency(spObAmount)}
+                          {spObAmount > 0 ? ` (${spObType === 'credit' ? 'Cr' : 'Dr'})` : ''}
+                        </span>
+                      </div>
+                    </div>
+
+                    {Boolean(selectedCustomer.openingCrateBalance) && (
+                      <div className="flex items-center gap-2.5">
+                        <span className="flex items-center justify-center w-7 h-7 rounded-lg bg-sky-50 dark:bg-sky-950/50 text-sky-600 shrink-0">
+                          <Box className="h-4 w-4" />
+                        </span>
+                        <div>
+                          <span className="text-[10px] uppercase font-bold text-slate-400 block leading-3">
+                            Opening Crate Balance
+                          </span>
+                          <span className="font-semibold text-slate-800 dark:text-slate-200 font-mono-numbers text-xs">
+                            {selectedCustomer.openingCrateBalance} Crates
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Top-Right Sale Proceeds Balance Card */}
+              <div className="w-full lg:w-72 shrink-0 flex flex-col justify-between bg-slate-50 erp-dark-panel p-4 sm:p-5 rounded-xl border border-slate-200 dark:border-slate-700/60 shadow-2xs">
+                <div>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-200">
+                      {filterStartDate || filterEndDate ? 'Period Balance' : 'Sale Proceeds Balance'}
+                    </span>
+                    <span
+                      className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                        ledger.closingBalance > 0
+                          ? 'bg-emerald-100 text-emerald-800 dark:bg-[#131d31] dark:text-emerald-300 dark:border dark:border-emerald-400/50'
+                          : ledger.closingBalance < 0
+                          ? 'bg-rose-100 text-rose-800 dark:bg-[#131d31] dark:text-rose-300 dark:border dark:border-rose-400/50'
+                          : 'bg-slate-200 text-slate-700 dark:bg-[#131d31] dark:text-slate-200 dark:border dark:border-slate-500'
+                      }`}
+                    >
+                      {ledger.closingBalance > 0
+                        ? 'Cr · Payable'
+                        : ledger.closingBalance < 0
+                        ? 'Dr · Receivable'
+                        : 'Settled'}
+                    </span>
+                  </div>
+
+                  <div
+                    className={`mt-1 font-mono-numbers text-2xl sm:text-3xl font-black tracking-tight ${
+                      ledger.closingBalance > 0
+                        ? 'text-emerald-600 dark:text-emerald-400'
+                        : ledger.closingBalance < 0
+                        ? 'text-rose-600 dark:text-rose-400'
+                        : 'text-slate-800 dark:text-slate-200'
+                    }`}
+                  >
+                    {formatCurrency(ledger.closingBalance)}
+                  </div>
+                </div>
+
+                {/* Summary totals inside balance box */}
+                <div className="mt-3 pt-3 border-t border-slate-200 dark:border-slate-700 text-[11px] space-y-1.5 text-slate-500 font-mono-numbers">
+                  {(filterStartDate || filterEndDate) && ledger.periodOpeningBalance !== undefined && (
+                    <div className="flex items-center justify-between gap-2 text-[10px]">
+                      <span className="uppercase tracking-wider text-slate-400">Opening (b/f)</span>
+                      <span className="font-semibold text-slate-700 dark:text-slate-300">
+                        {formatCurrency(ledger.periodOpeningBalance)}
+                      </span>
+                    </div>
+                  )}
+                  <div className="flex items-center justify-between gap-4">
+                    <div>
+                      <span className="block text-[9px] uppercase tracking-wider text-slate-400">
+                        Total Credit
+                      </span>
+                      <span className="font-bold text-emerald-600 dark:text-emerald-400">
+                        {formatCurrency(ledger.totalCredit)}
+                      </span>
+                    </div>
+                    <div className="text-right">
+                      <span className="block text-[9px] uppercase tracking-wider text-slate-400">
+                        Total Debit
+                      </span>
+                      <span className="font-bold text-rose-600 dark:text-rose-400">
+                        {formatCurrency(ledger.totalDebit)}
+                      </span>
+                    </div>
+                  </div>
+                  {(filterStartDate || filterEndDate) && ledger.overallClosingBalance !== undefined && (
+                    <div className="flex items-center justify-between gap-2 pt-1.5 border-t border-slate-200/60 dark:border-slate-700/60 text-[10px]">
+                      <span className="uppercase tracking-wider text-slate-400">All-Time Balance</span>
+                      <span className="font-bold text-slate-900 dark:text-white">
+                        {formatCurrency(ledger.overallClosingBalance)}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })() : (
+        saleProceedsCustomers.length > 0 && (
+          <div className="rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-2xs dark:border-slate-800 dark:bg-slate-900 no-print">
+            <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+              <span className="text-xs font-bold text-slate-700 dark:text-slate-200">
+                Sale Proceeds Customer Profiles ({saleProceedsCustomers.length})
+              </span>
+              <span className="text-[11px] text-slate-400">
+                Click any customer to open their dedicated Sale Proceeds profile &amp; statement
+              </span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {saleProceedsCustomers.slice(0, 12).map((c) => (
+                <button
+                  key={c.id}
+                  type="button"
+                  onClick={() => setSelectedCustomerId(c.id)}
+                  className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50/80 px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:border-emerald-400 hover:bg-emerald-50 hover:text-emerald-800 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/50 cursor-pointer transition-colors"
+                >
+                  <CustomerAvatar photo={c.photo} name={c.name} size="xs" />
+                  <span>{c.name}</span>
+                  {c.city && (
+                    <span className="text-[10px] font-normal text-slate-400">({c.city})</span>
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+        )
+      )}
 
       {/* On-screen Ledger Table Container (Interactive, full dark mode and edit support) */}
       <div
@@ -479,19 +821,19 @@ export const SaleProceedsLedgerView: React.FC<SaleProceedsLedgerViewProps> = ({
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm border-collapse bg-white dark:bg-slate-900">
             <thead>
-              <tr className="border-b border-slate-200 bg-slate-100 text-[11px] font-bold uppercase tracking-wider text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
-                <th className="px-5 py-3.5 w-32 text-slate-800 dark:text-slate-100 font-bold">Date</th>
-                <th className="px-5 py-3.5 text-slate-800 dark:text-slate-100 font-bold">Particulars</th>
-                <th className="px-5 py-3.5 text-right w-36 text-slate-800 dark:text-slate-100 font-bold">Debit (Dr)</th>
-                <th className="px-5 py-3.5 text-right w-36 text-slate-800 dark:text-slate-100 font-bold">Credit (Cr)</th>
-                <th className="px-5 py-3.5 text-right w-44 text-slate-800 dark:text-slate-100 font-bold">Balance (₹)</th>
+              <tr className="border-b border-slate-200 bg-slate-100 text-[11px] print:text-[13.5px] font-bold print:font-extrabold uppercase tracking-wider text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
+                <th className="px-5 py-3.5 w-32 text-slate-800 dark:text-slate-100 font-bold print:font-extrabold">Date</th>
+                <th className="px-5 py-3.5 text-slate-800 dark:text-slate-100 font-bold print:font-extrabold">Particulars</th>
+                <th className="px-5 py-3.5 text-right w-36 text-slate-800 dark:text-slate-100 font-bold print:font-extrabold">Debit (Dr)</th>
+                <th className="px-5 py-3.5 text-right w-36 text-slate-800 dark:text-slate-100 font-bold print:font-extrabold">Credit (Cr)</th>
+                <th className="px-5 py-3.5 text-right w-44 text-slate-800 dark:text-slate-100 font-bold print:font-extrabold">Balance (₹)</th>
                 <th className="px-4 py-3.5 text-center w-24 text-slate-800 dark:text-slate-100 font-bold no-print">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800 bg-white dark:bg-slate-900">
               {ledger.entries.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-5 py-8 text-center text-xs text-slate-500 dark:text-slate-400">
+                  <td colSpan={6} className="px-5 py-8 text-center text-xs print:text-[13px] print:font-bold text-slate-500 dark:text-slate-400">
                     {selectedCustomer
                       ? `No sale proceeds records found for ${selectedCustomer.name}${filterStartDate || filterEndDate ? ' in this date range.' : '.'}`
                       : 'No ledger transactions recorded in this period.'}
@@ -505,18 +847,19 @@ export const SaleProceedsLedgerView: React.FC<SaleProceedsLedgerViewProps> = ({
                     <tr
                       key={entry.id}
                       className={`hover:bg-slate-50/60 transition-colors dark:hover:bg-slate-800/40 ${
-                        isOb ? 'bg-amber-50/40 font-medium dark:bg-amber-950/30' : ''
+                        isOb ? 'bg-amber-50/40 font-medium print:font-bold dark:bg-amber-950/30' : ''
                       }`}
                     >
-                      <td className="px-5 py-3 font-mono-numbers text-xs text-slate-700 dark:text-slate-300 whitespace-nowrap">
+                      <td className="px-5 py-3 font-mono-numbers text-xs print:text-[13px] print:font-bold text-slate-700 dark:text-slate-300 whitespace-nowrap">
                         {formatDate(entry.date)}
                       </td>
                       <td className="px-5 py-3 text-slate-900 dark:text-slate-100">
-                        <div className={`font-semibold text-xs sm:text-sm ${isOb ? 'text-amber-900 dark:text-amber-300 font-bold' : 'text-slate-900 dark:text-slate-100'}`}>
-                          {entry.particulars}
+                        <div className={`font-semibold print:font-bold text-xs sm:text-sm print:text-[13px] ${isOb ? 'text-amber-900 dark:text-amber-300 font-bold' : 'text-slate-900 dark:text-slate-100'}`}>
+                          <span className="print:hidden">{entry.particulars}</span>
+                          <span className="hidden print:inline">{stripLedgerCrateInOut(entry.particulars) || entry.particulars}</span>
                         </div>
                         {!isOb && (
-                          <div className="text-[11px] font-semibold text-slate-700 dark:text-slate-300 print:text-black mt-0.5 whitespace-nowrap">
+                          <div className="text-[11px] print:text-[13px] font-semibold print:font-bold text-slate-700 dark:text-slate-300 print:text-black mt-0.5 whitespace-nowrap">
                             <span>Qty: {details.qty}</span>
                             <span className="mx-1.5 opacity-60">|</span>
                             <span>Weight: {details.weight > 0 ? `${details.weight} Kg` : '0 Kg'}</span>
@@ -526,15 +869,15 @@ export const SaleProceedsLedgerView: React.FC<SaleProceedsLedgerViewProps> = ({
                         )}
                       </td>
                       {/* Debit cell - blank if null */}
-                      <td className="px-5 py-3 text-right font-mono-numbers text-xs sm:text-sm text-rose-600 dark:text-rose-400 font-semibold whitespace-nowrap">
+                      <td className="px-5 py-3 text-right font-mono-numbers text-xs sm:text-sm print:text-[13px] text-rose-600 dark:text-rose-400 font-semibold print:font-bold whitespace-nowrap">
                         {entry.debit !== null ? formatCurrency(entry.debit) : ''}
                       </td>
                       {/* Credit cell - blank if null */}
-                      <td className="px-5 py-3 text-right font-mono-numbers text-xs sm:text-sm text-emerald-600 dark:text-emerald-400 font-semibold whitespace-nowrap">
+                      <td className="px-5 py-3 text-right font-mono-numbers text-xs sm:text-sm print:text-[13px] text-emerald-600 dark:text-emerald-400 font-semibold print:font-bold whitespace-nowrap">
                         {entry.credit !== null ? formatCurrency(entry.credit) : ''}
                       </td>
                       {/* Balance cell */}
-                      <td className="px-5 py-3 text-right font-mono-numbers text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100 whitespace-nowrap">
+                      <td className="px-5 py-3 text-right font-mono-numbers text-xs sm:text-sm print:text-[13px] font-bold text-slate-900 dark:text-slate-100 whitespace-nowrap">
                         {formatCurrency(entry.balance)}
                       </td>
                       <td className="px-4 py-3 text-center no-print whitespace-nowrap">
@@ -554,17 +897,17 @@ export const SaleProceedsLedgerView: React.FC<SaleProceedsLedgerViewProps> = ({
               )}
             </tbody>
             <tfoot>
-              <tr className="border-t-2 border-slate-300 bg-slate-100 font-bold dark:border-slate-700 dark:bg-slate-800">
-                <td colSpan={2} className="px-5 py-3.5 text-xs uppercase tracking-wider text-slate-800 dark:text-slate-100">
+              <tr className="border-t-2 border-slate-300 bg-slate-100 font-bold print:font-extrabold dark:border-slate-700 dark:bg-slate-800">
+                <td colSpan={2} className="px-5 py-3.5 text-xs print:text-[13.5px] uppercase tracking-wider text-slate-800 dark:text-slate-100">
                   Total & Closing Balance
                 </td>
-                <td className="px-5 py-3.5 text-right font-mono-numbers text-sm text-rose-600 dark:text-rose-400 whitespace-nowrap">
+                <td className="px-5 py-3.5 text-right font-mono-numbers text-sm print:text-[13.5px] text-rose-600 dark:text-rose-400 whitespace-nowrap">
                   {ledger.totalDebit > 0 ? formatCurrency(ledger.totalDebit) : ''}
                 </td>
-                <td className="px-5 py-3.5 text-right font-mono-numbers text-sm text-emerald-600 dark:text-emerald-400 whitespace-nowrap">
+                <td className="px-5 py-3.5 text-right font-mono-numbers text-sm print:text-[13.5px] text-emerald-600 dark:text-emerald-400 whitespace-nowrap">
                   {ledger.totalCredit > 0 ? formatCurrency(ledger.totalCredit) : ''}
                 </td>
-                <td className="px-5 py-3.5 text-right font-mono-numbers text-base text-emerald-700 dark:text-emerald-300 font-extrabold whitespace-nowrap">
+                <td className="px-5 py-3.5 text-right font-mono-numbers text-base print:text-[15px] text-emerald-700 dark:text-emerald-300 font-extrabold print:font-black whitespace-nowrap">
                   {formatCurrency(ledger.closingBalance)}
                 </td>
                 <td className="no-print"></td>
@@ -631,11 +974,11 @@ export const SaleProceedsLedgerView: React.FC<SaleProceedsLedgerViewProps> = ({
             {/* Top-Left: M/s: Customer Name only */}
             <div className="max-w-[65%]">
               {resolvedPrintCustomer ? (
-                <div className="text-[16px] font-extrabold text-black uppercase tracking-tight leading-tight">
+                <div className="sp-ledger-party-name text-[17px] font-extrabold text-black uppercase tracking-tight leading-tight">
                   M/s: {resolvedPrintCustomer.name || 'Customer'}
                 </div>
               ) : (
-                <div className="text-[16px] font-extrabold text-black uppercase tracking-tight leading-tight">
+                <div className="sp-ledger-party-name text-[17px] font-extrabold text-black uppercase tracking-tight leading-tight">
                   ALL CUSTOMERS
                 </div>
               )}
@@ -643,10 +986,10 @@ export const SaleProceedsLedgerView: React.FC<SaleProceedsLedgerViewProps> = ({
 
             {/* Top-Right: ACCOUNT DETAILS & Date Range */}
             <div className="text-right shrink-0">
-              <div className="text-[15px] font-black uppercase tracking-wider text-black leading-tight">
+              <div className="sp-ledger-account-heading text-[16px] font-black uppercase tracking-wider text-black leading-tight">
                 ACCOUNT DETAILS
               </div>
-              <div className="text-[12px] font-semibold text-black mt-0.5">
+              <div className="sp-ledger-date-range text-[13px] font-bold text-black mt-0.5">
                 {filterStartDate && filterEndDate ? (
                   <span>{formatDate(filterStartDate)} To {formatDate(filterEndDate)}</span>
                 ) : filterStartDate ? (
@@ -663,16 +1006,16 @@ export const SaleProceedsLedgerView: React.FC<SaleProceedsLedgerViewProps> = ({
 
         {/* Short Print Table: DATE | PARTICULARS | DEBIT | CREDIT | BALANCE */}
         <div className="overflow-x-auto">
-          <table className="sp-short-table w-full table-fixed box-border text-left text-[12px] border-collapse bg-white text-black">
+          <table className="sp-short-table w-full table-fixed box-border text-left text-[13px] border-collapse bg-white text-black">
             <colgroup>
-              <col style={{ width: '86px' }} />
+              <col style={{ width: '94px' }} />
               <col />
-              <col style={{ width: '102px' }} />
-              <col style={{ width: '102px' }} />
+              <col style={{ width: '104px' }} />
+              <col style={{ width: '104px' }} />
               <col style={{ width: '116px' }} />
             </colgroup>
             <thead>
-              <tr className="sp-short-col-header border-t border-b border-black bg-white text-[12px] font-bold uppercase tracking-wider text-black">
+              <tr className="sp-short-col-header border-t border-b border-black bg-white text-[13.5px] font-extrabold uppercase tracking-wider text-black">
                 <th className="py-2 px-2 text-left whitespace-nowrap box-border">DATE</th>
                 <th className="py-2 px-2.5 text-left box-border">PARTICULARS</th>
                 <th className="py-2 px-2 text-right whitespace-nowrap box-border">DEBIT</th>
@@ -683,7 +1026,7 @@ export const SaleProceedsLedgerView: React.FC<SaleProceedsLedgerViewProps> = ({
             <tbody className="bg-white text-black">
               {ledger.entries.length === 0 ? (
                 <tr className="bg-white">
-                  <td colSpan={5} className="py-6 text-center text-[12px] text-black">
+                  <td colSpan={5} className="py-6 text-center text-[13px] font-bold text-black">
                     No transactions found in this period.
                   </td>
                 </tr>
@@ -711,27 +1054,27 @@ export const SaleProceedsLedgerView: React.FC<SaleProceedsLedgerViewProps> = ({
                       key={`short-acc-${entry.id}`}
                       className={`ledger-tx-row ${isShaded ? 'sp-zebra-even bg-[#eaedf1]' : 'sp-zebra-odd bg-white'}`}
                     >
-                      <td className="py-1.5 px-2 text-[12px] font-medium text-black align-top whitespace-nowrap tabular-nums">
+                      <td className="py-1.5 px-2 text-[13px] font-bold text-black align-top whitespace-nowrap tabular-nums">
                         {formatDate(entry.date)}
                       </td>
-                      <td className="py-1.5 px-2.5 text-[12px] text-black align-top">
+                      <td className="py-1.5 px-2.5 text-[13px] font-bold text-black align-top">
                         {isOb ? (
-                          <span className="font-bold text-[12px] text-black uppercase">
+                          <span className="font-bold text-[13px] text-black uppercase">
                             {cleanPrimaryRef || 'Opening Balance'}
                           </span>
                         ) : (
-                          <div className="flex items-baseline justify-between gap-3 text-[12px] leading-snug text-black">
+                          <div className="flex items-baseline justify-between gap-3 text-[13px] font-bold leading-snug text-black">
                             <span className="font-bold text-black whitespace-nowrap">
                               {cleanPrimaryRef}
                             </span>
-                            <div className="flex items-baseline gap-2.5 shrink-0 text-black tabular-nums">
+                            <div className="flex items-baseline gap-2.5 shrink-0 font-bold text-black tabular-nums">
                               {cleanAccountRef && (
-                                <span className="uppercase font-medium whitespace-nowrap">
+                                <span className="uppercase font-bold whitespace-nowrap">
                                   {cleanAccountRef}
                                 </span>
                               )}
                               {shortInfo.qty > 0 && (
-                                <span className="font-semibold whitespace-nowrap">
+                                <span className="font-bold whitespace-nowrap">
                                   Qty:{shortInfo.qty}
                                 </span>
                               )}
@@ -739,13 +1082,13 @@ export const SaleProceedsLedgerView: React.FC<SaleProceedsLedgerViewProps> = ({
                           </div>
                         )}
                       </td>
-                      <td className="py-1.5 px-2 text-right text-[12px] font-medium text-black align-top whitespace-nowrap tabular-nums">
+                      <td className="py-1.5 px-2 text-right text-[13px] font-bold text-black align-top whitespace-nowrap tabular-nums">
                         {debitVal}
                       </td>
-                      <td className="py-1.5 px-2 text-right text-[12px] font-medium text-black align-top whitespace-nowrap tabular-nums">
+                      <td className="py-1.5 px-2 text-right text-[13px] font-bold text-black align-top whitespace-nowrap tabular-nums">
                         {creditVal}
                       </td>
-                      <td className="py-1.5 px-2 text-right text-[12px] font-bold text-black align-top whitespace-nowrap tabular-nums">
+                      <td className="py-1.5 px-2 text-right text-[13px] font-bold text-black align-top whitespace-nowrap tabular-nums">
                         {balanceVal}
                       </td>
                     </tr>
@@ -754,22 +1097,22 @@ export const SaleProceedsLedgerView: React.FC<SaleProceedsLedgerViewProps> = ({
               )}
             </tbody>
             <tfoot>
-              <tr className="sp-short-total-row border-t border-black text-[12px] bg-white text-black">
-                <td colSpan={2} className="pt-1.5 pb-0.5 px-2 text-left text-[12px] font-bold text-black align-top">
+              <tr className="sp-short-total-row border-t border-black text-[13.5px] bg-white text-black">
+                <td colSpan={2} className="pt-1.5 pb-0.5 px-2 text-left text-[13.5px] font-extrabold text-black align-top">
                   Crate Balance: {crateSummary.balanceCrate}
                 </td>
-                <td className="pt-1.5 pb-0.5 px-2 text-right text-[12px] font-bold text-black whitespace-nowrap tabular-nums align-top">
+                <td className="pt-1.5 pb-0.5 px-2 text-right text-[13.5px] font-extrabold text-black whitespace-nowrap tabular-nums align-top">
                   {ledger.totalDebit > 0 ? Number(ledger.totalDebit).toFixed(2) : ''}
                 </td>
-                <td className="pt-1.5 pb-0.5 px-2 text-right text-[12px] font-bold text-black whitespace-nowrap tabular-nums align-top">
+                <td className="pt-1.5 pb-0.5 px-2 text-right text-[13.5px] font-extrabold text-black whitespace-nowrap tabular-nums align-top">
                   {ledger.totalCredit > 0 ? Number(ledger.totalCredit).toFixed(2) : ''}
                 </td>
-                <td className="pt-1.5 pb-0.5 px-2 text-right text-[12px] font-bold text-black whitespace-nowrap align-top">
+                <td className="pt-1.5 pb-0.5 px-2 text-right text-[13.5px] font-extrabold text-black whitespace-nowrap align-top">
                   &nbsp;
                 </td>
               </tr>
               <tr className="sp-short-closing-row bg-white text-black">
-                <td colSpan={2} className="py-1 px-2 text-left text-[12px] font-bold text-black align-top">
+                <td colSpan={2} className="py-1 px-2 text-left text-[13.5px] font-extrabold text-black align-top">
                   <div className="flex items-center gap-4">
                     <span>= {crateSummary.balanceCrate}</span>
                     {totalQty > 0 && <span>Total Qty: {totalQty}</span>}
@@ -777,10 +1120,10 @@ export const SaleProceedsLedgerView: React.FC<SaleProceedsLedgerViewProps> = ({
                 </td>
                 <td colSpan={3} className="sp-short-closing-cell border-t border-black py-1.5 px-2 align-top">
                   <div className="flex items-baseline justify-between gap-4">
-                    <span className="text-[13px] font-bold uppercase tracking-wide text-black whitespace-nowrap">
+                    <span className="sp-closing-label text-[14.5px] font-extrabold uppercase tracking-wide text-black whitespace-nowrap">
                       CLOSING BALANCE :
                     </span>
-                    <span className="text-[14px] font-extrabold text-black whitespace-nowrap tabular-nums">
+                    <span className="sp-closing-value text-[16px] font-black text-black whitespace-nowrap tabular-nums">
                       {Math.abs(ledger.closingBalance).toFixed(2)} {ledger.closingBalance < 0 ? 'Dr' : ledger.closingBalance > 0 ? 'Cr' : ''}
                     </span>
                   </div>
@@ -824,11 +1167,11 @@ export const SaleProceedsLedgerView: React.FC<SaleProceedsLedgerViewProps> = ({
             {/* Top-Left: M/s: Customer Name only */}
             <div className="max-w-[65%]">
               {resolvedPrintCustomer ? (
-                <div className="text-[16px] font-extrabold text-black uppercase tracking-tight leading-tight">
+                <div className="sp-ledger-party-name text-[17px] font-extrabold text-black uppercase tracking-tight leading-tight">
                   M/s: {resolvedPrintCustomer.name || 'Customer'}
                 </div>
               ) : (
-                <div className="text-[16px] font-extrabold text-black uppercase tracking-tight leading-tight">
+                <div className="sp-ledger-party-name text-[17px] font-extrabold text-black uppercase tracking-tight leading-tight">
                   ALL CUSTOMERS
                 </div>
               )}
@@ -836,10 +1179,10 @@ export const SaleProceedsLedgerView: React.FC<SaleProceedsLedgerViewProps> = ({
 
             {/* Top-Right: ACCOUNT DETAILS & Date Range */}
             <div className="text-right shrink-0">
-              <div className="text-[15px] font-black uppercase tracking-wider text-black leading-tight">
+              <div className="sp-ledger-account-heading text-[16px] font-black uppercase tracking-wider text-black leading-tight">
                 ACCOUNT DETAILS
               </div>
-              <div className="text-[12px] font-semibold text-black mt-0.5">
+              <div className="sp-ledger-date-range text-[13px] font-bold text-black mt-0.5">
                 {filterStartDate && filterEndDate ? (
                   <span>{formatDate(filterStartDate)} To {formatDate(filterEndDate)}</span>
                 ) : filterStartDate ? (
@@ -856,16 +1199,16 @@ export const SaleProceedsLedgerView: React.FC<SaleProceedsLedgerViewProps> = ({
 
         {/* Ledger Table: DATE | PARTICULARS | DEBIT | CREDIT | BALANCE */}
         <div className="overflow-x-auto">
-          <table className="ledger-ref-table sp-detailed-ref-table w-full table-fixed box-border text-left text-[12px] border-collapse bg-white text-black">
+          <table className="ledger-ref-table sp-detailed-ref-table w-full table-fixed box-border text-left text-[13px] border-collapse bg-white text-black">
             <colgroup>
-              <col style={{ width: '86px' }} />
+              <col style={{ width: '94px' }} />
               <col />
-              <col style={{ width: '102px' }} />
-              <col style={{ width: '102px' }} />
+              <col style={{ width: '104px' }} />
+              <col style={{ width: '104px' }} />
               <col style={{ width: '116px' }} />
             </colgroup>
             <thead>
-              <tr className="border-0 bg-white text-[12px] font-bold uppercase tracking-wider text-black">
+              <tr className="border-0 bg-white text-[13.5px] font-extrabold uppercase tracking-wider text-black">
                 <th className="py-2 px-2 text-left border-t border-b border-black border-r border-r-slate-300 whitespace-nowrap">DATE</th>
                 <th className="py-2 px-2.5 text-left border-t border-b border-black border-r border-r-slate-300">PARTICULARS</th>
                 <th className="py-2 px-2 text-right border-t border-b border-black border-r border-r-slate-300 whitespace-nowrap">DEBIT</th>
@@ -876,7 +1219,7 @@ export const SaleProceedsLedgerView: React.FC<SaleProceedsLedgerViewProps> = ({
             <tbody className="bg-white text-black">
               {ledger.entries.length === 0 ? (
                 <tr className="border-0">
-                  <td colSpan={5} className="py-8 text-center text-[12px] text-black border-b border-slate-300">
+                  <td colSpan={5} className="py-8 text-center text-[13px] font-bold text-black border-b border-slate-300">
                     No transactions found in this period.
                   </td>
                 </tr>
@@ -933,26 +1276,26 @@ export const SaleProceedsLedgerView: React.FC<SaleProceedsLedgerViewProps> = ({
                             className="ledger-tx-row border-0"
                           >
                             {/* DATE */}
-                            <td className="py-1.5 px-2 text-[12px] font-medium text-black align-top whitespace-nowrap tabular-nums border-b border-slate-300 border-r border-r-slate-300">
+                            <td className="py-1.5 px-2 text-[13px] font-bold text-black align-top whitespace-nowrap tabular-nums border-b border-slate-300 border-r border-r-slate-300">
                               {isFirstChunk ? formatDate(entry.date) : ''}
                             </td>
 
                             {/* PARTICULARS */}
-                            <td className="py-1.5 px-2.5 text-[12px] text-black align-top border-b border-slate-300 border-r border-r-slate-300">
+                            <td className="py-1.5 px-2.5 text-[13px] font-bold text-black align-top border-b border-slate-300 border-r border-r-slate-300">
                               {isOb ? (
-                                <div className="ledger-tx-block font-bold text-[12px] text-black uppercase">
+                                <div className="ledger-tx-block font-bold text-[13px] text-black uppercase">
                                   {cleanObLabel}
                                 </div>
                               ) : (
                                 <div className="ledger-tx-block space-y-0.5">
                                   {/* Line 1: Transaction number on Left, Qty on Right */}
-                                  <div className="flex items-baseline justify-between gap-3 text-[12px] leading-snug text-black">
+                                  <div className="flex items-baseline justify-between gap-3 text-[13px] font-bold leading-snug text-black">
                                     <div className="flex flex-wrap items-baseline gap-1.5">
                                       <span className="font-bold text-black whitespace-nowrap">
                                         Sale Proceed No. {formattedNo}{!isFirstChunk ? ' (contd.)' : ''}
                                       </span>
                                       {isFirstChunk && sp?.challanDate && sp.challanDate !== sp.date && (
-                                        <span className="text-[12px] font-medium text-black">
+                                        <span className="text-[13px] font-bold text-black">
                                           Challan Dt: {formatDate(sp.challanDate)}
                                         </span>
                                       )}
@@ -975,11 +1318,11 @@ export const SaleProceedsLedgerView: React.FC<SaleProceedsLedgerViewProps> = ({
                                         const itAmount = Number(it.amount ?? (itQty * itRate));
 
                                         return (
-                                          <div key={iIdx} className="sp-detail-line flex items-baseline justify-between gap-3 text-[12px] leading-snug text-black">
-                                            <span className="font-medium text-black uppercase">
+                                          <div key={iIdx} className="sp-detail-line flex items-baseline justify-between gap-3 text-[13px] font-bold leading-snug text-black">
+                                            <span className="font-bold text-black uppercase">
                                               {it.fruitName || it.name || 'Item'}
                                             </span>
-                                            <span className="font-medium text-black text-right shrink-0 tabular-nums">
+                                            <span className="font-bold text-black text-right shrink-0 tabular-nums">
                                               <span className="whitespace-nowrap sp-qty-nowrap">
                                                 {itQty} {itUnit}
                                               </span>
@@ -992,7 +1335,7 @@ export const SaleProceedsLedgerView: React.FC<SaleProceedsLedgerViewProps> = ({
                                       })}
                                     </div>
                                   ) : isFirstChunk ? (
-                                    <div className="flex items-baseline justify-between gap-3 text-[12px] font-medium text-black tabular-nums">
+                                    <div className="flex items-baseline justify-between gap-3 text-[13px] font-bold text-black tabular-nums">
                                       <span>&nbsp;</span>
                                       <span>
                                         <span className="whitespace-nowrap sp-qty-nowrap">
@@ -1007,12 +1350,12 @@ export const SaleProceedsLedgerView: React.FC<SaleProceedsLedgerViewProps> = ({
 
                                   {/* Expenses Breakdown: items on Left, total expense on Right */}
                                   {isLastChunk && expenses.length > 0 && (
-                                    <div className="flex items-baseline justify-between gap-3 text-[12px] font-normal leading-snug text-black">
+                                    <div className="flex items-baseline justify-between gap-3 text-[13px] font-bold leading-snug text-black">
                                       <span>
                                         {expenses.map((e: any) => `${e.name} ${Number(Number(e.amount).toFixed(2))}`).join('  ')}
                                       </span>
                                       {totalExpenseSum > 0 && (
-                                        <span className="font-medium shrink-0 tabular-nums">
+                                        <span className="font-bold shrink-0 tabular-nums">
                                           {Number(totalExpenseSum.toFixed(2))}
                                         </span>
                                       )}
@@ -1023,17 +1366,17 @@ export const SaleProceedsLedgerView: React.FC<SaleProceedsLedgerViewProps> = ({
                             </td>
 
                             {/* DEBIT */}
-                            <td className="py-1.5 px-2 text-right text-[12px] font-medium text-black align-top whitespace-nowrap tabular-nums border-b border-slate-300 border-r border-r-slate-300">
+                            <td className="py-1.5 px-2 text-right text-[13px] font-bold text-black align-top whitespace-nowrap tabular-nums border-b border-slate-300 border-r border-r-slate-300">
                               {isLastChunk ? debitVal : ''}
                             </td>
 
                             {/* CREDIT */}
-                            <td className="py-1.5 px-2 text-right text-[12px] font-medium text-black align-top whitespace-nowrap tabular-nums border-b border-slate-300 border-r border-r-slate-300">
+                            <td className="py-1.5 px-2 text-right text-[13px] font-bold text-black align-top whitespace-nowrap tabular-nums border-b border-slate-300 border-r border-r-slate-300">
                               {isLastChunk ? creditVal : ''}
                             </td>
 
                             {/* BALANCE */}
-                            <td className="py-1.5 px-2 text-right text-[12px] font-bold text-black align-top whitespace-nowrap tabular-nums border-b border-slate-300">
+                            <td className="py-1.5 px-2 text-right text-[13px] font-bold text-black align-top whitespace-nowrap tabular-nums border-b border-slate-300">
                               {isLastChunk ? balanceVal : ''}
                             </td>
                           </tr>
@@ -1046,21 +1389,21 @@ export const SaleProceedsLedgerView: React.FC<SaleProceedsLedgerViewProps> = ({
             </tbody>
             <tfoot>
               {/* Total Row with Crate Balance on Left and Debit/Credit Totals aligned under columns */}
-              <tr className="border-0 text-[12px] bg-white text-black">
-                <td colSpan={2} className="py-1.5 px-2 text-left text-[12px] font-bold text-black border-t border-b border-black border-r border-r-slate-300 align-top">
+              <tr className="border-0 text-[13.5px] bg-white text-black">
+                <td colSpan={2} className="py-1.5 px-2 text-left text-[13.5px] font-extrabold text-black border-t border-b border-black border-r border-r-slate-300 align-top">
                   <div>Crate Balance: {crateSummary.balanceCrate}</div>
                   <div className="flex items-center gap-4">
                     <span>= {crateSummary.balanceCrate}</span>
                     {totalQty > 0 && <span>Total Qty: {totalQty}</span>}
                   </div>
                 </td>
-                <td className="py-1.5 px-2 text-right text-[12px] font-bold text-black whitespace-nowrap tabular-nums border-t border-b border-black border-r border-r-slate-300 align-top">
+                <td className="py-1.5 px-2 text-right text-[13.5px] font-extrabold text-black whitespace-nowrap tabular-nums border-t border-b border-black border-r border-r-slate-300 align-top">
                   {ledger.totalDebit > 0 ? Number(ledger.totalDebit).toFixed(2) : ''}
                 </td>
-                <td className="py-1.5 px-2 text-right text-[12px] font-bold text-black whitespace-nowrap tabular-nums border-t border-b border-black border-r border-r-slate-300 align-top">
+                <td className="py-1.5 px-2 text-right text-[13.5px] font-extrabold text-black whitespace-nowrap tabular-nums border-t border-b border-black border-r border-r-slate-300 align-top">
                   {ledger.totalCredit > 0 ? Number(ledger.totalCredit).toFixed(2) : ''}
                 </td>
-                <td className="py-1.5 px-2 text-right text-[12px] font-bold text-black whitespace-nowrap border-t border-b border-black align-top">
+                <td className="py-1.5 px-2 text-right text-[13.5px] font-extrabold text-black whitespace-nowrap border-t border-b border-black align-top">
                   &nbsp;
                 </td>
               </tr>
@@ -1069,10 +1412,10 @@ export const SaleProceedsLedgerView: React.FC<SaleProceedsLedgerViewProps> = ({
               <tr className="ledger-closing-meta-row bg-white text-black">
                 <td colSpan={5} className="ledger-closing-meta-cell p-0 bg-white text-black">
                   <div className="pt-2 pb-1 px-2 flex justify-end items-baseline gap-6 bg-white text-black">
-                    <span className="text-[13px] font-bold uppercase tracking-wide text-black">
+                    <span className="sp-closing-label text-[14.5px] font-extrabold uppercase tracking-wide text-black">
                       CLOSING BALANCE :
                     </span>
-                    <span className="text-[14px] font-extrabold text-black whitespace-nowrap tabular-nums">
+                    <span className="sp-closing-value text-[16px] font-black text-black whitespace-nowrap tabular-nums">
                       {Math.abs(ledger.closingBalance).toFixed(2)} {ledger.closingBalance < 0 ? 'Dr' : ledger.closingBalance > 0 ? 'Cr' : ''}
                     </span>
                   </div>
@@ -1207,6 +1550,8 @@ export const SaleProceedsLedgerView: React.FC<SaleProceedsLedgerViewProps> = ({
           setSelectedCustomerId(c ? c.id : '');
         }}
         selectedCustomerId={selectedCustomerId}
+        customerType="sale_proceeds"
+        subtitle="Select a Sale Proceeds customer to view their profile & statement"
       />
     </div>
   );

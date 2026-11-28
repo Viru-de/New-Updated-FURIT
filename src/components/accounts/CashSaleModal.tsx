@@ -548,7 +548,8 @@ export const CashSaleModal: React.FC<CashSaleModalProps> = ({
                   <CustomerAutocomplete
                     valueCustomerId={customerId}
                     onChange={(c) => setCustomerId(c ? c.id : '')}
-                    placeholder="Search customer name, mobile or city..."
+                    customerType="cash_sale"
+                    placeholder="Search Cash Sale customer name, mobile or city..."
                   />
                   {selectedCustomer && (
                     <div className="mt-2 flex flex-wrap items-center gap-3 text-[11px] text-slate-500 dark:text-slate-400">
@@ -966,6 +967,7 @@ export const CashSaleModal: React.FC<CashSaleModalProps> = ({
       <AddCustomerModal
         isOpen={isAddCustomerOpen}
         onClose={() => setIsAddCustomerOpen(false)}
+        defaultCustomerTypes={['cash_sale']}
         onCustomerCreated={(c) => setCustomerId(c.id)}
       />
 

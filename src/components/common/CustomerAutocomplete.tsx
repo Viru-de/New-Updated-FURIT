@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { createPortal } from 'react-dom';
-import { Customer } from '../../types';
+import { Customer, CustomerType } from '../../types';
 import { db } from '../../services/db';
+import { customerHasType } from '../../utils/customerTypeUtils';
 import { CustomerAvatar } from './CustomerAvatar';
 import { Users, Search, Phone, Check, X } from 'lucide-react';
 
@@ -15,6 +16,7 @@ interface CustomerAutocompleteProps {
   autoFocus?: boolean;
   className?: string;
   compact?: boolean;
+  customerType?: CustomerType | CustomerType[];
 }
 
 export const CustomerAutocomplete: React.FC<CustomerAutocompleteProps> = ({
@@ -26,11 +28,16 @@ export const CustomerAutocomplete: React.FC<CustomerAutocompleteProps> = ({
   disabled = false,
   autoFocus = false,
   className = '',
+  customerType,
 }) => {
-  const customers = db.getCustomers();
+  const allCustomers = db.getCustomers();
+  const customers = useMemo(
+    () => (customerType ? allCustomers.filter((c) => customerHasType(c, customerType)) : allCustomers),
+    [allCustomers, customerType]
+  );
   const selectedCustomer = useMemo(
-    () => customers.find((c) => c.id === valueCustomerId) || null,
-    [customers, valueCustomerId]
+    () => allCustomers.find((c) => c.id === valueCustomerId) || null,
+    [allCustomers, valueCustomerId]
   );
 
   const [searchTerm, setSearchTerm] = useState(selectedCustomer ? selectedCustomer.name : '');

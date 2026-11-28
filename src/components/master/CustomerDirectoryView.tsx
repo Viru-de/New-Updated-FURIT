@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Customer } from '../../types';
+import { Customer, CustomerType } from '../../types';
 import { db } from '../../services/db';
-import { getAllCustomerOutstandings } from '../../services/accounting';
+import { getAllCustomerOutstandings, getSaleProceedsLedger } from '../../services/accounting';
 import { formatCurrency } from '../../utils/formatters';
 import { AddCustomerModal } from '../modals/AddCustomerModal';
 import { CustomerAvatar } from '../common/CustomerAvatar';
@@ -10,6 +10,13 @@ import { CreditSaleModal } from '../accounts/CreditSaleModal';
 import { ReceiptModal } from '../accounts/ReceiptModal';
 import { ExcelActionBar } from '../common/ExcelActionBar';
 import { exportCustomers } from '../../utils/excelEngine';
+import {
+  CUSTOMER_TYPE_OPTIONS,
+  getCustomerTypeMeta,
+  getEffectiveCustomerTypes,
+  customerHasType,
+  normalizeCustomerTypes,
+} from '../../utils/customerTypeUtils';
 import {
   UserPlus,
   Search,
@@ -21,8 +28,9 @@ import {
   Trash2,
   Phone,
   MapPin,
-  AlertCircle,
   X,
+  Check,
+  TrendingUp,
 } from 'lucide-react';
 import { AdminPasswordModal } from '../common/AdminPasswordModal';
 
@@ -31,6 +39,7 @@ interface CustomerDirectoryViewProps {
   onNavigateToCrate: (customerId: string) => void;
   onNavigateToCreditSales: (customerId: string) => void;
   onNavigateToReceipts: (customerId: string) => void;
+  onNavigateToSaleProceedsLedger?: (customerId: string) => void;
 }
 
 export const CustomerDirectoryView: React.FC<CustomerDirectoryViewProps> = ({
@@ -38,8 +47,10 @@ export const CustomerDirectoryView: React.FC<CustomerDirectoryViewProps> = ({
   onNavigateToCrate,
   onNavigateToCreditSales,
   onNavigateToReceipts,
+  onNavigateToSaleProceedsLedger,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [typeFilter, setTypeFilter] = useState<'all' | CustomerType>('all');
   const [, setVersion] = useState(0);
 
   React.useEffect(() => {
@@ -52,6 +63,8 @@ export const CustomerDirectoryView: React.FC<CustomerDirectoryViewProps> = ({
 
   // Edit Customer Modal State
   const [editName, setEditName] = useState('');
+  const [editCustomerTypes, setEditCustomerTypes] = useState<CustomerType[]>([]);
+  const [editTypeError, setEditTypeError] = useState('');
   const [editMobile, setEditMobile] = useState('');
   const [editAltMobile, setEditAltMobile] = useState(''); // Alternate Number 1
   const [editAlternate2Mobile, setEditAlternate2Mobile] = useState(''); // Alternate Number 2
@@ -66,13 +79,34 @@ export const CustomerDirectoryView: React.FC<CustomerDirectoryViewProps> = ({
 
   const outstandings = getAllCustomerOutstandings();
 
+  const typeCounts = React.useMemo(() => {
+    const counts: Record<'all' | CustomerType, number> = {
+      all: outstandings.length,
+      cash_sale: 0,
+      credit_sale: 0,
+      sale_proceeds: 0,
+    };
+    for (const item of outstandings) {
+      const types = getEffectiveCustomerTypes(item.customer);
+      if (types.includes('cash_sale')) counts.cash_sale += 1;
+      if (types.includes('credit_sale')) counts.credit_sale += 1;
+      if (types.includes('sale_proceeds')) counts.sale_proceeds += 1;
+    }
+    return counts;
+  }, [outstandings]);
+
   const q = searchTerm.trim().toLowerCase();
   const cleanQ = q.replace(/\s+/g, '');
 
   const filtered = React.useMemo(() => {
-    if (!q) return outstandings;
+    const byType =
+      typeFilter === 'all'
+        ? outstandings
+        : outstandings.filter((item) => customerHasType(item.customer, typeFilter));
 
-    const scored = outstandings
+    if (!q) return byType;
+
+    const scored = byType
       .map((item) => {
         const c = item.customer;
         const nameLower = c.name.toLowerCase();
@@ -105,11 +139,13 @@ export const CustomerDirectoryView: React.FC<CustomerDirectoryViewProps> = ({
     });
 
     return scored.map((s) => s.item);
-  }, [outstandings, q, cleanQ]);
+  }, [outstandings, typeFilter, q, cleanQ]);
 
   const handleEditClick = (c: Customer) => {
     setEditingCustomer(c);
     setEditName(c.name);
+    setEditCustomerTypes(getEffectiveCustomerTypes(c));
+    setEditTypeError('');
     setEditMobile(c.mobile || '');
     setEditAltMobile(c.altMobile || c.alternate1Mobile || c.alternateNumber1 || '');
     setEditAlternate2Mobile(c.alternate2Mobile || c.alternateNumber2 || '');
@@ -119,9 +155,24 @@ export const CustomerDirectoryView: React.FC<CustomerDirectoryViewProps> = ({
     setEditPhoto(c.photo);
   };
 
+  const toggleEditCustomerType = (type: CustomerType) => {
+    setEditTypeError('');
+    setEditCustomerTypes((prev) => {
+      const exists = prev.includes(type);
+      const next = exists ? prev.filter((t) => t !== type) : [...prev, type];
+      return normalizeCustomerTypes(next);
+    });
+  };
+
   const handleSaveEdit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingCustomer || !editName.trim()) return;
+
+    const normalizedTypes = normalizeCustomerTypes(editCustomerTypes);
+    if (normalizedTypes.length === 0) {
+      setEditTypeError('Please keep at least one Customer Type selected.');
+      return;
+    }
 
     const trimmedAlt1 = editAltMobile.trim();
     const trimmedAlt2 = editAlternate2Mobile.trim();
@@ -129,6 +180,7 @@ export const CustomerDirectoryView: React.FC<CustomerDirectoryViewProps> = ({
     const updated: Customer = {
       ...editingCustomer,
       name: editName.trim(),
+      customerTypes: normalizedTypes,
       mobile: editMobile.trim(),
       altMobile: trimmedAlt1 || undefined,
       alternate1Mobile: trimmedAlt1 || undefined,
@@ -199,172 +251,289 @@ export const CustomerDirectoryView: React.FC<CustomerDirectoryViewProps> = ({
               setEditingCustomer(null);
               setIsAddCustomerOpen(true);
             }}
-            className="flex items-center gap-1.5 rounded-lg bg-emerald-600 px-4 py-2 text-xs font-semibold text-white shadow-xs hover:bg-emerald-700"
+            className="flex items-center gap-1.5 rounded-lg bg-emerald-600 px-4 py-2 text-xs font-semibold text-white shadow-xs hover:bg-emerald-700 cursor-pointer"
           >
             <UserPlus className="h-4 w-4" /> + Add New Customer
           </button>
         </div>
       </div>
 
-      {/* Search */}
-      <div className="flex items-center rounded-xl border border-slate-200 bg-white px-3 py-2 shadow-2xs dark:border-slate-800 dark:bg-slate-900">
-        <Search className="h-4 w-4 text-slate-400 mr-2 shrink-0" />
-        <input
-          type="text"
-          placeholder="Search by customer name, mobile, city, Aadhaar..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full text-xs text-slate-900 outline-none placeholder:text-slate-400 dark:bg-slate-900 dark:text-white"
-        />
-        {searchTerm && (
+      {/* Customer Type Filter Tabs & Search */}
+      <div className="space-y-3">
+        <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
-            onClick={() => setSearchTerm('')}
-            className="flex items-center gap-1 text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer p-1"
-            title="Clear search"
+            onClick={() => setTypeFilter('all')}
+            className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-bold transition-colors cursor-pointer ${
+              typeFilter === 'all'
+                ? 'border-slate-900 bg-slate-900 text-white dark:border-emerald-500 dark:bg-emerald-600'
+                : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800'
+            }`}
           >
-            <X className="h-3.5 w-3.5" />
+            <span>All Customers</span>
+            <span className={`rounded px-1.5 py-0.2 text-[10px] font-mono-numbers ${typeFilter === 'all' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'}`}>
+              {typeCounts.all}
+            </span>
           </button>
-        )}
+
+          {CUSTOMER_TYPE_OPTIONS.map((opt) => {
+            const active = typeFilter === opt.value;
+            return (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => setTypeFilter(opt.value)}
+                className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-bold transition-colors cursor-pointer ${
+                  active
+                    ? 'border-emerald-600 bg-emerald-600 text-white shadow-2xs'
+                    : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800'
+                }`}
+              >
+                <span>{opt.label}</span>
+                <span className={`rounded px-1.5 py-0.2 text-[10px] font-mono-numbers ${active ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'}`}>
+                  {typeCounts[opt.value]}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="flex items-center rounded-xl border border-slate-200 bg-white px-3 py-2 shadow-2xs dark:border-slate-800 dark:bg-slate-900">
+          <Search className="h-4 w-4 text-slate-400 mr-2 shrink-0" />
+          <input
+            type="text"
+            placeholder="Search by customer name, mobile, city, Aadhaar..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full text-xs text-slate-900 outline-none placeholder:text-slate-400 dark:bg-slate-900 dark:text-white"
+          />
+          {searchTerm && (
+            <button
+              type="button"
+              onClick={() => setSearchTerm('')}
+              className="flex items-center gap-1 text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer p-1"
+              title="Clear search"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Customers Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filtered.map((item) => {
-          const { customer, closingBalance, crateBalance, crateKg } = item;
-          return (
-            <div
-              key={customer.id}
-              className="flex flex-col justify-between rounded-xl border border-slate-200 bg-white p-5 shadow-2xs transition-all hover:border-slate-300 dark:border-slate-800 dark:bg-slate-900"
-            >
-              <div>
-                <div className="flex items-start justify-between gap-3 mb-2">
-                  <div className="flex items-start gap-3 min-w-0">
-                    <CustomerAvatar
-                      photo={customer.photo}
-                      name={customer.name}
-                      size="md"
-                    />
-                    <div className="min-w-0">
-                      <h3 className="font-bold text-sm text-slate-900 truncate dark:text-white">
-                        {customer.name}
-                      </h3>
-                      <div className="text-xs text-slate-500 flex flex-wrap items-center gap-2 mt-0.5">
-                        {customer.mobile && (
-                          <span className="flex items-center gap-1">
-                            <Phone className="h-3 w-3" /> {customer.mobile}
-                          </span>
-                        )}
-                        {customer.city && (
-                          <span className="flex items-center gap-1">
-                            <MapPin className="h-3 w-3" /> {customer.city}
-                          </span>
-                        )}
-                        {customer.aadhaarNo && (
-                          <span className="flex items-center gap-1 text-[11px] text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-950/40 px-1.5 py-0.5 rounded font-mono">
-                            Aadhaar: {customer.aadhaarNo}
-                          </span>
-                        )}
+      {filtered.length === 0 ? (
+        <div className="rounded-xl border border-dashed border-slate-300 bg-white p-10 text-center text-slate-500 dark:border-slate-700 dark:bg-slate-900">
+          <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+            No customers match the selected filter.
+          </p>
+          <p className="text-xs text-slate-400 mt-1">
+            Switch customer type tabs or add a new customer with the required type.
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filtered.map((item) => {
+            const { customer, closingBalance, crateBalance, crateKg } = item;
+            const types = getEffectiveCustomerTypes(customer);
+            const hasCash = types.includes('cash_sale');
+            const hasCredit = types.includes('credit_sale');
+            const hasSaleProceeds = types.includes('sale_proceeds');
+            const spLedger = hasSaleProceeds ? getSaleProceedsLedger({ customerId: customer.id }) : null;
+
+            return (
+              <div
+                key={customer.id}
+                className="flex flex-col justify-between rounded-xl border border-slate-200 bg-white p-5 shadow-2xs transition-all hover:border-slate-300 dark:border-slate-800 dark:bg-slate-900"
+              >
+                <div>
+                  <div className="flex items-start justify-between gap-3 mb-2">
+                    <div className="flex items-start gap-3 min-w-0">
+                      <CustomerAvatar
+                        photo={customer.photo}
+                        name={customer.name}
+                        size="md"
+                      />
+                      <div className="min-w-0">
+                        <h3 className="font-bold text-sm text-slate-900 truncate dark:text-white">
+                          {customer.name}
+                        </h3>
+                        <div className="flex flex-wrap items-center gap-1 mt-1">
+                          {types.map((t) => {
+                            const meta = getCustomerTypeMeta(t);
+                            return (
+                              <span
+                                key={t}
+                                className={`inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-bold ${meta.badgeClass}`}
+                              >
+                                {meta.shortLabel}
+                              </span>
+                            );
+                          })}
+                        </div>
+                        <div className="text-xs text-slate-500 flex flex-wrap items-center gap-2 mt-1">
+                          {customer.mobile && (
+                            <span className="flex items-center gap-1">
+                              <Phone className="h-3 w-3" /> {customer.mobile}
+                            </span>
+                          )}
+                          {customer.city && (
+                            <span className="flex items-center gap-1">
+                              <MapPin className="h-3 w-3" /> {customer.city}
+                            </span>
+                          )}
+                          {customer.aadhaarNo && (
+                            <span className="flex items-center gap-1 text-[11px] text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-950/40 px-1.5 py-0.5 rounded font-mono">
+                              Aadhaar: {customer.aadhaarNo}
+                            </span>
+                          )}
+                        </div>
                       </div>
+                    </div>
+
+                    <div className="flex items-center gap-1 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => handleEditClick(customer)}
+                        className="p-1 text-slate-400 hover:text-slate-700 cursor-pointer"
+                        title="Edit Customer & Type"
+                      >
+                        <Edit2 className="h-3.5 w-3.5" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setDeleteId(customer.id)}
+                        className="p-1 text-slate-400 hover:text-rose-500 cursor-pointer"
+                        title="Delete Customer"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-1 shrink-0">
-                    <button
-                      type="button"
-                      onClick={() => handleEditClick(customer)}
-                      className="p-1 text-slate-400 hover:text-slate-700"
-                      title="Edit Customer & Photo"
-                    >
-                      <Edit2 className="h-3.5 w-3.5" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setDeleteId(customer.id)}
-                      className="p-1 text-slate-400 hover:text-rose-500"
-                      title="Delete Customer"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </button>
+                  {customer.address && (
+                    <p className="text-[11px] text-slate-500 line-clamp-1 mb-3">
+                      {customer.address}
+                    </p>
+                  )}
+
+                  {/* Balances strip */}
+                  <div className={`grid ${hasCredit && hasSaleProceeds ? 'grid-cols-3' : 'grid-cols-2'} gap-2 my-3 rounded-lg border border-slate-100 bg-slate-50 erp-dark-panel p-2.5`}>
+                    {hasCredit && (
+                      <div>
+                        <span className="block text-[10px] uppercase font-bold text-slate-400">
+                          Outstanding (₹)
+                        </span>
+                        <span
+                          className={`font-mono-numbers text-xs sm:text-sm font-bold ${
+                            closingBalance > 0
+                              ? 'text-rose-600 dark:text-rose-400'
+                              : closingBalance < 0
+                              ? 'text-emerald-600 dark:text-emerald-400'
+                              : 'text-slate-700 dark:text-slate-300'
+                          }`}
+                        >
+                          {formatCurrency(closingBalance)}
+                        </span>
+                      </div>
+                    )}
+
+                    {spLedger && (
+                      <div>
+                        <span className="block text-[10px] uppercase font-bold text-slate-400">
+                          Sale Proceeds (₹)
+                        </span>
+                        <span
+                          className={`font-mono-numbers text-xs sm:text-sm font-bold ${
+                            spLedger.closingBalance > 0
+                              ? 'text-emerald-600 dark:text-emerald-400'
+                              : spLedger.closingBalance < 0
+                              ? 'text-rose-600 dark:text-rose-400'
+                              : 'text-slate-700 dark:text-slate-300'
+                          }`}
+                        >
+                          {formatCurrency(spLedger.closingBalance)}
+                        </span>
+                      </div>
+                    )}
+
+                    {!hasCredit && !hasSaleProceeds && hasCash && (
+                      <div>
+                        <span className="block text-[10px] uppercase font-bold text-slate-400">
+                          Account Mode
+                        </span>
+                        <span className="text-xs font-bold text-amber-700 dark:text-amber-300">
+                          Cash Settlement
+                        </span>
+                      </div>
+                    )}
+
+                    <div>
+                      <span className="block text-[10px] uppercase font-bold text-slate-400">
+                        Crate Balance
+                      </span>
+                      <span className="font-mono-numbers text-xs sm:text-sm font-bold text-sky-700 dark:text-sky-300">
+                        {crateBalance} Crates ({crateKg} KG)
+                      </span>
+                    </div>
                   </div>
                 </div>
 
-                {customer.address && (
-                  <p className="text-[11px] text-slate-500 line-clamp-1 mb-3">
-                    {customer.address}
-                  </p>
-                )}
-
-                {/* Balances strip */}
-                <div className="grid grid-cols-2 gap-2 my-3 rounded-lg border border-slate-100 bg-slate-50 erp-dark-panel p-2.5">
-                  <div>
-                    <span className="block text-[10px] uppercase font-bold text-slate-400">
-                      Outstanding (₹)
-                    </span>
-                    <span
-                      className={`font-mono-numbers text-xs sm:text-sm font-bold ${
-                        closingBalance > 0
-                          ? 'text-rose-600 dark:text-rose-400'
-                          : closingBalance < 0
-                          ? 'text-emerald-600 dark:text-emerald-400'
-                          : 'text-slate-700 dark:text-slate-300'
+                {/* Action Buttons tailored to assigned Customer Types */}
+                <div className="pt-3 border-t border-slate-100 dark:border-slate-800 space-y-2">
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {hasCredit && (
+                      <button
+                        type="button"
+                        onClick={() => onNavigateToLedger(customer.id)}
+                        className="flex items-center justify-center gap-1 rounded bg-slate-100 py-1.5 text-[11px] font-semibold text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 cursor-pointer"
+                      >
+                        <BookOpen className="h-3 w-3" /> View Ledger
+                      </button>
+                    )}
+                    {hasSaleProceeds && onNavigateToSaleProceedsLedger && (
+                      <button
+                        type="button"
+                        onClick={() => onNavigateToSaleProceedsLedger(customer.id)}
+                        className="flex items-center justify-center gap-1 rounded bg-emerald-50 py-1.5 text-[11px] font-semibold text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-950/40 dark:text-emerald-300 cursor-pointer"
+                      >
+                        <TrendingUp className="h-3 w-3" /> SP Profile
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => onNavigateToCrate(customer.id)}
+                      className={`flex items-center justify-center gap-1 rounded bg-sky-50 py-1.5 text-[11px] font-semibold text-sky-700 hover:bg-sky-100 dark:bg-sky-950/40 dark:text-sky-300 cursor-pointer ${
+                        !hasCredit && !(hasSaleProceeds && onNavigateToSaleProceedsLedger) ? 'col-span-2' : ''
                       }`}
                     >
-                      {formatCurrency(closingBalance)}
-                    </span>
+                      <Box className="h-3 w-3" /> Crate Statement
+                    </button>
                   </div>
 
-                  <div>
-                    <span className="block text-[10px] uppercase font-bold text-slate-400">
-                      Crate Balance
-                    </span>
-                    <span className="font-mono-numbers text-xs sm:text-sm font-bold text-sky-700 dark:text-sky-300">
-                      {crateBalance} Crates ({crateKg} KG)
-                    </span>
-                  </div>
+                  {hasCredit && (
+                    <div className="grid grid-cols-2 gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => setActiveCustomerIdForSale(customer.id)}
+                        className="flex items-center justify-center gap-1 rounded bg-emerald-50 py-1 text-[11px] font-medium text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-950/40 dark:text-emerald-300 cursor-pointer"
+                      >
+                        <ShoppingBag className="h-3 w-3" /> + Credit Sale
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setActiveCustomerIdForReceipt(customer.id)}
+                        className="flex items-center justify-center gap-1 rounded bg-emerald-50 py-1 text-[11px] font-medium text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-950/40 dark:text-emerald-300 cursor-pointer"
+                      >
+                        <CreditCard className="h-3 w-3" /> + Receipt
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
-
-              {/* Action Buttons as requested in Section 14 */}
-              <div className="pt-3 border-t border-slate-100 dark:border-slate-800 space-y-2">
-                <div className="grid grid-cols-2 gap-1.5">
-                  <button
-                    type="button"
-                    onClick={() => onNavigateToLedger(customer.id)}
-                    className="flex items-center justify-center gap-1 rounded bg-slate-100 py-1.5 text-[11px] font-semibold text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300"
-                  >
-                    <BookOpen className="h-3 w-3" /> View Ledger
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => onNavigateToCrate(customer.id)}
-                    className="flex items-center justify-center gap-1 rounded bg-sky-50 py-1.5 text-[11px] font-semibold text-sky-700 hover:bg-sky-100 dark:bg-sky-950/40 dark:text-sky-300"
-                  >
-                    <Box className="h-3 w-3" /> Crate Statement
-                  </button>
-                </div>
-
-                <div className="grid grid-cols-2 gap-1.5">
-                  <button
-                    type="button"
-                    onClick={() => setActiveCustomerIdForSale(customer.id)}
-                    className="flex items-center justify-center gap-1 rounded bg-emerald-50 py-1 text-[11px] font-medium text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-950/40 dark:text-emerald-300"
-                  >
-                    <ShoppingBag className="h-3 w-3" /> + Credit Sale
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setActiveCustomerIdForReceipt(customer.id)}
-                    className="flex items-center justify-center gap-1 rounded bg-emerald-50 py-1 text-[11px] font-medium text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-950/40 dark:text-emerald-300"
-                  >
-                    <CreditCard className="h-3 w-3" /> + Receipt
-                  </button>
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      )}
 
       {/* Password-Protected Delete Confirmation */}
       <AdminPasswordModal
@@ -381,6 +550,7 @@ export const CustomerDirectoryView: React.FC<CustomerDirectoryViewProps> = ({
       <AddCustomerModal
         isOpen={isAddCustomerOpen}
         onClose={() => setIsAddCustomerOpen(false)}
+        defaultCustomerTypes={typeFilter !== 'all' ? [typeFilter] : undefined}
         onCustomerCreated={() => {
           setIsAddCustomerOpen(false);
           setVersion((v) => v + 1);
@@ -393,7 +563,7 @@ export const CustomerDirectoryView: React.FC<CustomerDirectoryViewProps> = ({
           <div className="w-full max-w-lg rounded-xl border border-slate-200 bg-white shadow-xl dark:border-slate-800 dark:bg-slate-900 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4 dark:border-slate-800">
               <h3 className="text-base font-semibold text-slate-900 dark:text-white">
-                Edit Customer & Photo
+                Edit Customer & Type
               </h3>
               <button
                 type="button"
@@ -416,6 +586,52 @@ export const CustomerDirectoryView: React.FC<CustomerDirectoryViewProps> = ({
                   onChange={(e) => setEditName(e.target.value)}
                   className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                 />
+              </div>
+
+              {/* Edit Customer Type Multi-Select */}
+              <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-3.5 dark:border-slate-800 dark:bg-slate-900/50">
+                <div className="flex items-center justify-between gap-2 mb-2">
+                  <label className="text-xs font-bold text-slate-800 dark:text-slate-200">
+                    Customer Type <span className="text-rose-500">*</span>
+                  </label>
+                  <span className="text-[10px] text-slate-500 dark:text-slate-400">
+                    Existing bills & ledgers stay preserved
+                  </span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  {CUSTOMER_TYPE_OPTIONS.map((opt) => {
+                    const isSelected = editCustomerTypes.includes(opt.value);
+                    return (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        onClick={() => toggleEditCustomerType(opt.value)}
+                        aria-pressed={isSelected}
+                        className={`flex items-start gap-2 rounded-lg border p-2.5 text-left transition-all cursor-pointer ${
+                          isSelected
+                            ? 'border-emerald-500 bg-emerald-50/90 text-emerald-950 ring-1 ring-emerald-500/40 dark:border-emerald-500 dark:bg-emerald-950/50 dark:text-emerald-100'
+                            : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-slate-600'
+                        }`}
+                      >
+                        <span
+                          className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors ${
+                            isSelected
+                              ? 'border-emerald-600 bg-emerald-600 text-white'
+                              : 'border-slate-300 bg-white dark:border-slate-600 dark:bg-slate-900'
+                          }`}
+                        >
+                          {isSelected && <Check className="h-3 w-3 stroke-[3]" />}
+                        </span>
+                        <span className="text-xs font-bold leading-tight">{opt.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+                {editTypeError && (
+                  <p className="mt-2 text-xs font-semibold text-rose-600 dark:text-rose-400">
+                    {editTypeError}
+                  </p>
+                )}
               </div>
 
               {/* Photo Uploader */}

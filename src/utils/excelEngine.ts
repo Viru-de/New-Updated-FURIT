@@ -17,6 +17,7 @@ import {
 import { formatDate, formatCurrency, getTodayIso } from './formatters';
 import { maskAadhaar } from './aadhaarUtils';
 import { getCustomerLedger, getSaleProceedsLedger, getCustomerCrateStatement } from '../services/accounting';
+import { formatCustomerTypesLabel, getEffectiveCustomerTypes } from './customerTypeUtils';
 
 /**
  * Sanitizes cell values to prevent CSV / Excel formula injection.
@@ -132,6 +133,7 @@ export function exportCustomers(records?: Customer[], fileNameSuffix = '') {
   const headers = [
     'Customer ID',
     'Customer Name',
+    'Customer Types',
     'Mobile / Phone',
     'City / Area',
     'Address',
@@ -154,6 +156,7 @@ export function exportCustomers(records?: Customer[], fileNameSuffix = '') {
     return [
       sanitizeCellValue(c.id),
       sanitizeCellValue(c.name),
+      sanitizeCellValue(formatCustomerTypesLabel(getEffectiveCustomerTypes(c))),
       sanitizeCellValue(c.mobile || ''),
       sanitizeCellValue(c.city || ''),
       sanitizeCellValue(c.address || ''),

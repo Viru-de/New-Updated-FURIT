@@ -71,9 +71,12 @@ export interface Fruit {
   createdAt: string;
 }
 
+export type CustomerType = 'cash_sale' | 'credit_sale' | 'sale_proceeds';
+
 export interface Customer {
   id: string;
   name: string;
+  customerTypes?: CustomerType[];
   contactPerson?: string;
   mobile: string;
   altMobile?: string; // Preserved legacy database field (Alternate Number 1)
@@ -90,6 +93,8 @@ export interface Customer {
   state?: string;
   openingBalance: number;
   openingBalanceType: 'debit' | 'credit';
+  saleProceedsOpeningBalance?: number;
+  saleProceedsOpeningBalanceType?: 'debit' | 'credit';
   openingCrateBalance: number;
   crateTypeId?: string;
   notes?: string;

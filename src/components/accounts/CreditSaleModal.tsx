@@ -682,7 +682,8 @@ export const CreditSaleModal: React.FC<CreditSaleModalProps> = ({
                     valueCustomerId={customerId}
                     onChange={(cust) => handleCustomerChange(cust ? cust.id : '')}
                     hasError={customerError}
-                    placeholder="Search customer name, mobile or city..."
+                    customerType="credit_sale"
+                    placeholder="Search Credit Sale customer name, mobile or city..."
                   />
                   {customerError && (
                     <p className="mt-1 text-xs font-semibold text-rose-600 dark:text-rose-400">
@@ -1094,6 +1095,7 @@ export const CreditSaleModal: React.FC<CreditSaleModalProps> = ({
       <AddCustomerModal
         isOpen={isAddCustomerOpen}
         onClose={() => setIsAddCustomerOpen(false)}
+        defaultCustomerTypes={['credit_sale']}
         onCustomerCreated={(newCust) => {
           handleCustomerChange(newCust.id);
           setIsAddCustomerOpen(false);

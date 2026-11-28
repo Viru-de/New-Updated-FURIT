@@ -1,24 +1,35 @@
-import React, { useState } from 'react';
-import { Customer } from '../../types';
+import React, { useState, useEffect } from 'react';
+import { Customer, CustomerType } from '../../types';
 import { db } from '../../services/db';
-import { X, Plus, UserPlus } from 'lucide-react';
+import { X, Plus, UserPlus, Check } from 'lucide-react';
 import { ImageUploader } from '../common/ImageUploader';
 import { QuantityInput } from '../common/QuantityInput';
+import {
+  CUSTOMER_TYPE_OPTIONS,
+  normalizeCustomerTypes,
+  formatCustomerTypesLabel,
+} from '../../utils/customerTypeUtils';
 
 interface AddCustomerModalProps {
   isOpen: boolean;
   onClose: () => void;
   onCustomerCreated: (customer: Customer) => void;
+  defaultCustomerTypes?: CustomerType[];
 }
 
 export const AddCustomerModal: React.FC<AddCustomerModalProps> = ({
   isOpen,
   onClose,
   onCustomerCreated,
+  defaultCustomerTypes,
 }) => {
   const crateTypes = db.getCrateTypes();
 
   const [name, setName] = useState('');
+  const [customerTypes, setCustomerTypes] = useState<CustomerType[]>(
+    defaultCustomerTypes ? normalizeCustomerTypes(defaultCustomerTypes) : []
+  );
+  const [typeError, setTypeError] = useState('');
   const [mobile, setMobile] = useState('');
   const [altMobile, setAltMobile] = useState(''); // Alternate Number 1
   const [alternate2Mobile, setAlternate2Mobile] = useState(''); // Alternate Number 2
@@ -33,11 +44,37 @@ export const AddCustomerModal: React.FC<AddCustomerModalProps> = ({
   const [notes, setNotes] = useState('');
   const [photo, setPhoto] = useState<string | undefined>(undefined);
 
+  useEffect(() => {
+    if (isOpen) {
+      setCustomerTypes(
+        defaultCustomerTypes && defaultCustomerTypes.length > 0
+          ? normalizeCustomerTypes(defaultCustomerTypes)
+          : []
+      );
+      setTypeError('');
+    }
+  }, [isOpen, defaultCustomerTypes]);
+
   if (!isOpen) return null;
+
+  const toggleCustomerType = (type: CustomerType) => {
+    setTypeError('');
+    setCustomerTypes((prev) => {
+      const exists = prev.includes(type);
+      const next = exists ? prev.filter((t) => t !== type) : [...prev, type];
+      return normalizeCustomerTypes(next);
+    });
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
+
+    const normalizedTypes = normalizeCustomerTypes(customerTypes);
+    if (normalizedTypes.length === 0) {
+      setTypeError('Please select at least one Customer Type (Cash Sale, Credit Sale, or Sale Proceeds).');
+      return;
+    }
 
     const trimmedAlt1 = altMobile.trim();
     const trimmedAlt2 = alternate2Mobile.trim();
@@ -45,6 +82,7 @@ export const AddCustomerModal: React.FC<AddCustomerModalProps> = ({
     const newCustomer: Customer = {
       id: `c-${Date.now()}`,
       name: name.trim(),
+      customerTypes: normalizedTypes,
       mobile: mobile.trim(),
       altMobile: trimmedAlt1 || undefined,
       alternate1Mobile: trimmedAlt1 || undefined,
@@ -71,11 +109,21 @@ export const AddCustomerModal: React.FC<AddCustomerModalProps> = ({
 
     // Reset
     setName('');
+    setCustomerTypes(
+      defaultCustomerTypes && defaultCustomerTypes.length > 0
+        ? normalizeCustomerTypes(defaultCustomerTypes)
+        : []
+    );
+    setTypeError('');
     setMobile('');
     setAltMobile('');
     setAlternate2Mobile('');
     setAddress('');
+    setCity('');
     setAadhaarNo('');
+    setOpeningBalance(0);
+    setOpeningCrateBalance(0);
+    setNotes('');
     setPhoto(undefined);
   };
 
@@ -112,6 +160,62 @@ export const AddCustomerModal: React.FC<AddCustomerModalProps> = ({
               onChange={(e) => setName(e.target.value)}
               className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
             />
+          </div>
+
+          {/* Customer Type Multi-Select */}
+          <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-3.5 dark:border-slate-800 dark:bg-slate-900/50">
+            <div className="flex items-center justify-between gap-2 mb-2">
+              <label className="text-xs font-bold text-slate-800 dark:text-slate-200">
+                Customer Type <span className="text-rose-500">*</span>
+              </label>
+              <span className="text-[10px] font-medium text-slate-500 dark:text-slate-400">
+                Select one or multiple modules
+              </span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              {CUSTOMER_TYPE_OPTIONS.map((opt) => {
+                const isSelected = customerTypes.includes(opt.value);
+                return (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => toggleCustomerType(opt.value)}
+                    aria-pressed={isSelected}
+                    className={`flex items-start gap-2 rounded-lg border p-2.5 text-left transition-all cursor-pointer ${
+                      isSelected
+                        ? 'border-emerald-500 bg-emerald-50/90 text-emerald-950 ring-1 ring-emerald-500/40 dark:border-emerald-500 dark:bg-emerald-950/50 dark:text-emerald-100'
+                        : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-slate-600'
+                    }`}
+                  >
+                    <span
+                      className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors ${
+                        isSelected
+                          ? 'border-emerald-600 bg-emerald-600 text-white'
+                          : 'border-slate-300 bg-white dark:border-slate-600 dark:bg-slate-900'
+                      }`}
+                    >
+                      {isSelected && <Check className="h-3 w-3 stroke-[3]" />}
+                    </span>
+                    <div className="min-w-0">
+                      <div className="text-xs font-bold leading-tight">{opt.label}</div>
+                      <div className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 leading-tight">
+                        {opt.visibilityHint}
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+            {customerTypes.length > 0 && (
+              <p className="mt-2 text-[11px] font-medium text-emerald-700 dark:text-emerald-300">
+                Visible in: <strong>{formatCustomerTypesLabel(customerTypes)}</strong>
+              </p>
+            )}
+            {typeError && (
+              <p className="mt-2 text-xs font-semibold text-rose-600 dark:text-rose-400">
+                {typeError}
+              </p>
+            )}
           </div>
 
           {/* Customer Photo Upload */}

@@ -162,13 +162,13 @@ async function run() {
       'CashSalePrintModal displays exact ordered buttons: Small Bill, B7, B6, A5, A4'
     );
 
-    // 3. Check SaleProceedPrintModal remains completely untouched (still shows B7 & 88x125)
+    // 3. Check SaleProceedPrintModal displays ordered buttons & applies 105 × 148.5 mm B7 layout
     const spModalHtml = renderToStaticMarkup(
       React.createElement(SaleProceedPrintModal, {
         isOpen: true,
         onClose: () => {},
         proceeds: {
-          id: 'sp-unchanged',
+          id: 'sp-compat-105',
           proceedsNo: 'Sale Proceeds No. 108',
           sequenceNumber: 108,
           date: '2026-11-24',
@@ -201,11 +201,12 @@ async function run() {
         spA4Idx > spA5Idx &&
         !spModalHtml.includes('>Compact</button>') &&
         !spModalHtml.includes('>Compat</button>') &&
-        !spModalHtml.includes('data-compat-105'),
-      'SaleProceedPrintModal displays exact ordered buttons (Small Bill, B7, B6, A5, A4) without altering 88×125 override'
+        spModalHtml.includes('data-compat-105="true"') &&
+        spModalHtml.includes('max-w-[397px]'),
+      'SaleProceedPrintModal displays exact ordered buttons (Small Bill, B7, B6, A5, A4) with 105 × 148.5 mm (397px) B7 portrait layout'
     );
 
-    // 4. Check ChooseBillPrintFormatModal displays Small Bill (140 × 210 mm) & B7 (105 × 148.5 mm) for Credit Sale, and preserves B7 (88 × 125 mm) when false
+    // 4. Check ChooseBillPrintFormatModal displays Small Bill (140 × 210 mm) & B7 (105 × 148.5 mm) for Credit Sale, Cash Sale, Sale Proceeds, and preserves B7 (88 × 125 mm) when useCompatB7 is false
     const formatModalCreditSaleHtml = renderToStaticMarkup(
       React.createElement(ChooseBillPrintFormatModal, {
         isOpen: true,
@@ -250,7 +251,7 @@ async function run() {
       'ChooseBillPrintFormatModal displays Small Bill (140 × 210 mm) & B7 (105 × 148.5 mm) for Cash Sale identically to Credit Sale'
     );
 
-    const formatModalStandardHtml = renderToStaticMarkup(
+    const formatModalSaleProceedHtml = renderToStaticMarkup(
       React.createElement(ChooseBillPrintFormatModal, {
         isOpen: true,
         onClose: () => {},
@@ -258,18 +259,36 @@ async function run() {
         elementId: 'mandi-print-area',
         filename: 'Sale-Proceeds-108',
         defaultSize: 'b7',
+        useCompatB7: true,
+        optionLabelOverrides: { compact: 'Small Bill', b7: 'B7' },
+      })
+    );
+    check(
+      formatModalSaleProceedHtml.includes('>Small Bill</span>') &&
+        formatModalSaleProceedHtml.includes('140 × 210 mm') &&
+        formatModalSaleProceedHtml.includes('>B7</span>') &&
+        formatModalSaleProceedHtml.includes('105 × 148.5 mm') &&
+        !formatModalSaleProceedHtml.includes('>Compat</span>') &&
+        !formatModalSaleProceedHtml.includes('>Compact (Mandi)</span>'),
+      'ChooseBillPrintFormatModal displays Small Bill (140 × 210 mm) & B7 (105 × 148.5 mm) for Sale Proceeds'
+    );
+
+    const formatModalStandardHtml = renderToStaticMarkup(
+      React.createElement(ChooseBillPrintFormatModal, {
+        isOpen: true,
+        onClose: () => {},
+        documentTitle: 'Other Bill 001',
+        elementId: 'mandi-print-area',
+        filename: 'Other-Bill-001',
+        defaultSize: 'b7',
         useCompatB7: false,
         optionLabelOverrides: { compact: 'Small Bill', b7: 'B7' },
       })
     );
     check(
-      formatModalStandardHtml.includes('>Small Bill</span>') &&
-        formatModalStandardHtml.includes('140 × 210 mm') &&
-        formatModalStandardHtml.includes('>B7</span>') &&
-        formatModalStandardHtml.includes('88 × 125 mm') &&
-        !formatModalStandardHtml.includes('>Compat</span>') &&
-        !formatModalStandardHtml.includes('>Compact (Mandi)</span>'),
-      'ChooseBillPrintFormatModal displays Small Bill (140 × 210 mm) & B7 (88 × 125 mm) for Sale Proceeds'
+      formatModalStandardHtml.includes('>B7</span>') &&
+        formatModalStandardHtml.includes('88 × 125 mm'),
+      'ChooseBillPrintFormatModal preserves B7 (88 × 125 mm) when useCompatB7 is false'
     );
   } finally {
     if (origWindow === undefined) delete (globalThis as any).window;

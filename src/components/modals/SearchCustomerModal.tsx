@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { Customer } from '../../types';
+import { Customer, CustomerType } from '../../types';
 import { db } from '../../services/db';
+import { customerHasType } from '../../utils/customerTypeUtils';
 import { CustomerAvatar } from '../common/CustomerAvatar';
 import { Search, X, Users, Check, Phone, MapPin, ArrowRight } from 'lucide-react';
 import { getCustomerPrintContactLines } from '../../utils/customerContactUtils';
@@ -10,6 +11,8 @@ interface SearchCustomerModalProps {
   onClose: () => void;
   onSelectCustomer: (customer: Customer | null) => void;
   selectedCustomerId?: string;
+  customerType?: CustomerType | CustomerType[];
+  subtitle?: string;
 }
 
 export const SearchCustomerModal: React.FC<SearchCustomerModalProps> = ({
@@ -17,6 +20,8 @@ export const SearchCustomerModal: React.FC<SearchCustomerModalProps> = ({
   onClose,
   onSelectCustomer,
   selectedCustomerId = '',
+  customerType,
+  subtitle = 'Filter Sale Proceeds Ledger by customer name or mobile number',
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [highlightedIndex, setHighlightedIndex] = useState(0);
@@ -25,7 +30,11 @@ export const SearchCustomerModal: React.FC<SearchCustomerModalProps> = ({
   const listRef = useRef<HTMLDivElement>(null);
   const itemsRef = useRef<(HTMLDivElement | null)[]>([]);
 
-  const customers = db.getCustomers();
+  const allCustomers = db.getCustomers();
+  const customers = useMemo(
+    () => (customerType ? allCustomers.filter((c) => customerHasType(c, customerType)) : allCustomers),
+    [allCustomers, customerType]
+  );
 
   // Reset search and highlight whenever modal opens
   useEffect(() => {
@@ -141,7 +150,7 @@ export const SearchCustomerModal: React.FC<SearchCustomerModalProps> = ({
                 Search Customer
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                Filter Sale Proceeds Ledger by customer name or mobile number
+                {subtitle}
               </p>
             </div>
           </div>

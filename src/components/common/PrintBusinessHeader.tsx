@@ -8,6 +8,8 @@ interface PrintBusinessHeaderProps {
   variant?: 'bill' | 'ledger' | 'ledger-centered';
   paperSize?: BillPaperSize;
   className?: string;
+  enlargeContactAndAddressOnB7?: boolean;
+  boldContactAndAddressOnB7?: boolean;
 }
 
 /**
@@ -28,6 +30,8 @@ export const PrintBusinessHeader: React.FC<PrintBusinessHeaderProps> = ({
   variant = 'ledger',
   paperSize = 'a5',
   className = '',
+  enlargeContactAndAddressOnB7 = false,
+  boldContactAndAddressOnB7 = false,
 }) => {
   if (!profile) return null;
 
@@ -99,6 +103,10 @@ export const PrintBusinessHeader: React.FC<PrintBusinessHeaderProps> = ({
 
   const addressClass = !isBill
     ? 'text-[11px] sm:text-[12px] print:text-[11.5px]'
+    : isB7 && enlargeContactAndAddressOnB7
+    ? 'text-[9px] print:text-[9.5px] font-semibold text-black'
+    : isB7 && boldContactAndAddressOnB7
+    ? 'text-[7.5px] print:text-[8px] font-bold text-black'
     : isB7
     ? 'text-[7.5px] print:text-[8px]'
     : isB6
@@ -111,6 +119,10 @@ export const PrintBusinessHeader: React.FC<PrintBusinessHeaderProps> = ({
 
   const contactClass = !isBill
     ? 'text-[10.5px] sm:text-[11.5px] print:text-[11px] font-semibold text-black'
+    : isB7 && enlargeContactAndAddressOnB7
+    ? 'text-[8.5px] print:text-[9px] tracking-tight font-bold text-black'
+    : isB7 && boldContactAndAddressOnB7
+    ? 'text-[6.5px] print:text-[7px] tracking-tight font-bold text-black'
     : isB7
     ? 'text-[6.5px] print:text-[7px] tracking-tight font-medium text-slate-800 dark:text-slate-800 print:text-black'
     : isB6
@@ -120,6 +132,12 @@ export const PrintBusinessHeader: React.FC<PrintBusinessHeaderProps> = ({
     : isA4Bill
     ? 'text-[10.5px] sm:text-[11px] print:text-[11px] font-medium text-slate-800 dark:text-slate-800 print:text-black'
     : 'text-[10px] sm:text-[10.5px] print:text-[10px] font-medium text-slate-800 dark:text-slate-800 print:text-black';
+
+  const addressBaseToneClass = isLedgerCentered
+    ? 'font-semibold text-black'
+    : isB7 && (enlargeContactAndAddressOnB7 || boldContactAndAddressOnB7)
+    ? ''
+    : 'font-medium text-slate-800 dark:text-slate-800 print:text-black';
 
   if (isBill || isLedgerCentered) {
     return (
@@ -158,7 +176,7 @@ export const PrintBusinessHeader: React.FC<PrintBusinessHeaderProps> = ({
 
         {addressLine && (
           <div
-            className={`${isLedgerCentered ? 'font-semibold text-black' : 'font-medium text-slate-800 dark:text-slate-800 print:text-black'} leading-snug break-words m-0 p-0 mt-0.5 ${addressClass}`}
+            className={`${addressBaseToneClass} leading-snug break-words m-0 p-0 mt-0.5 ${addressClass}`.trim()}
           >
             {addressLine}
           </div>

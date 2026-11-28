@@ -17,6 +17,7 @@ import { getFruitEffectivePrice } from './fruitUtils';
 import { isCrateUnit, getDefaultCrateSizeForFruit } from './crateUtils';
 import { getTodayIso } from './formatters';
 import { calculateWholesaleItemAmount } from './billingCalculations';
+import { parseCustomerTypesFromText } from './customerTypeUtils';
 
 export type ImportModule =
   | 'fruitMaster'
@@ -84,6 +85,7 @@ const FIELD_ALIASES: Record<ImportModule, Record<string, string[]>> = {
   },
   customers: {
     name: ['customername', 'name', 'buyername', 'clientname', 'partyname'],
+    customerTypes: ['customertypes', 'customertype', 'type', 'types', 'module', 'modules'],
     mobile: ['phone', 'mobile', 'mobilephone', 'contact', 'cell'],
     city: ['city', 'area', 'town', 'mandi', 'location'],
     address: ['address', 'shopaddress', 'fulladdress'],
@@ -313,9 +315,18 @@ export function validateImportRows(
           isDuplicate = true;
         }
 
+        const parsedTypes = parseCustomerTypesFromText(normalizedRow.customerTypes);
+        const customerTypes =
+          parsedTypes.length > 0
+            ? parsedTypes
+            : match?.customerTypes && match.customerTypes.length > 0
+            ? match.customerTypes
+            : (['credit_sale'] as const);
+
         parsedData = {
           id: match?.id || `c-${Date.now()}-${idx}`,
           name,
+          customerTypes: [...customerTypes],
           mobile: normalizedRow.mobile || '',
           city: normalizedRow.city || '',
           address: normalizedRow.address || '',
@@ -722,6 +733,7 @@ export function commitImportBatch(
             id: `c-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
             name: first.customerName,
             mobile: '',
+            customerTypes: [isCash ? 'cash_sale' : 'credit_sale'],
             openingBalance: 0,
             openingBalanceType: 'debit',
             openingCrateBalance: 0,
@@ -846,6 +858,7 @@ export function commitImportBatch(
             id: `c-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
             name: item.customerName,
             mobile: '',
+            customerTypes: ['credit_sale'],
             openingBalance: 0,
             openingBalanceType: 'debit',
             openingCrateBalance: 0,

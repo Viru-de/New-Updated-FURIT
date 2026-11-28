@@ -32,6 +32,7 @@ import {
   downloadWorkbook,
   setAutoColumnWidths,
 } from '../../utils/excelEngine';
+import { customerHasType } from '../../utils/customerTypeUtils';
 
 interface ReportsViewProps {
   initialTab?: 'dailySales' | 'customerOutstanding' | 'vendorOutstanding' | 'expenses' | 'profit' | 'crates';
@@ -78,6 +79,9 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
     : undefined;
 
   const customerOutstandings = getAllCustomerOutstandings(dateFilter);
+  const creditSaleOutstandings = customerOutstandings.filter((o) =>
+    customerHasType(o.customer, 'credit_sale')
+  );
   const profiles = db.getCompanyProfiles();
   const defaultProfile = db.getDefaultProfile() || profiles[0];
   const [selectedProfileId, setSelectedProfileId] = useState<string>(
@@ -217,7 +221,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
       ]);
     } else if (activeTab === 'customerOutstanding') {
       headers = ['Customer', 'Opening (₹)', 'Debit (₹)', 'Credit (₹)', 'Closing Balance (₹)'];
-      rows = customerOutstandings.map((o) => [
+      rows = creditSaleOutstandings.map((o) => [
         `"${o.customer.name}"`,
         o.openingBalance.toFixed(2),
         o.totalDebit.toFixed(2),
@@ -581,7 +585,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                {customerOutstandings.map((o) => (
+                {creditSaleOutstandings.map((o) => (
                   <tr key={o.customer.id} className="hover:bg-slate-50/60 dark:hover:bg-slate-800/40">
                     <td className="px-5 py-3.5 font-bold text-xs text-slate-900 dark:text-white">
                       <span

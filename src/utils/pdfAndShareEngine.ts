@@ -186,21 +186,23 @@ export function stampPdfDynamicPageNumbers(
   footerLeftText = ''
 ): void {
   const total = Math.max(1, pageCount);
+  const isNarrow = pageWidthMm <= 105;
+  const sideMargin = isNarrow ? 4 : 6;
   for (let p = 1; p <= total; p++) {
     doc.setPage(p);
-    const footerLineY = pageHeightMm - 8.5;
-    const footerTextY = pageHeightMm - 4.2;
+    const footerLineY = pageHeightMm - (isNarrow ? 6.5 : 8.5);
+    const footerTextY = pageHeightMm - (isNarrow ? 3.2 : 4.2);
     doc.setDrawColor(148, 163, 184);
     doc.setLineWidth(0.2);
-    doc.line(6, footerLineY, pageWidthMm - 6, footerLineY);
+    doc.line(sideMargin, footerLineY, pageWidthMm - sideMargin, footerLineY);
     doc.setFont('helvetica', 'normal');
-    doc.setFontSize(8.5);
+    doc.setFontSize(isNarrow ? 7 : 8.5);
     doc.setTextColor(30, 41, 59);
     if (footerLeftText) {
-      doc.text(footerLeftText, 6, footerTextY);
+      doc.text(footerLeftText, sideMargin, footerTextY);
     }
     doc.setFont('helvetica', 'bold');
-    doc.text(`Page ${p} of ${total}`, pageWidthMm - 6, footerTextY, { align: 'right' });
+    doc.text(`Page ${p} of ${total}`, pageWidthMm - sideMargin, footerTextY, { align: 'right' });
   }
 }
 
@@ -232,10 +234,11 @@ function paginateDynamicLedgerCloneForPrint(
     tableContainerIndex > 0 ? cloneChildren.slice(0, tableContainerIndex) : [];
 
   const prevMountCssText = mountEl.style.cssText;
+  const measureWidthMm = spec.widthMm >= 200 ? 198 : Math.max(76, spec.widthMm - 6);
   try {
     // Temporarily render offscreen at printable width to measure exact row heights
     mountEl.style.cssText =
-      'display: block !important; position: fixed !important; left: -99999px !important; top: 0 !important; width: 198mm !important; visibility: hidden !important; background-color: #ffffff !important; color: #000000 !important; color-scheme: light !important;';
+      `display: block !important; position: fixed !important; left: -99999px !important; top: 0 !important; width: ${measureWidthMm}mm !important; visibility: hidden !important; background-color: #ffffff !important; color: #000000 !important; color-scheme: light !important;`;
 
     const docHeaderH = docHeaderNodes.reduce(
       (sum, el) => sum + (el.getBoundingClientRect?.().height || 0),
@@ -306,7 +309,9 @@ function paginateDynamicLedgerCloneForPrint(
       pageDiv.style.display = 'flex';
       pageDiv.style.flexDirection = 'column';
       pageDiv.style.justifyContent = 'space-between';
-      pageDiv.style.minHeight = `${Math.max(100, spec.heightMm - 20)}mm`;
+      const minPageHeightMm =
+        spec.heightMm >= 200 ? spec.heightMm - 20 : Math.max(90, spec.heightMm - 14);
+      pageDiv.style.minHeight = `${minPageHeightMm}mm`;
       pageDiv.style.boxSizing = 'border-box';
       if (pIdx < totalPages - 1) {
         pageDiv.style.pageBreakAfter = 'always';
@@ -460,39 +465,56 @@ export async function triggerPrint(
 
   // 4. Deep-clone the target printable node
   const clone = targetEl.cloneNode(true) as HTMLElement;
+  if (!clone.hasAttribute('data-paper-size')) {
+    clone.setAttribute('data-paper-size', chosenSize);
+  }
 
   const isCompat105 = clone.getAttribute('data-compat-105') === 'true';
 
   // 5. Sanitize and prepare clone for pristine white-background print
   clone.classList.remove('hidden');
-  clone.style.display = isCompat105 ? 'flex' : 'block';
-  if (isCompat105) {
-    clone.style.flexDirection = 'column';
-    clone.style.justifyContent = 'center';
-    clone.style.alignItems = 'stretch';
-  }
+  clone.style.display = 'block';
   clone.style.visibility = 'visible';
   clone.style.position = 'static';
   clone.style.boxSizing = 'border-box';
   clone.style.width = '100%';
   clone.style.maxWidth = '100%';
   clone.style.height = 'auto';
-  clone.style.minHeight = isCompat105 ? '141mm' : '0';
+  clone.style.minHeight = '0';
   clone.style.maxHeight = 'none';
   clone.style.margin = '0 auto';
   // Provide print-safe internal padding so content never cuts at physical sheet boundaries
-  const safePad =
-    chosenSize === 'b7'
-      ? '0.5mm 1mm 0.5mm 1mm'
-      : chosenSize === 'b6'
-      ? '0.5mm 1.5mm 1mm 1.5mm'
-      : chosenSize === 'a5'
-      ? '1mm 2mm 1mm 2mm'
-      : chosenSize === 'compact'
-      ? '1mm 2.5mm 1.5mm 2.5mm'
-      : '1mm 2.5mm 2mm 2.5mm';
+  const safePad = isCompat105
+    ? '0'
+    : chosenSize === 'b7'
+    ? '0.5mm 1mm 0.5mm 1mm'
+    : chosenSize === 'b6'
+    ? '0.5mm 1.5mm 1mm 1.5mm'
+    : chosenSize === 'a5'
+    ? '1mm 2mm 1mm 2mm'
+    : chosenSize === 'compact'
+    ? '1mm 2.5mm 1.5mm 2.5mm'
+    : '1mm 2.5mm 2mm 2.5mm';
   clone.style.padding = safePad;
   clone.style.marginTop = '0';
+
+  if (isCompat105) {
+    const b7Pages = Array.from(clone.querySelectorAll('.b7-bill-page')) as HTMLElement[];
+    b7Pages.forEach((pageEl, idx) => {
+      pageEl.style.display = 'flex';
+      pageEl.style.flexDirection = 'column';
+      pageEl.style.justifyContent = 'space-between';
+      pageEl.style.alignItems = 'stretch';
+      pageEl.style.minHeight = '139mm';
+      pageEl.style.padding = '1.5mm 2.5mm 1.5mm 2.5mm';
+      pageEl.style.boxSizing = 'border-box';
+      pageEl.style.borderBottom = 'none';
+      pageEl.style.marginBottom = '0';
+      const isLast = idx === b7Pages.length - 1;
+      pageEl.style.pageBreakAfter = isLast ? 'auto' : 'always';
+      (pageEl.style as any).breakAfter = isLast ? 'auto' : 'page';
+    });
+  }
   clone.style.overflow = 'visible';
   clone.style.backgroundColor = '#ffffff';
   clone.style.color = '#000000';
@@ -505,13 +527,30 @@ export async function triggerPrint(
   const noPrints = clone.querySelectorAll('.no-print, [class*="no-print"], button:not(.keep-in-print)');
   noPrints.forEach((el) => el.remove());
 
-  // Unhide print headers and summary sections
-  const printBlocks = clone.querySelectorAll('.print\\:block, [class*="print:block"], [class*="print:flex"]');
+  // Hide screen-only elements marked print:hidden before pagination height calculation
+  const printHiddenEls = clone.querySelectorAll('.print\\:hidden, [class*="print:hidden"]');
+  printHiddenEls.forEach((el) => {
+    (el as HTMLElement).style.display = 'none';
+  });
+
+  // Unhide print headers, table rows, inline spans, and summary sections
+  const printBlocks = clone.querySelectorAll(
+    '.print\\:block, [class*="print:block"], [class*="print:flex"], [class*="print:inline"], [class*="print:inline-block"], [class*="print:table-row"]'
+  );
   printBlocks.forEach((el) => {
     const htmlEl = el as HTMLElement;
+    if (htmlEl.classList.contains('print:hidden') || htmlEl.className.includes('print:hidden')) {
+      return;
+    }
     htmlEl.classList.remove('hidden');
     if (htmlEl.classList.contains('print:flex') || htmlEl.className.includes('print:flex')) {
       htmlEl.style.display = 'flex';
+    } else if (htmlEl.classList.contains('print:inline-block') || htmlEl.className.includes('print:inline-block')) {
+      htmlEl.style.display = 'inline-block';
+    } else if (htmlEl.classList.contains('print:inline') || htmlEl.className.includes('print:inline')) {
+      htmlEl.style.display = 'inline';
+    } else if (htmlEl.classList.contains('print:table-row') || htmlEl.className.includes('print:table-row')) {
+      htmlEl.style.display = 'table-row';
     } else {
       htmlEl.style.display = 'block';
     }
@@ -703,6 +742,7 @@ export async function generatePdfDoc(
 
   // Track unbreakable DOM element bounds (rows, tfoot, bottom signature) & repeating table header bounds in CSS px relative to root
   let unbreakableCssBounds: Array<{ top: number; bottom: number }> = [];
+  let b7PageCssBounds: Array<{ top: number; bottom: number }> = [];
   const tableMeasure: {
     theadCssBounds: { top: number; bottom: number } | null;
     tfootCssTop: number | null;
@@ -727,13 +767,11 @@ export async function generatePdfDoc(
         const isCompat105Clone = clonedElement.getAttribute('data-compat-105') === 'true';
         // Ensure root element is visible in clone and matches paper size width
         clonedElement.setAttribute('data-pdf-export', 'true');
-        clonedElement.style.display = isCompat105Clone ? 'flex' : 'block';
-        if (isCompat105Clone) {
-          clonedElement.style.flexDirection = 'column';
-          clonedElement.style.justifyContent = 'center';
-          clonedElement.style.alignItems = 'stretch';
-          clonedElement.style.minHeight = '542px';
+        if (!clonedElement.hasAttribute('data-paper-size')) {
+          clonedElement.setAttribute('data-paper-size', paperSize);
         }
+        clonedElement.style.display = 'block';
+        clonedElement.style.minHeight = '0';
         clonedElement.style.visibility = 'visible';
         clonedElement.style.position = 'static';
         clonedElement.classList.remove('hidden');
@@ -756,16 +794,32 @@ export async function generatePdfDoc(
         clonedElement.style.overflow = 'visible';
         // Keep safe compact PDF margins without clipping Company Short Name
         clonedElement.style.marginTop = '0';
-        clonedElement.style.paddingTop =
-          paperSize === 'b7' ? (spec.widthMm === 105 ? '6px' : '4px') : paperSize === 'b6' ? '5px' : '8px';
-        if (paperSize === 'b7') {
-          clonedElement.style.paddingLeft = spec.widthMm === 105 ? '7px' : '5px';
-          clonedElement.style.paddingRight = spec.widthMm === 105 ? '7px' : '5px';
-          clonedElement.style.paddingBottom = spec.widthMm === 105 ? '5px' : '4px';
-        } else if (paperSize === 'b6') {
-          clonedElement.style.paddingLeft = '7px';
-          clonedElement.style.paddingRight = '7px';
-          clonedElement.style.paddingBottom = '6px';
+        if (isCompat105Clone) {
+          clonedElement.style.padding = '0';
+          const b7Pages = Array.from(clonedElement.querySelectorAll('.b7-bill-page')) as HTMLElement[];
+          b7Pages.forEach((pageEl) => {
+            pageEl.style.display = 'flex';
+            pageEl.style.flexDirection = 'column';
+            pageEl.style.justifyContent = 'space-between';
+            pageEl.style.alignItems = 'stretch';
+            pageEl.style.minHeight = '542px';
+            pageEl.style.padding = '6px 10px 6px 10px';
+            pageEl.style.boxSizing = 'border-box';
+            pageEl.style.borderBottom = 'none';
+            pageEl.style.marginBottom = '0';
+          });
+        } else {
+          clonedElement.style.paddingTop =
+            paperSize === 'b7' ? (spec.widthMm === 105 ? '6px' : '4px') : paperSize === 'b6' ? '5px' : '8px';
+          if (paperSize === 'b7') {
+            clonedElement.style.paddingLeft = spec.widthMm === 105 ? '7px' : '5px';
+            clonedElement.style.paddingRight = spec.widthMm === 105 ? '7px' : '5px';
+            clonedElement.style.paddingBottom = spec.widthMm === 105 ? '5px' : '4px';
+          } else if (paperSize === 'b6') {
+            clonedElement.style.paddingLeft = '7px';
+            clonedElement.style.paddingRight = '7px';
+            clonedElement.style.paddingBottom = '6px';
+          }
         }
 
         // Strip dark variant classes from all cloned elements
@@ -783,21 +837,30 @@ export async function generatePdfDoc(
           }
         });
 
-        // 1. Unhide any print-only headers (such as statement and report headers) so they appear in PDFs
-        const printBlocks = clonedElement.querySelectorAll('.print\\:block, [class*="print:block"], [class*="print:flex"], .hidden');
+        // 1. Unhide any print-only headers and inline/table-row print replacements so they appear in PDFs
+        const printBlocks = clonedElement.querySelectorAll('.print\\:block, [class*="print:block"], [class*="print:flex"], [class*="print:inline"], [class*="print:table-row"], .hidden');
         printBlocks.forEach((el) => {
           const htmlEl = el as HTMLElement;
+          if (htmlEl.classList.contains('print:hidden') || htmlEl.className.includes('print:hidden')) {
+            return;
+          }
           htmlEl.classList.remove('hidden');
           if (htmlEl.classList.contains('print:flex') || htmlEl.className.includes('print:flex')) {
             htmlEl.style.display = 'flex';
+          } else if (htmlEl.classList.contains('print:inline-block') || htmlEl.className.includes('print:inline-block')) {
+            htmlEl.style.display = 'inline-block';
+          } else if (htmlEl.classList.contains('print:inline') || htmlEl.className.includes('print:inline')) {
+            htmlEl.style.display = 'inline';
+          } else if (htmlEl.classList.contains('print:table-row') || htmlEl.className.includes('print:table-row')) {
+            htmlEl.style.display = 'table-row';
           } else {
             htmlEl.style.display = 'block';
           }
           htmlEl.style.visibility = 'visible';
         });
 
-        // 2. Hide any on-screen only elements from the PDF
-        const noPrints = clonedElement.querySelectorAll('.no-print, [class*="no-print"]');
+        // 2. Hide any on-screen only elements (no-print and print:hidden) from the PDF
+        const noPrints = clonedElement.querySelectorAll('.no-print, [class*="no-print"], .print\\:hidden, [class*="print:hidden"]');
         noPrints.forEach((el) => {
           (el as HTMLElement).style.display = 'none';
         });
@@ -852,6 +915,19 @@ export async function generatePdfDoc(
           }
         }
 
+        if (isCompat105Clone) {
+          const b7PageEls = Array.from(clonedElement.querySelectorAll('.b7-bill-page')) as HTMLElement[];
+          b7PageCssBounds = b7PageEls
+            .map((el) => {
+              const r = el.getBoundingClientRect();
+              return {
+                top: r.top - rootRect.top,
+                bottom: r.bottom - rootRect.top,
+              };
+            })
+            .filter((b) => b.bottom > b.top);
+        }
+
         const protectedEls = clonedElement.querySelectorAll(
           'tbody > tr, .ledger-tx-row, tfoot, .ledger-closing-meta-row, .bill-bottom-footer'
         );
@@ -882,14 +958,40 @@ export async function generatePdfDoc(
 
     let pageCount = 1;
 
-    // Case 1: Fits cleanly on a single page (reserve bottom margin when dynamic footer is stamped)
-    const singlePageTolerance = paperSize === 'b7' || paperSize === 'b6' ? 1.03 : 1.04;
-    const effectiveSinglePageHeightMm = hasDynamicPageNumbers ? pageHeightMm - 10 : pageHeightMm;
-    if (totalContentHeightMm <= effectiveSinglePageHeightMm * singlePageTolerance) {
-      const fitHeightMm = Math.min(totalContentHeightMm, effectiveSinglePageHeightMm);
-      const imgData = canvas.toDataURL('image/jpeg', 0.95);
-      doc.addImage(imgData, 'JPEG', 0, 0, pageWidthMm, fitHeightMm, undefined, 'FAST');
+    // Case 0: Pre-paginated B7 (105 × 148.5 mm) pages — render each .b7-bill-page cleanly onto its own PDF page
+    if (b7PageCssBounds.length > 0) {
+      const canvasScaleY = clonedScrollHeight > 0 ? canvas.height / clonedScrollHeight : 2;
+      b7PageCssBounds.forEach((b, idx) => {
+        if (idx > 0) {
+          doc.addPage([pageWidthMm, pageHeightMm]);
+        }
+        const sy = Math.max(0, Math.floor(b.top * canvasScaleY));
+        const ey = Math.min(canvas.height, Math.ceil(b.bottom * canvasScaleY));
+        const slicePxHeight = Math.max(1, ey - sy);
+        const pageCanvas = document.createElement('canvas');
+        pageCanvas.width = canvas.width;
+        pageCanvas.height = slicePxHeight;
+        const ctx = pageCanvas.getContext('2d');
+        if (ctx) {
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
+          ctx.drawImage(canvas, 0, sy, canvas.width, slicePxHeight, 0, 0, canvas.width, slicePxHeight);
+        }
+        const sliceImgData = pageCanvas.toDataURL('image/jpeg', 0.95);
+        const rawHeightMm = (slicePxHeight * pageWidthMm) / canvas.width;
+        const fitHeightMm = Math.min(rawHeightMm, pageHeightMm);
+        doc.addImage(sliceImgData, 'JPEG', 0, 0, pageWidthMm, fitHeightMm, undefined, 'FAST');
+      });
+      pageCount = b7PageCssBounds.length;
     } else {
+      // Case 1: Fits cleanly on a single page (reserve bottom margin when dynamic footer is stamped)
+      const singlePageTolerance = paperSize === 'b7' || paperSize === 'b6' ? 1.03 : 1.04;
+      const effectiveSinglePageHeightMm = hasDynamicPageNumbers ? pageHeightMm - 10 : pageHeightMm;
+      if (totalContentHeightMm <= effectiveSinglePageHeightMm * singlePageTolerance) {
+        const fitHeightMm = Math.min(totalContentHeightMm, effectiveSinglePageHeightMm);
+        const imgData = canvas.toDataURL('image/jpeg', 0.95);
+        doc.addImage(imgData, 'JPEG', 0, 0, pageWidthMm, fitHeightMm, undefined, 'FAST');
+      } else {
       // Case 2: Multi-page document — slice canvas at clean row/footer boundaries, repeat table headers on continuation pages, and reserve safe top/bottom margins
       const canvasScaleY =
         clonedScrollHeight > 0 ? canvas.height / clonedScrollHeight : 2;
@@ -1036,6 +1138,7 @@ export async function generatePdfDoc(
         startY = endY;
       }
       pageCount = actualPages;
+    }
     }
 
     if (hasDynamicPageNumbers) {

@@ -12,7 +12,8 @@ import { PrintBusinessHeader } from '../common/PrintBusinessHeader';
 import { CustomerAvatar } from '../common/CustomerAvatar';
 import { CustomerAutocomplete } from '../common/CustomerAutocomplete';
 import { QuantityInput } from '../common/QuantityInput';
-import { getCustomerPrintContactLines, formatCustomerContactsInline } from '../../utils/customerContactUtils';
+import { formatCustomerContactsInline } from '../../utils/customerContactUtils';
+import { stripLedgerCrateInOut } from '../../utils/shortPrintUtils';
 
 interface CrateStatementViewProps {
   initialCustomerId?: string;
@@ -66,6 +67,29 @@ export const CrateStatementView: React.FC<CrateStatementViewProps> = ({
         endDate: filterEndDate ? toIsoDate(filterEndDate) : undefined,
       })
     : { customer: undefined, entries: [], closingCrates: 0, crateWeightKg: 20, closingTotalKg: 0, typeBalances: [] };
+
+  const activeTypeBalances = (statement.typeBalances || []).filter(
+    (tb) => tb.issued > 0 || tb.returned > 0 || tb.balance !== 0
+  );
+  const totalIssued = statement.entries.reduce((sum, e) => sum + (Number(e.outQuantity) || 0), 0);
+  const totalReturned = statement.entries.reduce((sum, e) => sum + (Number(e.inQuantity) || 0), 0);
+
+  const rawCustomerAddrParts = [activeCustomer?.address, activeCustomer?.city, activeCustomer?.state]
+    .map((part) => (part || '').trim())
+    .filter(Boolean);
+  const customerAddressParts: string[] = [];
+  for (const part of rawCustomerAddrParts) {
+    const lowerPart = part.toLowerCase();
+    if (!customerAddressParts.some((existing) => existing.toLowerCase().includes(lowerPart))) {
+      customerAddressParts.push(part);
+    }
+  }
+  const customerAddressLine = customerAddressParts.join(', ');
+  const customerContactLine = activeCustomer ? formatCustomerContactsInline(activeCustomer) : '';
+  const statementPeriodLabel =
+    filterStartDate || filterEndDate
+      ? `${filterStartDate ? formatDate(filterStartDate) : 'Opening'} to ${filterEndDate ? formatDate(filterEndDate) : 'Today'}`
+      : 'Complete Statement (All Transactions)';
 
   const effectiveAdjustCrateTypeId = adjustCrateTypeId || activeCustomer?.crateTypeId || crateTypes[0]?.id || '';
   const selectedAdjustCrateType = crateTypes.find((c) => c.id === effectiveAdjustCrateTypeId) || crateTypes[0];
@@ -352,51 +376,98 @@ export const CrateStatementView: React.FC<CrateStatementViewProps> = ({
       {/* Crate Statement Table */}
       <div
         id="crate-statement-print-area"
-        className="rounded-xl border border-slate-200 bg-white shadow-2xs dark:border-slate-800 dark:bg-slate-900 overflow-hidden erp-print-area"
+        data-dynamic-page-numbers="true"
+        className="crate-statement-modern-print rounded-xl border border-slate-200 bg-white shadow-2xs dark:border-slate-800 dark:bg-slate-900 overflow-hidden erp-print-area"
       >
-        {/* Printable Traditional Mandi Statement Header */}
-        <div className="hidden print:block pt-0 px-3 pb-2 border-b border-black text-center mb-1">
-          <PrintBusinessHeader profile={currentProfile} variant="ledger" className="mb-1" />
-          <div className="my-1 text-xs font-bold uppercase tracking-widest border-b border-t border-black py-0.5 inline-block">
-            CUSTOMER CRATE STATEMENT
+        {/* Modern Printable Statement Header & Customer Information Section */}
+        <div className="hidden print:block crate-stmt-doc-header pt-0.5 px-1 pb-2.5 mb-2">
+          <PrintBusinessHeader
+            profile={currentProfile}
+            variant="ledger-centered"
+            className="crate-stmt-business-header pb-2 mb-2"
+          />
+
+          <div className="crate-stmt-title-band border-y border-black py-1 px-2 mb-2 flex items-center justify-between gap-3 bg-slate-100">
+            <span className="crate-stmt-title-text text-[14.5px] font-black uppercase tracking-[0.16em] text-black">
+              CUSTOMER CRATE STATEMENT
+            </span>
+            <span className="crate-stmt-date-badge text-[11.5px] font-bold text-black tabular-nums whitespace-nowrap">
+              Statement Date: {formatDate(getTodayIso())}
+            </span>
           </div>
-          <div className="flex justify-between items-start text-xs mt-2 text-left border-t border-slate-300 pt-1.5">
-            <div>
-              <div className="font-bold text-sm">M/s. {activeCustomer?.name || 'Customer'}</div>
-              {activeCustomer?.address && <div className="text-[11px]">{activeCustomer.address}</div>}
-              {activeCustomer?.city && <div className="text-[11px]">{activeCustomer.city}</div>}
-              {activeCustomer && formatCustomerContactsInline(activeCustomer) && (
-                <div className="text-[11px] text-slate-800 dark:text-slate-800 print:text-black font-medium mt-0.5">
-                  {formatCustomerContactsInline(activeCustomer)}
+
+          <div className="crate-stmt-info-grid grid grid-cols-12 border border-slate-400 rounded-md overflow-hidden bg-white">
+            <div className="crate-stmt-customer-col col-span-7 p-2.5 pr-3 bg-white">
+              <div className="crate-stmt-info-eyebrow text-[9.5px] font-extrabold uppercase tracking-[0.12em] text-slate-600 mb-0.5">
+                CUSTOMER DETAILS
+              </div>
+              <div className="crate-stmt-party-name text-[15px] font-black uppercase text-black leading-snug">
+                M/s. {activeCustomer?.name || 'Customer'}
+              </div>
+              {customerAddressLine && (
+                <div className="crate-stmt-info-line text-[12px] font-bold text-black leading-snug mt-0.5">
+                  {customerAddressLine}
+                </div>
+              )}
+              {customerContactLine && (
+                <div className="crate-stmt-info-line text-[12px] font-bold text-black leading-snug mt-0.5 tabular-nums">
+                  Contact: {customerContactLine}
                 </div>
               )}
             </div>
-            <div className="text-right">
-              <div>DATE: <strong>{formatDate(getTodayIso())}</strong></div>
-              {(filterStartDate || filterEndDate) ? (
-                <div className="text-[11px]">Period: {filterStartDate ? formatDate(filterStartDate) : 'Opening'} to {filterEndDate ? formatDate(filterEndDate) : 'Today'}</div>
-              ) : (
-                <div className="text-[11px]">Period: Complete Statement (All Transactions)</div>
-              )}
-              <div className="mt-1 font-bold">
-                Closing Balance: <strong>{statement.closingCrates} Crates ({statement.closingTotalKg} KG)</strong>
+
+            <div className="crate-stmt-summary-col col-span-5 p-2.5 pl-3 border-l border-slate-300 bg-slate-50 flex flex-col justify-between gap-1">
+              <div className="crate-stmt-info-eyebrow text-[9.5px] font-extrabold uppercase tracking-[0.12em] text-slate-600">
+                STATEMENT SUMMARY
+              </div>
+              <div className="crate-stmt-summary-row flex items-baseline justify-between gap-2 text-[11.5px] text-black">
+                <span className="font-semibold">Period:</span>
+                <span className="font-bold text-right tabular-nums">{statementPeriodLabel}</span>
+              </div>
+              <div className="crate-stmt-summary-row flex items-baseline justify-between gap-2 text-[12px] text-black pt-1 border-t border-slate-300">
+                <span className="font-bold">Closing Crate Balance:</span>
+                <span className="crate-stmt-summary-highlight font-black text-[13.5px] text-right tabular-nums">
+                  {statement.closingCrates} {statement.closingCrates === 1 ? 'Crate' : 'Crates'}
+                </span>
+              </div>
+              <div className="crate-stmt-summary-row flex items-baseline justify-between gap-2 text-[12px] text-black">
+                <span className="font-bold">Total Crates / Total KG:</span>
+                <span className="crate-stmt-summary-highlight font-black text-[13px] text-right tabular-nums">
+                  {statement.closingCrates} Crates / {statement.closingTotalKg} KG
+                </span>
               </div>
             </div>
           </div>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm border-collapse">
+          <table className="w-full text-left text-sm border-collapse crate-stmt-table">
+            <colgroup>
+              <col style={{ width: '11%' }} />
+              <col style={{ width: '28%' }} />
+              <col style={{ width: '14%' }} />
+              <col style={{ width: '8%' }} />
+              <col style={{ width: '8%' }} />
+              <col style={{ width: '10%' }} />
+              <col style={{ width: '11%' }} />
+              <col style={{ width: '10%' }} />
+            </colgroup>
             <thead>
               <tr className="border-b border-slate-200 bg-slate-100 text-[11px] font-bold uppercase tracking-wider text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">
-                <th className="px-4 py-3.5 w-28">Date</th>
+                <th className="px-4 py-3.5">Date</th>
                 <th className="px-4 py-3.5">Particulars / Reference</th>
-                <th className="px-4 py-3.5 text-center w-36">Crate Type</th>
-                <th className="px-4 py-3.5 text-center w-28">OUT (Issued)</th>
-                <th className="px-4 py-3.5 text-center w-28">IN (Returned)</th>
-                <th className="px-4 py-3.5 text-right w-32">Type Balance</th>
-                <th className="px-4 py-3.5 text-right w-32">Total Balance</th>
-                <th className="px-4 py-3.5 text-right w-28">Total KG</th>
+                <th className="px-4 py-3.5 text-center">Crate Type</th>
+                <th className="px-4 py-3.5 text-center">
+                  <span className="print:hidden">OUT (Issued)</span>
+                  <span className="hidden print:inline">Issued</span>
+                </th>
+                <th className="px-4 py-3.5 text-center">
+                  <span className="print:hidden">IN (Returned)</span>
+                  <span className="hidden print:inline">Returned</span>
+                </th>
+                <th className="px-4 py-3.5 text-right">Type Balance</th>
+                <th className="px-4 py-3.5 text-right">Total Balance</th>
+                <th className="px-4 py-3.5 text-right">Total KG</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -408,62 +479,71 @@ export const CrateStatementView: React.FC<CrateStatementViewProps> = ({
                 </tr>
               ) : (
                 statement.entries.map((entry) => {
-                  const isOb = entry.particulars === 'Opening Crate Balance';
+                  const isOb =
+                    entry.id.startsWith('ob-') ||
+                    entry.particulars.startsWith('Opening Crate Balance');
                   return (
                     <tr
                       key={entry.id}
                       className={`hover:bg-slate-50/60 transition-colors dark:hover:bg-slate-800/40 ${
-                        isOb ? 'bg-sky-50/40 font-medium dark:bg-sky-950/30' : ''
+                        isOb ? 'crate-stmt-ob-row bg-sky-50/40 font-medium dark:bg-sky-950/30' : ''
                       }`}
                     >
-                      <td className="px-4 py-3 font-mono-numbers text-xs text-slate-700 dark:text-slate-300 whitespace-nowrap">
+                      <td className="px-4 py-3 font-mono-numbers text-xs text-slate-700 dark:text-slate-300 whitespace-nowrap align-top">
                         {formatDate(entry.date)}
                       </td>
-                      <td className="px-4 py-3.5 text-slate-900 dark:text-slate-100 align-top">
-                        <div className={`font-bold text-sm tracking-tight leading-snug ${isOb ? 'text-sky-900 dark:text-sky-200 font-bold' : 'text-slate-950 dark:text-slate-100'}`}>
-                          {entry.particulars}
+                      <td className="px-4 py-3 text-slate-900 dark:text-slate-100 align-top">
+                        <div
+                          className={`crate-stmt-particulars font-bold text-sm tracking-tight leading-snug ${
+                            isOb ? 'text-sky-900 dark:text-sky-200 font-bold' : 'text-slate-950 dark:text-slate-100'
+                          }`}
+                        >
+                          <span className="print:hidden">{entry.particulars}</span>
+                          <span className="hidden print:inline">
+                            {stripLedgerCrateInOut(entry.particulars) || entry.particulars}
+                          </span>
                         </div>
                         {entry.referenceNo && entry.referenceNo !== 'OB' && (
-                          <div className="text-[11px] text-slate-500 font-mono mt-0.5">
+                          <div className="crate-stmt-ref text-[11px] text-slate-500 font-mono mt-0.5">
                             Ref: {entry.referenceNo}
                           </div>
                         )}
                       </td>
                       <td className="px-4 py-3 text-center align-top">
-                        <span className="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-bold font-mono bg-sky-50 text-sky-900 dark:bg-sky-950/70 dark:text-sky-200 border border-sky-300 dark:border-sky-800">
+                        <span className="crate-stmt-type-pill inline-flex items-center rounded-md px-2 py-0.5 text-xs font-bold font-mono bg-sky-50 text-sky-900 dark:bg-sky-950/70 dark:text-sky-200 border border-sky-300 dark:border-sky-800">
                           {entry.crateName || 'Crate'}
                         </span>
                       </td>
-                      {/* OUT */}
-                      <td className="px-4 py-3 text-center font-mono-numbers text-xs sm:text-sm font-semibold text-amber-600 dark:text-amber-400">
+                      {/* Issued */}
+                      <td className="px-4 py-3 text-center font-mono-numbers text-xs sm:text-sm font-semibold text-amber-600 dark:text-amber-400 align-top whitespace-nowrap">
                         {entry.outQuantity > 0 ? (
-                          <span className="inline-flex items-center gap-1">
-                            <ArrowUpRight className="h-3 w-3" /> {entry.outQuantity}
+                          <span className="inline-flex items-center gap-1 font-bold">
+                            <ArrowUpRight className="h-3 w-3 print:hidden" /> {entry.outQuantity}
                           </span>
                         ) : (
                           '-'
                         )}
                       </td>
-                      {/* IN */}
-                      <td className="px-4 py-3 text-center font-mono-numbers text-xs sm:text-sm font-semibold text-emerald-600 dark:text-emerald-400">
+                      {/* Returned */}
+                      <td className="px-4 py-3 text-center font-mono-numbers text-xs sm:text-sm font-semibold text-emerald-600 dark:text-emerald-400 align-top whitespace-nowrap">
                         {entry.inQuantity > 0 ? (
-                          <span className="inline-flex items-center gap-1">
-                            <ArrowDownLeft className="h-3 w-3" /> {entry.inQuantity}
+                          <span className="inline-flex items-center gap-1 font-bold">
+                            <ArrowDownLeft className="h-3 w-3 print:hidden" /> {entry.inQuantity}
                           </span>
                         ) : (
                           '-'
                         )}
                       </td>
                       {/* Type Balance */}
-                      <td className="px-4 py-3 text-right font-mono-numbers text-xs sm:text-sm font-bold text-sky-800 dark:text-sky-300">
+                      <td className="px-4 py-3 text-right font-mono-numbers text-xs sm:text-sm font-bold text-sky-800 dark:text-sky-300 align-top whitespace-nowrap">
                         {entry.typeBalance !== undefined ? `${entry.typeBalance}` : `${entry.balance}`}
                       </td>
                       {/* Total Balance (Crates) */}
-                      <td className="px-4 py-3 text-right font-mono-numbers text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
+                      <td className="px-4 py-3 text-right font-mono-numbers text-xs sm:text-sm font-bold text-slate-900 dark:text-white align-top whitespace-nowrap">
                         {entry.balance} {entry.balance === 1 ? 'Crate' : 'Crates'}
                       </td>
                       {/* Total KG */}
-                      <td className="px-4 py-3 text-right font-mono-numbers text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-400">
+                      <td className="px-4 py-3 text-right font-mono-numbers text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-400 align-top whitespace-nowrap">
                         {entry.totalKg} KG
                       </td>
                     </tr>
@@ -472,37 +552,100 @@ export const CrateStatementView: React.FC<CrateStatementViewProps> = ({
               )}
             </tbody>
             <tfoot>
-              <tr className="border-t-2 border-slate-300 bg-slate-50/90 font-bold dark:border-slate-700 dark:bg-slate-800/80">
-                <td colSpan={5} className="px-5 py-3.5 text-xs uppercase tracking-wider text-slate-700 dark:text-slate-300">
+              <tr className="crate-stmt-total-row border-t-2 border-slate-300 bg-slate-50/90 font-bold dark:border-slate-700 dark:bg-slate-800/80">
+                <td colSpan={3} className="px-4 py-3 text-xs uppercase tracking-wider text-slate-700 dark:text-slate-300">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <span>Closing Crate Summary</span>
-                    <div className="flex flex-wrap gap-2 font-mono text-xs normal-case">
-                      {statement.typeBalances
-                        .filter((tb) => tb.issued > 0 || tb.returned > 0 || tb.balance !== 0)
-                        .map((tb) => (
-                          <span
-                            key={tb.crateTypeId}
-                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-sky-100 text-sky-900 dark:bg-sky-950 dark:text-sky-200 border border-sky-300 dark:border-sky-800"
-                          >
-                            <strong>{tb.crateName}:</strong> {tb.balance}
-                          </span>
-                        ))}
+                    <span className="font-extrabold">Closing Crate Summary</span>
+                    <div className="print:hidden flex flex-wrap gap-2 font-mono text-xs normal-case">
+                      {activeTypeBalances.map((tb) => (
+                        <span
+                          key={tb.crateTypeId}
+                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-sky-100 text-sky-900 dark:bg-sky-950 dark:text-sky-200 border border-sky-300 dark:border-sky-800"
+                        >
+                          <strong>{tb.crateName}:</strong> {tb.balance}
+                        </span>
+                      ))}
                     </div>
                   </div>
                 </td>
-                <td colSpan={2} className="px-5 py-3.5 text-right font-mono-numbers text-base text-slate-900 dark:text-white">
-                  {statement.closingCrates} Crates Total
+                <td className="px-4 py-3 text-center font-mono-numbers text-sm font-extrabold text-slate-900 dark:text-white whitespace-nowrap">
+                  {totalIssued > 0 ? totalIssued : '-'}
                 </td>
-                <td className="px-5 py-3.5 text-right font-mono-numbers text-base text-sky-700 dark:text-sky-300">
+                <td className="px-4 py-3 text-center font-mono-numbers text-sm font-extrabold text-slate-900 dark:text-white whitespace-nowrap">
+                  {totalReturned > 0 ? totalReturned : '-'}
+                </td>
+                <td className="px-4 py-3 text-right text-xs font-extrabold uppercase tracking-wide text-slate-600 dark:text-slate-300 whitespace-nowrap">
+                  <span className="hidden print:inline">Closing</span>
+                  <span className="print:hidden">-</span>
+                </td>
+                <td className="px-4 py-3 text-right font-mono-numbers text-base font-black text-slate-900 dark:text-white whitespace-nowrap">
+                  {statement.closingCrates} {statement.closingCrates === 1 ? 'Crate' : 'Crates'}
+                </td>
+                <td className="px-4 py-3 text-right font-mono-numbers text-base font-black text-sky-700 dark:text-sky-300 whitespace-nowrap">
                   {statement.closingTotalKg} KG
+                </td>
+              </tr>
+
+              {/* Printable Closing Crate Summary Card & Authorised Signature inside tfoot so multi-page prints keep them together on final page */}
+              <tr className="ledger-closing-meta-row hidden print:table-row bg-white text-black">
+                <td colSpan={8} className="ledger-closing-meta-cell p-0 pt-2.5 bg-white text-black">
+                  <div className="crate-stmt-closing-card border border-slate-400 rounded-md p-2.5 bg-slate-50 flex items-center justify-between gap-4 text-black">
+                    <div className="min-w-0 flex-1">
+                      <div className="crate-stmt-closing-heading text-[10.5px] font-black uppercase tracking-[0.12em] text-black mb-1">
+                        Closing Crate Summary — {activeCustomer?.name || 'Customer'}
+                      </div>
+                      <div className="crate-stmt-type-breakdown flex flex-wrap gap-x-4 gap-y-1 text-[12px] font-bold text-black">
+                        {activeTypeBalances.length > 0 ? (
+                          activeTypeBalances.map((tb) => (
+                            <span key={tb.crateTypeId} className="crate-stmt-type-summary-item tabular-nums">
+                              {tb.crateName}: <strong>{tb.balance}</strong> {tb.balance === 1 ? 'Crate' : 'Crates'}
+                            </span>
+                          ))
+                        ) : (
+                          <span className="crate-stmt-type-summary-item tabular-nums">
+                            Combined Crate Balance: <strong>{statement.closingCrates}</strong> Crates
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="crate-stmt-closing-totals shrink-0 text-right border-l border-slate-300 pl-4 tabular-nums">
+                      <div className="crate-stmt-closing-line text-[12px] font-extrabold uppercase text-black">
+                        Total Crates:{' '}
+                        <span className="crate-stmt-closing-big text-[15px] font-black">
+                          {statement.closingCrates} {statement.closingCrates === 1 ? 'Crate' : 'Crates'}
+                        </span>
+                      </div>
+                      <div className="crate-stmt-closing-line text-[12px] font-extrabold uppercase text-black mt-0.5">
+                        Total KG:{' '}
+                        <span className="crate-stmt-closing-big text-[15px] font-black">
+                          {statement.closingTotalKg} KG
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="crate-stmt-signatory-row px-1 pt-3 pb-1 flex justify-between items-end text-[10.5px] bg-white text-black">
+                    <div className="text-[10.5px] font-medium text-black">
+                      Software Developed By: {currentProfile.softwareDevelopedBy || defaultProfile.softwareDevelopedBy || 'Klyia Technology'}
+                    </div>
+                    <div className="text-right shrink-0">
+                      <div className="text-[11px] font-bold uppercase text-black">
+                        {formatCompanySignature(currentProfile)}
+                      </div>
+                      <div className="text-[9.5px] uppercase tracking-wider text-black mt-3">
+                        AUTHORISED SIGNATURE
+                      </div>
+                    </div>
+                  </div>
                 </td>
               </tr>
             </tfoot>
           </table>
         </div>
 
-        {/* Bottom Banner */}
-        <div className="flex flex-col sm:flex-row items-center justify-between border-t border-slate-200 bg-sky-50/60 px-6 py-4 dark:border-slate-800 dark:bg-sky-950/20">
+        {/* On-Screen Bottom Banner */}
+        <div className="print:hidden flex flex-col sm:flex-row items-center justify-between border-t border-slate-200 bg-sky-50/60 px-6 py-4 dark:border-slate-800 dark:bg-sky-950/20">
           <div className="text-xs text-sky-800 dark:text-sky-300">
             Total Crates held by <strong>{activeCustomer?.name}</strong>: {statement.closingCrates} Crates
           </div>
@@ -516,14 +659,20 @@ export const CrateStatementView: React.FC<CrateStatementViewProps> = ({
           </div>
         </div>
 
-        {/* Software attribution & Signatory */}
-        <div className="p-3 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 print:border-black flex justify-between items-center text-xs">
-          <div className="text-[8px] sm:text-[8.5px] text-left text-slate-500 print:text-black font-mono">
-            Software Developed by: {defaultProfile.softwareDevelopedBy || 'Klyia Technology'}
+        {/* On-Screen Software attribution */}
+        <div className="print:hidden p-3 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 flex justify-between items-center text-xs">
+          <div className="text-[8px] sm:text-[8.5px] text-left text-slate-500 font-mono">
+            Software Developed by: {currentProfile.softwareDevelopedBy || defaultProfile.softwareDevelopedBy || 'Klyia Technology'}
           </div>
-          <div className="hidden print:block text-right font-bold uppercase text-[11px]">
-            {formatCompanySignature(defaultProfile)}
-          </div>
+        </div>
+
+        {/* Dynamic Page Footer for Browser Print & PDF */}
+        <div
+          data-sp-page-footer="true"
+          className="hidden print:flex sp-page-footer mt-2 pt-1 border-t border-slate-300 justify-between items-center text-[10.5px] font-medium text-black bg-white"
+        >
+          <span>{currentProfile.name || defaultProfile.name}</span>
+          <span data-sp-page-number="true"></span>
         </div>
       </div>
 

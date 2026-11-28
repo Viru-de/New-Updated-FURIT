@@ -781,19 +781,86 @@ input.no-spinners {
 [data-compat-105="true"] table.b7-bill-table.b7-single-line-table > tbody > tr > td,
 [data-pdf-export="true"][data-compat-105="true"] table.b7-bill-table.b7-single-line-table > thead > tr > th,
 [data-pdf-export="true"][data-compat-105="true"] table.b7-bill-table.b7-single-line-table > tbody > tr > td {
-  padding-top: 2px !important;
-  padding-bottom: 2px !important;
-  line-height: 1.15 !important;
+  padding-top: 3px !important;
+  padding-bottom: 3px !important;
+  line-height: 1.2 !important;
+  font-weight: 700 !important;
+}
+[data-compat-105="true"] .b7-bill-frame,
+[data-pdf-export="true"][data-compat-105="true"] .b7-bill-frame {
+  border: 1px solid #000000 !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+[data-compat-105="true"] .b7-bill-frame > table.b7-bill-table,
+[data-compat-105="true"] .b7-bill-frame > table.b7-footer-summary-table,
+[data-pdf-export="true"][data-compat-105="true"] .b7-bill-frame > table.b7-bill-table,
+[data-pdf-export="true"][data-compat-105="true"] .b7-bill-frame > table.b7-footer-summary-table {
+  border: none !important;
+  border-collapse: collapse !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+[data-compat-105="true"] .b7-bill-frame > table.b7-footer-summary-table > tfoot > tr:last-child > td,
+[data-pdf-export="true"][data-compat-105="true"] .b7-bill-frame > table.b7-footer-summary-table > tfoot > tr:last-child > td {
+  border-bottom: none !important;
+}
+[data-compat-105="true"] .b7-bill-frame > table.b7-footer-summary-table > tfoot > tr > td:first-child,
+[data-pdf-export="true"][data-compat-105="true"] .b7-bill-frame > table.b7-footer-summary-table > tfoot > tr > td:first-child {
+  border-left: none !important;
+}
+[data-compat-105="true"] .b7-bill-frame > table.b7-footer-summary-table > tfoot > tr > td:last-child,
+[data-pdf-export="true"][data-compat-105="true"] .b7-bill-frame > table.b7-footer-summary-table > tfoot > tr > td:last-child {
+  border-right: none !important;
+}
+[data-compat-105="true"] .b7-bill-frame .b7-columns-fill > table,
+[data-pdf-export="true"][data-compat-105="true"] .b7-bill-frame .b7-columns-fill > table {
+  border: none !important;
+  border-collapse: collapse !important;
+  table-layout: fixed !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  height: 100% !important;
+  box-sizing: border-box !important;
+}
+[data-compat-105="true"] .b7-bill-frame .b7-columns-fill > table > tbody > tr > td,
+[data-pdf-export="true"][data-compat-105="true"] .b7-bill-frame .b7-columns-fill > table > tbody > tr > td {
+  border-top: none !important;
+  border-bottom: none !important;
+  border-color: #000000 !important;
+  padding: 0 !important;
+  font-size: 1px !important;
+  line-height: 1 !important;
+  box-sizing: border-box !important;
+}
+[data-compat-105="true"] .b7-bill-frame .b7-columns-fill > table > tbody > tr > td:first-child,
+[data-pdf-export="true"][data-compat-105="true"] .b7-bill-frame .b7-columns-fill > table > tbody > tr > td:first-child {
+  border-left: none !important;
+}
+[data-compat-105="true"] .b7-bill-frame .b7-columns-fill > table > tbody > tr > td:last-child,
+[data-pdf-export="true"][data-compat-105="true"] .b7-bill-frame .b7-columns-fill > table > tbody > tr > td:last-child {
+  border-right: none !important;
 }
 [data-pdf-export="true"]#mandi-print-area[data-paper-size="b7"][data-compat-105="true"] {
-  display: flex !important;
-  flex-direction: column !important;
-  justify-content: center !important;
-  align-items: stretch !important;
-  min-height: 542px !important;
+  display: block !important;
+  min-height: 0 !important;
+  padding: 0 !important;
   width: 397px !important;
   max-width: 397px !important;
   margin: 0 auto !important;
+}
+[data-pdf-export="true"]#mandi-print-area[data-paper-size="b7"][data-compat-105="true"] .b7-bill-page {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+  align-items: stretch !important;
+  min-height: 542px !important;
+  padding: 6px 10px 6px 10px !important;
+  box-sizing: border-box !important;
+  border-bottom: none !important;
+  margin-bottom: 0 !important;
 }
 
 /* B6 Bill Print Preview & PDF Export: lock fixed colgroup boundaries and prevent NO. / ITEM NAME border overlap */
@@ -840,12 +907,18 @@ input.no-spinners {
    keeping column separators, thead header borders, Total rows (.border-b-2), and nested tfoot summary tables intact */
 #mandi-print-area > table > tbody > tr:not(.border-b-2),
 #mandi-print-area > table > tbody > tr:not(.border-b-2) > td,
+#mandi-print-area .b7-bill-frame > table.b7-bill-table > tbody > tr:not(.border-b-2),
+#mandi-print-area .b7-bill-frame > table.b7-bill-table > tbody > tr:not(.border-b-2) > td,
 #mandi-live-preview-canvas > table > tbody > tr:not(.border-b-2),
 #mandi-live-preview-canvas > table > tbody > tr:not(.border-b-2) > td,
+#mandi-live-preview-canvas .b7-bill-frame > table.b7-bill-table > tbody > tr:not(.border-b-2),
+#mandi-live-preview-canvas .b7-bill-frame > table.b7-bill-table > tbody > tr:not(.border-b-2) > td,
 [data-pdf-export="true"]#group-sale-print-summary > table > tbody > tr:not(.border-b-2),
 [data-pdf-export="true"]#group-sale-print-summary > table > tbody > tr:not(.border-b-2) > td,
 [data-pdf-export="true"] #mandi-print-area > table > tbody > tr:not(.border-b-2),
-[data-pdf-export="true"] #mandi-print-area > table > tbody > tr:not(.border-b-2) > td {
+[data-pdf-export="true"] #mandi-print-area > table > tbody > tr:not(.border-b-2) > td,
+[data-pdf-export="true"] #mandi-print-area .b7-bill-frame > table.b7-bill-table > tbody > tr:not(.border-b-2),
+[data-pdf-export="true"] #mandi-print-area .b7-bill-frame > table.b7-bill-table > tbody > tr:not(.border-b-2) > td {
   border-top-width: 0 !important;
   border-top-style: none !important;
   border-bottom-width: 0 !important;
@@ -875,7 +948,7 @@ input.no-spinners {
   padding-top: 2px !important;
 }
 
-/* Standardized uniform font family & readable 12px sizing across Sale Proceeds & Customer Ledger Detailed + Short Prints (PDF export & canvas) */
+/* Standardized uniform font family, bold inside text & readable scaled sizing across Sale Proceeds & Customer Ledger (PDF export & canvas) */
 .sp-ledger-uniform-font,
 .sp-ledger-uniform-font *,
 #sale-proceeds-print-area,
@@ -889,51 +962,35 @@ input.no-spinners {
   font-family: 'Plus Jakarta Sans', 'Noto Sans Devanagari', Arial, sans-serif !important;
   font-variant-numeric: tabular-nums !important;
 }
-.sp-ledger-uniform-font table td,
-.sp-ledger-uniform-font table th {
-  font-size: 12px !important;
+.sp-ledger-uniform-font table thead th,
+#sale-proceeds-print-area table thead th,
+#sale-proceeds-short-print-area table thead th,
+#customer-ledger-detailed-print-area table thead th,
+#customer-ledger-short-print-area table thead th {
+  font-size: 13.5px !important;
+  font-weight: 800 !important;
   line-height: 1.35 !important;
-}
-#sale-proceeds-print-area tbody > tr > td:nth-child(1),
-#sale-proceeds-print-area tbody > tr > td:nth-child(3),
-#sale-proceeds-print-area tbody > tr > td:nth-child(4),
-#sale-proceeds-print-area tbody > tr > td:nth-child(5),
-#sale-proceeds-short-print-area tbody > tr > td:nth-child(1),
-#sale-proceeds-short-print-area tbody > tr > td:nth-child(3),
-#sale-proceeds-short-print-area tbody > tr > td:nth-child(4),
-#sale-proceeds-short-print-area tbody > tr > td:nth-child(5),
-#customer-ledger-detailed-print-area tbody > tr > td:nth-child(1),
-#customer-ledger-detailed-print-area tbody > tr > td:nth-child(3),
-#customer-ledger-detailed-print-area tbody > tr > td:nth-child(4),
-#customer-ledger-detailed-print-area tbody > tr > td:nth-child(5),
-#customer-ledger-short-print-area tbody > tr > td:nth-child(1),
-#customer-ledger-short-print-area tbody > tr > td:nth-child(3),
-#customer-ledger-short-print-area tbody > tr > td:nth-child(4),
-#customer-ledger-short-print-area tbody > tr > td:nth-child(5) {
-  font-size: 12px !important;
+  letter-spacing: 0.03em !important;
   color: #000000 !important;
 }
-#sale-proceeds-print-area tbody > tr > td:nth-child(2) .sp-detail-line,
-#sale-proceeds-print-area tbody > tr > td:nth-child(2) .sp-detail-line *,
-#customer-ledger-detailed-print-area tbody > tr > td:nth-child(2) .sp-detail-line,
-#customer-ledger-detailed-print-area tbody > tr > td:nth-child(2) .sp-detail-line *,
-#sale-proceeds-print-area tbody > tr > td:nth-child(2) > div > div:first-child > span,
-#sale-proceeds-print-area tbody > tr > td:nth-child(2) > div > div:first-child > div,
-#sale-proceeds-print-area tbody > tr > td:nth-child(2) > div > div:first-child > div *,
-#customer-ledger-detailed-print-area tbody > tr > td:nth-child(2) > div > div:first-child > span,
-#customer-ledger-detailed-print-area tbody > tr > td:nth-child(2) > div > div:first-child > div,
-#customer-ledger-detailed-print-area tbody > tr > td:nth-child(2) > div > div:first-child > div *,
-#sale-proceeds-print-area tbody > tr > td:nth-child(2) > div.uppercase,
-#customer-ledger-detailed-print-area tbody > tr > td:nth-child(2) > div.uppercase,
-#sale-proceeds-short-print-area tbody > tr > td:nth-child(2) > div,
-#sale-proceeds-short-print-area tbody > tr > td:nth-child(2) > div *,
-#sale-proceeds-short-print-area tbody > tr > td:nth-child(2) > span,
-#customer-ledger-short-print-area tbody > tr > td:nth-child(2) > div,
-#customer-ledger-short-print-area tbody > tr > td:nth-child(2) > div *,
-#customer-ledger-short-print-area tbody > tr > td:nth-child(2) > span {
+.sp-ledger-uniform-font table tbody td,
+#sale-proceeds-print-area tbody > tr > td,
+#sale-proceeds-short-print-area tbody > tr > td,
+#customer-ledger-detailed-print-area tbody > tr > td,
+#customer-ledger-short-print-area tbody > tr > td {
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  line-height: 1.38 !important;
+  color: #000000 !important;
+}
+#sale-proceeds-print-area tbody > tr > td:nth-child(2) *,
+#sale-proceeds-short-print-area tbody > tr > td:nth-child(2) *,
+#customer-ledger-detailed-print-area tbody > tr > td:nth-child(2) *,
+#customer-ledger-short-print-area tbody > tr > td:nth-child(2) * {
   font-weight: 700 !important;
   color: #000000 !important;
-  font-size: 12px !important;
+  font-size: 13px !important;
+  line-height: 1.38 !important;
   letter-spacing: 0.01em !important;
 }
 #sale-proceeds-print-area tbody > tr > td:nth-child(2) .sp-detail-line,
@@ -942,9 +999,539 @@ input.no-spinners {
 #customer-ledger-detailed-print-area tbody > tr > td:nth-child(2) .sp-detail-line *,
 #sale-proceeds-print-area tbody > tr > td:nth-child(2) > div > div:not(:first-child),
 #customer-ledger-detailed-print-area tbody > tr > td:nth-child(2) > div > div:not(:first-child) {
-  font-weight: 500 !important;
+  font-weight: 700 !important;
   color: #000000 !important;
+  font-size: 13px !important;
+  line-height: 1.38 !important;
+}
+#sale-proceeds-print-area tfoot > tr:first-child > td,
+#sale-proceeds-short-print-area tfoot > tr:first-child > td,
+#sale-proceeds-short-print-area tfoot > tr.sp-short-closing-row > td,
+#customer-ledger-detailed-print-area tfoot > tr:first-child > td,
+#customer-ledger-short-print-area tfoot > tr:first-child > td,
+#customer-ledger-short-print-area tfoot > tr.sp-short-closing-row > td {
+  font-weight: 800 !important;
+  font-size: 13.5px !important;
+  line-height: 1.35 !important;
+  color: #000000 !important;
+}
+#sale-proceeds-print-area .sp-closing-label,
+#sale-proceeds-short-print-area .sp-closing-label,
+#customer-ledger-detailed-print-area .sp-closing-label,
+#customer-ledger-short-print-area .sp-closing-label {
+  font-weight: 800 !important;
+  font-size: 14.5px !important;
+  color: #000000 !important;
+}
+#sale-proceeds-print-area .sp-closing-value,
+#sale-proceeds-short-print-area .sp-closing-value,
+#customer-ledger-detailed-print-area .sp-closing-value,
+#customer-ledger-short-print-area .sp-closing-value {
+  font-weight: 900 !important;
+  font-size: 16px !important;
+  color: #000000 !important;
+}
+
+/* Responsive PDF & Canvas Format Fit for A5, Small Bill (compact), B6, and B7 */
+[data-pdf-export="true"]#sale-proceeds-print-area[data-paper-size="a5"],
+[data-pdf-export="true"]#sale-proceeds-short-print-area[data-paper-size="a5"],
+[data-pdf-export="true"]#customer-ledger-detailed-print-area[data-paper-size="a5"],
+[data-pdf-export="true"]#customer-ledger-short-print-area[data-paper-size="a5"] {
+  padding-left: 8px !important;
+  padding-right: 8px !important;
+}
+[data-pdf-export="true"]#sale-proceeds-print-area[data-paper-size="a5"] colgroup col:nth-child(1),
+[data-pdf-export="true"]#sale-proceeds-short-print-area[data-paper-size="a5"] colgroup col:nth-child(1),
+[data-pdf-export="true"]#customer-ledger-detailed-print-area[data-paper-size="a5"] colgroup col:nth-child(1),
+[data-pdf-export="true"]#customer-ledger-short-print-area[data-paper-size="a5"] colgroup col:nth-child(1) { width: 16% !important; }
+[data-pdf-export="true"]#sale-proceeds-print-area[data-paper-size="a5"] colgroup col:nth-child(2),
+[data-pdf-export="true"]#sale-proceeds-short-print-area[data-paper-size="a5"] colgroup col:nth-child(2),
+[data-pdf-export="true"]#customer-ledger-detailed-print-area[data-paper-size="a5"] colgroup col:nth-child(2),
+[data-pdf-export="true"]#customer-ledger-short-print-area[data-paper-size="a5"] colgroup col:nth-child(2) { width: 41% !important; }
+[data-pdf-export="true"]#sale-proceeds-print-area[data-paper-size="a5"] colgroup col:nth-child(3),
+[data-pdf-export="true"]#sale-proceeds-short-print-area[data-paper-size="a5"] colgroup col:nth-child(3),
+[data-pdf-export="true"]#customer-ledger-detailed-print-area[data-paper-size="a5"] colgroup col:nth-child(3),
+[data-pdf-export="true"]#customer-ledger-short-print-area[data-paper-size="a5"] colgroup col:nth-child(3),
+[data-pdf-export="true"]#sale-proceeds-print-area[data-paper-size="a5"] colgroup col:nth-child(4),
+[data-pdf-export="true"]#sale-proceeds-short-print-area[data-paper-size="a5"] colgroup col:nth-child(4),
+[data-pdf-export="true"]#customer-ledger-detailed-print-area[data-paper-size="a5"] colgroup col:nth-child(4),
+[data-pdf-export="true"]#customer-ledger-short-print-area[data-paper-size="a5"] colgroup col:nth-child(4) { width: 13.5% !important; }
+[data-pdf-export="true"]#sale-proceeds-print-area[data-paper-size="a5"] colgroup col:nth-child(5),
+[data-pdf-export="true"]#sale-proceeds-short-print-area[data-paper-size="a5"] colgroup col:nth-child(5),
+[data-pdf-export="true"]#customer-ledger-detailed-print-area[data-paper-size="a5"] colgroup col:nth-child(5),
+[data-pdf-export="true"]#customer-ledger-short-print-area[data-paper-size="a5"] colgroup col:nth-child(5) { width: 16% !important; }
+[data-pdf-export="true"]#sale-proceeds-print-area[data-paper-size="a5"] table th,
+[data-pdf-export="true"]#sale-proceeds-short-print-area[data-paper-size="a5"] table th,
+[data-pdf-export="true"]#customer-ledger-detailed-print-area[data-paper-size="a5"] table th,
+[data-pdf-export="true"]#customer-ledger-short-print-area[data-paper-size="a5"] table th {
   font-size: 12px !important;
+  padding: 5px 4px !important;
+}
+[data-pdf-export="true"]#sale-proceeds-print-area[data-paper-size="a5"] table tbody td,
+[data-pdf-export="true"]#sale-proceeds-print-area[data-paper-size="a5"] table tbody td *,
+[data-pdf-export="true"]#sale-proceeds-short-print-area[data-paper-size="a5"] table tbody td,
+[data-pdf-export="true"]#sale-proceeds-short-print-area[data-paper-size="a5"] table tbody td *,
+[data-pdf-export="true"]#customer-ledger-detailed-print-area[data-paper-size="a5"] table tbody td,
+[data-pdf-export="true"]#customer-ledger-detailed-print-area[data-paper-size="a5"] table tbody td *,
+[data-pdf-export="true"]#customer-ledger-short-print-area[data-paper-size="a5"] table tbody td,
+[data-pdf-export="true"]#customer-ledger-short-print-area[data-paper-size="a5"] table tbody td * {
+  font-size: 11.5px !important;
+  font-weight: 700 !important;
+  line-height: 1.32 !important;
+}
+[data-pdf-export="true"]#sale-proceeds-print-area[data-paper-size="a5"] table tbody td,
+[data-pdf-export="true"]#sale-proceeds-short-print-area[data-paper-size="a5"] table tbody td,
+[data-pdf-export="true"]#customer-ledger-detailed-print-area[data-paper-size="a5"] table tbody td,
+[data-pdf-export="true"]#customer-ledger-short-print-area[data-paper-size="a5"] table tbody td {
+  padding: 4px 4px !important;
+}
+[data-pdf-export="true"]#sale-proceeds-print-area[data-paper-size="a5"] tfoot > tr:first-child > td,
+[data-pdf-export="true"]#sale-proceeds-short-print-area[data-paper-size="a5"] tfoot > tr:first-child > td,
+[data-pdf-export="true"]#sale-proceeds-short-print-area[data-paper-size="a5"] tfoot > tr.sp-short-closing-row > td,
+[data-pdf-export="true"]#customer-ledger-detailed-print-area[data-paper-size="a5"] tfoot > tr:first-child > td,
+[data-pdf-export="true"]#customer-ledger-short-print-area[data-paper-size="a5"] tfoot > tr:first-child > td,
+[data-pdf-export="true"]#customer-ledger-short-print-area[data-paper-size="a5"] tfoot > tr.sp-short-closing-row > td {
+  font-size: 12px !important;
+  padding: 4px 4px !important;
+}
+[data-pdf-export="true"]#sale-proceeds-print-area[data-paper-size="a5"] .sp-closing-label,
+[data-pdf-export="true"]#sale-proceeds-short-print-area[data-paper-size="a5"] .sp-closing-label,
+[data-pdf-export="true"]#customer-ledger-detailed-print-area[data-paper-size="a5"] .sp-closing-label,
+[data-pdf-export="true"]#customer-ledger-short-print-area[data-paper-size="a5"] .sp-closing-label { font-size: 12.5px !important; }
+[data-pdf-export="true"]#sale-proceeds-print-area[data-paper-size="a5"] .sp-closing-value,
+[data-pdf-export="true"]#sale-proceeds-short-print-area[data-paper-size="a5"] .sp-closing-value,
+[data-pdf-export="true"]#customer-ledger-detailed-print-area[data-paper-size="a5"] .sp-closing-value,
+[data-pdf-export="true"]#customer-ledger-short-print-area[data-paper-size="a5"] .sp-closing-value { font-size: 13.5px !important; }
+[data-pdf-export="true"]#sale-proceeds-print-area[data-paper-size="a5"] .sp-ledger-party-name,
+[data-pdf-export="true"]#sale-proceeds-short-print-area[data-paper-size="a5"] .sp-ledger-party-name,
+[data-pdf-export="true"]#customer-ledger-detailed-print-area[data-paper-size="a5"] .sp-ledger-party-name,
+[data-pdf-export="true"]#customer-ledger-short-print-area[data-paper-size="a5"] .sp-ledger-party-name,
+[data-pdf-export="true"]#sale-proceeds-print-area[data-paper-size="a5"] .sp-ledger-account-heading,
+[data-pdf-export="true"]#sale-proceeds-short-print-area[data-paper-size="a5"] .sp-ledger-account-heading,
+[data-pdf-export="true"]#customer-ledger-detailed-print-area[data-paper-size="a5"] .sp-ledger-account-heading,
+[data-pdf-export="true"]#customer-ledger-short-print-area[data-paper-size="a5"] .sp-ledger-account-heading { font-size: 14px !important; }
+
+/* Small Bill (compact 140mm) */
+[data-pdf-export="true"]#sale-proceeds-print-area[data-paper-size="compact"],
+[data-pdf-export="true"]#sale-proceeds-short-print-area[data-paper-size="compact"],
+[data-pdf-export="true"]#customer-ledger-detailed-print-area[data-paper-size="compact"],
+[data-pdf-export="true"]#customer-ledger-short-print-area[data-paper-size="compact"] {
+  padding-left: 7px !important;
+  padding-right: 7px !important;
+}
+[data-pdf-export="true"]#sale-proceeds-print-area[data-paper-size="compact"] colgroup col:nth-child(1),
+[data-pdf-export="true"]#sale-proceeds-short-print-area[data-paper-size="compact"] colgroup col:nth-child(1),
+[data-pdf-export="true"]#customer-ledger-detailed-print-area[data-paper-size="compact"] colgroup col:nth-child(1),
+[data-pdf-export="true"]#customer-ledger-short-print-area[data-paper-size="compact"] colgroup col:nth-child(1) { width: 16% !important; }
+[data-pdf-export="true"]#sale-proceeds-print-area[data-paper-size="compact"] colgroup col:nth-child(2),
+[data-pdf-export="true"]#sale-proceeds-short-print-area[data-paper-size="compact"] colgroup col:nth-child(2),
+[data-pdf-export="true"]#customer-ledger-detailed-print-area[data-paper-size="compact"] colgroup col:nth-child(2),
+[data-pdf-export="true"]#customer-ledger-short-print-area[data-paper-size="compact"] colgroup col:nth-child(2) { width: 40% !important; }
+[data-pdf-export="true"]#sale-proceeds-print-area[data-paper-size="compact"] colgroup col:nth-child(3),
+[data-pdf-export="true"]#sale-proceeds-short-print-area[data-paper-size="compact"] colgroup col:nth-child(3),
+[data-pdf-export="true"]#customer-ledger-detailed-print-area[data-paper-size="compact"] colgroup col:nth-child(3),
+[data-pdf-export="true"]#customer-ledger-short-print-area[data-paper-size="compact"] colgroup col:nth-child(3),
+[data-pdf-export="true"]#sale-proceeds-print-area[data-paper-size="compact"] colgroup col:nth-child(4),
+[data-pdf-export="true"]#sale-proceeds-short-print-area[data-paper-size="compact"] colgroup col:nth-child(4),
+[data-pdf-export="true"]#customer-ledger-detailed-print-area[data-paper-size="compact"] colgroup col:nth-child(4),
+[data-pdf-export="true"]#customer-ledger-short-print-area[data-paper-size="compact"] colgroup col:nth-child(4) { width: 13.5% !important; }
+[data-pdf-export="true"]#sale-proceeds-print-area[data-paper-size="compact"] colgroup col:nth-child(5),
+[data-pdf-export="true"]#sale-proceeds-short-print-area[data-paper-size="compact"] colgroup col:nth-child(5),
+[data-pdf-export="true"]#customer-ledger-detailed-print-area[data-paper-size="compact"] colgroup col:nth-child(5),
+[data-pdf-export="true"]#customer-ledger-short-print-area[data-paper-size="compact"] colgroup col:nth-child(5) { width: 17% !important; }
+[data-pdf-export="true"]#sale-proceeds-print-area[data-paper-size="compact"] table th,
+[data-pdf-export="true"]#sale-proceeds-short-print-area[data-paper-size="compact"] table th,
+[data-pdf-export="true"]#customer-ledger-detailed-print-area[data-paper-size="compact"] table th,
+[data-pdf-export="true"]#customer-ledger-short-print-area[data-paper-size="compact"] table th {
+  font-size: 11.5px !important;
+  padding: 4px 3px !important;
+}
+[data-pdf-export="true"]#sale-proceeds-print-area[data-paper-size="compact"] table tbody td,
+[data-pdf-export="true"]#sale-proceeds-print-area[data-paper-size="compact"] table tbody td *,
+[data-pdf-export="true"]#sale-proceeds-short-print-area[data-paper-size="compact"] table tbody td,
+[data-pdf-export="true"]#sale-proceeds-short-print-area[data-paper-size="compact"] table tbody td *,
+[data-pdf-export="true"]#customer-ledger-detailed-print-area[data-paper-size="compact"] table tbody td,
+[data-pdf-export="true"]#customer-ledger-detailed-print-area[data-paper-size="compact"] table tbody td *,
+[data-pdf-export="true"]#customer-ledger-short-print-area[data-paper-size="compact"] table tbody td,
+[data-pdf-export="true"]#customer-ledger-short-print-area[data-paper-size="compact"] table tbody td * {
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  line-height: 1.3 !important;
+}
+[data-pdf-export="true"]#sale-proceeds-print-area[data-paper-size="compact"] table tbody td,
+[data-pdf-export="true"]#sale-proceeds-short-print-area[data-paper-size="compact"] table tbody td,
+[data-pdf-export="true"]#customer-ledger-detailed-print-area[data-paper-size="compact"] table tbody td,
+[data-pdf-export="true"]#customer-ledger-short-print-area[data-paper-size="compact"] table tbody td {
+  padding: 3.5px 3px !important;
+}
+[data-pdf-export="true"]#sale-proceeds-print-area[data-paper-size="compact"] tfoot > tr:first-child > td,
+[data-pdf-export="true"]#sale-proceeds-short-print-area[data-paper-size="compact"] tfoot > tr:first-child > td,
+[data-pdf-export="true"]#sale-proceeds-short-print-area[data-paper-size="compact"] tfoot > tr.sp-short-closing-row > td,
+[data-pdf-export="true"]#customer-ledger-detailed-print-area[data-paper-size="compact"] tfoot > tr:first-child > td,
+[data-pdf-export="true"]#customer-ledger-short-print-area[data-paper-size="compact"] tfoot > tr:first-child > td,
+[data-pdf-export="true"]#customer-ledger-short-print-area[data-paper-size="compact"] tfoot > tr.sp-short-closing-row > td {
+  font-size: 11.5px !important;
+  padding: 4px 3px !important;
+}
+[data-pdf-export="true"]#sale-proceeds-print-area[data-paper-size="compact"] .sp-closing-label,
+[data-pdf-export="true"]#sale-proceeds-short-print-area[data-paper-size="compact"] .sp-closing-label,
+[data-pdf-export="true"]#customer-ledger-detailed-print-area[data-paper-size="compact"] .sp-closing-label,
+[data-pdf-export="true"]#customer-ledger-short-print-area[data-paper-size="compact"] .sp-closing-label { font-size: 12px !important; }
+[data-pdf-export="true"]#sale-proceeds-print-area[data-paper-size="compact"] .sp-closing-value,
+[data-pdf-export="true"]#sale-proceeds-short-print-area[data-paper-size="compact"] .sp-closing-value,
+[data-pdf-export="true"]#customer-ledger-detailed-print-area[data-paper-size="compact"] .sp-closing-value,
+[data-pdf-export="true"]#customer-ledger-short-print-area[data-paper-size="compact"] .sp-closing-value { font-size: 13px !important; }
+[data-pdf-export="true"]#sale-proceeds-print-area[data-paper-size="compact"] .sp-ledger-party-name,
+[data-pdf-export="true"]#sale-proceeds-short-print-area[data-paper-size="compact"] .sp-ledger-party-name,
+[data-pdf-export="true"]#customer-ledger-detailed-print-area[data-paper-size="compact"] .sp-ledger-party-name,
+[data-pdf-export="true"]#customer-ledger-short-print-area[data-paper-size="compact"] .sp-ledger-party-name,
+[data-pdf-export="true"]#sale-proceeds-print-area[data-paper-size="compact"] .sp-ledger-account-heading,
+[data-pdf-export="true"]#sale-proceeds-short-print-area[data-paper-size="compact"] .sp-ledger-account-heading,
+[data-pdf-export="true"]#customer-ledger-detailed-print-area[data-paper-size="compact"] .sp-ledger-account-heading,
+[data-pdf-export="true"]#customer-ledger-short-print-area[data-paper-size="compact"] .sp-ledger-account-heading { font-size: 13.5px !important; }
+
+/* B6 (125mm) */
+[data-pdf-export="true"]#sale-proceeds-print-area[data-paper-size="b6"],
+[data-pdf-export="true"]#sale-proceeds-short-print-area[data-paper-size="b6"],
+[data-pdf-export="true"]#customer-ledger-detailed-print-area[data-paper-size="b6"],
+[data-pdf-export="true"]#customer-ledger-short-print-area[data-paper-size="b6"] {
+  padding-left: 6px !important;
+  padding-right: 6px !important;
+}
+[data-pdf-export="true"]#sale-proceeds-print-area[data-paper-size="b6"] colgroup col:nth-child(1),
+[data-pdf-export="true"]#sale-proceeds-short-print-area[data-paper-size="b6"] colgroup col:nth-child(1),
+[data-pdf-export="true"]#customer-ledger-detailed-print-area[data-paper-size="b6"] colgroup col:nth-child(1),
+[data-pdf-export="true"]#customer-ledger-short-print-area[data-paper-size="b6"] colgroup col:nth-child(1) { width: 16.5% !important; }
+[data-pdf-export="true"]#sale-proceeds-print-area[data-paper-size="b6"] colgroup col:nth-child(2),
+[data-pdf-export="true"]#sale-proceeds-short-print-area[data-paper-size="b6"] colgroup col:nth-child(2),
+[data-pdf-export="true"]#customer-ledger-detailed-print-area[data-paper-size="b6"] colgroup col:nth-child(2),
+[data-pdf-export="true"]#customer-ledger-short-print-area[data-paper-size="b6"] colgroup col:nth-child(2) { width: 39.5% !important; }
+[data-pdf-export="true"]#sale-proceeds-print-area[data-paper-size="b6"] colgroup col:nth-child(3),
+[data-pdf-export="true"]#sale-proceeds-short-print-area[data-paper-size="b6"] colgroup col:nth-child(3),
+[data-pdf-export="true"]#customer-ledger-detailed-print-area[data-paper-size="b6"] colgroup col:nth-child(3),
+[data-pdf-export="true"]#customer-ledger-short-print-area[data-paper-size="b6"] colgroup col:nth-child(3),
+[data-pdf-export="true"]#sale-proceeds-print-area[data-paper-size="b6"] colgroup col:nth-child(4),
+[data-pdf-export="true"]#sale-proceeds-short-print-area[data-paper-size="b6"] colgroup col:nth-child(4),
+[data-pdf-export="true"]#customer-ledger-detailed-print-area[data-paper-size="b6"] colgroup col:nth-child(4),
+[data-pdf-export="true"]#customer-ledger-short-print-area[data-paper-size="b6"] colgroup col:nth-child(4) { width: 13.5% !important; }
+[data-pdf-export="true"]#sale-proceeds-print-area[data-paper-size="b6"] colgroup col:nth-child(5),
+[data-pdf-export="true"]#sale-proceeds-short-print-area[data-paper-size="b6"] colgroup col:nth-child(5),
+[data-pdf-export="true"]#customer-ledger-detailed-print-area[data-paper-size="b6"] colgroup col:nth-child(5),
+[data-pdf-export="true"]#customer-ledger-short-print-area[data-paper-size="b6"] colgroup col:nth-child(5) { width: 17% !important; }
+[data-pdf-export="true"]#sale-proceeds-print-area[data-paper-size="b6"] table th,
+[data-pdf-export="true"]#sale-proceeds-short-print-area[data-paper-size="b6"] table th,
+[data-pdf-export="true"]#customer-ledger-detailed-print-area[data-paper-size="b6"] table th,
+[data-pdf-export="true"]#customer-ledger-short-print-area[data-paper-size="b6"] table th {
+  font-size: 10.5px !important;
+  padding: 3.5px 2.5px !important;
+}
+[data-pdf-export="true"]#sale-proceeds-print-area[data-paper-size="b6"] table tbody td,
+[data-pdf-export="true"]#sale-proceeds-print-area[data-paper-size="b6"] table tbody td *,
+[data-pdf-export="true"]#sale-proceeds-short-print-area[data-paper-size="b6"] table tbody td,
+[data-pdf-export="true"]#sale-proceeds-short-print-area[data-paper-size="b6"] table tbody td *,
+[data-pdf-export="true"]#customer-ledger-detailed-print-area[data-paper-size="b6"] table tbody td,
+[data-pdf-export="true"]#customer-ledger-detailed-print-area[data-paper-size="b6"] table tbody td *,
+[data-pdf-export="true"]#customer-ledger-short-print-area[data-paper-size="b6"] table tbody td,
+[data-pdf-export="true"]#customer-ledger-short-print-area[data-paper-size="b6"] table tbody td * {
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  line-height: 1.28 !important;
+}
+[data-pdf-export="true"]#sale-proceeds-print-area[data-paper-size="b6"] table tbody td,
+[data-pdf-export="true"]#sale-proceeds-short-print-area[data-paper-size="b6"] table tbody td,
+[data-pdf-export="true"]#customer-ledger-detailed-print-area[data-paper-size="b6"] table tbody td,
+[data-pdf-export="true"]#customer-ledger-short-print-area[data-paper-size="b6"] table tbody td {
+  padding: 3px 2.5px !important;
+}
+[data-pdf-export="true"]#sale-proceeds-print-area[data-paper-size="b6"] table tbody td:nth-child(2) .flex,
+[data-pdf-export="true"]#sale-proceeds-short-print-area[data-paper-size="b6"] table tbody td:nth-child(2) .flex,
+[data-pdf-export="true"]#customer-ledger-detailed-print-area[data-paper-size="b6"] table tbody td:nth-child(2) .flex,
+[data-pdf-export="true"]#customer-ledger-short-print-area[data-paper-size="b6"] table tbody td:nth-child(2) .flex {
+  flex-wrap: wrap !important;
+  gap: 1px 6px !important;
+}
+[data-pdf-export="true"]#sale-proceeds-print-area[data-paper-size="b6"] tfoot > tr:first-child > td,
+[data-pdf-export="true"]#sale-proceeds-short-print-area[data-paper-size="b6"] tfoot > tr:first-child > td,
+[data-pdf-export="true"]#sale-proceeds-short-print-area[data-paper-size="b6"] tfoot > tr.sp-short-closing-row > td,
+[data-pdf-export="true"]#customer-ledger-detailed-print-area[data-paper-size="b6"] tfoot > tr:first-child > td,
+[data-pdf-export="true"]#customer-ledger-short-print-area[data-paper-size="b6"] tfoot > tr:first-child > td,
+[data-pdf-export="true"]#customer-ledger-short-print-area[data-paper-size="b6"] tfoot > tr.sp-short-closing-row > td {
+  font-size: 10.5px !important;
+  padding: 3px 2.5px !important;
+}
+[data-pdf-export="true"]#sale-proceeds-print-area[data-paper-size="b6"] .sp-closing-label,
+[data-pdf-export="true"]#sale-proceeds-short-print-area[data-paper-size="b6"] .sp-closing-label,
+[data-pdf-export="true"]#customer-ledger-detailed-print-area[data-paper-size="b6"] .sp-closing-label,
+[data-pdf-export="true"]#customer-ledger-short-print-area[data-paper-size="b6"] .sp-closing-label { font-size: 11px !important; }
+[data-pdf-export="true"]#sale-proceeds-print-area[data-paper-size="b6"] .sp-closing-value,
+[data-pdf-export="true"]#sale-proceeds-short-print-area[data-paper-size="b6"] .sp-closing-value,
+[data-pdf-export="true"]#customer-ledger-detailed-print-area[data-paper-size="b6"] .sp-closing-value,
+[data-pdf-export="true"]#customer-ledger-short-print-area[data-paper-size="b6"] .sp-closing-value { font-size: 12px !important; }
+[data-pdf-export="true"]#sale-proceeds-print-area[data-paper-size="b6"] .sp-ledger-party-name,
+[data-pdf-export="true"]#sale-proceeds-short-print-area[data-paper-size="b6"] .sp-ledger-party-name,
+[data-pdf-export="true"]#customer-ledger-detailed-print-area[data-paper-size="b6"] .sp-ledger-party-name,
+[data-pdf-export="true"]#customer-ledger-short-print-area[data-paper-size="b6"] .sp-ledger-party-name,
+[data-pdf-export="true"]#sale-proceeds-print-area[data-paper-size="b6"] .sp-ledger-account-heading,
+[data-pdf-export="true"]#sale-proceeds-short-print-area[data-paper-size="b6"] .sp-ledger-account-heading,
+[data-pdf-export="true"]#customer-ledger-detailed-print-area[data-paper-size="b6"] .sp-ledger-account-heading,
+[data-pdf-export="true"]#customer-ledger-short-print-area[data-paper-size="b6"] .sp-ledger-account-heading { font-size: 12.5px !important; }
+[data-pdf-export="true"]#sale-proceeds-print-area[data-paper-size="b6"] .sp-ledger-date-range,
+[data-pdf-export="true"]#sale-proceeds-short-print-area[data-paper-size="b6"] .sp-ledger-date-range,
+[data-pdf-export="true"]#customer-ledger-detailed-print-area[data-paper-size="b6"] .sp-ledger-date-range,
+[data-pdf-export="true"]#customer-ledger-short-print-area[data-paper-size="b6"] .sp-ledger-date-range { font-size: 10.5px !important; }
+
+/* B7 (88mm) */
+[data-pdf-export="true"]#sale-proceeds-print-area[data-paper-size="b7"],
+[data-pdf-export="true"]#sale-proceeds-short-print-area[data-paper-size="b7"],
+[data-pdf-export="true"]#customer-ledger-detailed-print-area[data-paper-size="b7"],
+[data-pdf-export="true"]#customer-ledger-short-print-area[data-paper-size="b7"] {
+  padding-left: 4px !important;
+  padding-right: 4px !important;
+}
+[data-pdf-export="true"]#sale-proceeds-print-area[data-paper-size="b7"] colgroup col:nth-child(1),
+[data-pdf-export="true"]#sale-proceeds-short-print-area[data-paper-size="b7"] colgroup col:nth-child(1),
+[data-pdf-export="true"]#customer-ledger-detailed-print-area[data-paper-size="b7"] colgroup col:nth-child(1),
+[data-pdf-export="true"]#customer-ledger-short-print-area[data-paper-size="b7"] colgroup col:nth-child(1) { width: 17.5% !important; }
+[data-pdf-export="true"]#sale-proceeds-print-area[data-paper-size="b7"] colgroup col:nth-child(2),
+[data-pdf-export="true"]#sale-proceeds-short-print-area[data-paper-size="b7"] colgroup col:nth-child(2),
+[data-pdf-export="true"]#customer-ledger-detailed-print-area[data-paper-size="b7"] colgroup col:nth-child(2),
+[data-pdf-export="true"]#customer-ledger-short-print-area[data-paper-size="b7"] colgroup col:nth-child(2) { width: 38.5% !important; }
+[data-pdf-export="true"]#sale-proceeds-print-area[data-paper-size="b7"] colgroup col:nth-child(3),
+[data-pdf-export="true"]#sale-proceeds-short-print-area[data-paper-size="b7"] colgroup col:nth-child(3),
+[data-pdf-export="true"]#customer-ledger-detailed-print-area[data-paper-size="b7"] colgroup col:nth-child(3),
+[data-pdf-export="true"]#customer-ledger-short-print-area[data-paper-size="b7"] colgroup col:nth-child(3),
+[data-pdf-export="true"]#sale-proceeds-print-area[data-paper-size="b7"] colgroup col:nth-child(4),
+[data-pdf-export="true"]#sale-proceeds-short-print-area[data-paper-size="b7"] colgroup col:nth-child(4),
+[data-pdf-export="true"]#customer-ledger-detailed-print-area[data-paper-size="b7"] colgroup col:nth-child(4),
+[data-pdf-export="true"]#customer-ledger-short-print-area[data-paper-size="b7"] colgroup col:nth-child(4) { width: 13.5% !important; }
+[data-pdf-export="true"]#sale-proceeds-print-area[data-paper-size="b7"] colgroup col:nth-child(5),
+[data-pdf-export="true"]#sale-proceeds-short-print-area[data-paper-size="b7"] colgroup col:nth-child(5),
+[data-pdf-export="true"]#customer-ledger-detailed-print-area[data-paper-size="b7"] colgroup col:nth-child(5),
+[data-pdf-export="true"]#customer-ledger-short-print-area[data-paper-size="b7"] colgroup col:nth-child(5) { width: 17% !important; }
+[data-pdf-export="true"]#sale-proceeds-print-area[data-paper-size="b7"] table th,
+[data-pdf-export="true"]#sale-proceeds-short-print-area[data-paper-size="b7"] table th,
+[data-pdf-export="true"]#customer-ledger-detailed-print-area[data-paper-size="b7"] table th,
+[data-pdf-export="true"]#customer-ledger-short-print-area[data-paper-size="b7"] table th {
+  font-size: 8.5px !important;
+  padding: 3px 2px !important;
+  letter-spacing: 0.01em !important;
+}
+[data-pdf-export="true"]#sale-proceeds-print-area[data-paper-size="b7"] table tbody td,
+[data-pdf-export="true"]#sale-proceeds-print-area[data-paper-size="b7"] table tbody td *,
+[data-pdf-export="true"]#sale-proceeds-short-print-area[data-paper-size="b7"] table tbody td,
+[data-pdf-export="true"]#sale-proceeds-short-print-area[data-paper-size="b7"] table tbody td *,
+[data-pdf-export="true"]#customer-ledger-detailed-print-area[data-paper-size="b7"] table tbody td,
+[data-pdf-export="true"]#customer-ledger-detailed-print-area[data-paper-size="b7"] table tbody td *,
+[data-pdf-export="true"]#customer-ledger-short-print-area[data-paper-size="b7"] table tbody td,
+[data-pdf-export="true"]#customer-ledger-short-print-area[data-paper-size="b7"] table tbody td * {
+  font-size: 8px !important;
+  font-weight: 700 !important;
+  line-height: 1.24 !important;
+}
+[data-pdf-export="true"]#sale-proceeds-print-area[data-paper-size="b7"] table tbody td,
+[data-pdf-export="true"]#sale-proceeds-short-print-area[data-paper-size="b7"] table tbody td,
+[data-pdf-export="true"]#customer-ledger-detailed-print-area[data-paper-size="b7"] table tbody td,
+[data-pdf-export="true"]#customer-ledger-short-print-area[data-paper-size="b7"] table tbody td {
+  padding: 2px 2px !important;
+}
+[data-pdf-export="true"]#sale-proceeds-print-area[data-paper-size="b7"] table tbody td:nth-child(2) .flex,
+[data-pdf-export="true"]#sale-proceeds-short-print-area[data-paper-size="b7"] table tbody td:nth-child(2) .flex,
+[data-pdf-export="true"]#customer-ledger-detailed-print-area[data-paper-size="b7"] table tbody td:nth-child(2) .flex,
+[data-pdf-export="true"]#customer-ledger-short-print-area[data-paper-size="b7"] table tbody td:nth-child(2) .flex {
+  flex-wrap: wrap !important;
+  gap: 1px 4px !important;
+}
+[data-pdf-export="true"]#sale-proceeds-print-area[data-paper-size="b7"] tfoot > tr:first-child > td,
+[data-pdf-export="true"]#sale-proceeds-short-print-area[data-paper-size="b7"] tfoot > tr:first-child > td,
+[data-pdf-export="true"]#sale-proceeds-short-print-area[data-paper-size="b7"] tfoot > tr.sp-short-closing-row > td,
+[data-pdf-export="true"]#customer-ledger-detailed-print-area[data-paper-size="b7"] tfoot > tr:first-child > td,
+[data-pdf-export="true"]#customer-ledger-short-print-area[data-paper-size="b7"] tfoot > tr:first-child > td,
+[data-pdf-export="true"]#customer-ledger-short-print-area[data-paper-size="b7"] tfoot > tr.sp-short-closing-row > td {
+  font-size: 8.5px !important;
+  padding: 2.5px 2px !important;
+}
+[data-pdf-export="true"]#sale-proceeds-print-area[data-paper-size="b7"] .sp-closing-label,
+[data-pdf-export="true"]#sale-proceeds-short-print-area[data-paper-size="b7"] .sp-closing-label,
+[data-pdf-export="true"]#customer-ledger-detailed-print-area[data-paper-size="b7"] .sp-closing-label,
+[data-pdf-export="true"]#customer-ledger-short-print-area[data-paper-size="b7"] .sp-closing-label { font-size: 9px !important; }
+[data-pdf-export="true"]#sale-proceeds-print-area[data-paper-size="b7"] .sp-closing-value,
+[data-pdf-export="true"]#sale-proceeds-short-print-area[data-paper-size="b7"] .sp-closing-value,
+[data-pdf-export="true"]#customer-ledger-detailed-print-area[data-paper-size="b7"] .sp-closing-value,
+[data-pdf-export="true"]#customer-ledger-short-print-area[data-paper-size="b7"] .sp-closing-value { font-size: 9.5px !important; }
+[data-pdf-export="true"]#sale-proceeds-print-area[data-paper-size="b7"] .sp-ledger-party-name,
+[data-pdf-export="true"]#sale-proceeds-short-print-area[data-paper-size="b7"] .sp-ledger-party-name,
+[data-pdf-export="true"]#customer-ledger-detailed-print-area[data-paper-size="b7"] .sp-ledger-party-name,
+[data-pdf-export="true"]#customer-ledger-short-print-area[data-paper-size="b7"] .sp-ledger-party-name,
+[data-pdf-export="true"]#sale-proceeds-print-area[data-paper-size="b7"] .sp-ledger-account-heading,
+[data-pdf-export="true"]#sale-proceeds-short-print-area[data-paper-size="b7"] .sp-ledger-account-heading,
+[data-pdf-export="true"]#customer-ledger-detailed-print-area[data-paper-size="b7"] .sp-ledger-account-heading,
+[data-pdf-export="true"]#customer-ledger-short-print-area[data-paper-size="b7"] .sp-ledger-account-heading { font-size: 10.5px !important; }
+[data-pdf-export="true"]#sale-proceeds-print-area[data-paper-size="b7"] .sp-ledger-date-range,
+[data-pdf-export="true"]#sale-proceeds-short-print-area[data-paper-size="b7"] .sp-ledger-date-range,
+[data-pdf-export="true"]#customer-ledger-detailed-print-area[data-paper-size="b7"] .sp-ledger-date-range,
+[data-pdf-export="true"]#customer-ledger-short-print-area[data-paper-size="b7"] .sp-ledger-date-range { font-size: 8.5px !important; }
+[data-pdf-export="true"]#sale-proceeds-print-area[data-paper-size="b7"] .print-business-header--ledger-centered .print-business-short-name,
+[data-pdf-export="true"]#sale-proceeds-short-print-area[data-paper-size="b7"] .print-business-header--ledger-centered .print-business-short-name,
+[data-pdf-export="true"]#customer-ledger-detailed-print-area[data-paper-size="b7"] .print-business-header--ledger-centered .print-business-short-name,
+[data-pdf-export="true"]#customer-ledger-short-print-area[data-paper-size="b7"] .print-business-header--ledger-centered .print-business-short-name,
+[data-pdf-export="true"]#crate-statement-print-area[data-paper-size="b7"] .print-business-header--ledger-centered .print-business-short-name { font-size: 14px !important; }
+
+/* Customer Crate Statement Modern PDF Export Styles */
+[data-pdf-export="true"]#crate-statement-print-area.crate-statement-modern-print,
+[data-pdf-export="true"]#crate-statement-print-area.crate-statement-modern-print * {
+  font-family: 'Plus Jakarta Sans', 'Noto Sans Devanagari', Arial, sans-serif !important;
+  font-variant-numeric: tabular-nums !important;
+  color: #000000 !important;
+  box-shadow: none !important;
+}
+[data-pdf-export="true"]#crate-statement-print-area.crate-statement-modern-print {
+  border: none !important;
+  border-radius: 0 !important;
+  background-color: #ffffff !important;
+}
+[data-pdf-export="true"]#crate-statement-print-area.crate-statement-modern-print .crate-stmt-title-band {
+  background-color: #f1f5f9 !important;
+  border-top: 1.5px solid #000000 !important;
+  border-bottom: 1.5px solid #000000 !important;
+}
+[data-pdf-export="true"]#crate-statement-print-area.crate-statement-modern-print .crate-stmt-info-grid {
+  border: 1px solid #94a3b8 !important;
+  background-color: #ffffff !important;
+}
+[data-pdf-export="true"]#crate-statement-print-area.crate-statement-modern-print .crate-stmt-summary-col {
+  background-color: #f8fafc !important;
+  border-left: 1px solid #cbd5e1 !important;
+}
+[data-pdf-export="true"]#crate-statement-print-area.crate-statement-modern-print table.crate-stmt-table {
+  table-layout: fixed !important;
+  width: 100% !important;
+  border-collapse: collapse !important;
+  border: none !important;
+}
+[data-pdf-export="true"]#crate-statement-print-area.crate-statement-modern-print table.crate-stmt-table thead th {
+  background-color: #f1f5f9 !important;
+  border-top: 1.5px solid #000000 !important;
+  border-bottom: 1.5px solid #000000 !important;
+  border-left: none !important;
+  border-right: 1px solid #cbd5e1 !important;
+  font-size: 12px !important;
+  font-weight: 800 !important;
+  padding: 7px 6px !important;
+  line-height: 1.25 !important;
+}
+[data-pdf-export="true"]#crate-statement-print-area.crate-statement-modern-print table.crate-stmt-table thead th:last-child {
+  border-right: none !important;
+}
+[data-pdf-export="true"]#crate-statement-print-area.crate-statement-modern-print table.crate-stmt-table tbody td {
+  background-color: #ffffff !important;
+  border-top: none !important;
+  border-left: none !important;
+  border-bottom: 1px solid #cbd5e1 !important;
+  border-right: 1px solid #cbd5e1 !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  padding: 6px 6px !important;
+  line-height: 1.32 !important;
+}
+[data-pdf-export="true"]#crate-statement-print-area.crate-statement-modern-print table.crate-stmt-table tbody td:last-child {
+  border-right: none !important;
+}
+[data-pdf-export="true"]#crate-statement-print-area.crate-statement-modern-print table.crate-stmt-table tbody tr.crate-stmt-ob-row td {
+  background-color: #f8fafc !important;
+}
+[data-pdf-export="true"]#crate-statement-print-area.crate-statement-modern-print table.crate-stmt-table tbody td .crate-stmt-type-pill {
+  border: none !important;
+  background: transparent !important;
+  padding: 0 !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+}
+[data-pdf-export="true"]#crate-statement-print-area.crate-statement-modern-print table.crate-stmt-table tfoot tr.crate-stmt-total-row td {
+  background-color: #f1f5f9 !important;
+  border-top: 1.5px solid #000000 !important;
+  border-bottom: 1.5px solid #000000 !important;
+  border-left: none !important;
+  border-right: 1px solid #cbd5e1 !important;
+  font-size: 12.5px !important;
+  font-weight: 800 !important;
+  padding: 7px 6px !important;
+}
+[data-pdf-export="true"]#crate-statement-print-area.crate-statement-modern-print table.crate-stmt-table tfoot tr.crate-stmt-total-row td:last-child {
+  border-right: none !important;
+}
+[data-pdf-export="true"]#crate-statement-print-area.crate-statement-modern-print table.crate-stmt-table tfoot tr.ledger-closing-meta-row,
+[data-pdf-export="true"]#crate-statement-print-area.crate-statement-modern-print table.crate-stmt-table tfoot td.ledger-closing-meta-cell {
+  border: none !important;
+  background-color: #ffffff !important;
+}
+[data-pdf-export="true"]#crate-statement-print-area.crate-statement-modern-print .crate-stmt-closing-card {
+  background-color: #f8fafc !important;
+  border: 1px solid #94a3b8 !important;
+}
+[data-pdf-export="true"]#crate-statement-print-area.crate-statement-modern-print[data-paper-size="a5"] table.crate-stmt-table thead th {
+  font-size: 10.5px !important;
+  padding: 5px 4px !important;
+}
+[data-pdf-export="true"]#crate-statement-print-area.crate-statement-modern-print[data-paper-size="a5"] table.crate-stmt-table tbody td,
+[data-pdf-export="true"]#crate-statement-print-area.crate-statement-modern-print[data-paper-size="a5"] table.crate-stmt-table tbody td .crate-stmt-type-pill {
+  font-size: 10px !important;
+  padding: 4px 4px !important;
+}
+[data-pdf-export="true"]#crate-statement-print-area.crate-statement-modern-print[data-paper-size="a5"] table.crate-stmt-table tfoot tr.crate-stmt-total-row td {
+  font-size: 10.5px !important;
+  padding: 5px 4px !important;
+}
+[data-pdf-export="true"]#crate-statement-print-area.crate-statement-modern-print[data-paper-size="compact"] table.crate-stmt-table thead th {
+  font-size: 10px !important;
+  padding: 4px 3px !important;
+}
+[data-pdf-export="true"]#crate-statement-print-area.crate-statement-modern-print[data-paper-size="compact"] table.crate-stmt-table tbody td,
+[data-pdf-export="true"]#crate-statement-print-area.crate-statement-modern-print[data-paper-size="compact"] table.crate-stmt-table tbody td .crate-stmt-type-pill {
+  font-size: 9.5px !important;
+  padding: 3.5px 3px !important;
+}
+[data-pdf-export="true"]#crate-statement-print-area.crate-statement-modern-print[data-paper-size="compact"] table.crate-stmt-table tfoot tr.crate-stmt-total-row td {
+  font-size: 10px !important;
+  padding: 4px 3px !important;
+}
+[data-pdf-export="true"]#crate-statement-print-area.crate-statement-modern-print[data-paper-size="b6"] table.crate-stmt-table thead th {
+  font-size: 9px !important;
+  padding: 3.5px 2px !important;
+}
+[data-pdf-export="true"]#crate-statement-print-area.crate-statement-modern-print[data-paper-size="b6"] table.crate-stmt-table tbody td,
+[data-pdf-export="true"]#crate-statement-print-area.crate-statement-modern-print[data-paper-size="b6"] table.crate-stmt-table tbody td .crate-stmt-type-pill {
+  font-size: 8.5px !important;
+  padding: 3px 2px !important;
+}
+[data-pdf-export="true"]#crate-statement-print-area.crate-statement-modern-print[data-paper-size="b6"] table.crate-stmt-table tfoot tr.crate-stmt-total-row td {
+  font-size: 9px !important;
+  padding: 3.5px 2px !important;
+}
+[data-pdf-export="true"]#crate-statement-print-area.crate-statement-modern-print[data-paper-size="b7"] table.crate-stmt-table thead th {
+  font-size: 7.5px !important;
+  padding: 2.5px 1.5px !important;
+}
+[data-pdf-export="true"]#crate-statement-print-area.crate-statement-modern-print[data-paper-size="b7"] table.crate-stmt-table tbody td,
+[data-pdf-export="true"]#crate-statement-print-area.crate-statement-modern-print[data-paper-size="b7"] table.crate-stmt-table tbody td .crate-stmt-type-pill {
+  font-size: 7px !important;
+  padding: 2px 1.5px !important;
+}
+[data-pdf-export="true"]#crate-statement-print-area.crate-statement-modern-print[data-paper-size="b7"] table.crate-stmt-table tfoot tr.crate-stmt-total-row td {
+  font-size: 7.5px !important;
+  padding: 2.5px 1.5px !important;
+}
+[data-pdf-export="true"]#crate-statement-print-area.crate-statement-modern-print[data-paper-size="b7"] .crate-stmt-info-grid,
+[data-pdf-export="true"]#crate-statement-print-area.crate-statement-modern-print[data-paper-size="b7"] .crate-stmt-closing-card {
+  display: block !important;
+}
+[data-pdf-export="true"]#crate-statement-print-area.crate-statement-modern-print[data-paper-size="b7"] .crate-stmt-summary-col,
+[data-pdf-export="true"]#crate-statement-print-area.crate-statement-modern-print[data-paper-size="b7"] .crate-stmt-closing-totals {
+  border-left: none !important;
+  border-top: 1px solid #cbd5e1 !important;
+  padding-left: 8px !important;
+  margin-top: 4px !important;
+  padding-top: 4px !important;
+  text-align: left !important;
 }
 
 /* Screen mode: hide isolated print mount completely */
@@ -1189,6 +1776,7 @@ input.no-spinners {
   /* Single-page & A5 bill canvases: centered, visible, white background, compact top space, no outer top border */
   #mandi-print-area,
   #receipt-print-area,
+  #crate-receipt-print-area,
   #sale-proceeds-print-area {
     display: block !important;
     visibility: visible !important;
@@ -1380,10 +1968,12 @@ input.no-spinners {
   /* Bill print containers must have zero outer top line and safe compact top padding above company header */
   #mandi-print-area,
   #receipt-print-area,
+  #crate-receipt-print-area,
   #mandi-print-area.bill-outer-frame,
   #erp-isolated-print-mount #mandi-print-area.bill-outer-frame,
   #erp-isolated-print-mount #mandi-print-area,
-  #erp-isolated-print-mount #receipt-print-area {
+  #erp-isolated-print-mount #receipt-print-area,
+  #erp-isolated-print-mount #crate-receipt-print-area {
     border: none !important;
     margin-top: 0 !important;
     padding: 1mm 2mm 1mm 2mm !important;
@@ -1391,28 +1981,52 @@ input.no-spinners {
 
   #mandi-print-area[data-paper-size="b7"],
   #receipt-print-area[data-paper-size="b7"],
+  #crate-receipt-print-area[data-paper-size="b7"],
   #erp-isolated-print-mount #mandi-print-area[data-paper-size="b7"],
-  #erp-isolated-print-mount #receipt-print-area[data-paper-size="b7"] {
+  #erp-isolated-print-mount #receipt-print-area[data-paper-size="b7"],
+  #erp-isolated-print-mount #crate-receipt-print-area[data-paper-size="b7"] {
     padding: 0.5mm 1mm 0.5mm 1mm !important;
   }
 
   #mandi-print-area[data-paper-size="b7"][data-compat-105="true"],
   #erp-isolated-print-mount #mandi-print-area[data-paper-size="b7"][data-compat-105="true"] {
-    display: flex !important;
-    flex-direction: column !important;
-    justify-content: center !important;
-    align-items: stretch !important;
-    min-height: 141mm !important;
-    padding: 1mm 1.5mm 1mm 1.5mm !important;
+    display: block !important;
+    min-height: 0 !important;
+    padding: 0 !important;
     margin: 0 auto !important;
     width: 100% !important;
     max-width: 100% !important;
   }
 
+  #mandi-print-area[data-paper-size="b7"][data-compat-105="true"] .b7-bill-page,
+  #erp-isolated-print-mount #mandi-print-area[data-paper-size="b7"][data-compat-105="true"] .b7-bill-page {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    align-items: stretch !important;
+    min-height: 139mm !important;
+    padding: 1.5mm 2.5mm 1.5mm 2.5mm !important;
+    margin: 0 auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+    border-bottom: none !important;
+  }
+
+  #mandi-print-area[data-paper-size="b7"][data-compat-105="true"] .b7-bill-page.b7-bill-page-break,
+  #erp-isolated-print-mount #mandi-print-area[data-paper-size="b7"][data-compat-105="true"] .b7-bill-page.b7-bill-page-break {
+    page-break-after: always !important;
+    break-after: page !important;
+  }
+
   #mandi-print-area[data-paper-size="b6"],
   #receipt-print-area[data-paper-size="b6"],
+  #crate-receipt-print-area[data-paper-size="b6"],
   #erp-isolated-print-mount #mandi-print-area[data-paper-size="b6"],
-  #erp-isolated-print-mount #receipt-print-area[data-paper-size="b6"] {
+  #erp-isolated-print-mount #receipt-print-area[data-paper-size="b6"],
+  #erp-isolated-print-mount #crate-receipt-print-area[data-paper-size="b6"] {
     padding: 0.5mm 1.5mm 1mm 1.5mm !important;
   }
 
@@ -1768,7 +2382,8 @@ input.no-spinners {
   .sale-proceed-print-canvas tbody td {
     border-color: #000000 !important;
   }
-  #mandi-print-area:not(.sale-proceed-print-canvas) > table > tbody > tr > td {
+  #mandi-print-area:not(.sale-proceed-print-canvas) > table > tbody > tr > td,
+  #mandi-print-area:not(.sale-proceed-print-canvas) .b7-bill-frame > table.b7-bill-table > tbody > tr > td {
     border-left-color: #000000 !important;
     border-right-color: #000000 !important;
     border-bottom-color: #94a3b8 !important;
@@ -1777,8 +2392,12 @@ input.no-spinners {
   /* Remove horizontal row border/underline directly below item & blank rows in bill and group-sale print tables */
   #mandi-print-area > table > tbody > tr:not(.border-b-2),
   #mandi-print-area > table > tbody > tr:not(.border-b-2) > td,
+  #mandi-print-area .b7-bill-frame > table.b7-bill-table > tbody > tr:not(.border-b-2),
+  #mandi-print-area .b7-bill-frame > table.b7-bill-table > tbody > tr:not(.border-b-2) > td,
   #erp-isolated-print-mount #mandi-print-area > table > tbody > tr:not(.border-b-2),
   #erp-isolated-print-mount #mandi-print-area > table > tbody > tr:not(.border-b-2) > td,
+  #erp-isolated-print-mount #mandi-print-area .b7-bill-frame > table.b7-bill-table > tbody > tr:not(.border-b-2),
+  #erp-isolated-print-mount #mandi-print-area .b7-bill-frame > table.b7-bill-table > tbody > tr:not(.border-b-2) > td,
   #group-sale-print-summary > table > tbody > tr:not(.border-b-2),
   #group-sale-print-summary > table > tbody > tr:not(.border-b-2) > td,
   #erp-isolated-print-mount #group-sale-print-summary > table > tbody > tr:not(.border-b-2),
@@ -1979,9 +2598,67 @@ input.no-spinners {
   #mandi-print-area[data-compat-105="true"] table.b7-bill-table.b7-single-line-table > tbody > tr > td,
   #erp-isolated-print-mount #mandi-print-area[data-compat-105="true"] table.b7-bill-table.b7-single-line-table > thead > tr > th,
   #erp-isolated-print-mount #mandi-print-area[data-compat-105="true"] table.b7-bill-table.b7-single-line-table > tbody > tr > td {
-    padding-top: 2px !important;
-    padding-bottom: 2px !important;
-    line-height: 1.15 !important;
+    padding-top: 3px !important;
+    padding-bottom: 3px !important;
+    line-height: 1.2 !important;
+    font-weight: 700 !important;
+  }
+  #mandi-print-area[data-compat-105="true"] .b7-bill-frame,
+  #erp-isolated-print-mount #mandi-print-area[data-compat-105="true"] .b7-bill-frame {
+    border: 1px solid #000000 !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  #mandi-print-area[data-compat-105="true"] .b7-bill-frame > table.b7-bill-table,
+  #mandi-print-area[data-compat-105="true"] .b7-bill-frame > table.b7-footer-summary-table,
+  #erp-isolated-print-mount #mandi-print-area[data-compat-105="true"] .b7-bill-frame > table.b7-bill-table,
+  #erp-isolated-print-mount #mandi-print-area[data-compat-105="true"] .b7-bill-frame > table.b7-footer-summary-table {
+    border: none !important;
+    border-collapse: collapse !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  #mandi-print-area[data-compat-105="true"] .b7-bill-frame > table.b7-footer-summary-table > tfoot > tr:last-child > td,
+  #erp-isolated-print-mount #mandi-print-area[data-compat-105="true"] .b7-bill-frame > table.b7-footer-summary-table > tfoot > tr:last-child > td {
+    border-bottom: none !important;
+  }
+  #mandi-print-area[data-compat-105="true"] .b7-bill-frame > table.b7-footer-summary-table > tfoot > tr > td:first-child,
+  #erp-isolated-print-mount #mandi-print-area[data-compat-105="true"] .b7-bill-frame > table.b7-footer-summary-table > tfoot > tr > td:first-child {
+    border-left: none !important;
+  }
+  #mandi-print-area[data-compat-105="true"] .b7-bill-frame > table.b7-footer-summary-table > tfoot > tr > td:last-child,
+  #erp-isolated-print-mount #mandi-print-area[data-compat-105="true"] .b7-bill-frame > table.b7-footer-summary-table > tfoot > tr > td:last-child {
+    border-right: none !important;
+  }
+  #mandi-print-area[data-compat-105="true"] .b7-bill-frame .b7-columns-fill > table,
+  #erp-isolated-print-mount #mandi-print-area[data-compat-105="true"] .b7-bill-frame .b7-columns-fill > table {
+    border: none !important;
+    border-collapse: collapse !important;
+    table-layout: fixed !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 100% !important;
+    box-sizing: border-box !important;
+  }
+  #mandi-print-area[data-compat-105="true"] .b7-bill-frame .b7-columns-fill > table > tbody > tr > td,
+  #erp-isolated-print-mount #mandi-print-area[data-compat-105="true"] .b7-bill-frame .b7-columns-fill > table > tbody > tr > td {
+    border-top: none !important;
+    border-bottom: none !important;
+    border-color: #000000 !important;
+    padding: 0 !important;
+    font-size: 1px !important;
+    line-height: 1 !important;
+    box-sizing: border-box !important;
+  }
+  #mandi-print-area[data-compat-105="true"] .b7-bill-frame .b7-columns-fill > table > tbody > tr > td:first-child,
+  #erp-isolated-print-mount #mandi-print-area[data-compat-105="true"] .b7-bill-frame .b7-columns-fill > table > tbody > tr > td:first-child {
+    border-left: none !important;
+  }
+  #mandi-print-area[data-compat-105="true"] .b7-bill-frame .b7-columns-fill > table > tbody > tr > td:last-child,
+  #erp-isolated-print-mount #mandi-print-area[data-compat-105="true"] .b7-bill-frame .b7-columns-fill > table > tbody > tr > td:last-child {
+    border-right: none !important;
   }
 
   /* B6 Bill Print: lock fixed colgroup boundaries and prevent NO. / ITEM NAME border overlap */
@@ -2436,7 +3113,7 @@ input.no-spinners {
     padding-top: 2px !important;
   }
 
-  /* Standardized uniform font family & 12px print typography across Sale Proceeds & Customer Ledger (Detailed + Short) */
+  /* Standardized uniform font family, bold inside text & scaled readable print typography across Sale Proceeds & Customer Ledger (Detailed + Short) */
   .sp-ledger-uniform-font,
   .sp-ledger-uniform-font *,
   #sale-proceeds-print-area,
@@ -2472,74 +3149,53 @@ input.no-spinners {
     margin-top: 8px !important;
   }
 
-  #customer-ledger-detailed-print-area tbody > tr > td:nth-child(1),
-  #customer-ledger-detailed-print-area tbody > tr > td:nth-child(3),
-  #customer-ledger-detailed-print-area tbody > tr > td:nth-child(4),
-  #customer-ledger-detailed-print-area tbody > tr > td:nth-child(5),
-  #erp-isolated-print-mount #customer-ledger-detailed-print-area tbody > tr > td:nth-child(1),
-  #erp-isolated-print-mount #customer-ledger-detailed-print-area tbody > tr > td:nth-child(3),
-  #erp-isolated-print-mount #customer-ledger-detailed-print-area tbody > tr > td:nth-child(4),
-  #erp-isolated-print-mount #customer-ledger-detailed-print-area tbody > tr > td:nth-child(5),
-  #customer-ledger-short-print-area tbody > tr > td:nth-child(1),
-  #customer-ledger-short-print-area tbody > tr > td:nth-child(3),
-  #customer-ledger-short-print-area tbody > tr > td:nth-child(4),
-  #customer-ledger-short-print-area tbody > tr > td:nth-child(5),
-  #erp-isolated-print-mount #customer-ledger-short-print-area tbody > tr > td:nth-child(1),
-  #erp-isolated-print-mount #customer-ledger-short-print-area tbody > tr > td:nth-child(3),
-  #erp-isolated-print-mount #customer-ledger-short-print-area tbody > tr > td:nth-child(4),
-  #erp-isolated-print-mount #customer-ledger-short-print-area tbody > tr > td:nth-child(5),
-  #sale-proceeds-print-area tbody > tr > td:nth-child(1),
-  #sale-proceeds-print-area tbody > tr > td:nth-child(3),
-  #sale-proceeds-print-area tbody > tr > td:nth-child(4),
-  #sale-proceeds-print-area tbody > tr > td:nth-child(5),
-  #erp-isolated-print-mount #sale-proceeds-print-area tbody > tr > td:nth-child(1),
-  #erp-isolated-print-mount #sale-proceeds-print-area tbody > tr > td:nth-child(3),
-  #erp-isolated-print-mount #sale-proceeds-print-area tbody > tr > td:nth-child(4),
-  #erp-isolated-print-mount #sale-proceeds-print-area tbody > tr > td:nth-child(5),
-  #sale-proceeds-short-print-area tbody > tr > td:nth-child(1),
-  #sale-proceeds-short-print-area tbody > tr > td:nth-child(3),
-  #sale-proceeds-short-print-area tbody > tr > td:nth-child(4),
-  #sale-proceeds-short-print-area tbody > tr > td:nth-child(5),
-  #erp-isolated-print-mount #sale-proceeds-short-print-area tbody > tr > td:nth-child(1),
-  #erp-isolated-print-mount #sale-proceeds-short-print-area tbody > tr > td:nth-child(3),
-  #erp-isolated-print-mount #sale-proceeds-short-print-area tbody > tr > td:nth-child(4),
-  #erp-isolated-print-mount #sale-proceeds-short-print-area tbody > tr > td:nth-child(5) {
+  #sale-proceeds-print-area table thead th,
+  #sale-proceeds-short-print-area table thead th,
+  #customer-ledger-detailed-print-area table thead th,
+  #customer-ledger-short-print-area table thead th,
+  #ledger-print-area table thead th,
+  #erp-isolated-print-mount #sale-proceeds-print-area table thead th,
+  #erp-isolated-print-mount #sale-proceeds-short-print-area table thead th,
+  #erp-isolated-print-mount #customer-ledger-detailed-print-area table thead th,
+  #erp-isolated-print-mount #customer-ledger-short-print-area table thead th,
+  #erp-isolated-print-mount #ledger-print-area table thead th {
     color: #000000 !important;
-    font-size: 12px !important;
+    font-size: 13.5px !important;
+    font-weight: 800 !important;
     line-height: 1.35 !important;
+    letter-spacing: 0.03em !important;
   }
 
-  #customer-ledger-detailed-print-area tbody > tr > td:nth-child(2) > div > div:first-child > span,
-  #customer-ledger-detailed-print-area tbody > tr > td:nth-child(2) > div > div:first-child > div,
-  #customer-ledger-detailed-print-area tbody > tr > td:nth-child(2) > div > div:first-child > div *,
-  #erp-isolated-print-mount #customer-ledger-detailed-print-area tbody > tr > td:nth-child(2) > div > div:first-child > span,
-  #erp-isolated-print-mount #customer-ledger-detailed-print-area tbody > tr > td:nth-child(2) > div > div:first-child > div,
-  #erp-isolated-print-mount #customer-ledger-detailed-print-area tbody > tr > td:nth-child(2) > div > div:first-child > div *,
-  #customer-ledger-detailed-print-area tbody > tr > td:nth-child(2) > div.uppercase,
-  #erp-isolated-print-mount #customer-ledger-detailed-print-area tbody > tr > td:nth-child(2) > div.uppercase,
-  #customer-ledger-short-print-area tbody > tr > td:nth-child(2) > div,
-  #customer-ledger-short-print-area tbody > tr > td:nth-child(2) > div *,
-  #customer-ledger-short-print-area tbody > tr > td:nth-child(2) > span,
-  #erp-isolated-print-mount #customer-ledger-short-print-area tbody > tr > td:nth-child(2) > div,
-  #erp-isolated-print-mount #customer-ledger-short-print-area tbody > tr > td:nth-child(2) > div *,
-  #erp-isolated-print-mount #customer-ledger-short-print-area tbody > tr > td:nth-child(2) > span,
-  #sale-proceeds-print-area tbody > tr > td:nth-child(2) > div > div:first-child > span,
-  #sale-proceeds-print-area tbody > tr > td:nth-child(2) > div > div:first-child > div,
-  #sale-proceeds-print-area tbody > tr > td:nth-child(2) > div > div:first-child > div *,
-  #erp-isolated-print-mount #sale-proceeds-print-area tbody > tr > td:nth-child(2) > div > div:first-child > span,
-  #erp-isolated-print-mount #sale-proceeds-print-area tbody > tr > td:nth-child(2) > div > div:first-child > div,
-  #erp-isolated-print-mount #sale-proceeds-print-area tbody > tr > td:nth-child(2) > div > div:first-child > div *,
-  #sale-proceeds-print-area tbody > tr > td:nth-child(2) > div.uppercase,
-  #erp-isolated-print-mount #sale-proceeds-print-area tbody > tr > td:nth-child(2) > div.uppercase,
-  #sale-proceeds-short-print-area tbody > tr > td:nth-child(2) > div,
-  #sale-proceeds-short-print-area tbody > tr > td:nth-child(2) > div *,
-  #sale-proceeds-short-print-area tbody > tr > td:nth-child(2) > span,
-  #erp-isolated-print-mount #sale-proceeds-short-print-area tbody > tr > td:nth-child(2) > div,
-  #erp-isolated-print-mount #sale-proceeds-short-print-area tbody > tr > td:nth-child(2) > div *,
-  #erp-isolated-print-mount #sale-proceeds-short-print-area tbody > tr > td:nth-child(2) > span {
+  #customer-ledger-detailed-print-area tbody > tr > td,
+  #erp-isolated-print-mount #customer-ledger-detailed-print-area tbody > tr > td,
+  #customer-ledger-short-print-area tbody > tr > td,
+  #erp-isolated-print-mount #customer-ledger-short-print-area tbody > tr > td,
+  #ledger-print-area tbody > tr > td,
+  #erp-isolated-print-mount #ledger-print-area tbody > tr > td,
+  #sale-proceeds-print-area tbody > tr > td,
+  #erp-isolated-print-mount #sale-proceeds-print-area tbody > tr > td,
+  #sale-proceeds-short-print-area tbody > tr > td,
+  #erp-isolated-print-mount #sale-proceeds-short-print-area tbody > tr > td {
+    color: #000000 !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    line-height: 1.38 !important;
+  }
+
+  #customer-ledger-detailed-print-area tbody > tr > td:nth-child(2) *,
+  #erp-isolated-print-mount #customer-ledger-detailed-print-area tbody > tr > td:nth-child(2) *,
+  #customer-ledger-short-print-area tbody > tr > td:nth-child(2) *,
+  #erp-isolated-print-mount #customer-ledger-short-print-area tbody > tr > td:nth-child(2) *,
+  #ledger-print-area tbody > tr > td:nth-child(2) *,
+  #erp-isolated-print-mount #ledger-print-area tbody > tr > td:nth-child(2) *,
+  #sale-proceeds-print-area tbody > tr > td:nth-child(2) *,
+  #erp-isolated-print-mount #sale-proceeds-print-area tbody > tr > td:nth-child(2) *,
+  #sale-proceeds-short-print-area tbody > tr > td:nth-child(2) *,
+  #erp-isolated-print-mount #sale-proceeds-short-print-area tbody > tr > td:nth-child(2) * {
     font-weight: 700 !important;
     color: #000000 !important;
-    font-size: 12px !important;
+    font-size: 13px !important;
+    line-height: 1.38 !important;
     letter-spacing: 0.01em !important;
   }
 
@@ -2555,9 +3211,610 @@ input.no-spinners {
   #erp-isolated-print-mount #customer-ledger-detailed-print-area tbody > tr > td:nth-child(2) > div > div:not(:first-child),
   #sale-proceeds-print-area tbody > tr > td:nth-child(2) > div > div:not(:first-child),
   #erp-isolated-print-mount #sale-proceeds-print-area tbody > tr > td:nth-child(2) > div > div:not(:first-child) {
-    font-weight: 500 !important;
+    font-weight: 700 !important;
     color: #000000 !important;
-    font-size: 12px !important;
+    font-size: 13px !important;
+    line-height: 1.38 !important;
+  }
+
+  #sale-proceeds-print-area tfoot > tr:first-child > td,
+  #sale-proceeds-short-print-area tfoot > tr:first-child > td,
+  #sale-proceeds-short-print-area tfoot > tr.sp-short-closing-row > td,
+  #customer-ledger-detailed-print-area tfoot > tr:first-child > td,
+  #customer-ledger-short-print-area tfoot > tr:first-child > td,
+  #customer-ledger-short-print-area tfoot > tr.sp-short-closing-row > td,
+  #ledger-print-area tfoot > tr:first-child > td,
+  #erp-isolated-print-mount #sale-proceeds-print-area tfoot > tr:first-child > td,
+  #erp-isolated-print-mount #sale-proceeds-short-print-area tfoot > tr:first-child > td,
+  #erp-isolated-print-mount #sale-proceeds-short-print-area tfoot > tr.sp-short-closing-row > td,
+  #erp-isolated-print-mount #customer-ledger-detailed-print-area tfoot > tr:first-child > td,
+  #erp-isolated-print-mount #customer-ledger-short-print-area tfoot > tr:first-child > td,
+  #erp-isolated-print-mount #customer-ledger-short-print-area tfoot > tr.sp-short-closing-row > td,
+  #erp-isolated-print-mount #ledger-print-area tfoot > tr:first-child > td {
+    font-weight: 800 !important;
+    font-size: 13.5px !important;
     line-height: 1.35 !important;
+    color: #000000 !important;
+  }
+
+  #sale-proceeds-print-area .sp-closing-label,
+  #sale-proceeds-short-print-area .sp-closing-label,
+  #customer-ledger-detailed-print-area .sp-closing-label,
+  #customer-ledger-short-print-area .sp-closing-label,
+  #ledger-print-area .sp-closing-label,
+  #erp-isolated-print-mount .sp-closing-label {
+    font-weight: 800 !important;
+    font-size: 14.5px !important;
+    color: #000000 !important;
+  }
+  #sale-proceeds-print-area .sp-closing-value,
+  #sale-proceeds-short-print-area .sp-closing-value,
+  #customer-ledger-detailed-print-area .sp-closing-value,
+  #customer-ledger-short-print-area .sp-closing-value,
+  #ledger-print-area .sp-closing-value,
+  #erp-isolated-print-mount .sp-closing-value {
+    font-weight: 900 !important;
+    font-size: 16px !important;
+    color: #000000 !important;
+  }
+
+  /* Responsive Print Format Fit for A5, Small Bill (compact), B6, and B7 */
+  #erp-isolated-print-mount #sale-proceeds-print-area[data-paper-size="a5"] colgroup col:nth-child(1),
+  #erp-isolated-print-mount #sale-proceeds-short-print-area[data-paper-size="a5"] colgroup col:nth-child(1),
+  #erp-isolated-print-mount #customer-ledger-detailed-print-area[data-paper-size="a5"] colgroup col:nth-child(1),
+  #erp-isolated-print-mount #customer-ledger-short-print-area[data-paper-size="a5"] colgroup col:nth-child(1) { width: 16% !important; }
+  #erp-isolated-print-mount #sale-proceeds-print-area[data-paper-size="a5"] colgroup col:nth-child(2),
+  #erp-isolated-print-mount #sale-proceeds-short-print-area[data-paper-size="a5"] colgroup col:nth-child(2),
+  #erp-isolated-print-mount #customer-ledger-detailed-print-area[data-paper-size="a5"] colgroup col:nth-child(2),
+  #erp-isolated-print-mount #customer-ledger-short-print-area[data-paper-size="a5"] colgroup col:nth-child(2) { width: 41% !important; }
+  #erp-isolated-print-mount #sale-proceeds-print-area[data-paper-size="a5"] colgroup col:nth-child(3),
+  #erp-isolated-print-mount #sale-proceeds-short-print-area[data-paper-size="a5"] colgroup col:nth-child(3),
+  #erp-isolated-print-mount #customer-ledger-detailed-print-area[data-paper-size="a5"] colgroup col:nth-child(3),
+  #erp-isolated-print-mount #customer-ledger-short-print-area[data-paper-size="a5"] colgroup col:nth-child(3),
+  #erp-isolated-print-mount #sale-proceeds-print-area[data-paper-size="a5"] colgroup col:nth-child(4),
+  #erp-isolated-print-mount #sale-proceeds-short-print-area[data-paper-size="a5"] colgroup col:nth-child(4),
+  #erp-isolated-print-mount #customer-ledger-detailed-print-area[data-paper-size="a5"] colgroup col:nth-child(4),
+  #erp-isolated-print-mount #customer-ledger-short-print-area[data-paper-size="a5"] colgroup col:nth-child(4) { width: 13.5% !important; }
+  #erp-isolated-print-mount #sale-proceeds-print-area[data-paper-size="a5"] colgroup col:nth-child(5),
+  #erp-isolated-print-mount #sale-proceeds-short-print-area[data-paper-size="a5"] colgroup col:nth-child(5),
+  #erp-isolated-print-mount #customer-ledger-detailed-print-area[data-paper-size="a5"] colgroup col:nth-child(5),
+  #erp-isolated-print-mount #customer-ledger-short-print-area[data-paper-size="a5"] colgroup col:nth-child(5) { width: 16% !important; }
+  #erp-isolated-print-mount #sale-proceeds-print-area[data-paper-size="a5"] table thead th,
+  #erp-isolated-print-mount #sale-proceeds-short-print-area[data-paper-size="a5"] table thead th,
+  #erp-isolated-print-mount #customer-ledger-detailed-print-area[data-paper-size="a5"] table thead th,
+  #erp-isolated-print-mount #customer-ledger-short-print-area[data-paper-size="a5"] table thead th {
+    font-size: 12px !important;
+    padding: 5px 4px !important;
+  }
+  #erp-isolated-print-mount #sale-proceeds-print-area[data-paper-size="a5"] table tbody td,
+  #erp-isolated-print-mount #sale-proceeds-print-area[data-paper-size="a5"] table tbody td *,
+  #erp-isolated-print-mount #sale-proceeds-short-print-area[data-paper-size="a5"] table tbody td,
+  #erp-isolated-print-mount #sale-proceeds-short-print-area[data-paper-size="a5"] table tbody td *,
+  #erp-isolated-print-mount #customer-ledger-detailed-print-area[data-paper-size="a5"] table tbody td,
+  #erp-isolated-print-mount #customer-ledger-detailed-print-area[data-paper-size="a5"] table tbody td *,
+  #erp-isolated-print-mount #customer-ledger-short-print-area[data-paper-size="a5"] table tbody td,
+  #erp-isolated-print-mount #customer-ledger-short-print-area[data-paper-size="a5"] table tbody td * {
+    font-size: 11.5px !important;
+    font-weight: 700 !important;
+    line-height: 1.32 !important;
+  }
+  #erp-isolated-print-mount #sale-proceeds-print-area[data-paper-size="a5"] table tbody td,
+  #erp-isolated-print-mount #sale-proceeds-short-print-area[data-paper-size="a5"] table tbody td,
+  #erp-isolated-print-mount #customer-ledger-detailed-print-area[data-paper-size="a5"] table tbody td,
+  #erp-isolated-print-mount #customer-ledger-short-print-area[data-paper-size="a5"] table tbody td {
+    padding: 4px 4px !important;
+  }
+  #erp-isolated-print-mount #sale-proceeds-print-area[data-paper-size="a5"] tfoot > tr:first-child > td,
+  #erp-isolated-print-mount #sale-proceeds-short-print-area[data-paper-size="a5"] tfoot > tr:first-child > td,
+  #erp-isolated-print-mount #sale-proceeds-short-print-area[data-paper-size="a5"] tfoot > tr.sp-short-closing-row > td,
+  #erp-isolated-print-mount #customer-ledger-detailed-print-area[data-paper-size="a5"] tfoot > tr:first-child > td,
+  #erp-isolated-print-mount #customer-ledger-short-print-area[data-paper-size="a5"] tfoot > tr:first-child > td,
+  #erp-isolated-print-mount #customer-ledger-short-print-area[data-paper-size="a5"] tfoot > tr.sp-short-closing-row > td {
+    font-size: 12px !important;
+    padding: 4px 4px !important;
+  }
+  #erp-isolated-print-mount [data-paper-size="a5"] .sp-closing-label { font-size: 12.5px !important; }
+  #erp-isolated-print-mount [data-paper-size="a5"] .sp-closing-value { font-size: 13.5px !important; }
+  #erp-isolated-print-mount [data-paper-size="a5"] .sp-ledger-party-name,
+  #erp-isolated-print-mount [data-paper-size="a5"] .sp-ledger-account-heading { font-size: 14px !important; }
+
+  /* Small Bill (compact 140mm) */
+  #erp-isolated-print-mount #sale-proceeds-print-area[data-paper-size="compact"] colgroup col:nth-child(1),
+  #erp-isolated-print-mount #sale-proceeds-short-print-area[data-paper-size="compact"] colgroup col:nth-child(1),
+  #erp-isolated-print-mount #customer-ledger-detailed-print-area[data-paper-size="compact"] colgroup col:nth-child(1),
+  #erp-isolated-print-mount #customer-ledger-short-print-area[data-paper-size="compact"] colgroup col:nth-child(1) { width: 16% !important; }
+  #erp-isolated-print-mount #sale-proceeds-print-area[data-paper-size="compact"] colgroup col:nth-child(2),
+  #erp-isolated-print-mount #sale-proceeds-short-print-area[data-paper-size="compact"] colgroup col:nth-child(2),
+  #erp-isolated-print-mount #customer-ledger-detailed-print-area[data-paper-size="compact"] colgroup col:nth-child(2),
+  #erp-isolated-print-mount #customer-ledger-short-print-area[data-paper-size="compact"] colgroup col:nth-child(2) { width: 40% !important; }
+  #erp-isolated-print-mount #sale-proceeds-print-area[data-paper-size="compact"] colgroup col:nth-child(3),
+  #erp-isolated-print-mount #sale-proceeds-short-print-area[data-paper-size="compact"] colgroup col:nth-child(3),
+  #erp-isolated-print-mount #customer-ledger-detailed-print-area[data-paper-size="compact"] colgroup col:nth-child(3),
+  #erp-isolated-print-mount #customer-ledger-short-print-area[data-paper-size="compact"] colgroup col:nth-child(3),
+  #erp-isolated-print-mount #sale-proceeds-print-area[data-paper-size="compact"] colgroup col:nth-child(4),
+  #erp-isolated-print-mount #sale-proceeds-short-print-area[data-paper-size="compact"] colgroup col:nth-child(4),
+  #erp-isolated-print-mount #customer-ledger-detailed-print-area[data-paper-size="compact"] colgroup col:nth-child(4),
+  #erp-isolated-print-mount #customer-ledger-short-print-area[data-paper-size="compact"] colgroup col:nth-child(4) { width: 13.5% !important; }
+  #erp-isolated-print-mount #sale-proceeds-print-area[data-paper-size="compact"] colgroup col:nth-child(5),
+  #erp-isolated-print-mount #sale-proceeds-short-print-area[data-paper-size="compact"] colgroup col:nth-child(5),
+  #erp-isolated-print-mount #customer-ledger-detailed-print-area[data-paper-size="compact"] colgroup col:nth-child(5),
+  #erp-isolated-print-mount #customer-ledger-short-print-area[data-paper-size="compact"] colgroup col:nth-child(5) { width: 17% !important; }
+  #erp-isolated-print-mount #sale-proceeds-print-area[data-paper-size="compact"] table thead th,
+  #erp-isolated-print-mount #sale-proceeds-short-print-area[data-paper-size="compact"] table thead th,
+  #erp-isolated-print-mount #customer-ledger-detailed-print-area[data-paper-size="compact"] table thead th,
+  #erp-isolated-print-mount #customer-ledger-short-print-area[data-paper-size="compact"] table thead th {
+    font-size: 11.5px !important;
+    padding: 4px 3px !important;
+  }
+  #erp-isolated-print-mount #sale-proceeds-print-area[data-paper-size="compact"] table tbody td,
+  #erp-isolated-print-mount #sale-proceeds-print-area[data-paper-size="compact"] table tbody td *,
+  #erp-isolated-print-mount #sale-proceeds-short-print-area[data-paper-size="compact"] table tbody td,
+  #erp-isolated-print-mount #sale-proceeds-short-print-area[data-paper-size="compact"] table tbody td *,
+  #erp-isolated-print-mount #customer-ledger-detailed-print-area[data-paper-size="compact"] table tbody td,
+  #erp-isolated-print-mount #customer-ledger-detailed-print-area[data-paper-size="compact"] table tbody td *,
+  #erp-isolated-print-mount #customer-ledger-short-print-area[data-paper-size="compact"] table tbody td,
+  #erp-isolated-print-mount #customer-ledger-short-print-area[data-paper-size="compact"] table tbody td * {
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    line-height: 1.3 !important;
+  }
+  #erp-isolated-print-mount #sale-proceeds-print-area[data-paper-size="compact"] table tbody td,
+  #erp-isolated-print-mount #sale-proceeds-short-print-area[data-paper-size="compact"] table tbody td,
+  #erp-isolated-print-mount #customer-ledger-detailed-print-area[data-paper-size="compact"] table tbody td,
+  #erp-isolated-print-mount #customer-ledger-short-print-area[data-paper-size="compact"] table tbody td {
+    padding: 3.5px 3px !important;
+  }
+  #erp-isolated-print-mount #sale-proceeds-print-area[data-paper-size="compact"] tfoot > tr:first-child > td,
+  #erp-isolated-print-mount #sale-proceeds-short-print-area[data-paper-size="compact"] tfoot > tr:first-child > td,
+  #erp-isolated-print-mount #sale-proceeds-short-print-area[data-paper-size="compact"] tfoot > tr.sp-short-closing-row > td,
+  #erp-isolated-print-mount #customer-ledger-detailed-print-area[data-paper-size="compact"] tfoot > tr:first-child > td,
+  #erp-isolated-print-mount #customer-ledger-short-print-area[data-paper-size="compact"] tfoot > tr:first-child > td,
+  #erp-isolated-print-mount #customer-ledger-short-print-area[data-paper-size="compact"] tfoot > tr.sp-short-closing-row > td {
+    font-size: 11.5px !important;
+    padding: 4px 3px !important;
+  }
+  #erp-isolated-print-mount [data-paper-size="compact"] .sp-closing-label { font-size: 12px !important; }
+  #erp-isolated-print-mount [data-paper-size="compact"] .sp-closing-value { font-size: 13px !important; }
+  #erp-isolated-print-mount [data-paper-size="compact"] .sp-ledger-party-name,
+  #erp-isolated-print-mount [data-paper-size="compact"] .sp-ledger-account-heading { font-size: 13.5px !important; }
+
+  /* B6 (125mm) */
+  #erp-isolated-print-mount #sale-proceeds-print-area[data-paper-size="b6"] colgroup col:nth-child(1),
+  #erp-isolated-print-mount #sale-proceeds-short-print-area[data-paper-size="b6"] colgroup col:nth-child(1),
+  #erp-isolated-print-mount #customer-ledger-detailed-print-area[data-paper-size="b6"] colgroup col:nth-child(1),
+  #erp-isolated-print-mount #customer-ledger-short-print-area[data-paper-size="b6"] colgroup col:nth-child(1) { width: 16.5% !important; }
+  #erp-isolated-print-mount #sale-proceeds-print-area[data-paper-size="b6"] colgroup col:nth-child(2),
+  #erp-isolated-print-mount #sale-proceeds-short-print-area[data-paper-size="b6"] colgroup col:nth-child(2),
+  #erp-isolated-print-mount #customer-ledger-detailed-print-area[data-paper-size="b6"] colgroup col:nth-child(2),
+  #erp-isolated-print-mount #customer-ledger-short-print-area[data-paper-size="b6"] colgroup col:nth-child(2) { width: 39.5% !important; }
+  #erp-isolated-print-mount #sale-proceeds-print-area[data-paper-size="b6"] colgroup col:nth-child(3),
+  #erp-isolated-print-mount #sale-proceeds-short-print-area[data-paper-size="b6"] colgroup col:nth-child(3),
+  #erp-isolated-print-mount #customer-ledger-detailed-print-area[data-paper-size="b6"] colgroup col:nth-child(3),
+  #erp-isolated-print-mount #customer-ledger-short-print-area[data-paper-size="b6"] colgroup col:nth-child(3),
+  #erp-isolated-print-mount #sale-proceeds-print-area[data-paper-size="b6"] colgroup col:nth-child(4),
+  #erp-isolated-print-mount #sale-proceeds-short-print-area[data-paper-size="b6"] colgroup col:nth-child(4),
+  #erp-isolated-print-mount #customer-ledger-detailed-print-area[data-paper-size="b6"] colgroup col:nth-child(4),
+  #erp-isolated-print-mount #customer-ledger-short-print-area[data-paper-size="b6"] colgroup col:nth-child(4) { width: 13.5% !important; }
+  #erp-isolated-print-mount #sale-proceeds-print-area[data-paper-size="b6"] colgroup col:nth-child(5),
+  #erp-isolated-print-mount #sale-proceeds-short-print-area[data-paper-size="b6"] colgroup col:nth-child(5),
+  #erp-isolated-print-mount #customer-ledger-detailed-print-area[data-paper-size="b6"] colgroup col:nth-child(5),
+  #erp-isolated-print-mount #customer-ledger-short-print-area[data-paper-size="b6"] colgroup col:nth-child(5) { width: 17% !important; }
+  #erp-isolated-print-mount #sale-proceeds-print-area[data-paper-size="b6"] table thead th,
+  #erp-isolated-print-mount #sale-proceeds-short-print-area[data-paper-size="b6"] table thead th,
+  #erp-isolated-print-mount #customer-ledger-detailed-print-area[data-paper-size="b6"] table thead th,
+  #erp-isolated-print-mount #customer-ledger-short-print-area[data-paper-size="b6"] table thead th {
+    font-size: 10.5px !important;
+    padding: 3.5px 2.5px !important;
+  }
+  #erp-isolated-print-mount #sale-proceeds-print-area[data-paper-size="b6"] table tbody td,
+  #erp-isolated-print-mount #sale-proceeds-print-area[data-paper-size="b6"] table tbody td *,
+  #erp-isolated-print-mount #sale-proceeds-short-print-area[data-paper-size="b6"] table tbody td,
+  #erp-isolated-print-mount #sale-proceeds-short-print-area[data-paper-size="b6"] table tbody td *,
+  #erp-isolated-print-mount #customer-ledger-detailed-print-area[data-paper-size="b6"] table tbody td,
+  #erp-isolated-print-mount #customer-ledger-detailed-print-area[data-paper-size="b6"] table tbody td *,
+  #erp-isolated-print-mount #customer-ledger-short-print-area[data-paper-size="b6"] table tbody td,
+  #erp-isolated-print-mount #customer-ledger-short-print-area[data-paper-size="b6"] table tbody td * {
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    line-height: 1.28 !important;
+  }
+  #erp-isolated-print-mount #sale-proceeds-print-area[data-paper-size="b6"] table tbody td,
+  #erp-isolated-print-mount #sale-proceeds-short-print-area[data-paper-size="b6"] table tbody td,
+  #erp-isolated-print-mount #customer-ledger-detailed-print-area[data-paper-size="b6"] table tbody td,
+  #erp-isolated-print-mount #customer-ledger-short-print-area[data-paper-size="b6"] table tbody td {
+    padding: 3px 2.5px !important;
+  }
+  #erp-isolated-print-mount #sale-proceeds-print-area[data-paper-size="b6"] table tbody td:nth-child(2) .flex,
+  #erp-isolated-print-mount #sale-proceeds-short-print-area[data-paper-size="b6"] table tbody td:nth-child(2) .flex,
+  #erp-isolated-print-mount #customer-ledger-detailed-print-area[data-paper-size="b6"] table tbody td:nth-child(2) .flex,
+  #erp-isolated-print-mount #customer-ledger-short-print-area[data-paper-size="b6"] table tbody td:nth-child(2) .flex {
+    flex-wrap: wrap !important;
+    gap: 1px 6px !important;
+  }
+  #erp-isolated-print-mount #sale-proceeds-print-area[data-paper-size="b6"] tfoot > tr:first-child > td,
+  #erp-isolated-print-mount #sale-proceeds-short-print-area[data-paper-size="b6"] tfoot > tr:first-child > td,
+  #erp-isolated-print-mount #sale-proceeds-short-print-area[data-paper-size="b6"] tfoot > tr.sp-short-closing-row > td,
+  #erp-isolated-print-mount #customer-ledger-detailed-print-area[data-paper-size="b6"] tfoot > tr:first-child > td,
+  #erp-isolated-print-mount #customer-ledger-short-print-area[data-paper-size="b6"] tfoot > tr:first-child > td,
+  #erp-isolated-print-mount #customer-ledger-short-print-area[data-paper-size="b6"] tfoot > tr.sp-short-closing-row > td {
+    font-size: 10.5px !important;
+    padding: 3px 2.5px !important;
+  }
+  #erp-isolated-print-mount [data-paper-size="b6"] .sp-closing-label { font-size: 11px !important; }
+  #erp-isolated-print-mount [data-paper-size="b6"] .sp-closing-value { font-size: 12px !important; }
+  #erp-isolated-print-mount [data-paper-size="b6"] .sp-ledger-party-name,
+  #erp-isolated-print-mount [data-paper-size="b6"] .sp-ledger-account-heading { font-size: 12.5px !important; }
+  #erp-isolated-print-mount [data-paper-size="b6"] .sp-ledger-date-range { font-size: 10.5px !important; }
+
+  /* B7 (88mm) */
+  #erp-isolated-print-mount #sale-proceeds-print-area[data-paper-size="b7"] colgroup col:nth-child(1),
+  #erp-isolated-print-mount #sale-proceeds-short-print-area[data-paper-size="b7"] colgroup col:nth-child(1),
+  #erp-isolated-print-mount #customer-ledger-detailed-print-area[data-paper-size="b7"] colgroup col:nth-child(1),
+  #erp-isolated-print-mount #customer-ledger-short-print-area[data-paper-size="b7"] colgroup col:nth-child(1) { width: 17.5% !important; }
+  #erp-isolated-print-mount #sale-proceeds-print-area[data-paper-size="b7"] colgroup col:nth-child(2),
+  #erp-isolated-print-mount #sale-proceeds-short-print-area[data-paper-size="b7"] colgroup col:nth-child(2),
+  #erp-isolated-print-mount #customer-ledger-detailed-print-area[data-paper-size="b7"] colgroup col:nth-child(2),
+  #erp-isolated-print-mount #customer-ledger-short-print-area[data-paper-size="b7"] colgroup col:nth-child(2) { width: 38.5% !important; }
+  #erp-isolated-print-mount #sale-proceeds-print-area[data-paper-size="b7"] colgroup col:nth-child(3),
+  #erp-isolated-print-mount #sale-proceeds-short-print-area[data-paper-size="b7"] colgroup col:nth-child(3),
+  #erp-isolated-print-mount #customer-ledger-detailed-print-area[data-paper-size="b7"] colgroup col:nth-child(3),
+  #erp-isolated-print-mount #customer-ledger-short-print-area[data-paper-size="b7"] colgroup col:nth-child(3),
+  #erp-isolated-print-mount #sale-proceeds-print-area[data-paper-size="b7"] colgroup col:nth-child(4),
+  #erp-isolated-print-mount #sale-proceeds-short-print-area[data-paper-size="b7"] colgroup col:nth-child(4),
+  #erp-isolated-print-mount #customer-ledger-detailed-print-area[data-paper-size="b7"] colgroup col:nth-child(4),
+  #erp-isolated-print-mount #customer-ledger-short-print-area[data-paper-size="b7"] colgroup col:nth-child(4) { width: 13.5% !important; }
+  #erp-isolated-print-mount #sale-proceeds-print-area[data-paper-size="b7"] colgroup col:nth-child(5),
+  #erp-isolated-print-mount #sale-proceeds-short-print-area[data-paper-size="b7"] colgroup col:nth-child(5),
+  #erp-isolated-print-mount #customer-ledger-detailed-print-area[data-paper-size="b7"] colgroup col:nth-child(5),
+  #erp-isolated-print-mount #customer-ledger-short-print-area[data-paper-size="b7"] colgroup col:nth-child(5) { width: 17% !important; }
+  #erp-isolated-print-mount #sale-proceeds-print-area[data-paper-size="b7"] table thead th,
+  #erp-isolated-print-mount #sale-proceeds-short-print-area[data-paper-size="b7"] table thead th,
+  #erp-isolated-print-mount #customer-ledger-detailed-print-area[data-paper-size="b7"] table thead th,
+  #erp-isolated-print-mount #customer-ledger-short-print-area[data-paper-size="b7"] table thead th {
+    font-size: 8.5px !important;
+    padding: 3px 2px !important;
+    letter-spacing: 0.01em !important;
+  }
+  #erp-isolated-print-mount #sale-proceeds-print-area[data-paper-size="b7"] table tbody td,
+  #erp-isolated-print-mount #sale-proceeds-print-area[data-paper-size="b7"] table tbody td *,
+  #erp-isolated-print-mount #sale-proceeds-short-print-area[data-paper-size="b7"] table tbody td,
+  #erp-isolated-print-mount #sale-proceeds-short-print-area[data-paper-size="b7"] table tbody td *,
+  #erp-isolated-print-mount #customer-ledger-detailed-print-area[data-paper-size="b7"] table tbody td,
+  #erp-isolated-print-mount #customer-ledger-detailed-print-area[data-paper-size="b7"] table tbody td *,
+  #erp-isolated-print-mount #customer-ledger-short-print-area[data-paper-size="b7"] table tbody td,
+  #erp-isolated-print-mount #customer-ledger-short-print-area[data-paper-size="b7"] table tbody td * {
+    font-size: 8px !important;
+    font-weight: 700 !important;
+    line-height: 1.24 !important;
+  }
+  #erp-isolated-print-mount #sale-proceeds-print-area[data-paper-size="b7"] table tbody td,
+  #erp-isolated-print-mount #sale-proceeds-short-print-area[data-paper-size="b7"] table tbody td,
+  #erp-isolated-print-mount #customer-ledger-detailed-print-area[data-paper-size="b7"] table tbody td,
+  #erp-isolated-print-mount #customer-ledger-short-print-area[data-paper-size="b7"] table tbody td {
+    padding: 2px 2px !important;
+  }
+  #erp-isolated-print-mount #sale-proceeds-print-area[data-paper-size="b7"] table tbody td:nth-child(2) .flex,
+  #erp-isolated-print-mount #sale-proceeds-short-print-area[data-paper-size="b7"] table tbody td:nth-child(2) .flex,
+  #erp-isolated-print-mount #customer-ledger-detailed-print-area[data-paper-size="b7"] table tbody td:nth-child(2) .flex,
+  #erp-isolated-print-mount #customer-ledger-short-print-area[data-paper-size="b7"] table tbody td:nth-child(2) .flex {
+    flex-wrap: wrap !important;
+    gap: 1px 4px !important;
+  }
+  #erp-isolated-print-mount #sale-proceeds-print-area[data-paper-size="b7"] tfoot > tr:first-child > td,
+  #erp-isolated-print-mount #sale-proceeds-short-print-area[data-paper-size="b7"] tfoot > tr:first-child > td,
+  #erp-isolated-print-mount #sale-proceeds-short-print-area[data-paper-size="b7"] tfoot > tr.sp-short-closing-row > td,
+  #erp-isolated-print-mount #customer-ledger-detailed-print-area[data-paper-size="b7"] tfoot > tr:first-child > td,
+  #erp-isolated-print-mount #customer-ledger-short-print-area[data-paper-size="b7"] tfoot > tr:first-child > td,
+  #erp-isolated-print-mount #customer-ledger-short-print-area[data-paper-size="b7"] tfoot > tr.sp-short-closing-row > td {
+    font-size: 8.5px !important;
+    padding: 2.5px 2px !important;
+  }
+  #erp-isolated-print-mount [data-paper-size="b7"] .sp-closing-label { font-size: 9px !important; }
+  #erp-isolated-print-mount [data-paper-size="b7"] .sp-closing-value { font-size: 9.5px !important; }
+  #erp-isolated-print-mount [data-paper-size="b7"] .sp-ledger-party-name,
+  #erp-isolated-print-mount [data-paper-size="b7"] .sp-ledger-account-heading { font-size: 10.5px !important; }
+  #erp-isolated-print-mount [data-paper-size="b7"] .sp-ledger-date-range { font-size: 8.5px !important; }
+  #erp-isolated-print-mount [data-paper-size="b7"] .print-business-header--ledger-centered .print-business-short-name { font-size: 14px !important; }
+  #erp-isolated-print-mount [data-paper-size="b7"] .sp-page-footer { font-size: 8px !important; }
+
+  /* =========================================================================
+     CUSTOMER CRATE STATEMENT — MODERN PRINT STYLING (ALL PAPER PRESETS)
+     ========================================================================= */
+  #crate-statement-print-area.crate-statement-modern-print,
+  #crate-statement-print-area.crate-statement-modern-print *,
+  #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print,
+  #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print * {
+    font-family: 'Plus Jakarta Sans', 'Noto Sans Devanagari', Arial, sans-serif !important;
+    font-variant-numeric: tabular-nums !important;
+    color: #000000 !important;
+    box-shadow: none !important;
+  }
+
+  #crate-statement-print-area.crate-statement-modern-print,
+  #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print {
+    border: none !important;
+    border-radius: 0 !important;
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+  }
+
+  #crate-statement-print-area.crate-statement-modern-print .crate-stmt-business-header,
+  #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print .crate-stmt-business-header {
+    border-bottom: 1.5px solid #000000 !important;
+    padding-bottom: 6px !important;
+    margin-bottom: 8px !important;
+  }
+
+  #crate-statement-print-area.crate-statement-modern-print .crate-stmt-title-band,
+  #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print .crate-stmt-title-band {
+    background-color: #f1f5f9 !important;
+    background: #f1f5f9 !important;
+    border-top: 1.5px solid #000000 !important;
+    border-bottom: 1.5px solid #000000 !important;
+    border-left: none !important;
+    border-right: none !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  #crate-statement-print-area.crate-statement-modern-print .crate-stmt-info-grid,
+  #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print .crate-stmt-info-grid {
+    border: 1px solid #94a3b8 !important;
+    border-radius: 5px !important;
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+  }
+
+  #crate-statement-print-area.crate-statement-modern-print .crate-stmt-customer-col,
+  #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print .crate-stmt-customer-col {
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+    border: none !important;
+  }
+
+  #crate-statement-print-area.crate-statement-modern-print .crate-stmt-summary-col,
+  #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print .crate-stmt-summary-col {
+    background-color: #f8fafc !important;
+    background: #f8fafc !important;
+    border-left: 1px solid #cbd5e1 !important;
+    border-top: none !important;
+    border-right: none !important;
+    border-bottom: none !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  #crate-statement-print-area.crate-statement-modern-print .crate-stmt-summary-row,
+  #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print .crate-stmt-summary-row {
+    background: transparent !important;
+    border-color: #cbd5e1 !important;
+  }
+
+  #crate-statement-print-area.crate-statement-modern-print table.crate-stmt-table,
+  #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print table.crate-stmt-table {
+    table-layout: fixed !important;
+    width: 100% !important;
+    border-collapse: collapse !important;
+    border: none !important;
+    background-color: #ffffff !important;
+  }
+
+  #crate-statement-print-area.crate-statement-modern-print table.crate-stmt-table thead tr,
+  #crate-statement-print-area.crate-statement-modern-print table.crate-stmt-table tbody tr,
+  #crate-statement-print-area.crate-statement-modern-print table.crate-stmt-table tfoot tr,
+  #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print table.crate-stmt-table thead tr,
+  #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print table.crate-stmt-table tbody tr,
+  #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print table.crate-stmt-table tfoot tr {
+    border: none !important;
+  }
+
+  #crate-statement-print-area.crate-statement-modern-print table.crate-stmt-table thead th,
+  #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print table.crate-stmt-table thead th {
+    background-color: #f1f5f9 !important;
+    background: #f1f5f9 !important;
+    color: #000000 !important;
+    border-top: 1.5px solid #000000 !important;
+    border-bottom: 1.5px solid #000000 !important;
+    border-left: none !important;
+    border-right: 1px solid #cbd5e1 !important;
+    font-size: 12px !important;
+    font-weight: 800 !important;
+    padding: 7px 6px !important;
+    line-height: 1.25 !important;
+    letter-spacing: 0.02em !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  #crate-statement-print-area.crate-statement-modern-print table.crate-stmt-table thead th:last-child,
+  #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print table.crate-stmt-table thead th:last-child {
+    border-right: none !important;
+  }
+
+  #crate-statement-print-area.crate-statement-modern-print table.crate-stmt-table tbody td,
+  #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print table.crate-stmt-table tbody td {
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    border-top: none !important;
+    border-left: none !important;
+    border-bottom: 1px solid #cbd5e1 !important;
+    border-right: 1px solid #cbd5e1 !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    padding: 6px 6px !important;
+    line-height: 1.32 !important;
+  }
+
+  #crate-statement-print-area.crate-statement-modern-print table.crate-stmt-table tbody td:last-child,
+  #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print table.crate-stmt-table tbody td:last-child {
+    border-right: none !important;
+  }
+
+  #crate-statement-print-area.crate-statement-modern-print table.crate-stmt-table tbody tr.crate-stmt-ob-row td,
+  #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print table.crate-stmt-table tbody tr.crate-stmt-ob-row td {
+    background-color: #f8fafc !important;
+    background: #f8fafc !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  #crate-statement-print-area.crate-statement-modern-print table.crate-stmt-table tbody td .crate-stmt-particulars,
+  #crate-statement-print-area.crate-statement-modern-print table.crate-stmt-table tbody td .crate-stmt-particulars *,
+  #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print table.crate-stmt-table tbody td .crate-stmt-particulars,
+  #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print table.crate-stmt-table tbody td .crate-stmt-particulars * {
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    line-height: 1.32 !important;
+    color: #000000 !important;
+  }
+
+  #crate-statement-print-area.crate-statement-modern-print table.crate-stmt-table tbody td .crate-stmt-ref,
+  #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print table.crate-stmt-table tbody td .crate-stmt-ref {
+    font-size: 10.5px !important;
+    font-weight: 600 !important;
+    color: #334155 !important;
+  }
+
+  #crate-statement-print-area.crate-statement-modern-print table.crate-stmt-table tbody td .crate-stmt-type-pill,
+  #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print table.crate-stmt-table tbody td .crate-stmt-type-pill {
+    border: none !important;
+    background: transparent !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    color: #000000 !important;
+  }
+
+  #crate-statement-print-area.crate-statement-modern-print table.crate-stmt-table tfoot tr.crate-stmt-total-row td,
+  #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print table.crate-stmt-table tfoot tr.crate-stmt-total-row td {
+    background-color: #f1f5f9 !important;
+    background: #f1f5f9 !important;
+    color: #000000 !important;
+    border-top: 1.5px solid #000000 !important;
+    border-bottom: 1.5px solid #000000 !important;
+    border-left: none !important;
+    border-right: 1px solid #cbd5e1 !important;
+    font-size: 12.5px !important;
+    font-weight: 800 !important;
+    padding: 7px 6px !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  #crate-statement-print-area.crate-statement-modern-print table.crate-stmt-table tfoot tr.crate-stmt-total-row td:last-child,
+  #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print table.crate-stmt-table tfoot tr.crate-stmt-total-row td:last-child {
+    border-right: none !important;
+  }
+
+  #crate-statement-print-area.crate-statement-modern-print table.crate-stmt-table tfoot tr.ledger-closing-meta-row,
+  #crate-statement-print-area.crate-statement-modern-print table.crate-stmt-table tfoot td.ledger-closing-meta-cell,
+  #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print table.crate-stmt-table tfoot tr.ledger-closing-meta-row,
+  #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print table.crate-stmt-table tfoot td.ledger-closing-meta-cell {
+    border: none !important;
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+  }
+
+  #crate-statement-print-area.crate-statement-modern-print .crate-stmt-closing-card,
+  #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print .crate-stmt-closing-card {
+    background-color: #f8fafc !important;
+    background: #f8fafc !important;
+    border: 1px solid #94a3b8 !important;
+    border-radius: 5px !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  #crate-statement-print-area.crate-statement-modern-print .crate-stmt-closing-card > div,
+  #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print .crate-stmt-closing-card > div,
+  #crate-statement-print-area.crate-statement-modern-print .crate-stmt-closing-card > div > div,
+  #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print .crate-stmt-closing-card > div > div {
+    background: transparent !important;
+  }
+
+  #crate-statement-print-area.crate-statement-modern-print .crate-stmt-closing-totals,
+  #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print .crate-stmt-closing-totals {
+    border-left: 1px solid #cbd5e1 !important;
+  }
+
+  #crate-statement-print-area.crate-statement-modern-print .crate-stmt-signatory-row,
+  #crate-statement-print-area.crate-statement-modern-print .crate-stmt-signatory-row *,
+  #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print .crate-stmt-signatory-row,
+  #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print .crate-stmt-signatory-row * {
+    background: transparent !important;
+    border: none !important;
+  }
+
+  /* Responsive sizing for smaller paper presets (A5, Compact, B6, B7) */
+  #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print[data-paper-size="a5"] table.crate-stmt-table thead th {
+    font-size: 10.5px !important;
+    padding: 5px 4px !important;
+  }
+  #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print[data-paper-size="a5"] table.crate-stmt-table tbody td,
+  #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print[data-paper-size="a5"] table.crate-stmt-table tbody td .crate-stmt-particulars,
+  #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print[data-paper-size="a5"] table.crate-stmt-table tbody td .crate-stmt-type-pill {
+    font-size: 10px !important;
+    padding: 4px 4px !important;
+  }
+  #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print[data-paper-size="a5"] table.crate-stmt-table tfoot tr.crate-stmt-total-row td {
+    font-size: 10.5px !important;
+    padding: 5px 4px !important;
+  }
+  #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print[data-paper-size="compact"] table.crate-stmt-table thead th {
+    font-size: 10px !important;
+    padding: 4px 3px !important;
+  }
+  #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print[data-paper-size="compact"] table.crate-stmt-table tbody td,
+  #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print[data-paper-size="compact"] table.crate-stmt-table tbody td .crate-stmt-particulars,
+  #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print[data-paper-size="compact"] table.crate-stmt-table tbody td .crate-stmt-type-pill {
+    font-size: 9.5px !important;
+    padding: 3.5px 3px !important;
+  }
+  #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print[data-paper-size="compact"] table.crate-stmt-table tfoot tr.crate-stmt-total-row td {
+    font-size: 10px !important;
+    padding: 4px 3px !important;
+  }
+  #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print[data-paper-size="b6"] table.crate-stmt-table thead th {
+    font-size: 9px !important;
+    padding: 3.5px 2px !important;
+  }
+  #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print[data-paper-size="b6"] table.crate-stmt-table tbody td,
+  #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print[data-paper-size="b6"] table.crate-stmt-table tbody td .crate-stmt-particulars,
+  #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print[data-paper-size="b6"] table.crate-stmt-table tbody td .crate-stmt-type-pill {
+    font-size: 8.5px !important;
+    padding: 3px 2px !important;
+  }
+  #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print[data-paper-size="b6"] table.crate-stmt-table tfoot tr.crate-stmt-total-row td {
+    font-size: 9px !important;
+    padding: 3.5px 2px !important;
+  }
+  #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print[data-paper-size="b7"] table.crate-stmt-table thead th {
+    font-size: 7.5px !important;
+    padding: 2.5px 1.5px !important;
+  }
+  #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print[data-paper-size="b7"] table.crate-stmt-table tbody td,
+  #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print[data-paper-size="b7"] table.crate-stmt-table tbody td .crate-stmt-particulars,
+  #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print[data-paper-size="b7"] table.crate-stmt-table tbody td .crate-stmt-type-pill {
+    font-size: 7px !important;
+    padding: 2px 1.5px !important;
+  }
+  #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print[data-paper-size="b7"] table.crate-stmt-table tfoot tr.crate-stmt-total-row td {
+    font-size: 7.5px !important;
+    padding: 2.5px 1.5px !important;
+  }
+  #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print[data-paper-size="b7"] .crate-stmt-info-grid,
+  #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print[data-paper-size="b7"] .crate-stmt-closing-card {
+    display: block !important;
+  }
+  #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print[data-paper-size="b7"] .crate-stmt-summary-col,
+  #erp-isolated-print-mount #crate-statement-print-area.crate-statement-modern-print[data-paper-size="b7"] .crate-stmt-closing-totals {
+    border-left: none !important;
+    border-top: 1px solid #cbd5e1 !important;
+    padding-left: 8px !important;
+    margin-top: 4px !important;
+    padding-top: 4px !important;
+    text-align: left !important;
   }
 }

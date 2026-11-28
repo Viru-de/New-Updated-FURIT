@@ -36,6 +36,7 @@ function AppContent() {
     'general' | 'profiles' | 'units' | 'crates' | 'backup' | 'users'
   >('general');
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | undefined>(undefined);
+  const [selectedSaleProceedsCustomerId, setSelectedSaleProceedsCustomerId] = useState<string | undefined>(undefined);
   const [ledgerReturnToReports, setLedgerReturnToReports] = useState<boolean>(false);
   const [dashboardVisitKey, setDashboardVisitKey] = useState<number>(0);
   const [editingBill, setEditingBill] = useState<Bill | null>(null);
@@ -127,6 +128,14 @@ function AppContent() {
       return;
     }
 
+    if (view === 'saleProceedsLedger') {
+      if (subParam !== undefined) {
+        setSelectedSaleProceedsCustomerId(subParam || undefined);
+      }
+      setCurrentView('saleProceedsLedger');
+      return;
+    }
+
     if (view === 'createBill') {
       setEditingBill(null);
       setSourceProceedsForBill(null);
@@ -163,9 +172,9 @@ function AppContent() {
               setCurrentView('createBill');
             }}
             onNavigateToCustomerLedger={(cId) => {
-              setSelectedCustomerId(cId);
+              setSelectedSaleProceedsCustomerId(cId);
               setLedgerReturnToReports(false);
-              setCurrentView('customerLedger');
+              setCurrentView('saleProceedsLedger');
             }}
           />
         );
@@ -200,7 +209,7 @@ function AppContent() {
           />
         );
       case 'saleProceedsLedger':
-        return <SaleProceedsLedgerView />;
+        return <SaleProceedsLedgerView initialCustomerId={selectedSaleProceedsCustomerId} />;
       case 'customerLedger':
         return (
           <CustomerLedgerView
@@ -228,6 +237,11 @@ function AppContent() {
               setSelectedCustomerId(cId);
               setLedgerReturnToReports(false);
               setCurrentView('customerLedger');
+            }}
+            onNavigateToSaleProceedsLedger={(cId) => {
+              setSelectedSaleProceedsCustomerId(cId);
+              setLedgerReturnToReports(false);
+              setCurrentView('saleProceedsLedger');
             }}
             onNavigateToCrate={(cId) => {
               setSelectedCustomerId(cId);

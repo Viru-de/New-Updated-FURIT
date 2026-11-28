@@ -248,11 +248,15 @@ expect(
   'Standard variant="ledger" continues rendering two-column header for other reports'
 );
 
-['CrateStatementView.tsx', 'ReportsView.tsx'].forEach((file) => {
-  const folder = file === 'CrateStatementView.tsx' ? 'accounts' : 'reports';
-  const src = fs.readFileSync(path.join(process.cwd(), `src/components/${folder}/${file}`), 'utf-8');
-  expect(src.includes('variant="ledger"'), `${file} retains two-column variant="ledger" untouched`);
-});
+{
+  const crateSrc = fs.readFileSync(path.join(process.cwd(), 'src/components/accounts/CrateStatementView.tsx'), 'utf-8');
+  expect(
+    crateSrc.includes('variant="ledger-centered"') && !crateSrc.includes('variant="ledger"'),
+    'CrateStatementView uses centered variant="ledger-centered" print header'
+  );
+  const reportsSrc = fs.readFileSync(path.join(process.cwd(), 'src/components/reports/ReportsView.tsx'), 'utf-8');
+  expect(reportsSrc.includes('variant="ledger"'), 'ReportsView retains two-column variant="ledger" untouched');
+}
 
 {
   const gsSrc = fs.readFileSync(path.join(process.cwd(), 'src/components/billing/GroupSaleView.tsx'), 'utf-8');
